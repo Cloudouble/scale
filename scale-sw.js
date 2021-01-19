@@ -2,8 +2,20 @@
 globalThis.LiveElement = globalThis.LiveElement || {}
 globalThis.LiveElement.Scale = globalThis.LiveElement.Scale || Object.defineProperties({}, {
     version: {configurable: false, enumerable: true, writable: false, value: '1.0.0'}, 
-    loopMaxMs: {configurable: false, enumerable: true, writable: false, value: 1000}, 
-    defaultListenerDelay: {configurable: false, enumerable: true, writable: false, value: 1000}, 
+    State: {configurable: false, enumerable: true, writable: false, value: Object.defineProperties({}, {
+        LoopDormantMs: {configurable: false, enumerable: true, writable: true, value: 10000}, 
+        LoopBackgroundMs: {configurable: false, enumerable: true, writable: true, value: 1000}, 
+        LoopMiddlegroundMs: {configurable: false, enumerable: true, writable: true, value: 200}, 
+        LoopForegroundMs: {configurable: false, enumerable: true, writable: true, value: 100}, 
+        DefaultListenerDelayMultiple: {configurable: false, enumerable: true, writable: true, value: 1}, 
+        CurrentGround: {configurable: false, enumerable: true, writable: true, value: 'Foreground'}, 
+        LoopCurrentMs: {configurable: false, enumerable: true, writable: true, value: 1000}, 
+        ClientCountAll: {configurable: false, enumerable: true, writable: true, value: 1}, 
+        ClientCountBackground: {configurable: false, enumerable: true, writable: true, value: 0}, 
+        ClientCountMiddleground: {configurable: false, enumerable: true, writable: true, value: 0}, 
+        ClientCountForeground: {configurable: false, enumerable: true, writable: true, value: 1}, 
+    })}, 
+    clients: {configurable: false, enumerable: true, writable: false, value: {}}, 
     listeners: {configurable: false, enumerable: true, writable: false, value: {}}, 
     processors: {configurable: false, enumerable: true, writable: false, value: {
         default: function(input) {
@@ -16,6 +28,9 @@ globalThis.LiveElement.Scale = globalThis.LiveElement.Scale || Object.defineProp
                     console.log(input)
             }
         }
+    }}, 
+    subscriptions: {configurable: false, enumerable: true, writable: false, value: {
+        test: ['test:default'] //channel: ['listener:processor', ...]
     }}, 
     getHandlerType: {configurable: false, enumerable: false, writable: false, value: function(input) {
         if (!input) {
@@ -35,18 +50,18 @@ globalThis.LiveElement.Scale = globalThis.LiveElement.Scale || Object.defineProp
         if (config && typeof config == 'object'
             && !config.expired 
             && typeof config.processor == 'string' && typeof globalThis.LiveElement.Scale.processors[config.processor] == 'function'
-            && (((config.last || 0) + (config.delay || globalThis.LiveElement.Scale.defaultListenerDelay)) < now)) {
+            && (((config.last || 0) + ((config.delaymultiple || globalThis.LiveElement.Scale.State.DefaultListenerDelayMultiple) * globalThis.LiveElement.Scale.State.LoopCurrentMs)) < now)) {
             if (config.expires && (config.expires <= now)) {
                 config.expired = true
-                globalThis.dispatchEvent(new globalThis.CustomEvent('live-listener-expired', {detail: {listener: key, config: config}}))
-                globalThis.dispatchEvent(new globalThis.CustomEvent(`live-listener-expired-${key}`, {detail: {listener: key, config: config}}))
+                globalThis.dispatchEvent(new globalThis.CustomEvent('scale-listener-expired', {detail: {listener: key, config: config}}))
+                globalThis.dispatchEvent(new globalThis.CustomEvent(`scale-listener-expired-${key}`, {detail: {listener: key, config: config}}))
             } else if (config.count && config.max && (config.count >= config.max)) {
                 config.expired = true
-                globalThis.dispatchEvent(new globalThis.CustomEvent('live-listener-maxed', {detail: {listener: key, config: config}}))
-                globalThis.dispatchEvent(new globalThis.CustomEvent(`live-listener-maxed-${key}`, {detail: {listener: key, config: config}}))
+                globalThis.dispatchEvent(new globalThis.CustomEvent('scale-listener-maxed', {detail: {listener: key, config: config}}))
+                globalThis.dispatchEvent(new globalThis.CustomEvent(`scale-listener-maxed-${key}`, {detail: {listener: key, config: config}}))
             } else if (config.next && (config.next > now)) {
-                globalThis.dispatchEvent(new globalThis.CustomEvent('live-listener-passed', {detail: {listener: key, config: config}}))
-                globalThis.dispatchEvent(new globalThis.CustomEvent(`live-listener-passed-${key}`, {detail: {listener: key, config: config}}))
+                globalThis.dispatchEvent(new globalThis.CustomEvent('scale-listener-passed', {detail: {listener: key, config: config}}))
+                globalThis.dispatchEvent(new globalThis.CustomEvent(`scale-listener-passed-${key}`, {detail: {listener: key, config: config}}))
             } else {
                 config.last = now
                 config.count = (config.count || 0) + 1
@@ -56,19 +71,47 @@ globalThis.LiveElement.Scale = globalThis.LiveElement.Scale || Object.defineProp
                     delete config.next
                 }
                 var payload = globalThis.LiveElement.Scale.processors[config.processor]()
-                globalThis.dispatchEvent(new globalThis.CustomEvent('live-listener-run', {detail: {listener: key, config: showconfig, payload: payload}}))
-                globalThis.dispatchEvent(new globalThis.CustomEvent(`live-listener-run-${key}`, {detail: {listener: key, config: showconfig, payload: payload}}))
+                Object.entries(globalThis.LiveElement.Scale.subscriptions).forEach(entry => {
+                    entry[1].map(vector => vector.split(':', 2)).filter(vectorSplit => vectorSplit[0] == key && typeof globalThis.LiveElement.Scale.processors[vectorSplit[1]] == 'function').forEach(vectorSplit => {
+                        var message = {
+                            meta: {source: 'worker', 'channel': entry[0]}, 
+                            payload: globalThis.LiveElement.Scale.processors[vectorSplit[1]](payload)
+                        }
+                        Object.values(globalThis.LiveElement.Scale.clients).forEach(client => {
+                            client.postMessage(message)
+                        })
+                    })
+                })
+                globalThis.dispatchEvent(new globalThis.CustomEvent('scale-listener-run', {detail: {listener: key, config: showconfig, payload: payload}}))
+                globalThis.dispatchEvent(new globalThis.CustomEvent(`scale-listener-run-${key}`, {detail: {listener: key, config: showconfig, payload: payload}}))
             }
         }
     }},
-    
-    
     run: {configurable: false, enumerable: false, writable: false, value: function() {
-        Object.entries(globalThis.LiveElement.Scale.listeners).forEach(entry => {
-            globalThis.LiveElement.Scale.runListener(...entry)
+        console.log('line 77', globalThis.LiveElement.Scale.State.CurrentGround)
+        globalThis.clients.claim()
+        globalThis.clients.matchAll({includeUncontrolled: true}).then(clients => {
+            Object.assign(globalThis.LiveElement.Scale.clients, ...clients.map(client => ({[client.id]: client})))
+            globalThis.LiveElement.Scale.State.ClientCountAll = Object.values(globalThis.LiveElement.Scale.clients).length
+            if (globalThis.LiveElement.Scale.State.ClientCountAll) {
+                globalThis.LiveElement.Scale.State.ClientCountBackground = Object.values(globalThis.LiveElement.Scale.clients).filter(client => client.visibilityState == 'hidden').length
+                globalThis.LiveElement.Scale.State.ClientCountMiddleground = Object.values(globalThis.LiveElement.Scale.clients).filter(client => !client.focused && ['visible', 'prerender'].includes(client.visibilityState)).length
+                globalThis.LiveElement.Scale.State.ClientCountForeground = Object.values(globalThis.LiveElement.Scale.clients).filter(client => client.focused).length
+                globalThis.LiveElement.Scale.State.CurrentGround = globalThis.LiveElement.Scale.State.ClientCountForeground ? 'Foreground' : (globalThis.LiveElement.Scale.State.ClientCountMiddleground ? 'Middleground' : 'Background')
+            } else {
+                globalThis.LiveElement.Scale.State.ClientCountBackground = 0
+                globalThis.LiveElement.Scale.State.ClientCountMiddleground = 0
+                globalThis.LiveElement.Scale.State.ClientCountForeground = 0
+                globalThis.LiveElement.Scale.State.CurrentGround = 'Dormant'
+            }
+            globalThis.LiveElement.Scale.State.LoopCurrentMs = globalThis.LiveElement.Scale.State[`Loop${globalThis.LiveElement.Scale.State.CurrentGround}Ms`]
+            Object.entries(globalThis.LiveElement.Scale.listeners).forEach(entry => {
+                globalThis.LiveElement.Scale.runListener(...entry)
+            })
+            globalThis.setTimeout(globalThis.LiveElement.Scale.run, globalThis.LiveElement.Scale.State.LoopCurrentMs || 1000)
         })
-        globalThis.setTimeout(globalThis.LiveElement.Scale.run, globalThis.LiveElement.Scale.loopMaxMs || 1000)
     }}
 })
 Object.freeze(globalThis.LiveElement.Scale)
-globalThis.setTimeout(globalThis.LiveElement.Scale.run, globalThis.LiveElement.Scale.loopMaxMs || 1000)
+globalThis.setTimeout(globalThis.LiveElement.Scale.run, globalThis.LiveElement.Scale.State.LoopCurrentMs || 1000)
+
