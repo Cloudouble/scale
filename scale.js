@@ -23,7 +23,7 @@ window.LiveElement.Scale = window.LiveElement.Scale || Object.defineProperties({
                             return hasTriggerCallback ? triggerCallback(input) : input
                         default: 
                             var message = (window.LiveElement.Scale.Channels[processorName] || []).shift()
-                            return message && typeof message == 'object' && message.payload && typeof message.payload == 'object' ? message.payload : {}
+                            return message && typeof message == 'object' ? message : {}
                     }
                 }
             } else {
@@ -38,12 +38,11 @@ window.LiveElement.Scale = window.LiveElement.Scale || Object.defineProperties({
 if ('serviceWorker' in window.navigator) {
     window.navigator.serviceWorker.register('worker.js')
     window.navigator.serviceWorker.addEventListener('message', event => {
-        console.log('scale.js line 41', event.data)
         if (window.LiveElement.Scale.Options.Listen) {
             if (window.LiveElement.Scale.isValidMessage(event.data)) {
-                if (window.LiveElement.Scale.OpenChannels[event.data.channel]) {
-                    window.LiveElement.Scale.Channels[event.data.channel] = window.LiveElement.Scale.Channels[event.data.channel] || []
-                    window.LiveElement.Scale.Channels[event.data.channel].push(event.data)
+                if (window.LiveElement.Scale.OpenChannels[event.data.meta.channel]) {
+                    window.LiveElement.Scale.Channels[event.data.meta.channel] = window.LiveElement.Scale.Channels[event.data.meta.channel] || []
+                    window.LiveElement.Scale.Channels[event.data.meta.channel].push(event.data.payload)
                 }
             }
         }

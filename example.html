@@ -11,7 +11,7 @@
     <body>
         <noscript>LiveElement requires javascript enabled</noscript>
         
-        <span></span>
+        <span live-subscription="testlistener:test"></span>
 
         <script src="https://cdn.jsdelivr.net/gh/cloudouble/element@1.7.5/element.min.js"></script>
         <script src="https://cdn.jsdelivr.net/gh/cloudouble/live@1.0.2/live.min.js"></script>
@@ -19,8 +19,8 @@
         <script src="scale.js"></script>
         <script>
             window.LiveElement.Scale.OpenChannels.test = true
-            window.LiveElement.Live.processors.test = window.LiveElement.Scale.getChannelProcessor('test', undefined, function(input) { console.log('line 22', input) })
-            window.LiveElement.Live.listeners.testlistener = {processor: 'default', delay: 1000, max: 10}
+            window.LiveElement.Live.processors.test = window.LiveElement.Scale.getChannelProcessor('test', undefined, function(input) { return {'#innerHTML': input.payload._timestamp} })
+            window.LiveElement.Live.listeners.testlistener = {processor: 'test', delay: 1000, max: 10}
         </script>
     </body>
 </html>
