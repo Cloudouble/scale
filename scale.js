@@ -6,7 +6,7 @@ window.LiveElement.Scale = window.LiveElement.Scale || Object.defineProperties({
     }}, 
     Channels: {configurable: false, enumerable: true, writable: false, value: {}}, 
     OpenChannels: {configurable: false, enumerable: true, writable: false, value: {}}, 
-    isValidMessage: {configurable: false, enumerable: true, writable: false, value: function(message) {
+    isValidMessage: {configurable: false, enumerable: false, writable: false, value: function(message) {
         return message && typeof message == 'object' && message.meta && typeof message.meta == 'object' && message.payload && typeof message.payload == 'object' && message.meta.channel && message.meta.source
     }}, 
     getChannelProcessor: {configurable: false, enumerable: true, writable: false, value: function(channelName, processorName=undefined, subscriptionCallback=undefined, triggerCallback=undefined) {
