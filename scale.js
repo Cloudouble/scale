@@ -38,6 +38,7 @@ window.LiveElement.Scale = window.LiveElement.Scale || Object.defineProperties({
 if ('serviceWorker' in window.navigator) {
     window.navigator.serviceWorker.register('worker.js')
     window.navigator.serviceWorker.addEventListener('message', event => {
+        console.log('scale.js line 41', event.data)
         if (window.LiveElement.Scale.Options.Listen) {
             if (window.LiveElement.Scale.isValidMessage(event.data)) {
                 if (window.LiveElement.Scale.OpenChannels[event.data.channel]) {

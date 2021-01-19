@@ -2,15 +2,9 @@
 
 importScripts('scale-sw.js')
 
-addEventListener('activate', function (activateEvent) {
-    activateEvent.waitUntil(globalThis.clients.claim())
-    activateEvent.waitUntil(globalThis.clients.matchAll({type: 'all', includeUncontrolled: true}).then(function (windowClients) {
-        windowClients.forEach(client => {
-            client.postMessage({
-                one: 1,
-                two: 2
-            })
-        })
-    }))
-})
+globalThis.LiveElement.Scale.listeners.testlistener = {processor: 'default', delaymultiple: 10, max: 100}
+
+globalThis.LiveElement.Scale.subscriptions.test = ['testlistener:default']
+
+
 

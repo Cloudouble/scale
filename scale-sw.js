@@ -29,19 +29,14 @@ globalThis.LiveElement.Scale = globalThis.LiveElement.Scale || Object.defineProp
             }
         }
     }}, 
-    subscriptions: {configurable: false, enumerable: true, writable: false, value: {
-        test: ['test:default'] //channel: ['listener:processor', ...]
-    }}, 
+    subscriptions: {configurable: false, enumerable: true, writable: false, value: {}}, 
     getHandlerType: {configurable: false, enumerable: false, writable: false, value: function(input) {
         if (!input) {
             return 'listener'
-        } else if (input && typeof input == 'object' && input.listener && input.config && input.payload && input.subscriber 
-            && typeof input.listener == 'string' && typeof input.config == 'object' && typeof input.payload == 'object' && typeof input.subscriber == 'object' 
-            && typeof input.subscriber.setAttribute == 'function') {
+        } else if (input && typeof input == 'object' && input.listener && input.config && input.payload && input.subscriber
+            && typeof input.listener == 'string' && typeof input.config == 'object' && typeof input.payload == 'object' && typeof input.subscriber == 'object') {
             return 'subscription'
-        } else if (input && typeof input == 'object' && input.attributes && input.properties && input.map && input.triggersource 
-            && typeof input.attributes == 'object' && typeof input.properties == 'object' && typeof input.map == 'object' && typeof input.triggersource == 'object' 
-            && typeof input.triggersource.setAttribute == 'function') {
+        } else if (input && typeof input == 'object' && input.payload && input.triggersource && typeof input.payload == 'object' && typeof input.triggersource == 'object') {
             return 'trigger'
         }
     }}, 
@@ -70,25 +65,31 @@ globalThis.LiveElement.Scale = globalThis.LiveElement.Scale || Object.defineProp
                     showconfig.next = config.next
                     delete config.next
                 }
-                var payload = globalThis.LiveElement.Scale.processors[config.processor]()
-                Object.entries(globalThis.LiveElement.Scale.subscriptions).forEach(entry => {
-                    entry[1].map(vector => vector.split(':', 2)).filter(vectorSplit => vectorSplit[0] == key && typeof globalThis.LiveElement.Scale.processors[vectorSplit[1]] == 'function').forEach(vectorSplit => {
-                        var message = {
-                            meta: {source: 'worker', 'channel': entry[0]}, 
-                            payload: globalThis.LiveElement.Scale.processors[vectorSplit[1]](payload)
-                        }
-                        Object.values(globalThis.LiveElement.Scale.clients).forEach(client => {
-                            client.postMessage(message)
+                var listenerResult = globalThis.LiveElement.Scale.processors[config.processor]()
+                if (listenerResult && typeof listenerResult == 'object') {
+                    var processorInput = {
+                        listener: key, 
+                        config: config, 
+                        payload: listenerResult
+                    }
+                    Object.entries(globalThis.LiveElement.Scale.subscriptions).forEach(entry => {
+                        entry[1].map(vector => vector.split(':', 2)).filter(vectorSplit => vectorSplit[0] == key && typeof globalThis.LiveElement.Scale.processors[vectorSplit[1]] == 'function').forEach(vectorSplit => {
+                            var message = {
+                                meta: {source: 'worker', 'channel': entry[0]}, 
+                                payload: globalThis.LiveElement.Scale.processors[vectorSplit[1]]({...processorInput, ...{subscriber: {[entry[0]]: entry[1]}}})
+                            }
+                            Object.values(globalThis.LiveElement.Scale.clients).forEach(client => {
+                                client.postMessage(message)
+                            })
                         })
                     })
-                })
-                globalThis.dispatchEvent(new globalThis.CustomEvent('scale-listener-run', {detail: {listener: key, config: showconfig, payload: payload}}))
-                globalThis.dispatchEvent(new globalThis.CustomEvent(`scale-listener-run-${key}`, {detail: {listener: key, config: showconfig, payload: payload}}))
+                }
+                globalThis.dispatchEvent(new globalThis.CustomEvent('scale-listener-run', {detail: {listener: key, config: showconfig, payload: listenerResult}}))
+                globalThis.dispatchEvent(new globalThis.CustomEvent(`scale-listener-run-${key}`, {detail: {listener: key, config: showconfig, payload: listenerResult}}))
             }
         }
     }},
     run: {configurable: false, enumerable: false, writable: false, value: function() {
-        console.log('line 77', globalThis.LiveElement.Scale.State.CurrentGround)
         globalThis.clients.claim()
         globalThis.clients.matchAll({includeUncontrolled: true}).then(clients => {
             Object.assign(globalThis.LiveElement.Scale.clients, ...clients.map(client => ({[client.id]: client})))
