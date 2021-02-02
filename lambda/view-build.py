@@ -10,7 +10,20 @@ def uuid_valid(s):
 
  
 def main(event, context):
-    # used in edge context for PUT, POST and PATCH requests
+    # used in edge context for GET requests
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     counter = 0
     s3 = boto3.resource('s3')
     lambda_client = boto3.client('lambda')
@@ -55,7 +68,7 @@ def main(event, context):
                                     masked_record = {**record}
                                 if masked_record:
                                     try:
-                                        current_record = s3.Object(os.environ['bucket'],'record/{record_type}/{record_id}.json'.format(record_type=record_type, record_id=record_id)).get()['Body'].read().decode('utf-8')
+                                        current_record = s3.Object(os.environ['bucket'],'record/{}.json'.format(record_id)).get()['Body'].read().decode('utf-8')
                                     except:
                                         current_record = {}
                                     canwrite = bool(current_record) if request_object['cf']['request']['method'] == 'PATCH' else True

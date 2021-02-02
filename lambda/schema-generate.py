@@ -1,8 +1,7 @@
 import urllib.request, json, boto3, os
 
-#ensure to set the 'bucket' environment variable to the name of the S3 Bucket which holds the database master
-
 def main(event, context):
+    # called on demand to update database schemas
     release = '11.01'
     feed = 'https://schema.org/version/{}/schemaorg-all-https.jsonld'.format(release)
     feed_response = urllib.request.urlopen(feed)
@@ -63,7 +62,7 @@ def main(event, context):
         for pdc in pd['classes']:
             pd['classes'] = sorted(list(set(pd['classes'] + classes.get(pdc, {}).get('children', []))))
     for n, d in classes.items():
-        d['properties'] = sorted(list(set([pn for pn, pd in properties.items() if n in pd.get('classes', [])])))
+        d['properties'] = { p: properties.get(p, {}).get('types', []) for p in sorted(list(set([pn for pn, pd in properties.items() if n in pd.get('classes', [])]))) }
 
     
     datatype_list = [p for p in graph if (p.get('@type') and ((type(p['@type']) is str and p['@type'] == 'schema:DataType') or (type(p['@type']) is list and 'schema:DataType' in p['@type'])))]
@@ -82,9 +81,9 @@ def main(event, context):
         
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(os.environ['bucket'])
-    bucket.put_object(Body=bytes(json.dumps(classes), 'utf-8'), ContentType='application/json', Key='schema/classes/index.json')
-    bucket.put_object(Body=bytes(json.dumps(properties), 'utf-8'), ContentType='application/json', Key='schema/properties/index.json')
-    bucket.put_object(Body=bytes(json.dumps(datatypes), 'utf-8'), ContentType='application/json', Key='schema/datatypes/index.json')
+    bucket.put_object(Body=bytes(json.dumps(classes), 'utf-8'), ContentType='application/json', Key='schema/classes.json')
+    bucket.put_object(Body=bytes(json.dumps(properties), 'utf-8'), ContentType='application/json', Key='schema/properties.json')
+    bucket.put_object(Body=bytes(json.dumps(datatypes), 'utf-8'), ContentType='application/json', Key='schema/datatypes.json')
         
     for k, v in properties.items():
         bucket.put_object(Body=bytes(json.dumps(v), 'utf-8'), ContentType='application/json', Key='schema/properties/{}.json'.format(k))

@@ -31,8 +31,8 @@ validators = {
     'False': lambda i: type(i) is bool and not i, 
     'Boolean': lambda i: type(i) is bool, 
     'DateTime': lambda i: datetime_valid(datetime, i), 
-    'Date': lambda i: date_valid(date, i), 
-    'Time': lambda i: time_valid(time, i), 
+    'Date': lambda i: datetime_valid(date, i), 
+    'Time': lambda i: datetime_valid(time, i), 
     'Integer': lambda i: type(i) is int, 
     'Float': lambda i: type(i) is float, 
     'Number': lambda i: type(i) in [float, int], 
@@ -44,6 +44,7 @@ validators = {
 }
 
 def main(record, context):
+    # called by other lambdas to validate a record
     valid = False
     if record and type(record) is dict and record.get('@type') and uuid_valid(record.get('@id')):
         s3 = boto3.resource('s3')

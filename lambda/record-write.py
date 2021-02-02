@@ -1,6 +1,7 @@
 import json, boto3, os
 
 def main(record, context):
+    # called by other lambdas to write a record
     retval = None
     try:
         bucket = boto3.resource('s3').Bucket(os.environ['bucket'])
