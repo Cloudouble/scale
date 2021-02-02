@@ -12,6 +12,7 @@ def uuid_valid(s):
 def main(event, context):
     counter = 0
     s3 = boto3.resource('s3')
+    lambda_client = boto3.client('lambda')
     for request_object in event.get('Records', []):
         try:
             if request_object['cf']['request']['method'] in ['POST', 'PUT', 'PATCH']:
@@ -26,7 +27,7 @@ def main(event, context):
                     if len(path) == 4:
                         connection, area, record_type, record_id = path
                         if area == 'record' and uuid_valid(connection) and uuid_valid(record_id):
-                            is_valid = record['@type'].lower() == record_type.lower() and record['@id'].lower() == record_id.lower() and json.loads(client.invoke(FunctionName='record-validate', 
+                            is_valid = record['@type'].lower() == record_type.lower() and record['@id'].lower() == record_id.lower() and json.loads(lambda_client.invoke(FunctionName='record-validate', 
                                 InvocationType='RequestResponse', Payload=bytes(json.dumps(record), 'utf-8'))['Payload'].read().decode('utf-8'))
                             if is_valid:
                                 connection_config = s3.Object(os.environ['bucket'],'connection/{}.json'.format(connection)).get()['Body'].read().decode('utf-8')
@@ -39,7 +40,7 @@ def main(event, context):
                                 for mask_name, mask_args in mask_map.items():
                                     if constrained:
                                         mask_payload = {'purpose': 'mask', 'record': record, 'connection': connection_config, 'args': mask_args}
-                                        allowfields.extend(json.loads(client.invoke(FunctionName=mask, InvocationType='RequestResponse', Payload=bytes(json.dumps(mask_payload), 'utf-8'))['Payload'].read().decode('utf-8')))
+                                        allowfields.extend(json.loads(lambda_client.invoke(FunctionName=mask, InvocationType='RequestResponse', Payload=bytes(json.dumps(mask_payload), 'utf-8'))['Payload'].read().decode('utf-8')))
                                         if '*' in allowfields:
                                             constrained = False
                                             break
@@ -63,7 +64,7 @@ def main(event, context):
                                         else:
                                             record_to_write = {**current_record, **masked_record}
                                     if record_to_write:
-                                        client.invoke(FunctionName='record-write', InvocationType='Event', Payload=bytes(json.dumps(record_to_write), 'utf-8'))
+                                        lambda_client.invoke(FunctionName='record-write', InvocationType='Event', Payload=bytes(json.dumps(record_to_write), 'utf-8'))
                                     counter = counter + 1
         except:
             pass
