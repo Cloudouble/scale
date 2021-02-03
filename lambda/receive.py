@@ -1,4 +1,4 @@
-import json, boto3, os, base64, uuid
+import json, boto3, os, base64, uuid, time
 from urllib.parse import parse_qs
 
 def uuid_valid(s):
@@ -15,6 +15,7 @@ def main(event, context):
     bucket = s3.Bucket(os.environ['bucket'])
     lambda_client = boto3.client('lambda')
     counter = 0
+    now = time.time()
     if event.get('body'):
         #API Gateway - either Rest or Websocket
         body = base64.b64decode(event['body']) if event.get('isBase64Encoded', False) else event['body']
@@ -28,7 +29,7 @@ def main(event, context):
         records = event.get('Records', [])
     for request_object in records:
         try:
-            if request_object['cf']['request']['method'] in ['POST', 'PUT', 'PATCH']:
+            if request_object['cf']['request']['method'] in ['POST', 'PUT', 'PATCH', 'DELETE']:
                 body = base64.b64decode(request_object['cf']['request']['body']['data']) if request_object['cf']['request']['isBase64Encoded'] else request_object['cf']['request']['body']['data']
                 record = {}
                 try: 
@@ -38,16 +39,35 @@ def main(event, context):
                 path = request_object['cf']['request']['uri'].strip('/?').removesuffix('.json').split('/')
                 if path and path[0] == 'connection' and len(path) in [2,5,6]:
                     if len(path) == 2 and uuid_valid(path[1]):
+                        # a new connection or connection extension (PUT / POST / PATCH), or connection immediate expiration (DELETE)
                         connection = path[1]
                         connection_object = bucket.Object('connection/{connection}.json'.format(connection=connection))
-                        try:
-                            connection_object.get()['Body'].read().decode('utf-8')
-                        except:
-                            connection_object.put(Body=bytes(json.dumps({'connection': connection, 'masks': []}), 'utf-8'), ContentType='application/json')
+                        if request_object['cf']['request']['method'] in ['POST', 'PUT', 'PATCH']:
+                            try:
+                                connection_record = connection_object.get()['Body'].read().decode('utf-8')
+                            except:
+                                connection_record = {}
+                            record['expires'] = record.get('expires', now + 1000)
+                            if type(record) is dict and record['expires'] != connection_record.get('expires'):
+                                try:
+                                    connection_record['expires'] = record['expires']
+                                except:
+                                    connection_record['expires'] = 0
+                                connection_object.put(Body=bytes(json.dumps(connection_record), 'utf-8'), ContentType='application/json')
+                                counter = counter + 1
+                            else :
+                                counter = counter + 1
+                        elif request_object['cf']['request']['method'] == 'DELETE':
+                            try:
+                                connection_object.delete()
+                            except:
+                                pass
                             counter = counter + 1
                     elif len(path) == 5:
+                        # query update, or record update at the record scope
                         
                     elif len(path) == 6:
+                        # record update at the field scope, subscription update
                         
                         
                         
