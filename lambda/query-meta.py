@@ -18,6 +18,7 @@ def main(event, context):
             query_summary = json.loads(bucket.get_object(Key=query_summary_key)['Body'].read().decode('utf-8'))
         except:
             query_summary = {}
+        query_summary['vectors'] = query_summary.get('vectors', [])
         query_summary['initials'] = query_summary.get('initials', {})
         for initial in query_initial_list:
             try: 
