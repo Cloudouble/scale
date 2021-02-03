@@ -15,27 +15,18 @@ def main(event, context):
             query_list = []
             for updated_field in updated_fields:
                 try:
-                    query_list.entend(json.loads(bucket.get_object(Key='vector/{record_type}/{updated_field}.json'.format(record_type=record_type, updated_field=updated_field))['Body'].read().decode('utf-8')))
+                    query_list.entend(json.loads(bucket.get_object(Key='vector/{record_type}/{field_name}.json'.format(record_type=record_type, field_name=updated_field))['Body'].read().decode('utf-8')))
                 except:
                     pass
             query_list = sorted(list(set(query_list)))
             for query_id in query_list:
                 query_payload = {'purpose': 'query', 'record': record_object}
                 query_result = json.loads(lambda_client.invoke(FunctionName=query_id, InvocationType='RequestResponse', Payload=bytes(json.dumps(query_payload), 'utf-8'))['Payload'].read().decode('utf-8'))
-                query_index_key = 'query/{query_id}/{record_initial}.json'.format(query_id=query_id, record_initial=record_id[0])
+                query_index_key = 'query/{record_type}/{query_id}/{record_initial}.json'.format(query_id=query_id, record_initial=record_id[0])
                 try:
                     query_index = json.loads(bucket.get_object(Key=query_index_key)['Body'].read().decode('utf-8'))
                 except:
                     query_index = []
-                    '''query_summary_key = 'query/{query_id}.json'.format(query_id=query_id)
-                    try: 
-                        query_summary = json.loads(bucket.get_object(Key=query_summary_key)['Body'].read().decode('utf-8'))
-                    except:
-                        query_summary = {}
-                    query_summary['initials'] = query_summary['initials'] if query_summary.get('initials') else []
-                    query_summary['initials'].append(record_id[0])
-                    query_summary['initials'] = sorted(list(set(query_summary['initials'])))'''
-                    bucket.put_object(Body=bytes(json.dumps(query_summary), 'utf-8'), Key=query_summary_key, ContentType='application/json')
                 query_index_changed = False
                 if query_result is True and record_id not in query_result:
                     query_index.append(record_id).sort()
