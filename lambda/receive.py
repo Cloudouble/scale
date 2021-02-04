@@ -55,9 +55,18 @@ def main(event, context):
                             except:
                                 pass
                     else:
-                        entity_type, record_type, entity_id = path[2:5]
-                        if len(path) == 6:
-                            path[5]
+                        entity_type, record_type, entity_id, record_field, sort_field, min_index, max_index = (path[2:5] + ([None] * 4))
+                        if len(path) == 5:
+                            entity_id, view_handle = (entity_id.split('.', 1) + ['json'])[:2]
+                        elif len(path) == 6:
+                            record_field, view_handle = (path[5].split('.', 1) + ['json'])[:2]
+                        elif len(path) == 7: 
+                            sort_field = path[5]
+                            index_range, view_handle =  (path[5].split('.', 1) + ['json'])[:2]
+                            min_index, max_index = (index_range.split('-', 1) + ['1000'])[:2]
+                            min_index = int(min_index) if str(min_index).isnumeric() else 0
+                            max_index = int(max_index) if str(max_index).isnumeric() else 0
+                            max_index = max_index if max_index > min_index else min_index + 1000
                         if request_object['cf']['request']['method'] in ['POST', 'PUT', 'PATCH']:
                             is_valid = json.loads(
                                 lambda_client.invoke(
@@ -75,13 +84,15 @@ def main(event, context):
                                 mask_map = mask_map.get(entity_type) if entity_type in mask_map else mask_map.get('*', {})
                                 mask_map = mask_map.get(request_object['cf']['request']['method']) if request_object['cf']['request']['method'] in mask_map else mask_map.get('*', {})
                                 mask_map = mask_map.get(record_type) if record_type in mask_map else mask_map.get('*', {})
-                                masked_body = {}
+                                masked_entity = {}
                                 constrained = True
                                 allowfields = []
-                                for mask_name, switches in mask_map.items():
-                                    switches = switches if type(switches) is dict else {}
+                                switches = {'purpose': 'mask', 'entity_type': entity_type, 'record_type': record_type, 'entity_id': entity_id, 
+                                        'record_field': record_field, 'view_handle': view_handle, 'sort_field': sort_field, 'min_index': min_index, 'max_index': max_index}
+                                for mask_name, options in mask_map.items():
+                                    options = options if type(options) is dict else {}
                                     if constrained:
-                                        mask_payload = {'purpose': 'mask', 'entity': entity, 'connection_record': connection_record, 'switches': switches}
+                                        mask_payload = {'entity': entity, 'connection': {**connection_record, **{'@id': connection_id}}, 'switches': switches, 'options': options}
                                         allowfields.extend(json.loads(lambda_client.invoke(FunctionName=mask, InvocationType='RequestResponse', Payload=bytes(json.dumps(mask_payload), 'utf-8'))['Payload'].read().decode('utf-8')))
                                         if '*' in allowfields:
                                             constrained = False
@@ -91,31 +102,24 @@ def main(event, context):
                                 if constrained:
                                     for field in allowfields:
                                         if field in record:
-                                            masked_record[field] = record[field]
+                                            masked_entity[field] = entity[field]
                                 else:
-                                    masked_record = {**record}
-                                if masked_record:
+                                    masked_entity = {**entity}
+                                if masked_entity:
                                     try:
-                                        current_record = s3.Object(os.environ['bucket'],'record/{record_type}/{record_id}.json'.format(record_type=record_type, record_id=record_id)).get()['Body'].read().decode('utf-8')
+                                        current_entity = s3.Object(os.environ['bucket'],'{entity_type}/{record_type}/{entity_id}.{view_handle}'.format(**switches)).get()['Body'].read().decode('utf-8')
                                     except:
-                                        current_record = {}
-                                    canwrite = bool(current_record) if request_object['cf']['request']['method'] == 'PATCH' else True
+                                        current_entity = {}
+                                    canwrite = bool(current_entity) if request_object['cf']['request']['method'] == 'PATCH' else True
                                     if canwrite:
                                         if not constrained and request_object['cf']['request']['method'] == 'PUT':
-                                            record_to_write = {**masked_record}
+                                            entity_to_write = {**masked_entity}
                                         else:
-                                            record_to_write = {**current_record, **masked_record}
-                                    if record_to_write:
-                                        lambda_client.invoke(FunctionName='record-write', InvocationType='Event', Payload=bytes(json.dumps(record_to_write), 'utf-8'))
+                                            entity_to_write = {**current_entity, **masked_entity}
+                                    if entity_to_write:
+                                        lambda_client.invoke(FunctionName='entity-write', InvocationType='Event', Payload=bytes(json.dumps(entity_to_write), 'utf-8'))
                                     counter = counter + 1
-                            
-                                
-                        
-                        
-
-                        
+        except:
+            pass
                     
     return counter
-
-
-
