@@ -37,8 +37,8 @@ def main(event, context):
                 except: 
                     record = {k: v[0] for k, v in parse_qs(body).items()}
                 path = request_object['cf']['request']['uri'].strip('/?').removesuffix('.json').split('/')
-                if path and path[0] == 'connection' and len(path) in [2,5,6]:
-                    if len(path) == 2 and uuid_valid(path[1]):
+                if path and path[0] == 'connection' and len(path) in [2,5,6] and uuid_valid(path[1]):
+                    if len(path) == 2:
                         # a new connection or connection extension (PUT / POST / PATCH), or connection immediate expiration (DELETE)
                         connection = path[1]
                         connection_object = bucket.Object('connection/{connection}.json'.format(connection=connection))
@@ -47,10 +47,14 @@ def main(event, context):
                                 connection_record = connection_object.get()['Body'].read().decode('utf-8')
                             except:
                                 connection_record = {}
+                            connection_expires = connection_record.get('expires', 0)
+                            if connection_expires <= now:
+                                connection_object.delete()
+                                connection_record = {}
                             record['expires'] = record.get('expires', now + 1000)
                             if type(record) is dict and record['expires'] != connection_record.get('expires'):
                                 try:
-                                    connection_record['expires'] = record['expires']
+                                    connection_record['expires'] = float(record['expires'])
                                 except:
                                     connection_record['expires'] = 0
                                 connection_object.put(Body=bytes(json.dumps(connection_record), 'utf-8'), ContentType='application/json')
@@ -64,10 +68,28 @@ def main(event, context):
                                 pass
                             counter = counter + 1
                     elif len(path) == 5:
-                        # query update, or record update at the record scope
+                        if path[2] == 'query':
+                            if request_object['cf']['request']['method'] in ['POST', 'PUT', 'PATCH']:
+                                query_object = bucket.Object('{}.json'.format('/'.join(path)))
+                                try:
+                                    query_record = json.loads(query_object.get()['Body'].read().decode('utf-8'))
+                                    canwrite = True
+                                except:
+                                    query_record = {}
+                                    canwrite = False if request_object['cf']['request']['method'] == 'PATCH' else True
+                                if canwrite:
+                                    allowfields = []
+                                    for field in allowfields:
+                                        if field in record:
+                                            query_record[field] = record[field]
+                                    query_object.put(Body=bytes(json.dumps(query_record), 'utf-8') , ContentType='application/json')
+                            elif request_object['cf']['request']['method'] == 'DELETE':
+                                query_object.delete()
+                        elif path[2] == 'record':
+                            pass
                         
                     elif len(path) == 6:
-                        # record update at the field scope, subscription update
+                            # record update at the field scope, subscription update
                         
                         
                         
