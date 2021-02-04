@@ -1,3 +1,5 @@
+### expand to validate any uploaded thing... {entity={}, scope='', path=[]}
+
 import json, boto3, os, datetime, uuid
 from datetime import datetime
 from datetime import date

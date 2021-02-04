@@ -19,75 +19,69 @@ def main(event, context):
     if event.get('body'):
         #API Gateway - either Rest or Websocket
         body = base64.b64decode(event['body']) if event.get('isBase64Encoded', False) else event['body']
-        records = [{'cf': {'request': {
+        request_objects = [{'cf': {'request': {
             'method': event['httpMethod'], 
             'body': {'data': event['body']}, 
             'uri': event['path']
         }}}]
     elif event.get('Records'):
         #CDN: PUT, POST or PATCH
-        records = event.get('Records', [])
-    for request_object in records:
+        request_objects = event.get('Records', [])
+    for request_object in request_objects:
         try:
             if request_object['cf']['request']['method'] in ['POST', 'PUT', 'PATCH', 'DELETE']:
                 body = base64.b64decode(request_object['cf']['request']['body']['data']) if request_object['cf']['request']['isBase64Encoded'] else request_object['cf']['request']['body']['data']
-                record = {}
                 try: 
-                    record = json.loads(body)
+                    entity = json.loads(body)
                 except: 
-                    record = {k: v[0] for k, v in parse_qs(body).items()}
+                    entity = {k: v[0] for k, v in parse_qs(body).items()}
                 path = request_object['cf']['request']['uri'].strip('/?').removesuffix('.json').split('/')
                 if path and path[0] == 'connection' and len(path) in [2,5,6] and uuid_valid(path[1]):
+                    connection_id = path[1]
+                    connection_object = bucket.Object('connection/{connection}.json'.format(connection=connection_id))
                     if len(path) == 2:
                         # a new connection or connection extension (PUT / POST / PATCH), or connection immediate expiration (DELETE)
-                        connection = path[1]
-                        connection_object = bucket.Object('connection/{connection}.json'.format(connection=connection))
                         if request_object['cf']['request']['method'] in ['POST', 'PUT', 'PATCH']:
                             try:
                                 connection_record = connection_object.get()['Body'].read().decode('utf-8')
                             except:
                                 connection_record = {'mask': []}
-                            if record and type(record) is dict:
-                                connection_record['mask'] = json.loads(lambda_client.invoke(FunctionName='authenticate', InvocationType='RequestResponse', Payload=bytes(json.dumps(record), 'utf-8'))['Payload'].read().decode('utf-8'))
+                            if entity and type(entity) is dict:
+                                connection_record['mask'] = json.loads(lambda_client.invoke(FunctionName='authenticate', InvocationType='RequestResponse', Payload=bytes(json.dumps(entity), 'utf-8'))['Payload'].read().decode('utf-8'))
                             connection_object.put(Body=bytes(json.dumps(connection_record), 'utf-8'), ContentType='application/json')
                         elif request_object['cf']['request']['method'] == 'DELETE':
                             try:
                                 connection_object.delete()
                             except:
                                 pass
-                            counter = counter + 1
                     else:
-                        if path[2] == 'query':
-                            if request_object['cf']['request']['method'] in ['POST', 'PUT', 'PATCH']:
-                                query_object = bucket.Object('{}.json'.format('/'.join(path)))
-                                try:
-                                    query_record = json.loads(query_object.get()['Body'].read().decode('utf-8'))
-                                    canwrite = True
-                                except:
-                                    query_record = {}
-                                    canwrite = False if request_object['cf']['request']['method'] == 'PATCH' else True
-                                if canwrite:
-                                    allowfields = []
-                                    for field in allowfields:
-                                        if field in record:
-                                            query_record[field] = record[field]
-                                    query_object.put(Body=bytes(json.dumps(query_record), 'utf-8') , ContentType='application/json')
-                            elif request_object['cf']['request']['method'] == 'DELETE':
-                                query_object.delete()
-                        elif path[2] == 'record':
-                            is_valid = record['@type'].lower() == record_type.lower() and record['@id'].lower() == record_id.lower() and json.loads(lambda_client.invoke(FunctionName='record-validate', 
-                                InvocationType='RequestResponse', Payload=bytes(json.dumps(record), 'utf-8'))['Payload'].read().decode('utf-8'))
+                        entity_type, record_type, entity_id = path[2:5]
+                        if len(path) == 6:
+                            path[5]
+                        if request_object['cf']['request']['method'] in ['POST', 'PUT', 'PATCH']:
+                            is_valid = json.loads(
+                                lambda_client.invoke(
+                                    FunctionName='validate', 
+                                    InvocationType='RequestResponse', 
+                                    Payload=bytes(json.dumps({'entity': entity, 'entity_type': entity_type, 'path': path}), 'utf-8')
+                                )['Payload'].read().decode('utf-8')
+                            )
                             if is_valid:
-                                connection_config = s3.Object(os.environ['bucket'],'connection/{}/config.json'.format(connection)).get()['Body'].read().decode('utf-8')
-                                mask_map = connection_config.get('mask', {})
+                                try:
+                                    connection_record = connection_object.get()['Body'].read().decode('utf-8')
+                                except:
+                                    connection_record = {'mask': []}
+                                mask_map = connection_record.get('mask', {})
+                                mask_map = mask_map.get(entity_type) if entity_type in mask_map else mask_map.get('*', {})
                                 mask_map = mask_map.get(request_object['cf']['request']['method']) if request_object['cf']['request']['method'] in mask_map else mask_map.get('*', {})
-                                mask_map = mask_map.get(record['@type']) if record['@type'] in mask_map else mask_map.get('*', {})
-                                masked_record = {}
+                                mask_map = mask_map.get(record_type) if record_type in mask_map else mask_map.get('*', {})
+                                masked_body = {}
                                 constrained = True
                                 allowfields = []
-                                for mask_name, mask_args in mask_map.items():
+                                for mask_name, switches in mask_map.items():
+                                    switches = switches if type(switches) is dict else {}
                                     if constrained:
-                                        mask_payload = {'purpose': 'mask', 'record': record, 'connection': connection_config, 'args': mask_args}
+                                        mask_payload = {'purpose': 'mask', 'entity': entity, 'connection_record': connection_record, 'switches': switches}
                                         allowfields.extend(json.loads(lambda_client.invoke(FunctionName=mask, InvocationType='RequestResponse', Payload=bytes(json.dumps(mask_payload), 'utf-8'))['Payload'].read().decode('utf-8')))
                                         if '*' in allowfields:
                                             constrained = False
@@ -115,6 +109,9 @@ def main(event, context):
                                         lambda_client.invoke(FunctionName='record-write', InvocationType='Event', Payload=bytes(json.dumps(record_to_write), 'utf-8'))
                                     counter = counter + 1
                             
+                                
+                        
+                        
 
                         
                     
