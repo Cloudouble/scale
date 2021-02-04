@@ -46,28 +46,17 @@ def main(event, context):
                             try:
                                 connection_record = connection_object.get()['Body'].read().decode('utf-8')
                             except:
-                                connection_record = {}
-                            connection_expires = connection_record.get('expires', 0)
-                            if connection_expires <= now:
-                                connection_object.delete()
-                                connection_record = {}
-                            record['expires'] = record.get('expires', now + 1000)
-                            if type(record) is dict and record['expires'] != connection_record.get('expires'):
-                                try:
-                                    connection_record['expires'] = float(record['expires'])
-                                except:
-                                    connection_record['expires'] = 0
-                                connection_object.put(Body=bytes(json.dumps(connection_record), 'utf-8'), ContentType='application/json')
-                                counter = counter + 1
-                            else :
-                                counter = counter + 1
+                                connection_record = {'mask': []}
+                            if record and type(record) is dict:
+                                connection_record['mask'] = json.loads(lambda_client.invoke(FunctionName='authenticate', InvocationType='RequestResponse', Payload=bytes(json.dumps(record), 'utf-8'))['Payload'].read().decode('utf-8'))
+                            connection_object.put(Body=bytes(json.dumps(connection_record), 'utf-8'), ContentType='application/json')
                         elif request_object['cf']['request']['method'] == 'DELETE':
                             try:
                                 connection_object.delete()
                             except:
                                 pass
                             counter = counter + 1
-                    elif len(path) == 5:
+                    else:
                         if path[2] == 'query':
                             if request_object['cf']['request']['method'] in ['POST', 'PUT', 'PATCH']:
                                 query_object = bucket.Object('{}.json'.format('/'.join(path)))
@@ -86,57 +75,49 @@ def main(event, context):
                             elif request_object['cf']['request']['method'] == 'DELETE':
                                 query_object.delete()
                         elif path[2] == 'record':
-                            pass
-                        
-                    elif len(path) == 6:
-                            # record update at the field scope, subscription update
-                        
-                        
+                            is_valid = record['@type'].lower() == record_type.lower() and record['@id'].lower() == record_id.lower() and json.loads(lambda_client.invoke(FunctionName='record-validate', 
+                                InvocationType='RequestResponse', Payload=bytes(json.dumps(record), 'utf-8'))['Payload'].read().decode('utf-8'))
+                            if is_valid:
+                                connection_config = s3.Object(os.environ['bucket'],'connection/{}/config.json'.format(connection)).get()['Body'].read().decode('utf-8')
+                                mask_map = connection_config.get('mask', {})
+                                mask_map = mask_map.get(request_object['cf']['request']['method']) if request_object['cf']['request']['method'] in mask_map else mask_map.get('*', {})
+                                mask_map = mask_map.get(record['@type']) if record['@type'] in mask_map else mask_map.get('*', {})
+                                masked_record = {}
+                                constrained = True
+                                allowfields = []
+                                for mask_name, mask_args in mask_map.items():
+                                    if constrained:
+                                        mask_payload = {'purpose': 'mask', 'record': record, 'connection': connection_config, 'args': mask_args}
+                                        allowfields.extend(json.loads(lambda_client.invoke(FunctionName=mask, InvocationType='RequestResponse', Payload=bytes(json.dumps(mask_payload), 'utf-8'))['Payload'].read().decode('utf-8')))
+                                        if '*' in allowfields:
+                                            constrained = False
+                                            break
+                                    else:
+                                        break
+                                if constrained:
+                                    for field in allowfields:
+                                        if field in record:
+                                            masked_record[field] = record[field]
+                                else:
+                                    masked_record = {**record}
+                                if masked_record:
+                                    try:
+                                        current_record = s3.Object(os.environ['bucket'],'record/{record_type}/{record_id}.json'.format(record_type=record_type, record_id=record_id)).get()['Body'].read().decode('utf-8')
+                                    except:
+                                        current_record = {}
+                                    canwrite = bool(current_record) if request_object['cf']['request']['method'] == 'PATCH' else True
+                                    if canwrite:
+                                        if not constrained and request_object['cf']['request']['method'] == 'PUT':
+                                            record_to_write = {**masked_record}
+                                        else:
+                                            record_to_write = {**current_record, **masked_record}
+                                    if record_to_write:
+                                        lambda_client.invoke(FunctionName='record-write', InvocationType='Event', Payload=bytes(json.dumps(record_to_write), 'utf-8'))
+                                    counter = counter + 1
+                            
+
                         
                     
-                    connection, area, record_type, record_id = path[1:]
-                    if area == 'record' and uuid_valid(connection) and uuid_valid(record_id):
-                        is_valid = record['@type'].lower() == record_type.lower() and record['@id'].lower() == record_id.lower() and json.loads(lambda_client.invoke(FunctionName='record-validate', 
-                            InvocationType='RequestResponse', Payload=bytes(json.dumps(record), 'utf-8'))['Payload'].read().decode('utf-8'))
-                        if is_valid:
-                            connection_config = s3.Object(os.environ['bucket'],'connection/{}/config.json'.format(connection)).get()['Body'].read().decode('utf-8')
-                            mask_map = connection_config.get('mask', {})
-                            mask_map = mask_map.get(request_object['cf']['request']['method']) if request_object['cf']['request']['method'] in mask_map else mask_map.get('*', {})
-                            mask_map = mask_map.get(record['@type']) if record['@type'] in mask_map else mask_map.get('*', {})
-                            masked_record = {}
-                            constrained = True
-                            allowfields = []
-                            for mask_name, mask_args in mask_map.items():
-                                if constrained:
-                                    mask_payload = {'purpose': 'mask', 'record': record, 'connection': connection_config, 'args': mask_args}
-                                    allowfields.extend(json.loads(lambda_client.invoke(FunctionName=mask, InvocationType='RequestResponse', Payload=bytes(json.dumps(mask_payload), 'utf-8'))['Payload'].read().decode('utf-8')))
-                                    if '*' in allowfields:
-                                        constrained = False
-                                        break
-                                else:
-                                    break
-                            if constrained:
-                                for field in allowfields:
-                                    if field in record:
-                                        masked_record[field] = record[field]
-                            else:
-                                masked_record = {**record}
-                            if masked_record:
-                                try:
-                                    current_record = s3.Object(os.environ['bucket'],'record/{record_type}/{record_id}.json'.format(record_type=record_type, record_id=record_id)).get()['Body'].read().decode('utf-8')
-                                except:
-                                    current_record = {}
-                                canwrite = bool(current_record) if request_object['cf']['request']['method'] == 'PATCH' else True
-                                if canwrite:
-                                    if not constrained and request_object['cf']['request']['method'] == 'PUT':
-                                        record_to_write = {**masked_record}
-                                    else:
-                                        record_to_write = {**current_record, **masked_record}
-                                if record_to_write:
-                                    lambda_client.invoke(FunctionName='record-write', InvocationType='Event', Payload=bytes(json.dumps(record_to_write), 'utf-8'))
-                                counter = counter + 1
-        except:
-            pass
     return counter
 
 
