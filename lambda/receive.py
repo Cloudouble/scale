@@ -107,6 +107,7 @@ def main(event, context):
                                     masked_entity = {**entity}
                                 if masked_entity:
                                     try:
+                                        # nuance required
                                         current_entity = s3.Object(os.environ['bucket'],'{entity_type}/{record_type}/{entity_id}.{view_handle}'.format(**switches)).get()['Body'].read().decode('utf-8')
                                     except:
                                         current_entity = {}
@@ -117,7 +118,7 @@ def main(event, context):
                                         else:
                                             entity_to_write = {**current_entity, **masked_entity}
                                     if entity_to_write:
-                                        lambda_client.invoke(FunctionName='entity-write', InvocationType='Event', Payload=bytes(json.dumps(entity_to_write), 'utf-8'))
+                                        lambda_client.invoke(FunctionName='write', InvocationType='Event', Payload=bytes(json.dumps(entity_to_write), 'utf-8'))
                                     counter = counter + 1
         except:
             pass

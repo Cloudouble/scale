@@ -1,3 +1,5 @@
+# expand to handle writing of any kind of entity
+
 import json, boto3, os
 
 def main(record, context):
