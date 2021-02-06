@@ -83,20 +83,13 @@ def main(event, context):
                         elif request_object['method'] == 'DELETE':
                             asset_object.delete()
             else:
-                entity_type, class_name, entity_id, record_field, sort_field, min_index, max_index = (path[2:5] + ([None] * 4))
+                entity_type, class_name, entity_id, record_field = (path[2:5] + [None])
                 if len(path) == 5:
                     entity_id, view_handle = (entity_id.split('.', 1) + ['json'])[:2]
                 elif len(path) == 6:
                     record_field, view_handle = (path[5].split('.', 1) + ['json'])[:2]
-                elif len(path) == 7: 
-                    sort_field = path[5]
-                    index_range, view_handle =  (path[5].split('.', 1) + ['json'])[:2]
-                    min_index, max_index = (index_range.split('-', 1) + ['1000'])[:2]
-                    min_index = int(min_index) if str(min_index).isnumeric() else 0
-                    max_index = int(max_index) if str(max_index).isnumeric() else 0
-                    max_index = max_index if max_index > min_index else min_index + 1000
-                switches = {'purpose': 'mask', 'entity_type': entity_type, 'class_name': class_name, 'entity_id': entity_id, 
-                        'record_field': record_field, 'view_handle': view_handle, 'sort_field': sort_field, 'min_index': min_index, 'max_index': max_index}
+                    entity = {record_field: entity}
+                switches = {'purpose': 'mask', 'entity_type': entity_type, 'class_name': class_name, 'entity_id': entity_id}
                 if request_object['method'] in ['POST', 'PUT', 'PATCH']:
                     if json.loads(lambda_client.invoke(FunctionName='validate', Payload=bytes(json.dumps({'entity': entity, 'switches': switches}), 'utf-8'))['Payload'].read().decode('utf-8')):
                         mask = connection_record.get('mask', {})
@@ -124,9 +117,6 @@ def main(event, context):
                             masked_entity = {**entity}
                         if masked_entity:
                             try:
-                                #  entity_type/class_name/entity_id.view
-                                # if record_field => construct the record patch
-                                # 
                                 current_entity = s3.Object(os.environ['bucket'],'{entity_type}/{class_name}/{entity_id}.{view_handle}'.format(**switches)).get()['Body'].read().decode('utf-8')
                             except:
                                 current_entity = {}
@@ -158,6 +148,12 @@ def main(event, context):
      - DELETE - immediately removes the asset at /asset/{asset_path}.json
      
 
+6 -- /connection/{connection_id}/record/{class_name}/{record_id}/{record_field}.{view_id}
+    - PUT/POST/PATCH - .json view only, updates /record/{class_name}/{record_id}[record_field]
+        - PATCH only if record already exists
+    - DELETE - removes this field, .json view only
+
+
 5 -- /connection/{connection_id}/query/{class_name}/{query_id}.json 
     - PUT/POST/PATCH - accepts an object {processor, options, vectors}, overlays onto /query/{class_name}/{query_id}.json
         - PUT only if not exists
@@ -167,10 +163,6 @@ def main(event, context):
     - GET - return {processor, options, vectors, count}
     
 
-7 -- /connection/{connection_id}/query/{class_name}/{query_id}/{sort_field}/{min_index}-{max_index}.{view_id} 
-    - GET - return the query results formatted into the chosen view, masked by the connection mask
-
-
 5 -- /connection/{connection_id}/record/{class_name}/{record_id}.{view_id}
     - PUT/POST/PATCH - .json view only, overlays /record/{class_name}/{record_id}.json
         - PUT - replaces completely
@@ -178,13 +170,6 @@ def main(event, context):
         - PATCH overlays only if already exists
     - DELETE - removes this record, .json view only
     - GET - return the record formatted into the chosen view, masked by the connection mask
-
-
-6 -- /connection/{connection_id}/record/{class_name}/{record_id}/{record_field}.{view_id}
-    - PUT/POST/PATCH - .json view only, updates /record/{class_name}/{record_id}[record_field]
-        - PATCH only if record already exists
-    - DELETE - removes this field, .json view only
-    - GET - return the record field formatted into the chosen view, masked by the connection mask
 
 
 5 -- /connection/{connection_id}/subscription/{class_name}/{query_id|record_id}.json
