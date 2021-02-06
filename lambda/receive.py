@@ -78,7 +78,10 @@ def main(event, context):
                         except:
                             canwrite = False
                     if canwrite:
-                        asset_object.put(Body=bytes(body, 'utf-8'))
+                        if request_object['method'] in ['PUT', 'POST', 'PATCH']:
+                            asset_object.put(Body=bytes(body, 'utf-8'))
+                        elif request_object['method'] == 'DELETE':
+                            asset_object.delete()
             else:
                 entity_type, class_name, entity_id, record_field, sort_field, min_index, max_index = (path[2:5] + ([None] * 4))
                 if len(path) == 5:
@@ -147,6 +150,14 @@ def main(event, context):
      - DELETE - immediately removes the connection object 
 
 
+** 4+ -- /connection/{connection_id}/asset/{asset_path} (path[2] == 'asset')
+     - PUT/POST/PATCH - directly writes object verbatum to /asset/{asset_path}, uses given contentType
+        - PUT only if not already exists
+        - POST if exists or not exists
+        - PATCH - only if already exists
+     - DELETE - immediately removes the asset at /asset/{asset_path}.json
+     
+
 5 -- /connection/{connection_id}/query/{class_name}/{query_id}.json 
     - PUT/POST/PATCH - accepts an object {processor, options, vectors}, overlays onto /query/{class_name}/{query_id}.json
         - PUT only if not exists
@@ -190,14 +201,6 @@ def main(event, context):
     - DELETE - removes /view/{class_name}/{view_id}.json
     - GET - return {processor, options, assets}
 
-
-4+ -- /connection/{connection_id}/asset/{asset_path} (path[2] == 'asset')
-     - PUT/POST/PATCH - directly writes object verbatum to /asset/{asset_path}, uses given contentType
-        - PUT only if not already exists
-        - POST if exists or not exists
-        - PATCH - only if already exists
-     - DELETE - immediately removes the asset at /asset/{asset_path}.json
-     
 
 5 -- /connection/{connection_id_1}/administrator/connection/{connection_id_2}.json 
      - PUT/POST/PATCH - directly writes object containing a mask property to the connection record at /connection/{connection_id_2}.json
