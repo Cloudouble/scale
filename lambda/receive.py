@@ -87,8 +87,9 @@ def main(event, context):
             elif len(path) >= 5:
                 entity_type, class_name, entity_id, record_field = (path[2:5] + [None])
                 switches = {'entity_type': entity_type, 'class_name': class_name, 'entity_id': entity_id}
+                entity_key = '_/{entity_type}/{class_name}/{entity_id}.json'.format(**switches)
                 try:
-                    current_entity = s3.Object(os.environ['bucket'],'_/{entity_type}/{class_name}/{entity_id}.json'.format(**switches)).get()['Body'].read().decode('utf-8')
+                    current_entity = s3.Object(os.environ['bucket'], entity_key).get()['Body'].read().decode('utf-8')
                 except:
                     current_entity = {}
                 if len(path) == 5:
@@ -141,17 +142,18 @@ def main(event, context):
                             else:
                                 entity_to_write = {**current_entity, **masked_entity}
                         if entity_to_write:
-                            if entity_type in ['query', 'record']:
-                                
-                                updated_fields = [f for f in entity if entity[f] != current_entity.get(f)]
-                                put_response = bucket.put_object(Body=bytes(json.dumps(entity_to_write), 'utf-8'), Key=record_key, ContentType='application/json')
-                                record_versions_key = 'version/{record_type}/{record_id}/{version_id}.json'.format(record_type=record['@type'], record_id=record['@id'], version_id=put_response['VersionId'])
-                                bucket.put_object(Body=bytes(json.dumps(updated_fields), 'utf-8'), Key=record_versions_key, ContentType='application/json')
+                            if request_object['method'] in ['PUT', 'POST', 'PATCH']:
+                                if entity_type in ['query', 'record']:
+                                    updated_fields = [f for f in entity if entity[f] != current_entity.get(f)]
+                                    put_response = bucket.put_object(Body=bytes(json.dumps(entity_to_write), 'utf-8'), Key=entity_key, ContentType='application/json')
+                                    if entity_type == 'record':
+                                        record_version_key = '_/version/{class_name}/{record_id}/{version_id}.json'.format(class_name=entity['@type'], record_id=entity['@id'], version_id=put_response['VersionId'])
+                                        bucket.put_object(Body=bytes(json.dumps(updated_fields), 'utf-8'), Key=record_version_key, ContentType='application/json')
                             
-                            
-                            
-                            #lambda_client.invoke(FunctionName='write', InvocationType='Event', Payload=bytes(json.dumps(entity_to_write), 'utf-8'))
-                        counter = counter + 1
+                            elif request_object['method'] == 'DELETE' and current_entity
+                                if entity_type in ['query', 'record']:
+                                    current_entity.delete()
+                            counter = counter + 1
 
     return counter
 
@@ -177,7 +179,7 @@ def main(event, context):
     - DELETE - removes this field
 
 
-5 -- /_/connection/{connection_id}/query/{class_name}/{query_id}.json 
+** 5 -- /_/connection/{connection_id}/query/{class_name}/{query_id}.json 
     - PUT/POST/PATCH - accepts an object {processor, options, vectors}, overlays onto /_/query/{class_name}/{query_id}.json
         - PUT - replaces completely
         - POST - overlays or creates
@@ -187,7 +189,7 @@ def main(event, context):
     ** triggers re-building of all indexes of this query
     
 
-5 -- /_/connection/{connection_id}/record/{class_name}/{record_id}.json
+** 5 -- /_/connection/{connection_id}/record/{class_name}/{record_id}.json
     - PUT/POST/PATCH - overlays /_/record/{class_name}/{record_id}.json
         - PUT - replaces completely
         - POST - overlays or creates
