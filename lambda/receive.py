@@ -33,10 +33,10 @@ def main(event, context):
             entity = json.loads(body)
         except: 
             entity = {k: v[0] for k, v in parse_qs(body).items()}
-        path = request_object['uri'].strip('/?').removesuffix('.json').split('/')
-        if path and path[0] == 'connection' and len(path) in [2,5,6] and uuid_valid(path[1]):
+        path = request_object['uri'].strip('/?').removeprefix('_/').removesuffix('.json').split('/')
+        if path and path[0] == 'connection' and len(path) >= 2 and uuid_valid(path[1]):
             connection_id = path[1]
-            connection_object = bucket.Object('connection/{connection}.json'.format(connection=connection_id))
+            connection_object = bucket.Object('_/connection/{connection}.json'.format(connection=connection_id))
             try:
                 connection_record = connection_object.get()['Body'].read().decode('utf-8')
             except:
@@ -45,14 +45,14 @@ def main(event, context):
                 # a new connection or connection extension (PUT / POST / PATCH), or connection immediate expiration (DELETE)
                 if request_object['method'] in ['POST', 'PUT', 'PATCH']:
                     if entity and type(entity) is dict:
-                        connection_record['mask'] = json.loads(lambda_client.invoke(FunctionName='authenticate', InvocationType='RequestResponse', Payload=bytes(json.dumps(entity), 'utf-8'))['Payload'].read().decode('utf-8'))
+                        connection_record = {**connection_record, **json.loads(lambda_client.invoke(FunctionName='authenticate', InvocationType='RequestResponse', Payload=bytes(json.dumps(entity), 'utf-8'))['Payload'].read().decode('utf-8'))}
                     connection_object.put(Body=bytes(json.dumps(connection_record), 'utf-8'), ContentType='application/json')
                 elif request_object['method'] == 'DELETE':
                     try:
                         connection_object.delete()
                     except:
                         pass
-            elif len(path) >= 4 and path[2] == 'asset':
+            elif len(path) >= 4 and path[2] in ['asset', 'static']:
                 constrained = True
                 assetpath = path[3:]
                 mask = connection_record.get('mask', {})
@@ -67,129 +67,149 @@ def main(event, context):
                     allowed = True
                 elif type(mask) is dict:
                     allowed = all([json.loads(lambda_client.invoke(FunctionName=mask_name, Payload=bytes(json.dumps({
-                        'purpose': 'mask', 'connection': {**connection_record, **{'@id': connection_id}}, 'assetpath': assetpath, 'options': options}), 'utf-8'))['Payload'].read().decode('utf-8')) 
+                        'purpose': 'mask', 'connection': {**connection_record, **{'@id': connection_id}}, '{}path'.format(path[2]): assetpath, 'options': options}), 'utf-8'))['Payload'].read().decode('utf-8')) 
                         for mask_name, options in mask.items()])
-                if allowed:        
-                    asset_object = bucket.Object('asset/{}'.format('/'.join(assetpath)))
+                if path[2] == 'static' and assetpath[0] == '_':
+                    allowed = False
+                if allowed:
+                    the_object = bucket.Object('_/asset/{}'.format('/'.join(assetpath))) if path[2] == 'asset' else bucket.Object('/'.join(assetpath))
                     canwrite = True
                     if request_object['method'] == 'PATCH':
                         try:
-                            asset_object.get()['Body'].read()
+                            the_object.get()['Body'].read()
                         except:
                             canwrite = False
                     if canwrite:
                         if request_object['method'] in ['PUT', 'POST', 'PATCH']:
-                            asset_object.put(Body=bytes(body, 'utf-8'))
+                            the_object.put(Body=bytes(body, 'utf-8'))
                         elif request_object['method'] == 'DELETE':
-                            asset_object.delete()
-            else:
+                            the_object.delete()
+            elif len(path) >= 5:
                 entity_type, class_name, entity_id, record_field = (path[2:5] + [None])
+                switches = {'entity_type': entity_type, 'class_name': class_name, 'entity_id': entity_id}
+                try:
+                    current_entity = s3.Object(os.environ['bucket'],'_/{entity_type}/{class_name}/{entity_id}.json'.format(**switches)).get()['Body'].read().decode('utf-8')
+                except:
+                    current_entity = {}
                 if len(path) == 5:
                     entity_id, view_handle = (entity_id.split('.', 1) + ['json'])[:2]
                 elif len(path) == 6:
                     record_field, view_handle = (path[5].split('.', 1) + ['json'])[:2]
-                    entity = {record_field: entity}
-                switches = {'purpose': 'mask', 'entity_type': entity_type, 'class_name': class_name, 'entity_id': entity_id}
-                if request_object['method'] in ['POST', 'PUT', 'PATCH']:
-                    if json.loads(lambda_client.invoke(FunctionName='validate', Payload=bytes(json.dumps({'entity': entity, 'switches': switches}), 'utf-8'))['Payload'].read().decode('utf-8')):
-                        mask = connection_record.get('mask', {})
-                        mask = mask.get(entity_type) if entity_type in mask else mask.get('*', {})
-                        mask = mask.get(request_object['method']) if request_object['method'] in mask else mask.get('*', {})
-                        mask = mask.get(class_name) if class_name in mask else mask.get('*', {})
-                        masked_entity = {}
-                        constrained = True
-                        allowfields = []
-                        for mask_name, options in mask.items():
-                            options = options if type(options) is dict else {}
-                            if constrained:
-                                mask_payload = {'entity': entity, 'connection': {**connection_record, **{'@id': connection_id}}, 'switches': switches, 'options': options}
-                                allowfields.extend(json.loads(lambda_client.invoke(FunctionName=mask_name, Payload=bytes(json.dumps(mask_payload), 'utf-8'))['Payload'].read().decode('utf-8')))
-                                if '*' in allowfields:
-                                    constrained = False
-                                    break
+                    if request_object['method'] in ['POST', 'PUT']:
+                        entity = {record_field: entity}
+                        request_object['method'] = 'POST'
+                    elif request_object['method'] in ['DELETE', 'PATCH']:
+                        if request_object['method'] == 'PATCH':
+                            if current_entity:
+                                entity = {record_field: entity}
+                                request_object['method'] = 'POST'
                             else:
-                                break
+                                entity = {} 
+                        elif request_object['method'] == 'DELETE':
+                            entity = current_entity
+                            del entity[record_field]
+                            request_object['method'] = 'PUT'
+                if view_handle == 'json' and request_object['method'] in ['POST', 'PUT', 'PATCH'] and json.loads(lambda_client.invoke(FunctionName='validate', Payload=bytes(json.dumps({'entity': entity, 'switches': switches}), 'utf-8'))['Payload'].read().decode('utf-8')):
+                    mask = connection_record.get('mask', {})
+                    mask = mask.get(entity_type) if entity_type in mask else mask.get('*', {})
+                    mask = mask.get(request_object['method']) if request_object['method'] in mask else mask.get('*', {})
+                    mask = mask.get(class_name) if class_name in mask else mask.get('*', {})
+                    masked_entity = {}
+                    constrained = True
+                    allowfields = []
+                    for mask_name, options in mask.items():
+                        options = options if type(options) is dict else {}
                         if constrained:
-                            for field in allowfields:
-                                if field in entity:
-                                    masked_entity[field] = entity[field]
+                            mask_payload = {'purpose': 'mask', 'entity': entity, 'connection': {**connection_record, **{'@id': connection_id}}, 'switches': switches, 'options': options}
+                            allowfields.extend(json.loads(lambda_client.invoke(FunctionName=mask_name, Payload=bytes(json.dumps(mask_payload), 'utf-8'))['Payload'].read().decode('utf-8')))
+                            if '*' in allowfields:
+                                constrained = False
+                                break
                         else:
-                            masked_entity = {**entity}
-                        if masked_entity:
-                            try:
-                                current_entity = s3.Object(os.environ['bucket'],'{entity_type}/{class_name}/{entity_id}.{view_handle}'.format(**switches)).get()['Body'].read().decode('utf-8')
-                            except:
-                                current_entity = {}
-                            canwrite = bool(current_entity) if request_object['method'] == 'PATCH' else True
-                            if canwrite:
-                                if not constrained and request_object['method'] == 'PUT':
-                                    entity_to_write = {**masked_entity}
-                                else:
-                                    entity_to_write = {**current_entity, **masked_entity}
-                            if entity_to_write:
-                                lambda_client.invoke(FunctionName='write', InvocationType='Event', Payload=bytes(json.dumps(entity_to_write), 'utf-8'))
-                            counter = counter + 1
+                            break
+                    if constrained:
+                        for field in allowfields:
+                            if field in entity:
+                                masked_entity[field] = entity[field]
+                    else:
+                        masked_entity = {**entity}
+                    if masked_entity:
+                        canwrite = bool(current_entity) if request_object['method'] == 'PATCH' else True
+                        if canwrite:
+                            if not constrained and request_object['method'] == 'PUT':
+                                entity_to_write = {**masked_entity}
+                            else:
+                                entity_to_write = {**current_entity, **masked_entity}
+                        if entity_to_write:
+                            if entity_type in ['query', 'record']:
+                                
+                                updated_fields = [f for f in entity if entity[f] != current_entity.get(f)]
+                                put_response = bucket.put_object(Body=bytes(json.dumps(entity_to_write), 'utf-8'), Key=record_key, ContentType='application/json')
+                                record_versions_key = 'version/{record_type}/{record_id}/{version_id}.json'.format(record_type=record['@type'], record_id=record['@id'], version_id=put_response['VersionId'])
+                                bucket.put_object(Body=bytes(json.dumps(updated_fields), 'utf-8'), Key=record_versions_key, ContentType='application/json')
+                            
+                            
+                            
+                            #lambda_client.invoke(FunctionName='write', InvocationType='Event', Payload=bytes(json.dumps(entity_to_write), 'utf-8'))
+                        counter = counter + 1
 
     return counter
 
 
 '''
 
-** 2 -- /connection/{connection_id}.json 
+** 2 -- /_/connection/{connection_id}.json 
      - PUT/POST/PATCH - accepts an object containing authentication data, writes object containing a mask property generated by the authentication processor
      - DELETE - immediately removes the connection object 
 
 
-** 4+ -- /connection/{connection_id}/asset/{asset_path} (path[2] == 'asset')
-     - PUT/POST/PATCH - directly writes object verbatum to /asset/{asset_path}, uses given contentType
+** 4+ -- /_/connection/{connection_id}/asset/{asset_path} (path[2] == 'asset')
+     - PUT/POST/PATCH - directly writes object verbatum to /_/asset/{asset_path}, uses given contentType
         - PUT only if not already exists
         - POST if exists or not exists
         - PATCH - only if already exists
      - DELETE - immediately removes the asset at /asset/{asset_path}.json
      
 
-6 -- /connection/{connection_id}/record/{class_name}/{record_id}/{record_field}.{view_id}
-    - PUT/POST/PATCH - .json view only, updates /record/{class_name}/{record_id}[record_field]
+** 6 -- /_/connection/{connection_id}/record/{class_name}/{record_id}/{record_field}.json
+    - PUT/POST/PATCH - updates /_/record/{class_name}/{record_id}[record_field]
         - PATCH only if record already exists
-    - DELETE - removes this field, .json view only
+    - DELETE - removes this field
 
 
-5 -- /connection/{connection_id}/query/{class_name}/{query_id}.json 
-    - PUT/POST/PATCH - accepts an object {processor, options, vectors}, overlays onto /query/{class_name}/{query_id}.json
-        - PUT only if not exists
-        - POST if not exist or if exists, overlays
-        - PATCH only if exists
-    - DELETE - removes /query/{class_name}/{query_id}.json
-    - GET - return {processor, options, vectors, count}
-    
-
-5 -- /connection/{connection_id}/record/{class_name}/{record_id}.{view_id}
-    - PUT/POST/PATCH - .json view only, overlays /record/{class_name}/{record_id}.json
+5 -- /_/connection/{connection_id}/query/{class_name}/{query_id}.json 
+    - PUT/POST/PATCH - accepts an object {processor, options, vectors}, overlays onto /_/query/{class_name}/{query_id}.json
         - PUT - replaces completely
         - POST - overlays or creates
         - PATCH overlays only if already exists
-    - DELETE - removes this record, .json view only
+    - DELETE - removes /_/query/{class_name}/{query_id}.json
+    - GET - return {processor, options, vectors, count}
+    ** triggers re-building of all indexes of this query
+    
+
+5 -- /_/connection/{connection_id}/record/{class_name}/{record_id}.json
+    - PUT/POST/PATCH - overlays /_/record/{class_name}/{record_id}.json
+        - PUT - replaces completely
+        - POST - overlays or creates
+        - PATCH overlays only if already exists
+    - DELETE - removes this record
     - GET - return the record formatted into the chosen view, masked by the connection mask
+    ** triggers re-building of related query indexes
 
 
-5 -- /connection/{connection_id}/subscription/{class_name}/{query_id|record_id}.json
-    - PUT/POST/PATCH - body is ignored, connection_id is added to /subscription/{class_name}/{query_id|record_id}.json (which is a [])
-    - GET - true/false if present in [] /subscription/{class_name}/{query_id|record_id}.json
-    - DELETE - connection_id is removed from /subscription/{class_name}/{query_id|record_id}.json
+5 -- /_/connection/{connection_id}/feed/{class_name}/{query_id|record_id}.json
+    - PUT/POST/PATCH - {expires, max, next, last, count}, connection_id is added to /_/feed/{class_name}/{query_id|record_id}.json (which is a {})
+    - GET - {feed connection options object} if connection_id present in {} /_/feed/{class_name}/{query_id|record_id}.json
+    - DELETE - connection_id is removed from /_/feed/{class_name}/{query_id|record_id}.json
 
 
-5 -- /connection/{connection_id}/view/{class_name}/{view_id}.json
-    - PUT/POST/PATCH - accepts an object {processor, options, assets}, overlays onto /view/{class_name}/{view_id}.json
+5 -- /_/connection/{connection_id}/view/{class_name}/{view_id}.json
+    - PUT/POST/PATCH - accepts an object {processor, options, assets}, overlays onto /_/view/{class_name}/{view_id}.json
         - PUT only if not exists
         - POST if not exist or if exists, overlays
         - PATCH only if exists
-    - DELETE - removes /view/{class_name}/{view_id}.json
+    - DELETE - removes /_/view/{class_name}/{view_id}.json
     - GET - return {processor, options, assets}
-
-
-5 -- /connection/{connection_id_1}/administrator/connection/{connection_id_2}.json 
-     - PUT/POST/PATCH - directly writes object containing a mask property to the connection record at /connection/{connection_id_2}.json
-     - DELETE - immediately removes the connection object at /connection/{connection_id_2}.json
-
+    ** triggers rebuilding of compiled views
 
 '''
