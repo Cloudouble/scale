@@ -162,8 +162,7 @@ def main(event, context):
      - DELETE - immediately removes the connection object 
      ** remove connection from feeds 
      ** calculate views for this connection
-     * /_/connection/{connection_id}/feed.json => { class_name: { query_id|record_id: true } }
-     
+
 
 ** 4+ -- /_/connection/{connection_id}/asset/{asset_path} (path[2] == 'asset' | 'static')
      - PUT/POST/PATCH - directly writes object verbatum to /_/asset/{asset_path}, uses given contentType
