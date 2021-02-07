@@ -7,9 +7,28 @@ def main(event_data, context):
     s3_client = boto3.client('s3')
     lambda_client = boto3.client('lambda')
     counter = 0
+    vectors_to_update = {}
     for event in event_data['Records']:
         path = event['s3']['object']['key'].strip('/?').removeprefix('_').removesuffix('.json').strip('/').split('/')
         class_name, query_id = path[1:3]
+        query_data = json.loads(bucket.get_object(Key=event['s3']['object']['key'])['Body'].read().decode('utf-8'))
+        vector_base_key = '_/vector/{class_name}/'.format(class_name=class_name)
+        vector_list_response = s3_client.list_objects_v2(Bucket=os.environ['bucket'], Prefix=vector_base_key)
+        for vector_listing in vector_list_response['Contents']:
+            field_name = vector_listing['Key'].strip('/').removeprefix('_').removesuffix('.json').strip('/').split()[2]
+            if vector_listing['Key'] in vectors_to_update:
+                vector_queries = vectors_to_update[vector_listing['Key']]
+            else:
+                vector_obj = bucket.Object(vector_listing['Key'])
+                vector_queries = json.loads(vector_obj.get()['Body'].read().decode('utf-8'))
+            if query_id in vector_queries and field_name not in query_data['vectors']:
+                vector_queries.remove(query_id).sort()
+            elif query_id not in vector_queries and field_name in query_data['vectors']:
+                vector_queries.append(query_id).sort()
+            vectors_to_update[vector_listing['Key']] = vector_queries
+    for key, vectors_queries in vectors_to_update.items():
+        vector_obj.put(Body=bytes(json.dumps(vector_queries), 'utf-8'))
+    for event in event_data['Records']:
         record_base_key = '_/record/{class_name}/'.format(class_name=class_name)
         record_list_response = s3_client.list_objects_v2(Bucket=os.environ['bucket'], Prefix=record_base_key)
         for key_obj in record_list_response['Contents']:
