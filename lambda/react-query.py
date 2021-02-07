@@ -26,6 +26,14 @@ def main(event_data, context):
             elif query_id not in vector_queries and field_name in query_data['vectors']:
                 vector_queries.append(query_id).sort()
             vectors_to_update[vector_listing['Key']] = vector_queries
+        for field_name in query_data.get('vectors', []):
+            vector_key = '_/vector/{class_name}/{field_name}.json'.format(class_name=class_name, field_name=field_name)
+            if vector_key not in vectors_to_update:
+                vector_obj = bucket.Object(vector_key)
+                vector_queries = json.loads(vector_obj.get()['Body'].read().decode('utf-8'))
+                if query_id not in vector_queries:
+                    vector_queries.append(query_id).sort()
+                    vectors_to_update[vector_key] = vector_queries
     for key, vectors_queries in vectors_to_update.items():
         vector_obj.put(Body=bytes(json.dumps(vector_queries), 'utf-8'))
     for event in event_data['Records']:
