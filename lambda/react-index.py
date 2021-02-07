@@ -27,23 +27,7 @@ def main(event, context):
                 if feed_data.get('next') and feed_data.get('next') > now:
                     ready = False
                 if active and ready and feed_data.get('views'):
-                    for view in feed_data['views']:
-                        view['sort_field'] = view.get('sort_field', '@id')
-                        view['sort_direction'] = view['sort_direction'] if view.get('sort_direction') in ['ascending', 'descending'] else 'ascending'
-                        view['min_index'] = view.get('min_index', 0)
-                        try:
-                            view['min_index'] = int(view['min_index'])
-                        except:
-                            view['min_index'] = 0
-                        view['max_index'] = view.get('max_index', 1000)
-                        try:
-                            view['max_index'] = int(view['max_index'])
-                        except:
-                            view['max_index'] = 1000
-                        if view['max_index'] <= view['min_index']:
-                            view['max_index'] = view['min_index'] + 1
-                        view['view_id'] = view.get('view_id', 'json')
-                        lambda_client.invoke(FunctionName='view', InvocationType='Event', Payload=bytes(json.dumps({
-                            'connection_id': feed_connection_id, 'class_name': class_name, 'query_id': query_id, **view}), 'utf-8'))
-                        counter = counter + 1
+                    lambda_client.invoke(FunctionName='view', InvocationType='Event', Payload=bytes(json.dumps({
+                        'connection_id': feed_connection_id, 'class_name': class_name, 'query_id': query_id, 'views': feed_data['views']}), 'utf-8'))
+                    counter = counter + 1
     return counter
