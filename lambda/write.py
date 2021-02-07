@@ -208,7 +208,7 @@ def main(event, context):
 
 
 ** 5 -- /_/connection/{connection_id}/feed/{class_name}/{query_id|record_id}.json
-    - PUT/POST/PATCH - {expires, max, next, last, count}, connection_id is written to /_/feed/{class_name}/{query_id|record_id}/{connection_id}.json (which is a {})
+    - PUT/POST/PATCH - {expires, max, next, last, count, view}, connection_id is written to /_/feed/{class_name}/{query_id|record_id}/{connection_id}.json (which is a {})
     - GET - {feed connection options object} if connection_id present at /_/feed/{class_name}/{query_id|record_id}/{connection_id}.json
     - DELETE - connection_id is removed from /_/feed/{class_name}/{query_id|record_id}/{connection_id}.json
     ** calculate affected views

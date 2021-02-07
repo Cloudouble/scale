@@ -23,5 +23,3 @@ def main(event, context):
             for query_id in query_list:
                 lambda_client.invoke(FunctionName='query-record', InvocationType='Event', Payload=bytes(json.dumps({'query': query_id, 'record': record_data}), 'utf-8'))
     return counter
-    
-    
