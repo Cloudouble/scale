@@ -47,7 +47,8 @@ FUNCTIONS
     
 * clean.py 
     - triggered on-demand by an administrator
-    - runs validation over every record in the system and alters them if found invalid
+    - schema-enforce: runs validation over every record in the system and moves them to /trash/record/{record_id}.json if found invalid
+    - delete-marker-tidy: removes version objects related to deleted records
 
 
 * write.py
