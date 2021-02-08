@@ -57,8 +57,8 @@ def main(event, context):
                 allowed = json.loads(lambda_client.invoke(FunctionName='mask', Payload=bytes(json.dumps({
                     'connection_id': connection_id, 
                     'entity_type': path[2], 
-                    'path': usable_path,
-                    'method': request_object['method']
+                    'method': request_object['method'], 
+                    'path': usable_path
                 }), 'utf-8'))['Payload'].read().decode('utf-8'))
                 if allowed:
                     the_object = bucket.Object('_/asset/{}'.format('/'.join(usable_path))) if path[2] == 'asset' else bucket.Object('/'.join(usable_path))
@@ -100,29 +100,17 @@ def main(event, context):
                             del entity[record_field]
                             request_object['method'] = 'PUT'
                 if view_handle == 'json' and request_object['method'] in ['POST', 'PUT', 'PATCH'] and json.loads(lambda_client.invoke(FunctionName='validate', Payload=bytes(json.dumps({'entity': entity, 'switches': switches}), 'utf-8'))['Payload'].read().decode('utf-8')):
-                    mask = connection_record.get('mask', {})
-                    mask = mask.get(entity_type) if entity_type in mask else mask.get('*', {})
-                    mask = mask.get(request_object['method']) if request_object['method'] in mask else mask.get('*', {})
-                    mask = mask.get(class_name) if class_name in mask else mask.get('*', {})
-                    masked_entity = {}
-                    constrained = True
-                    allowfields = []
-                    for mask_name, options in mask.items():
-                        options = options if type(options) is dict else {}
-                        if constrained:
-                            mask_payload = {'purpose': 'mask', 'entity': entity, 'connection': {**connection_record, **{'@id': connection_id}}, 'switches': switches, 'options': options}
-                            allowfields.extend(json.loads(lambda_client.invoke(FunctionName=mask_name, Payload=bytes(json.dumps(mask_payload), 'utf-8'))['Payload'].read().decode('utf-8')))
-                            if '*' in allowfields:
-                                constrained = False
-                                break
-                        else:
-                            break
-                    if constrained:
-                        for field in allowfields:
-                            if field in entity:
-                                masked_entity[field] = entity[field]
-                    else:
-                        masked_entity = {**entity}
+                    # {connection_id, entity_type, method, class_name, entity_id, entity}
+                    masked_entity = json.loads(lambda_client.invoke(FunctionName='mask', Payload=bytes(json.dumps({
+                        'connection_id': connection_id, 
+                        'entity_type': path[2], 
+                        'method': request_object['method'],
+                        'class_name': class_name, 
+                        'entity_id': entity_id, 
+                        'entity': entity
+                    }), 'utf-8'))['Payload'].read().decode('utf-8'))
+                    constrained = masked_entity.get('__constrained', True)
+                    del masked_entity['__constrained']
                     if masked_entity:
                         canwrite = bool(current_entity) if request_object['method'] == 'PATCH' else True
                         if canwrite:

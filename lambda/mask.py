@@ -38,33 +38,34 @@ def main(event, context):
                                 'purpose': 'mask', 'connection_id': event['connection_id'], 'path': event['path'], 'options': options}), 'utf-8'))['Payload'].read().decode('utf-8')) 
                                 for mask_name, options in mask.items()])
                     return allowed
-                elif all([event.get(k) for k in ['method', 'class_name', 'entity_id', 'entity']]):
-                        s3 = boto3.resource('s3')
-                        bucket = s3.Bucket(os.environ['bucket'])
-                        lambda_client = boto3.client('lambda')
-                        switches = {'entity_type': event['entity_type'], 'method': event['method'], 'class_name': event['class_name'], 'entity_id': event['entity_id']}
-                        mask = connection_mask.get(switches['entity_type']) if switches['entity_type'] in connection_mask else connection_mask.get('*', {})
-                        mask = mask.get(switches['method']) if switches['method'] in mask else mask.get('*', {})
-                        mask = mask.get(switches['class_name']) if switches['class_name'] in mask else mask.get('*', {})
-                        masked_entity = {}
-                        entity = event['entity']
-                        constrained = True
-                        allowfields = []
-                        for mask_name, options in mask.items():
-                            options = options if type(options) is dict else {}
-                            if constrained:
-                                mask_payload = {'purpose': 'mask', 'entity': entity, 'connection_id': event['connection_id'], 'switches': switches, 'options': options}
-                                allowfields.extend(json.loads(lambda_client.invoke(FunctionName=mask_name, Payload=bytes(json.dumps(mask_payload), 'utf-8'))['Payload'].read().decode('utf-8')))
-                                if '*' in allowfields:
-                                    constrained = False
-                                    break
-                            else:
-                                break
+                elif all([event.get(k) for k in ['class_name', 'entity_id', 'entity']]):
+                    # event = {connection_id, entity_type, method, class_name, entity_id, entity}
+                    s3 = boto3.resource('s3')
+                    bucket = s3.Bucket(os.environ['bucket'])
+                    lambda_client = boto3.client('lambda')
+                    switches = {'entity_type': event['entity_type'], 'method': event['method'], 'class_name': event['class_name'], 'entity_id': event['entity_id']}
+                    mask = connection_mask.get(switches['entity_type']) if switches['entity_type'] in connection_mask else connection_mask.get('*', {})
+                    mask = mask.get(switches['method']) if switches['method'] in mask else mask.get('*', {})
+                    mask = mask.get(switches['class_name']) if switches['class_name'] in mask else mask.get('*', {})
+                    masked_entity = {}
+                    entity = event['entity']
+                    constrained = True
+                    allowfields = []
+                    for mask_name, options in mask.items():
+                        options = options if type(options) is dict else {}
                         if constrained:
-                            for field in allowfields:
-                                if field in entity:
-                                    masked_entity[field] = entity[field]
+                            mask_payload = {'purpose': 'mask', 'entity': entity, 'connection_id': event['connection_id'], 'switches': switches, 'options': options}
+                            allowfields.extend(json.loads(lambda_client.invoke(FunctionName=mask_name, Payload=bytes(json.dumps(mask_payload), 'utf-8'))['Payload'].read().decode('utf-8')))
+                            if '*' in allowfields:
+                                constrained = False
+                                break
                         else:
-                            masked_entity = {**entity}
+                            break
+                    if constrained:
+                        for field in allowfields:
+                            if field in entity:
+                                masked_entity[field] = entity[field]
+                    else:
+                        masked_entity = {**entity, '__constrained': constrained}
 
     return masked_entity
