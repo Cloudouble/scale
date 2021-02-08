@@ -66,6 +66,14 @@ LIFECYCLE
 * react-connection-record.py
     - triggered by new/updated/deleted objects in /connection/{connection_id}/record/{class_name}/{record_id}.json
     - updates the relevant /connection/{connection_id}/query/{class_name}/{query_id}/{index_initial}.json based on the new masked record
+    - uses /subscription/{class_name}/{record_id}/{connection_id}.json to find affected subscriptions for this connection and record
+    - trigger view.py for each affected subscription view 
+    
+* react-connection-index.py
+    - triggered by new/updated/deleted /connection/{connection_id}/query/{class_name}/{query_id}/{index_initial}.json
+    - uses /feed/{class_name}/{query_id}/{connection_id}.json to find affected feeds for this connection and query
+    - trigger view.py for each affected feed view
+
 
 -----
 
