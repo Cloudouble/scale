@@ -20,6 +20,7 @@ SYSTEM PATHS
 /view/{view_id}.json
 /system/{scope}/{module}.json
 
+/trash/record/{record_id}.json
 
 ---
 
@@ -38,7 +39,7 @@ CONNECTION PATHS
 ---
 
 
-LIFECYCLE
+FUNCTIONS
 
 * schema.py
     - triggered on-demand by an administrator
@@ -110,6 +111,10 @@ LIFECYCLE
     - uses /feed/{class_name}/{query_id}/{connection_id}.json to find affected views for this connection and query
     - trigger view.py for each affected feed view
 
+
+* valid.py
+        - triggered by clean.py
+        - validated the given record according to its datatype
 
 * query-record.py
     - triggered by react-query.py react-version.py

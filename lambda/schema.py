@@ -1,7 +1,8 @@
 import urllib.request, json, boto3, os
 
 def main(event, context):
-    # called on demand to update database schemas
+    # triggered on-demand by an administrator
+    # updates schema data to all system paths under /schema
     release = '11.01'
     feed = 'https://schema.org/version/{}/schemaorg-all-https.jsonld'.format(release)
     feed_response = urllib.request.urlopen(feed)
