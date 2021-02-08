@@ -18,7 +18,7 @@ SYSTEM PATHS
 /subscription/{class_name}/{record_id}/{connection_id}.json => each connection that is interested in this record has a subscription configuration object stored here
 
 /view/{view_id}.json
-/system/{module_id}.json
+/system/{scope}/{module}.json
 
 
 ---
@@ -33,7 +33,7 @@ CONNECTION PATHS
 /connection/{connection_id}/feed/{class_name}/{query_id}/{sort_field}/{min-index}-{max-index}.{view_id} => query data as rendered by the given view
 /connection/{connection_id}/subscription/{class_name}/{record_id}.{view_id} => record data as rendered by the given view 
 /connection/{connection_id}/subscription/{class_name}/{record_id}/{record_field}.{view_id} => record field data as rendered by the given view
-
+/connection/{connection_id}/system/{scope}/{module}.json
 
 ---
 
@@ -57,7 +57,7 @@ LIFECYCLE
     - writes/deletes a subscription configuration to /subscription/{class_name}/{record_id}/{connection_id}.json via /connection/{connection_id}/subscription/{class_name}/{record_id}.json OR 
     - writes/deletes a subscription configuration to /subscription/{class_name}/{record_id}/{connection_id}.json via /connection/{connection_id}/subscription/{class_name}/{record_id}/{field_name}.json OR 
     - writes/deletes a view configuration to /view/{view_id}.json via /connection/{connection_id}/view/{view_id}.json OR
-    - writes/deletes a system configuration to /system/{module_id}.json via /connection/{connection_id}/system/{module_id}.json OR
+    - writes/deletes a system module configuration to /system/{scope}/{module}.json via /connection/{connection_id}/system/{scope}/{module}.json OR
     - writes a record to /record/{class_name}/{record_id}.json
     - generates a version record at /version/{class_name}/{record_id}/{version_id}.json
 
@@ -123,6 +123,15 @@ LIFECYCLE
     - triggered by react-subscription.py, react-index.py
     - given a connection_id and a record, writes the masked version of the record to /connection/{connection_id}/record/{class_name}/{record_id}.json
     
+
+* extension-alias.py
+    - triggered by writes to 
+        /connection/{connection_id}/feed/{class_name}/{query_id}/{sort_field}/{min-index}-{max-index}.{view_id} AND
+        /connection/{connection_id}/subscription/{class_name}/{record_id}.{view_id} AND
+        /connection/{connection_id}/subscription/{class_name}/{record_id}/{record_field}.{view_id}
+        (match on the prefix /connection/ and the suffix .{view_id})
+    - if the intra-connection path matches an alias registered in /system/extension/alias.json then copy the object to the target path
+
 
 -----
 
