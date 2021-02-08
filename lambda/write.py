@@ -52,26 +52,16 @@ def main(event, context):
                     except:
                         pass
             elif len(path) >= 4 and path[2] in ['asset', 'static']:
-                constrained = True
-                assetpath = path[3:]
-                mask = connection_record.get('mask', {})
-                mask = mask.get('asset') if 'asset' in mask else mask.get('*', {})
-                mask = mask.get(request_object['method']) if request_object['method'] in mask else mask.get('*', {})
-                for p in assetpath:
-                    if mask:
-                        mask = mask.get(p) if p in mask else mask.get('*', {})
-                if not mask:
-                    allowed = False
-                elif mask == '*':
-                    allowed = True
-                elif type(mask) is dict:
-                    allowed = all([json.loads(lambda_client.invoke(FunctionName=mask_name, Payload=bytes(json.dumps({
-                        'purpose': 'mask', 'connection': {**connection_record, **{'@id': connection_id}}, '{}path'.format(path[2]): assetpath, 'options': options}), 'utf-8'))['Payload'].read().decode('utf-8')) 
-                        for mask_name, options in mask.items()])
-                if path[2] == 'static' and assetpath[0] == '_':
-                    allowed = False
+                # {connection_id, entity_type, path, method}
+                usable_path = path[3:]
+                allowed = json.loads(lambda_client.invoke(FunctionName='mask', Payload=bytes(json.dumps({
+                    'connection_id': connection_id, 
+                    'entity_type': path[2], 
+                    'path': usable_path,
+                    'method': request_object['method']
+                }), 'utf-8'))['Payload'].read().decode('utf-8'))
                 if allowed:
-                    the_object = bucket.Object('_/asset/{}'.format('/'.join(assetpath))) if path[2] == 'asset' else bucket.Object('/'.join(assetpath))
+                    the_object = bucket.Object('_/asset/{}'.format('/'.join(usable_path))) if path[2] == 'asset' else bucket.Object('/'.join(usable_path))
                     canwrite = True
                     if request_object['method'] == 'PATCH':
                         try:
