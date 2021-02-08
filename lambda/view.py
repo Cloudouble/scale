@@ -31,7 +31,16 @@ def main(event, context):
         query_record_ids.extend(json.loads(bucket.get_object(Key=query_index_entry['Key'])['Body'].read().decode('utf-8')))
     query_record_ids.sort()
     for page_name, page_results in {'{}-{}'.format(i*1000, i*1000+999) for i, p in enumerate(list(chunks(query_record_ids, 1000)))}:
-        masked_page_results = [ for results in page_results]
+        masked_page_results = []
+        for record_id in page_results:
+            masked_page_results.append(json.loads(lambda_client.invoke(FunctionName='mask', Payload=bytes(json.dumps({
+                'connection_id': event['connection_id'], 
+                'entity_type': 'record', 
+                'method': 'GET',
+                'class_name': event['class_name'], 
+                'entity_id': record_id, 
+                'entity': json.loads(bucket.Object('_/record/{class_name}/{record_id}.json'.format(class_name=event['class_name'], record_id=record_id)).get()['Body'].read().decode('utf-8'))
+            }), 'utf-8'))['Payload'].read().decode('utf-8')))
         page_object = bucket.Object('_/connection/{connection_id}/view/{class_name}/{query_id}/id/ascending/{}.json'.format(page_name))
         page_object.put(Body=bytes(json.dumps(masked_page_results), 'utf-8'), ContentType='application/json')
 

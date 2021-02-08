@@ -36,12 +36,12 @@ def main(event, context):
         path = request_object['uri'].strip('/?').removeprefix('_/').removesuffix('.json').split('/')
         if path and path[0] == 'connection' and len(path) >= 2 and uuid_valid(path[1]):
             connection_id = path[1]
-            connection_object = bucket.Object('_/connection/{connection}.json'.format(connection=connection_id))
-            try:
-                connection_record = connection_object.get()['Body'].read().decode('utf-8')
-            except:
-                connection_record = {'mask': {}}
             if len(path) == 2:
+                connection_object = bucket.Object('_/connection/{connection}.json'.format(connection=connection_id))
+                try:
+                    connection_record = connection_object.get()['Body'].read().decode('utf-8')
+                except:
+                    connection_record = {'mask': {}}
                 if request_object['method'] in ['POST', 'PUT', 'PATCH']:
                     if entity and type(entity) is dict:
                         connection_record = {**connection_record, **json.loads(lambda_client.invoke(FunctionName='authenticate', InvocationType='RequestResponse', Payload=bytes(json.dumps(entity), 'utf-8'))['Payload'].read().decode('utf-8'))}
