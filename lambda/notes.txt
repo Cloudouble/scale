@@ -38,14 +38,34 @@ CONNECTION PATHS
 
 LIFECYCLE
 
-* schema.py writes schema data to all system paths under /schema on-demand by an administrator
+* schema.py
+    - triggered on-demand by an administrator
+    - updates schema data to all system paths under /schema
+    
+* clean.py 
+    - triggered on-demand by an administrator
+    - runs validation over every record in the system and alters them if found invalid
 
-* write.py writes a record to /record/{class_name}/{record_id}.json, which also generates a version record at /version/{class_name}/{record_id}/{version_id}.json
-    * react-version.py:
-        * uses /vector/{class_name}/{field_name}.json to find affected queries 
-            * calls query-record.py with the full record for each affected query to update the relevant indexes in /query/{class_name}/{query_id}/{record_initial}.json
-        * uses 
+* write.py
+    - triggered as an endpoint for a CDN or API originated PUT / PATCH / POST request, or a websocket $write message
+    - writes a record to /record/{class_name}/{record_id}.json
+    - generates a version record at /version/{class_name}/{record_id}/{version_id}.json
+    
+* react-version.py:
+    - triggered by new objects at /version/{class_name}/{record_id}/{version_id}.json
+    - uses /subscription/{class_name}/{record_id}/{connection_id}.json to find affected connections
+    - writes a masked version of the record to /connection/{connection_id}/record/{class_name}/{record_id}.json for each affected connection
+    - uses /vector/{class_name}/{field_name}.json to find affected queries 
+    - triggers query-record.py with the full record for each affected query to update the relevant indexes in /query/{class_name}/{query_id}/{record_initial}.json
 
+* react-index.py
+    - triggered by new/updated object at /query/{class_name}/{query_id}/{record_initial}.json
+    - uses /feed/{class_name}/{query_id}/{connection_id}.json to find affected connections
+    - for each record_id in the index that doesn't already exist in the /connection/{connection_id}/record/{class_name}/{record_id}.json, writes a masked version of the record there
+    
+* react-connection-record.py
+    - triggered by new/updated/deleted objects in /connection/{connection_id}/record/{class_name}/{record_id}.json
+    - updates the relevant /connection/{connection_id}/query/{class_name}/{query_id}/{index_initial}.json based on the new masked record
 
 -----
 
