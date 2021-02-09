@@ -32,8 +32,11 @@ def remove_versions(key_obj, bucket, s3_client):
 
 
 def main(event, context):
-    # triggered on-demand by an administrator
-    # runs validation over every record in the system and alters them if found invalid
+    '''
+    - triggered on-demand by an administrator
+    - schema-enforce: runs validation over every record in the system and moves them to /trash/record/{record_id}.json if found invalid
+    - delete-marker-tidy: removes version objects related to deleted records
+    '''
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(os.environ['bucket'])
     s3_client = boto3.client('s3')

@@ -1,7 +1,12 @@
 import json, boto3, os
 
 def main(event_data, context):
-    # reacts to /_/query/{class_name}/{query_id}.json
+    '''
+    - triggered by writes at /query/{class_name}/{query_id}.json
+    - for each field in /vector/{class_name}/, remove the query_id if the field name is not in query->vector
+    - for each query->vector, ensure that the query_id is present in /vector/{class_name}.json
+    - trigger query-record.py for every record in /record/{class_name}
+    '''
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(os.environ['bucket'])
     s3_client = boto3.client('s3')

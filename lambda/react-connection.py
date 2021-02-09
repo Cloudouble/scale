@@ -1,7 +1,10 @@
 import boto3, os
 
 def main(event_data, context):
-    # reacts to /_/connection/{connection_id}.json 
+    '''
+    - triggered by writes at /connection/{connection_id}.json
+    - deletes all objects under /connection/{connection_id}/
+    '''
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(os.environ['bucket'])
     counter = 0

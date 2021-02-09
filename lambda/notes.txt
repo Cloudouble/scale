@@ -66,7 +66,7 @@ FUNCTIONS
     - generates a version record at /version/{class_name}/{record_id}/{version_id}.json
 
     
-* react-connection.py
+* react-connection.py (ready for testing)
     - triggered by writes at /connection/{connection_id}.json
     - deletes all objects under /connection/{connection_id}/
 
@@ -76,7 +76,7 @@ FUNCTIONS
     - for each query->vector, ensure that the query_id is present in /vector/{class_name}.json
     - trigger query-record.py for every record in /record/{class_name}
 
-* react-feed.py
+* react-feed.py (ready for testing)
     - triggered by writes at /feed/{class_name}/{query_id}/{connection_id}.json
     - trigger view.py for each view configuration in feed->view
 
@@ -115,8 +115,8 @@ FUNCTIONS
     - trigger view.py for each affected feed view
 
 
-* valid.py
-        - triggered by clean.py
+* validate.py
+        - triggered by clean.py, write.py
         - validated the given record according to its datatype
 
 * query-record.py
