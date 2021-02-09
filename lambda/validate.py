@@ -64,6 +64,7 @@ def main(event, context):
         class_name = event['switches'].get('class_name')
         if entity_type = 'view':
             
+            
         elif entity_type = 'query':
 
         elif entity_type = 'feed':
