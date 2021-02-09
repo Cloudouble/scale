@@ -80,11 +80,11 @@ FUNCTIONS
     - triggered by writes at /feed/{class_name}/{query_id}/{connection_id}.json
     - trigger view.py for each view configuration in feed->view
 
-* react-subscription.py
+* react-subscription.py (ready for testing)
     - triggered by writes at /subscription/{class_name}/{record_id}/{connection_id}.json
     - trigger view.py for each view configuration in subscription->view
 
-* react-view.py
+* react-view.py (ready for testing)
     - triggered by writes at /view/{view_id}.json
     - use /subscription/{class_name}/{record_id}/{connection_id}.json to get all affected connection subscriptions
     - trigger view.py for each view configuration in each affected subscription->view of each affected connection
