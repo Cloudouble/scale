@@ -91,7 +91,7 @@ FUNCTIONS
     - use /feed/{class_name}/{query_id}/{connection_id}.json to get all affected connection feeds
     - trigger view.py for each view configuration in each affected feed->view of each affected connection
 
-* react-version.py
+* react-version.py (ready for testing)
     - triggered by new objects at /version/{class_name}/{record_id}/{version_id}.json
     - uses /vector/{class_name}/{field_name}.json to find affected queries 
     - triggers query-record.py with the full record for each affected query to update the relevant indexes in /query/{class_name}/{query_id}/{record_initial}.json
@@ -123,14 +123,14 @@ FUNCTIONS
     - triggered by react-query.py react-version.py
     - executes the given query using the given record, returning True if matching
 
-* view.py
-    - triggered by react-feed.py, react-subscription.py, react-view.py, react-connection-record.py, react-connection-index.py
-    - runs the given view with the given masked record/query results and writes the result to the relevant view path(s)
-
 * mask.py
     - triggered by react-subscription.py, react-index.py
     - given a connection_id and a record, writes the masked version of the record to /connection/{connection_id}/record/{class_name}/{record_id}.json
     
+* view.py
+    - triggered by react-feed.py, react-subscription.py, react-view.py, react-connection-record.py, react-connection-index.py
+    - runs the given view with the given masked record/query results and writes the result to the relevant view path(s)
+
 
 * extension-alias.py
     - triggered by writes to 
