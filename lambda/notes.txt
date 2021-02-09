@@ -116,12 +116,12 @@ FUNCTIONS
 
 
 * validate.py
-        - triggered by clean.py, write.py
-        - validated the given record according to its datatype
+    - triggered by clean.py, write.py
+    - validate the given record according to its datatype
         
 * authenticate.py
-        - triggered by write.py
-        - takes care of authentication sub-processes
+    - triggered by write.py
+    - takes care of authentication sub-processes
 
 * query-record.py
     - triggered by react-query.py, react-version.py

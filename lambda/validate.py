@@ -45,19 +45,48 @@ validators = {
     'Record': lambda i: type(i) is dict and len(i) == 2 and type(i.get('@type')) is str and uuid_valid(i.get('@id'))
 }
 
-def main(record, context):
-    # called by other lambdas to validate a record
+def main(event, context):
+    '''
+    - triggered by clean.py, write.py
+    - validate the given record according to its datatype
+    
+    {'entity': entity, 'switches': {'entity_type': entity_type, 'class_name'?: class_name?, 'entity_id': entity_id}}
+    
+    entity_type => view query feed subscription system record
+    
+    '''
     valid = False
-    if record and type(record) is dict and record.get('@type') and uuid_valid(record.get('@id')):
+    if event and type(event['entity']) is dict and type(event.get('switches')) is dict and event['switches'].get('entity_type') and event['switches'].get('entity_id'):
         s3 = boto3.resource('s3')
-        try:
-            type_schema = json.loads(s3.Object(os.environ['bucket'], 'schema/classes/{}.json'.format(record['@type'])).get()['Body'].read().decode('utf-8'))
-            if type_schema and type(type_schema) is dict:
-                type_properties_map = type_schema.get('properties', {})
-                non_core_record_properties = [p for p in record if p and type(p) is str and p[0] != '@']
-                if type_properties_map and all([type_properties_map.get(p) for p in non_core_record_properties]):
-                    valid = all([ any([validators.get(t, validators['Record'])(record[p]) for t in type_properties_map[p]]) for p in non_core_record_properties ])
-        except:
-            pass
+        entity = event['entity']
+        entity_type = event['switches']['entity_type']
+        entity_id = event['switches']['entity_id']
+        class_name = event['switches'].get('class_name')
+        if entity_type = 'view':
+            
+        elif entity_type = 'query':
+
+        elif entity_type = 'feed':
+
+        elif entity_type = 'subscription':
+
+        elif entity_type = 'system':
+
+        elif entity_type = 'record':
+            if entity.get('@type') and entity.get('@id'):
+                type_schema = json.loads(s3.Object(os.environ['bucket'], '_/schema/classes/{}.json'.format(entity['@type'])).get()['Body'].read().decode('utf-8'))
+                if type_schema and type(type_schema) is dict and entity['@type'] == entity_type and entity['@id'] == entity_id:
+                    type_properties_map = type_schema.get('properties', {})
+                    non_core_record_properties = [p for p in record if p and type(p) is str and p[0] != '@']
+                    if type_properties_map and all([type_properties_map.get(p) for p in non_core_record_properties]):
+                        valid = all([ any([validators.get(t, validators['Record'])(record[p]) for t in type_properties_map[p]]) for p in non_core_record_properties ])
+
+           
+        
+
+        
+        
+        
+        
     return valid
 
