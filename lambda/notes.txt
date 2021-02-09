@@ -98,18 +98,18 @@ FUNCTIONS
     - uses /subscription/{class_name}/{record_id}/{connection_id}.json to find affected connections
     - triggers mask.py for each affected connection
 
-* react-index.py
+* react-index.py (ready for testing)
     - triggered by new/updated object at /query/{class_name}/{query_id}/{record_initial}.json
     - uses /feed/{class_name}/{query_id}/{connection_id}.json to find affected connections
     - triggers mask.py for each record_id in the index that doesn't already exist in the /connection/{connection_id}/record/{class_name}/{record_id}.json
     
-* react-connection-record.py
+* react-connection-record.py (ready for testing)
     - triggered by new/updated/deleted objects in /connection/{connection_id}/record/{class_name}/{record_id}.json
-    - updates the relevant /connection/{connection_id}/query/{class_name}/{query_id}/{index_initial}.json based on the new masked record (compare to the system copy)
+    - removes the relevant record_id from /connection/{connection_id}/query/{class_name}/{query_id}/{index_initial}.json if the masked value is empty
     - uses /subscription/{class_name}/{record_id}/{connection_id}.json to find affected views for this connection and record
     - trigger view.py for each affected subscription view 
     
-* react-connection-index.py
+* react-connection-index.py (ready for testing)
     - triggered by new/updated/deleted /connection/{connection_id}/query/{class_name}/{query_id}/{index_initial}.json
     - uses /feed/{class_name}/{query_id}/{connection_id}.json to find affected views for this connection and query
     - trigger view.py for each affected feed view
