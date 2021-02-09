@@ -10,7 +10,20 @@ def uuid_valid(s):
 
  
 def main(event, context):
-    # used in edge context for PUT, POST and PATCH requests from CDN, or REST API Gateway trigger, or Websocket API Gateway trigger 
+    '''
+    - triggered as an endpoint for a CDN or API originated PUT / PATCH / POST / DELETE request, or a websocket $put/$post/$patch/$delete message
+    - writes/deletes a connection configuration to ~connection/{connection_id}.json OR
+    - writes/deletes a view configuration to /view/{view_id}.json via /connection/{connection_id}/view/{view_id}.json OR
+    - writes/deletes an private asset to ~asset/{assetpath} via ~connection/{connection_id}/asset/{path}
+    - writes/deletes an static asset to {path} via ~connection/{connection_id}/static/{path}
+    - writes/deletes a query configuration to /query/{class_name}/{query_id}.json via /connection/{connection_id}/query/{class_name}/{query_id}.json  OR
+    - writes/deletes a feed configuration to /feed/{class_name}/{query_id}/{connection_id}.json via /connection/{connection_id}/feed/{class_name}/{query_id}.json OR 
+    - writes/deletes a subscription configuration to /subscription/{class_name}/{record_id}/{connection_id}.json via /connection/{connection_id}/subscription/{class_name}/{record_id}.json OR 
+    - writes/deletes a system module configuration to /system/{scope}/{module}.json via /connection/{connection_id}/system/{scope}/{module}.json OR
+    - writes a record to /record/{class_name}/{record_id}.json via /connection/{connection_id}/record/{class_name}/{record_id}.json
+    - writes a record field to /record/{class_name}/{record_id}[field_name].json via /connection/{connection_id}/record/{class_name}/{record_id}/{field_name}.json
+    - generates a version record at /version/{class_name}/{record_id}/{version_id}.json
+    '''
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(os.environ['bucket'])
     lambda_client = boto3.client('lambda')
@@ -37,7 +50,8 @@ def main(event, context):
         if path and path[0] == 'connection' and len(path) >= 2 and uuid_valid(path[1]):
             connection_id = path[1]
             if len(path) == 2:
-                connection_object = bucket.Object('_/connection/{connection}.json'.format(connection=connection_id))
+                # - writes/deletes a connection configuration to /connection/{connection_id}.json
+                connection_object = bucket.Object('_/connection/{connection_id}.json'.format(connection_id=connection_id))
                 try:
                     connection_record = connection_object.get()['Body'].read().decode('utf-8')
                 except:
@@ -73,15 +87,20 @@ def main(event, context):
                             the_object.put(Body=bytes(body, 'utf-8'))
                         elif request_object['method'] == 'DELETE':
                             the_object.delete()
-            elif len(path) >= 5:
-                entity_type, class_name, entity_id, record_field = (path[2:5] + [None])
-                switches = {'entity_type': entity_type, 'class_name': class_name, 'entity_id': entity_id}
-                entity_key = '_/{entity_type}/{class_name}/{entity_id}/{connection_id}.json'.format(**switches, connection_id=connection_id) if entity_type == 'feed' else '_/{entity_type}/{class_name}/{entity_id}.json'.format(**switches)
+            elif len(path) >= 4:
+                if len(path) == 4:
+                    entity_type, entity_id = path[2:]
+                    switches = {'entity_type': entity_type, 'entity_id': entity_id}
+                    entity_key = '_/{entity_type}/{entity_id}.json'.format(**switches)
+                else:
+                    entity_type, class_name, entity_id, record_field = (path[2:5] + [None])
+                    switches = {'entity_type': entity_type, 'class_name': class_name, 'entity_id': entity_id}
+                    entity_key = '_/{entity_type}/{class_name}/{entity_id}/{connection_id}.json'.format(**switches, connection_id=connection_id) if entity_type in ['feed', 'subscription'] else '_/{entity_type}/{class_name}/{entity_id}.json'.format(**switches)
                 try:
                     current_entity = s3.Object(os.environ['bucket'], entity_key).get()['Body'].read().decode('utf-8')
                 except:
                     current_entity = {}
-                if len(path) == 5:
+                if len(path) in [4, 5]:
                     entity_id, view_handle = (entity_id.split('.', 1) + ['json'])[:2]
                 elif len(path) == 6:
                     record_field, view_handle = (path[5].split('.', 1) + ['json'])[:2]
@@ -103,7 +122,7 @@ def main(event, context):
                     # {connection_id, entity_type, method, class_name, entity_id, entity}
                     masked_entity = json.loads(lambda_client.invoke(FunctionName='mask', Payload=bytes(json.dumps({
                         'connection_id': connection_id, 
-                        'entity_type': path[2], 
+                        'entity_type': entity_type, 
                         'method': request_object['method'],
                         'class_name': class_name, 
                         'entity_id': entity_id, 
@@ -126,7 +145,7 @@ def main(event, context):
                                     record_version_key = '_/version/{class_name}/{record_id}/{version_id}.json'.format(class_name=entity['@type'], record_id=entity['@id'], version_id=put_response['VersionId'])
                                     bucket.put_object(Body=bytes(json.dumps(updated_fields), 'utf-8'), Key=record_version_key, ContentType='application/json')
                             elif request_object['method'] == 'DELETE' and current_entity:
-                                if entity_type in ['query', 'record', 'view']:
+                                if entity_type in ['query', 'record', 'view', 'feed', 'subscription', 'system']:
                                     current_entity.delete()
                             counter = counter + 1
     return counter
