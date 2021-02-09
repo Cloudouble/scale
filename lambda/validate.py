@@ -45,15 +45,19 @@ validators = {
     'Record': lambda i: type(i) is dict and len(i) == 2 and type(i.get('@type')) is str and uuid_valid(i.get('@id'))
 }
 
+
+def valid_view(view):
+    return all([type(view) is dict, type(view.get('view_id')) is str, type(view.get('expires', 0)) is int, type(view.get('max', 0)) is int, 
+                type(view.get('count', 0)) is int, type(view.get('last', 0)) is int, type(view.get('next', 0)) is int])
+
+
 def main(event, context):
     '''
     - triggered by clean.py, write.py
     - validate the given record according to its datatype
     
     {'entity': entity, 'switches': {'entity_type': entity_type, 'class_name'?: class_name?, 'entity_id': entity_id}}
-    
     entity_type => view query feed subscription system record
-    
     '''
     valid = False
     if event and type(event['entity']) is dict and type(event.get('switches')) is dict and event['switches'].get('entity_type') and event['switches'].get('entity_id'):
@@ -62,32 +66,34 @@ def main(event, context):
         entity_type = event['switches']['entity_type']
         entity_id = event['switches']['entity_id']
         class_name = event['switches'].get('class_name')
-        if entity_type = 'view':
-            
-            
-        elif entity_type = 'query':
-
-        elif entity_type = 'feed':
-
-        elif entity_type = 'subscription':
-
-        elif entity_type = 'system':
-
-        elif entity_type = 'record':
+        if entity_type == 'view':
+            # {processor='', ?options={}, ?assets={alias: assetpath}}
+            valid = type(entity.get('processor')) is str and type(entity.get('options', {})) is dict and type(entity.get('assets', {})) is dict
+        elif entity_type == 'query':
+            # {processor='', ?options={}, vector=[], ?count=0}
+            valid = type(entity.get('processor')) is str and type(entity.get('vector')) is list and type(entity.get('options', {})) is dict and type(entity.get('count', 0)) is int
+        elif entity_type == 'feed':
+            # {sort_field='', ?sort_direction='ascending', ?min_index=0, ?max_index=1000, view=[{view_id='', ?expires=0, ?max=0, ?count=0, ?last=0, ?next=0}]}
+            valid = all([
+                type(entity.get('sort_field')) is str, 
+                type(entity.get('sort_direction')) in ['ascending', 'descending'], 
+                type(entity.get('min_index', 0)) is int, 
+                type(entity.get('min_index', 0)) is int, 
+                type(entity.get('max_index', 0)) is int, 
+                type(entity.get('view')) is list, 
+                all([valid_view(v) for v in entity['view']])
+            ])
+        elif entity_type == 'subscription':
+            # {view=[{view_id='', ?expires=0, ?max=0, ?count=0, ?last=0, ?next=0}]}
+            valid = all([type(entity.get('view')) is list, all([valid_view(v) for v in entity['view']])])
+        elif entity_type == 'system':
+            valid = type(entity) is dict
+        elif entity_type == 'record':
             if entity.get('@type') and entity.get('@id'):
                 type_schema = json.loads(s3.Object(os.environ['bucket'], '_/schema/classes/{}.json'.format(entity['@type'])).get()['Body'].read().decode('utf-8'))
                 if type_schema and type(type_schema) is dict and entity['@type'] == entity_type and entity['@id'] == entity_id:
                     type_properties_map = type_schema.get('properties', {})
-                    non_core_record_properties = [p for p in record if p and type(p) is str and p[0] != '@']
+                    non_core_record_properties = [p for p in entity if p and type(p) is str and p[0] != '@']
                     if type_properties_map and all([type_properties_map.get(p) for p in non_core_record_properties]):
-                        valid = all([ any([validators.get(t, validators['Record'])(record[p]) for t in type_properties_map[p]]) for p in non_core_record_properties ])
-
-           
-        
-
-        
-        
-        
-        
+                        valid = all([ any([validators.get(t, validators['Record'])(entity[p]) for t in type_properties_map[p]]) for p in non_core_record_properties ])
     return valid
-

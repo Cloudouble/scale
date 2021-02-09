@@ -115,7 +115,7 @@ FUNCTIONS
     - trigger view.py for each affected feed view
 
 
-* validate.py
+* validate.py (ready for testing)
     - triggered by clean.py, write.py
     - validate the given record according to its datatype
         
