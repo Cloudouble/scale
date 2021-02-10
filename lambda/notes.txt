@@ -131,7 +131,7 @@ FUNCTIONS
     - triggered by react-query.py, react-version.py
     - executes the given query using the given record, returning True if matching
 
-* mask.py
+* mask.py (ready for testing)
     - triggered by write.py, react-version.py, react-index.py, react-connection-record.py, react-connection-index.py
     - given a connection_id and a record, writes the masked version of the record to /connection/{connection_id}/record/{class_name}/{record_id}.json
     

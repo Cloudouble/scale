@@ -5,7 +5,11 @@ def chunks(lst, n):
         yield lst[i:i + n]
 
 def main(event, context):
-    # called by other functions to determine the masking of a given entity and connection {}
+    '''
+    - triggered by write.py, react-version.py, react-index.py, react-connection-record.py, react-connection-index.py
+    - given a connection_id and a record, writes the masked version of the record to /connection/{connection_id}/record/{class_name}/{record_id}.json
+    event = {'connection_id': '', 'entity_type': '', 'method': '', ?'path': [], ?'class_name': '', ?'entity_id': '', ?entity: {}}
+    '''
     masked_entity = None
     if event.get('connection_id'):
         s3 = boto3.resource('s3')
@@ -38,7 +42,7 @@ def main(event, context):
                                 'purpose': 'mask', 'connection_id': event['connection_id'], 'path': event['path'], 'options': options}), 'utf-8'))['Payload'].read().decode('utf-8')) 
                                 for mask_name, options in mask.items()])
                     return allowed
-                elif all([event.get(k) for k in ['class_name', 'entity_id', 'entity']]):
+                elif all([event.get(k) for k in ['class_name', 'entity_id']]):
                     # event = {connection_id, entity_type, method, class_name, entity_id, entity}
                     s3 = boto3.resource('s3')
                     bucket = s3.Bucket(os.environ['bucket'])
@@ -48,7 +52,10 @@ def main(event, context):
                     mask = mask.get(switches['method']) if switches['method'] in mask else mask.get('*', {})
                     mask = mask.get(switches['class_name']) if switches['class_name'] in mask else mask.get('*', {})
                     masked_entity = {}
-                    entity = event['entity']
+                    if type(event.get('entity')) is dict:
+                        entity = event['entity']
+                    else:
+                        entity = json.loads(bucket.get_object(Key='_/{entity_type}/{class_name}/{entity_id}.json'.format(entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id']))['Body'].read().decode('utf-8'))
                     constrained = True
                     allowfields = []
                     for mask_name, options in mask.items():

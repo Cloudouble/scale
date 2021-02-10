@@ -6,7 +6,8 @@ def process_entity(key_obj, bucket, lambda_client, entity_type):
     lambda_client.invoke(FunctionName='mask', InvocationType='Event', Payload=bytes(json.dumps({
         'connection_id': connection_id,
         'class_name': class_name, 
-        '{}_id'.format(entity_type): entity_id, 
+        'entity_type': entity_type, 
+        'entity_id': entity_id
     }), 'utf-8'))
 
 def main(event, context):

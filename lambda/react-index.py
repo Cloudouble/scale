@@ -44,7 +44,8 @@ def main(event, context):
                     lambda_client.invoke(FunctionName='mask', InvocationType='Event', Payload=bytes(json.dumps({
                         'connection_id': affected_connection,
                         'class_name': class_name, 
-                        'record_id': connection_record_id, 
+                        'entity_type': 'record', 
+                        'entity_id': connection_record_id, 
                     }), 'utf-8'))
             counter = counter + 1
     return counter
