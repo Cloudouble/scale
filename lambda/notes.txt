@@ -18,6 +18,8 @@ SYSTEM PATHS
 /subscription/{class_name}/{record_id}/{connection_id}.json => each connection that is interested in this record has a subscription configuration object stored here
 
 /view/{view_id}.json
+
+/system/configuration.json
 /system/{scope}/{module}.json
 
 /trash/record/{record_id}.json
@@ -119,9 +121,10 @@ FUNCTIONS
     - triggered by clean.py, write.py
     - validate the given record according to its datatype
         
-* authenticate.py
+* authenticate.py (ready for testing)
     - triggered by write.py
     - takes care of authentication sub-processes
+    - returns a connection object with (at least) a 'mask' property, which is overlaid onto _/connection/{connection_id}.json
 
 * query-record.py
     - triggered by react-query.py, react-version.py
@@ -163,3 +166,18 @@ record => {@type, @id,  ...as per various schemas conforming to it's own @type..
 
 
 -----
+
+
+SYSTEM CONFIGURATION FORMAT
+
+{
+        "authentication": [
+                        {
+                                "password": {
+                                        "processor": "lambda function name", 
+                                        "options": {}
+                                }
+                        }
+                ]
+        }
+}
