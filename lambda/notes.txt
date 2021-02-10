@@ -19,8 +19,9 @@ SYSTEM PATHS
 
 /view/{view_id}.json
 
-/system/configuration.json
 /system/{scope}/{module}.json
+/system/authentication/{module}.json
+/system/extension/{module}.json
 
 /trash/record/{record_id}.json
 
@@ -170,14 +171,8 @@ record => {@type, @id,  ...as per various schemas conforming to it's own @type..
 
 SYSTEM CONFIGURATION FORMAT
 
-{
-        "authentication": [
-                        {
-                                "password": {
-                                        "processor": "lambda function name", 
-                                        "options": {}
-                                }
-                        }
-                ]
-        }
-}
+/system/authentication/{module}.json
+
+/system/authentication/password.json => {"processor": "lambda function name", "options": {}, "priority": 0}
+
+
