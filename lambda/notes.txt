@@ -127,7 +127,7 @@ FUNCTIONS
     - takes care of authentication sub-processes
     - returns a connection object with (at least) a 'mask' property, which is overlaid onto _/connection/{connection_id}.json
 
-* query-record.py
+* query-record.py (ready for testing)
     - triggered by react-query.py, react-version.py
     - executes the given query using the given record, returning True if matching
 
@@ -171,8 +171,14 @@ record => {@type, @id,  ...as per various schemas conforming to it's own @type..
 
 SYSTEM CONFIGURATION FORMAT
 
-/system/authentication/{module}.json
+/system/{scope}/{module}.json
 
-/system/authentication/password.json => {"processor": "lambda function name", "options": {}, "priority": 0}
+
+e.g. 
+
+/system/authentication/password.json => {"processor": "lambda function name", "options": {free form map of options passed to function}, "priority": 0}
+/system/authentication/key.json => {"processor": "lambda function name", "options": {free form map of options passed to function}, "priority": 1}
+
+
 
 

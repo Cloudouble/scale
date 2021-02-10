@@ -1,18 +1,21 @@
 import json, boto3, os
 
 def main(event, context):
-    #reacts to updated record version objects
+    '''
+    - triggered by react-query.py, react-version.py
+    - executes the given query using the given record, returning True if matching
+    '''
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(os.environ['bucket'])
     lambda_client = boto3.client('lambda')
     counter = 0
     query_id = event.get('query')
-    record = event.get('record', {})
-    if query_id and record:
-        record_type = record.get('@type')
-        record_id = record.get('@id')
-        record_object = json.loads(bucket.get_object(Key='record/{record_type}/{record_id}.json'.format(record_type=record_type, record_id=record_id))['Body'].read().decode('utf-8'))
-        query_payload = {'purpose': 'query', 'record': record}
+    record_stub = event.get('record', {})
+    if query_id and record_stub:
+        record_type = record_stub.get('@type')
+        record_id = record_stub.get('@id')
+        record_data = json.loads(bucket.get_object(Key='record/{record_type}/{record_id}.json'.format(record_type=record_type, record_id=record_id))['Body'].read().decode('utf-8'))
+        query_payload = {'purpose': 'query', 'record': record_data}
         query_result = json.loads(lambda_client.invoke(FunctionName=query_id, InvocationType='RequestResponse', Payload=bytes(json.dumps(query_payload), 'utf-8'))['Payload'].read().decode('utf-8'))
         query_index_key = '_/query/{record_type}/{query_id}/{record_initial}.json'.format(query_id=query_id, record_initial=record_id[0])
         try:

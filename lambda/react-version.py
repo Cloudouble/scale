@@ -26,7 +26,6 @@ def main(event, context):
         path = event['s3']['object']['key'].strip('/?').removeprefix('_').removesuffix('.json').strip('/').split('/')
         if len(path) == 4:
             class_name, record_id, record_version = path[1:]
-            record_data = json.loads(bucket.get_object(Key='_/record/{class_name}/{record_id}.json'.format(class_name=class_name, record_id=record_id))['Body'].read().decode('utf-8'))
             updated_fields = sorted(json.loads(bucket.get_object(Key=record['s3']['object']['key'])['Body'].read().decode('utf-8')))
             query_list = []
             for field_name in updated_fields:
@@ -36,7 +35,7 @@ def main(event, context):
                     pass
             query_list = sorted(list(set(query_list)))
             for query_id in query_list:
-                lambda_client.invoke(FunctionName='query-record', InvocationType='Event', Payload=bytes(json.dumps({'query': query_id, 'record': record_data}), 'utf-8'))
+                lambda_client.invoke(FunctionName='query-record', InvocationType='Event', Payload=bytes(json.dumps({'query': query_id, 'record': {'@type': class_name, '@id': record_id}}), 'utf-8'))
             subscription_list_key = '_/subscription/{class_name}/{record_id}/'.format(class_name=class_name, record_id=record_id)
             subscription_list_response = s3_client.list_objects_v2(Bucket=os.environ['bucket'], Prefix=subscription_list_key)
             for key_obj in subscription_list_response['Contents']:
