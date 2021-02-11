@@ -8,7 +8,8 @@ def process_entity(key_obj, bucket, lambda_client, entity_type):
         lambda_client.invoke(FunctionName='view', InvocationType='Event', Payload=bytes(json.dumps({
             'connection_id': connection_id,
             'class_name': class_name, 
-            '{}_id'.format(entity_type): entity_id, 
+            'entity_type': entity_type, 
+            'entity_id': entity_id, 
             'view_configuration': view_configuration
         }), 'utf-8'))
     

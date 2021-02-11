@@ -34,6 +34,7 @@ def main(event, context):
                 lambda_client.invoke(FunctionName='view', InvocationType='Event', Payload=bytes(json.dumps({
                     'connection_id': connection_id,
                     'class_name': class_name, 
+                    'entity_type': 'query', 
                     'query_id': query_id, 
                     'view_configuration': view_configuration
                 }), 'utf-8'))

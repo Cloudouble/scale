@@ -18,7 +18,8 @@ def main(event_data, context):
             lambda_client.invoke(FunctionName='view', InvocationType='Event', Payload=bytes(json.dumps({
                 'connection_id': connection_id,
                 'class_name': class_name, 
-                'query_id': query_id, 
+                'entity_type': 'query', 
+                'entity_id': query_id, 
                 'view_configuration': view_configuration
             }), 'utf-8'))
             counter = counter + 1

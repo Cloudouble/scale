@@ -47,8 +47,7 @@ validators = {
 
 
 def valid_view(view):
-    return all([type(view) is dict, type(view.get('view_id')) is str, type(view.get('expires', 0)) is int, type(view.get('max', 0)) is int, 
-                type(view.get('count', 0)) is int, type(view.get('last', 0)) is int, type(view.get('next', 0)) is int])
+    return all([type(view) is dict, type(view.get('view_id')) is str, type(view.get('expires', 0)) is int])
 
 
 def main(event, context):
