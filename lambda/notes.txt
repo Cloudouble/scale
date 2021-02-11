@@ -34,7 +34,7 @@ CONNECTION PATHS
 /connection/{connection_id}/record/{class_name}/{record_id}.json => the masked record data for this connection
 /connection/{connection_id}/query/{class_name}/{query_id}.json => metadata about this query as curated to this connection
 /connection/{connection_id}/query/{class_name}/{query_id}/{index_initial}.json => a-z0-9 indexes, but only containing records that are non-empty when masked for this connection
-/connection/{connection_id}/feed/{class_name}/{query_id}/{sort_field}/{min-index}-{max-index}.{view_id} => query data as rendered by the given view
+/connection/{connection_id}/feed/{class_name}/{query_id}/{sort_field}/{sort_direction}/{min-index}-{max-index}.{view_id} => query data as rendered by the given view
 /connection/{connection_id}/subscription/{class_name}/{record_id}.{view_id} => record data as rendered by the given view 
 /connection/{connection_id}/subscription/{class_name}/{record_id}/{record_field}.{view_id} => record field data as rendered by the given view
 /connection/{connection_id}/system/{scope}/{module}.json
@@ -157,7 +157,7 @@ view => {processor='', ?options={}, ?assets={alias: assetpath}, ?content_type=''
 
 query => {processor='', ?options={}, vectors=[], ?count=0}
 
-feed => {sort_field='', ?min_index=0, ?max_index=1000, view=[{view_id='', ?expires=0, ?max=0, ?count=0, ?last=0, ?next=0}]}
+feed => {view=[{view_id='', ?field_name, ?expires=0, ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}]}
 
 subscription => {view=[{view_id='', field_name='', ?expires=0}]}
 
