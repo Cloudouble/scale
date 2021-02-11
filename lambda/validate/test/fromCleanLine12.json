@@ -1,0 +1,8 @@
+{
+    "entity": {"@type": "Book", "@id": "87370050-971f-4cd9-9c32-1072c6ac3c52", "name": "Test Book", "numberOfPages": 42}, 
+    "switches": {
+        "entity_type": "record", 
+        "class_name": "Book", 
+        "entity_id": "87370050-971f-4cd9-9c32-1072c6ac3c52"
+    }
+}

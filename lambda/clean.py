@@ -7,8 +7,9 @@ def trash_record(key_obj, bucket, lambda_client):
     record_obj = bucket.Object(key_obj['Key'])
     record = json.loads(record_obj.get().read().decode('utf-8'))
     switches = {'entity_type': 'record', 'class_name': class_name, 'entity_id': record_id}
-    if not (record and type(record) is dict and record.get('@type') == class_name and record.get('@id') == 'record_id' and json.loads(lambda_client.invoke(FunctionName='validate', Payload=bytes(json.dumps({'entity': record, 'switches': switches}), 'utf-8'))['Payload'].read().decode('utf-8'))):
-        bucket.put_object(Body=bytes(json.dumps(record), 'utf-8'), Key='_/trash/record/{class_name}/{record_id}.json'.format(class_name=class_name, record_id=record_id), ContentType='application/json')
+    validate_payload = {'entity': record, 'switches': switches}
+    if not (record and type(record) is dict and record.get('@type') == class_name and record.get('@id') == 'record_id' and json.loads(lambda_client.invoke(FunctionName='{}-validate'.format(os.environ['lambda_namespace']), Payload=bytes(json.dumps({'entity': record, 'switches': switches}), 'utf-8'))['Payload'].read().decode('utf-8'))):
+        bucket.put_object(Body=bytes(json.dumps(validate_payload), 'utf-8'), Key='_/trash/record/{class_name}/{record_id}.json'.format(class_name=class_name, record_id=record_id), ContentType='application/json')
         record_obj.delete()
         bucket.put_object(Body=bytes(json.dumps(sorted(list(record.keys()))), 'utf-8'), Key='_/record/{class_name}/{record_id}/deleted.json'.format(class_name=class_name, record_id=record_id), ContentType='application/json')
     
