@@ -135,18 +135,9 @@ FUNCTIONS
     - triggered by write.py, react-version.py, react-index.py, react-connection-record.py, react-connection-index.py
     - given a connection_id and a record, writes the masked version of the record to /connection/{connection_id}/record/{class_name}/{record_id}.json
     
-* view.py
+* view.py (ready for testing)
     - triggered by react-feed.py, react-subscription.py, react-view.py, react-connection-record.py, react-connection-index.py
     - runs the given view with the given masked record/query results and writes the result to the relevant view path(s)
-
-
-* extension-alias.py
-    - triggered by writes to 
-        /connection/{connection_id}/feed/{class_name}/{query_id}/{sort_field}/{min-index}-{max-index}.{view_id} AND
-        /connection/{connection_id}/subscription/{class_name}/{record_id}.{view_id} AND
-        /connection/{connection_id}/subscription/{class_name}/{record_id}/{record_field}.{view_id}
-        (match on the prefix /connection/ and the suffix .{view_id})
-    - if the intra-connection path matches an alias registered in /system/extension/alias.json then copy the object to the target path
 
 
 -----
@@ -178,7 +169,6 @@ e.g.
 
 /system/authentication/password.json => {"processor": "lambda function name", "options": {free form map of options passed to function}, "priority": 0}
 /system/authentication/key.json => {"processor": "lambda function name", "options": {free form map of options passed to function}, "priority": 1}
-
 
 
 
