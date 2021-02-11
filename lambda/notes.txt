@@ -44,7 +44,7 @@ CONNECTION PATHS
 
 FUNCTIONS
 
-* schema.py (tested)
+* schema (tested)
     - triggered on-demand by an administrator
     - updates schema data to all system paths under /schema
     
