@@ -41,6 +41,9 @@ def main(event, context):
                     'field_name': field_name
                 }), 'utf-8'))['Payload'].read(), Key=view_result_key, ContentType=view_data.get('content_type', 'application/json'))
                 
+            elif entity_type = 'query':
+                query_base_key = '_/connection/{connection_id}/query/{}'
+                    
             
     
     
