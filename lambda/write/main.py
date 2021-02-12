@@ -1,3 +1,5 @@
+env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_"}
+
 import json, boto3, os, base64, uuid, time
 from urllib.parse import parse_qs
 
@@ -25,13 +27,12 @@ def main(event, context):
     - generates a version record at /version/{class_name}/{record_id}/{version_id}.json
     '''
     s3 = boto3.resource('s3')
-    bucket = s3.Bucket(os.environ['bucket'])
+    bucket = s3.Bucket(env['bucket'])
     lambda_client = boto3.client('lambda')
     counter = 0
     now = time.time()
     if event.get('body'):
         #API Gateway - either Rest or Websocket
-        body = base64.b64decode(event['body']) if event.get('isBase64Encoded', False) else event['body']
         request_objects = [{'cf': {'request': {
             'method': event['httpMethod'], 
             'body': {'data': event['body']}, 
@@ -41,24 +42,24 @@ def main(event, context):
         #CDN: PUT, POST or PATCH
         request_objects = event.get('Records', [])
     for request_object in [r['cf']['request'] for r in request_objects if r.get('cf', {}).get('request', {}).get('method', 'POST') in ['POST', 'PUT', 'PATCH', 'DELETE']]:
-        body = base64.b64decode(request_object['body']['data']) if request_object['isBase64Encoded'] else request_object['body']['data']
+        body = base64.b64decode(request_object['body']['data']) if request_object.get('isBase64Encoded') else request_object['body']['data']
         try: 
             entity = json.loads(body)
         except: 
             entity = {k: v[0] for k, v in parse_qs(body).items()}
-        path = request_object['uri'].strip('/?').removeprefix('_/').removesuffix('.json').split('/')
+        path = request_object['uri'].strip('/?').replace('{}/'.format(env['system_root']), '').replace('.json', '').split('/')
         if path and path[0] == 'connection' and len(path) >= 2 and uuid_valid(path[1]):
             connection_id = path[1]
             if len(path) == 2:
                 # - writes/deletes a connection configuration to /connection/{connection_id}.json
-                connection_object = bucket.Object('_/connection/{connection_id}.json'.format(connection_id=connection_id))
+                connection_object = bucket.Object('{system_root}/connection/{connection_id}.json'.format(system_root=env['system_root'], connection_id=connection_id))
                 try:
                     connection_record = connection_object.get()['Body'].read().decode('utf-8')
                 except:
                     connection_record = {'mask': {}}
                 if request_object['method'] in ['POST', 'PUT', 'PATCH']:
                     if entity and type(entity) is dict:
-                        connection_record = {**connection_record, **json.loads(lambda_client.invoke(FunctionName='authenticate', InvocationType='RequestResponse', Payload=bytes(json.dumps(entity), 'utf-8'))['Payload'].read().decode('utf-8'))}
+                        connection_record = {**connection_record, **json.loads(lambda_client.invoke(FunctionName='{}-authenticate'.format(env['lambda_namespace']), InvocationType='RequestResponse', Payload=bytes(json.dumps(entity), 'utf-8'))['Payload'].read().decode('utf-8'))}
                     connection_object.put(Body=bytes(json.dumps(connection_record), 'utf-8'), ContentType='application/json')
                 elif request_object['method'] == 'DELETE':
                     try:
@@ -68,14 +69,14 @@ def main(event, context):
             elif len(path) >= 4 and path[2] in ['asset', 'static']:
                 # {connection_id, entity_type, path, method}
                 usable_path = path[3:]
-                allowed = json.loads(lambda_client.invoke(FunctionName='mask', Payload=bytes(json.dumps({
+                allowed = json.loads(lambda_client.invoke(FunctionName='{}-mask'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
                     'connection_id': connection_id, 
                     'entity_type': path[2], 
                     'method': request_object['method'], 
                     'path': usable_path
                 }), 'utf-8'))['Payload'].read().decode('utf-8'))
                 if allowed:
-                    the_object = bucket.Object('_/asset/{}'.format('/'.join(usable_path))) if path[2] == 'asset' else bucket.Object('/'.join(usable_path))
+                    the_object = bucket.Object('{system_root}/asset/{usable_path}'.format(system_root=env['system_root'], usable_path='/'.join(usable_path))) if path[2] == 'asset' else bucket.Object('/'.join(usable_path))
                     canwrite = True
                     if request_object['method'] == 'PATCH':
                         try:
@@ -91,11 +92,11 @@ def main(event, context):
                 if len(path) == 4:
                     entity_type, entity_id = path[2:]
                     switches = {'entity_type': entity_type, 'entity_id': entity_id}
-                    entity_key = '_/{entity_type}/{entity_id}.json'.format(**switches)
+                    entity_key = '{system_root}/{entity_type}/{entity_id}.json'.format(system_root=env['system_root'], **switches)
                 else:
                     entity_type, class_name, entity_id, record_field = (path[2:5] + [None])
                     switches = {'entity_type': entity_type, 'class_name': class_name, 'entity_id': entity_id}
-                    entity_key = '_/{entity_type}/{class_name}/{entity_id}/{connection_id}.json'.format(**switches, connection_id=connection_id) if entity_type in ['feed', 'subscription'] else '_/{entity_type}/{class_name}/{entity_id}.json'.format(**switches)
+                    entity_key = '{system_root}/{entity_type}/{class_name}/{entity_id}/{connection_id}.json'.format(system_root=env['system_root'], **switches, connection_id=connection_id) if entity_type in ['feed', 'subscription'] else '_/{entity_type}/{class_name}/{entity_id}.json'.format(**switches)
                 try:
                     current_entity = s3.Object(os.environ['bucket'], entity_key).get()['Body'].read().decode('utf-8')
                 except:
@@ -118,9 +119,9 @@ def main(event, context):
                             entity = current_entity
                             del entity[record_field]
                             request_object['method'] = 'PUT'
-                if view_handle == 'json' and request_object['method'] in ['POST', 'PUT', 'PATCH'] and json.loads(lambda_client.invoke(FunctionName='validate', Payload=bytes(json.dumps({'entity': entity, 'switches': switches}), 'utf-8'))['Payload'].read().decode('utf-8')):
+                if view_handle == 'json' and request_object['method'] in ['POST', 'PUT', 'PATCH'] and json.loads(lambda_client.invoke(FunctionName='{}-validate'.format(env['lambda_namespace']), Payload=bytes(json.dumps({'entity': entity, 'switches': switches}), 'utf-8'))['Payload'].read().decode('utf-8')):
                     # {connection_id, entity_type, method, class_name, entity_id, entity}
-                    masked_entity = json.loads(lambda_client.invoke(FunctionName='mask', Payload=bytes(json.dumps({
+                    masked_entity = json.loads(lambda_client.invoke(FunctionName='{}-mask'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
                         'connection_id': connection_id, 
                         'entity_type': entity_type, 
                         'method': request_object['method'],
@@ -142,7 +143,7 @@ def main(event, context):
                                 updated_fields = [f for f in entity if entity[f] != current_entity.get(f)]
                                 put_response = bucket.put_object(Body=bytes(json.dumps(entity_to_write), 'utf-8'), Key=entity_key, ContentType='application/json')
                                 if entity_type == 'record':
-                                    record_version_key = '_/version/{class_name}/{record_id}/{version_id}.json'.format(class_name=entity['@type'], record_id=entity['@id'], version_id=put_response['VersionId'])
+                                    record_version_key = '{system_root}/version/{class_name}/{record_id}/{version_id}.json'.format(system_root=env['system_root'], class_name=entity['@type'], record_id=entity['@id'], version_id=put_response['VersionId'])
                                     bucket.put_object(Body=bytes(json.dumps(updated_fields), 'utf-8'), Key=record_version_key, ContentType='application/json')
                             elif request_object['method'] == 'DELETE' and current_entity:
                                 if entity_type in ['query', 'record', 'view', 'feed', 'subscription', 'system']:

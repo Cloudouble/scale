@@ -144,6 +144,8 @@ FUNCTIONS
 
 ENTITY TYPES
 
+connection => {mask=[]}
+
 view => {processor='', ?options={}, ?assets={alias: assetpath}, ?content_type='', ?suffix=''}
 
 query => {processor='', ?options={}, vectors=[], ?count=0}
