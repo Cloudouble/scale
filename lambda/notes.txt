@@ -118,7 +118,7 @@ FUNCTIONS
     - trigger view.py for each affected feed view
 
 
-* validate.py (ready for testing)
+* validate.py (tested)
     - triggered by clean.py, write.py
     - validate the given record according to its datatype
         
@@ -162,7 +162,8 @@ record => {@type, @id,  ...as per various schemas conforming to it's own @type..
 
 SYSTEM CONFIGURATION FORMAT
 
-/system/{scope}/{module}.json
+/system/{scope}/{module}.json  => /{entity_type}/{class_name}/{entity_id}.json
+
 
 
 e.g. 

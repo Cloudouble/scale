@@ -1,0 +1,16 @@
+{
+  "entity": {
+    "processor": "test",
+    "options": {
+      "abc": 1
+    },
+    "vector": [
+      "name"
+    ],
+    "count": 0
+  },
+  "switches": {
+    "entity_type": "query",
+    "entity_id": "test"
+  }
+}

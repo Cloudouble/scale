@@ -46,8 +46,25 @@ validators = {
 }
 
 
-def valid_view(view):
-    return all([type(view) is dict, type(view.get('view_id')) is str, type(view.get('expires', 0)) is int])
+def valid_feed_view(view):
+    return all([
+        type(view) is dict, 
+        type(view.get('view_id')) is str, 
+        type(view.get('sort_field')) is str, 
+        type(view.get('suffix')) is str, 
+        view.get('sort_direction', 'ascending') in ['ascending', 'descending'], 
+        type(view.get('field_name', '')) is str, 
+        type(view.get('min_index', 0)) is int, 
+        type(view.get('max_index', 0)) is int, 
+        type(view.get('expires', 0)) is int])
+
+def valid_subscription_view(view):
+    return all([
+        type(view) is dict, 
+        type(view.get('view_id')) is str, 
+        type(view.get('field_name', '')) is str, 
+        type(view.get('suffix', '')) is str, 
+        type(view.get('expires', 0)) is int])
 
 
 def main(event, context):
@@ -72,19 +89,11 @@ def main(event, context):
             # {processor='', ?options={}, vector=[], ?count=0}
             valid = type(entity.get('processor')) is str and type(entity.get('vector')) is list and type(entity.get('options', {})) is dict and type(entity.get('count', 0)) is int
         elif entity_type == 'feed':
-            # {sort_field='', ?sort_direction='ascending', ?min_index=0, ?max_index=1000, view=[{view_id='', ?expires=0, ?max=0, ?count=0, ?last=0, ?next=0}]}
-            valid = all([
-                type(entity.get('sort_field')) is str, 
-                type(entity.get('sort_direction')) in ['ascending', 'descending'], 
-                type(entity.get('min_index', 0)) is int, 
-                type(entity.get('min_index', 0)) is int, 
-                type(entity.get('max_index', 0)) is int, 
-                type(entity.get('view')) is list, 
-                all([valid_view(v) for v in entity['view']])
-            ])
+            # feed => {view=[{view_id='', ?field_name, ?expires=0, ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}]}
+            valid = type(entity.get('view')) is list and all([valid_feed_view(v) for v in entity['view']])
         elif entity_type == 'subscription':
-            # {view=[{view_id='', ?expires=0, ?max=0, ?count=0, ?last=0, ?next=0}]}
-            valid = all([type(entity.get('view')) is list, all([valid_view(v) for v in entity['view']])])
+            # subscription => {view=[{view_id='', ?field_name, ?expires=0, ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}]}
+            valid = type(entity.get('view')) is list and all([valid_subscription_view(v) for v in entity['view']])
         elif entity_type == 'system':
             valid = type(entity) is dict
         elif entity_type == 'record':

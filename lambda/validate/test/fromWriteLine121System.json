@@ -1,0 +1,14 @@
+{
+  "entity": {
+    "processor": "lambda-function-name",
+    "options": {
+      "abc": 123
+    },
+    "priority": 0
+  },
+  "switches": {
+    "entity_type": "system",
+    "class_name": "authentication",
+    "entity_id": "password"
+  }
+}

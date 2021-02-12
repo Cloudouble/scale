@@ -1,0 +1,16 @@
+{
+  "entity": {
+    "view": [
+      {
+        "view_id": "test",
+        "field_name": "name",
+        "expires": 100,
+        "suffix": "txt"
+      }
+    ]
+  },
+  "switches": {
+    "entity_type": "subscription",
+    "entity_id": "test"
+  }
+}

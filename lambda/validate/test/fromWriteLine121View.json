@@ -1,0 +1,17 @@
+{
+  "entity": {
+    "processor": "test",
+    "options": {
+      "abc": 1
+    },
+    "assets": {
+      "alias": "assetpath"
+    },
+    "content_type": "plain/text",
+    "suffix": "txt"
+  },
+  "switches": {
+    "entity_type": "view",
+    "entity_id": "test"
+  }
+}

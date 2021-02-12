@@ -1,0 +1,20 @@
+{
+  "entity": {
+    "view": [
+      {
+        "view_id": "test",
+        "field_name": "name",
+        "expires": 100,
+        "sort_field": "@id",
+        "sort_direction": "ascending",
+        "min_index": 0,
+        "max_index": 0,
+        "suffix": "txt"
+      }
+    ]
+  },
+  "switches": {
+    "entity_type": "query",
+    "entity_id": "test"
+  }
+}
