@@ -1,6 +1,6 @@
-import urllib.request, json, boto3
-
 env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_"}
+
+import urllib.request, json, boto3
 
 def main(event, context):
     '''

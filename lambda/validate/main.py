@@ -1,3 +1,5 @@
+env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_"}
+
 import json, boto3, os, datetime, uuid
 from datetime import datetime
 from datetime import date
@@ -87,8 +89,8 @@ def main(event, context):
             valid = type(entity) is dict
         elif entity_type == 'record':
             if entity.get('@type') and entity.get('@id'):
-                type_schema = json.loads(s3.Object(os.environ['bucket'], '_/schema/classes/{}.json'.format(entity['@type'])).get()['Body'].read().decode('utf-8'))
-                if type_schema and type(type_schema) is dict and entity['@type'] == entity_type and entity['@id'] == entity_id:
+                type_schema = json.loads(s3.Object(env['bucket'], '{system_root}/schema/classes/{entity_type}.json'.format(system_root=env['system_root'], entity_type=entity['@type'])).get()['Body'].read().decode('utf-8'))
+                if type_schema and type(type_schema) is dict and entity['@type'] == class_name and entity['@id'] == entity_id:
                     type_properties_map = type_schema.get('properties', {})
                     non_core_record_properties = [p for p in entity if p and type(p) is str and p[0] != '@']
                     if type_properties_map and all([type_properties_map.get(p) for p in non_core_record_properties]):
