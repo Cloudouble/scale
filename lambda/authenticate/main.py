@@ -5,7 +5,7 @@ import json, boto3
 def getpath(p):
     p = p.strip('/?')
     p = p[len(env['system_root']):] if p.startswith(env['system_root']) else p
-    p = p[:len('.json')] if p.endswith('.json') else p
+    p = p[:-len('.json')] if p.endswith('.json') else p
     return p.strip('/').split('/')
 
  
@@ -30,10 +30,15 @@ def main(event, context):
         system_configuration['authentication'].append({module_name: json.loads(bucket.Object(authentication_module_entry['Key']).get()['Body'].read().decode('utf-8'))})
     system_configuration['authentication'].sort(key=lambda a: a.get('priority', 1000))
     for authentication_channel in system_configuration['authentication']:
-        authentication_channel_name, authentication_channel_options = list(authentication_channel.items())[0]
-        if type(event.get(authentication_channel_name)) is dict and event[authentication_channel_name] and event[authentication_channel_name].get('processor') and event.get(authentication_channel_name):
-            authentication_payload = {'credentials': event[authentication_channel_name], 'options': event[authentication_channel_name].get('options', {})}
-            authentication_channel_result = json.loads(lambda_client.invoke(FunctionName=event[authentication_channel_name]['processor'], InvocationType='RequestResponse', Payload=bytes(json.dumps(authentication_payload), 'utf-8'))['Payload'].read().decode('utf-8'))
+        authentication_channel_name, authentication_channel_config = list(authentication_channel.items())[0]
+        
+        print(authentication_channel_name)
+        print(authentication_channel_config)
+        
+        if type(event.get(authentication_channel_name)) is dict and authentication_channel_config.get('processor'):
+            authentication_payload = {'credentials': event[authentication_channel_name], 'options': authentication_channel_config.get('options', {})}
+            print(authentication_payload)
+            authentication_channel_result = json.loads(lambda_client.invoke(FunctionName=authentication_channel_config['processor'], InvocationType='RequestResponse', Payload=bytes(json.dumps(authentication_payload), 'utf-8'))['Payload'].read().decode('utf-8'))
             if authentication_channel_result and type(authentication_channel_result) is dict and type(authentication_channel_result.get('mask')) is dict:
                 connection_record = authentication_channel_result
                 break
