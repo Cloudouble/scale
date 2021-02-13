@@ -1,0 +1,12 @@
+{
+  "credentials": {
+    "test": {
+      "username": "Test User"
+    }
+  },
+  "options": {
+    "mask": {
+      "*": "*"
+    }
+  }
+}

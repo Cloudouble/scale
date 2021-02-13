@@ -26,9 +26,10 @@ def main(event, context):
                 if event['entity_type'] in ['asset', 'static'] and event.get('path'):
                     # event = {connection_id, entity_type, path, method}
                     mask = connection_mask.get(event['entity_type']) if event['entity_type'] in mask else mask.get('*', {})
-                    mask = mask.get(event['method']) if event['method'] in mask else mask.get('*', {})
+                    if type(mask) is dict:
+                        mask = mask.get(event['method']) if event['method'] in mask else mask.get('*', {})
                     for p in event['path']:
-                        if mask:
+                        if type(mask) is dict:
                             mask = mask.get(p) if p in mask else mask.get('*', {})
                     if event['entity_type'] == 'static' and event['path'][0] == '_':
                         allowed = False
@@ -49,8 +50,10 @@ def main(event, context):
                     lambda_client = boto3.client('lambda')
                     switches = {'entity_type': event['entity_type'], 'method': event['method'], 'class_name': event['class_name'], 'entity_id': event['entity_id']}
                     mask = connection_mask.get(switches['entity_type']) if switches['entity_type'] in connection_mask else connection_mask.get('*', {})
-                    mask = mask.get(switches['method']) if switches['method'] in mask else mask.get('*', {})
-                    mask = mask.get(switches['class_name']) if switches['class_name'] in mask else mask.get('*', {})
+                    if type(mask) is dict:
+                        mask = mask.get(switches['method']) if switches['method'] in mask else mask.get('*', {})
+                    if type(mask) is dict:
+                        mask = mask.get(switches['class_name']) if switches['class_name'] in mask else mask.get('*', {})
                     masked_entity = {}
                     if type(event.get('entity')) is dict:
                         entity = event['entity']
@@ -58,6 +61,11 @@ def main(event, context):
                         entity = json.loads(bucket.get_object(Key='_/{entity_type}/{class_name}/{entity_id}.json'.format(entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id']))['Body'].read().decode('utf-8'))
                     constrained = True
                     allowfields = []
+                    if not mask:
+                        mask = {}
+                    elif mask == '*':
+                        constrained = False
+                        mask = {}
                     for mask_name, options in mask.items():
                         options = options if type(options) is dict else {}
                         if constrained:

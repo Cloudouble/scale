@@ -175,3 +175,26 @@ e.g.
 
 
 
+----- 
+
+MASK FORMAT
+
+{"*": "*"}  =>    all permissions 
+
+{"record": "*"}  => can do anything with any record
+
+record mask = {"record": {"GET": "*"}}   => can GET (view) any record
+
+{"record": {"GET": {"Book": "*"}}}   => can GET (view) any Book record
+
+{"record": {"GET": {"Book": {"mask-function-id-1": {"options1": 1}, "mask-function-2": {"option2": 234}}}}}  => the allowfields of mask-function-1 and mask-function-2 will be used to determine which fields 
+of Book record the connection can GET (view)
+ 
+
+{"asset": {"GET": {"file.png": "*"} } }  => can view _/asset/file.png
+
+{"asset": {"GET": {"profiles/": "*"} } }   => can view any file under the _/profiles/ path
+
+{"asset": {"GET": {"profiles/": {"testuser.png": "*"} } } }  => cam view the file _/profiles/testuser.png
+
+{"asset": {"GET": {"profiles/": {"testuser.png": {"mask-function-id": {"option1": 123}}}}}}  => if the result of mask-function-id is True, then can view _/profiles/testuser.png
