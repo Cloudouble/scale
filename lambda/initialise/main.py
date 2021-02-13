@@ -22,9 +22,9 @@ def main(event, context):
     if event.get('system_user_name') and event.get('system_user_key'):
         sudo_module_path = '{system_root}/system/authentication/sudo.json'.format(system_root=env['system_root'])
         sudo_module_data = {'processor': '{}-sudo'.format(env['lambda_namespace']), 'options': {
-            'user_name': event.get('system_user_name', 'system')}, 
+            'user_name': event.get('system_user_name', 'system'), 
             'key': hashlib.sha512(bytes(event.get('system_user_key'), 'utf-8')).hexdigest()
-        }
+        }}
         bucket.put_object(Body=bytes(json.dumps(sudo_module_data), 'utf-8'), Key=sudo_module_path, ContentType='application/json')
         hashlib.sha512(bytes(event.get('system_user_key'), 'utf-8')).hexdigest()
 
