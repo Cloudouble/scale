@@ -44,10 +44,15 @@ CONNECTION PATHS
 
 FUNCTIONS
 
+* initialise (tested)
+    - run once by an administrator to install the system into a AWS S3 Bucket
+    - take a set of parameters {"system_user_key": "-----", "system_user_name": "system"}
+    - return True when complete
+
 * schema (tested)
     - triggered on-demand by an administrator
     - updates schema data to all system paths under /schema
-    
+
 * clean.py (ready for testing)
     - triggered on-demand by an administrator
     - schema-enforce: runs validation over every record in the system and moves them to /trash/record/{record_id}.json if found invalid
@@ -118,11 +123,11 @@ FUNCTIONS
     - trigger view.py for each affected feed view
 
 
-* validate.py (tested)
+* validate (tested)
     - triggered by clean.py, write.py
     - validate the given record according to its datatype
         
-* authenticate.py (ready for testing)
+* authenticate (tested)
     - triggered by write.py
     - takes care of authentication sub-processes
     - returns a connection object with (at least) a 'mask' property, which is overlaid onto _/connection/{connection_id}.json
@@ -139,6 +144,10 @@ FUNCTIONS
     - triggered by react-feed.py, react-subscription.py, react-view.py, react-connection-record.py, react-connection-index.py
     - runs the given view with the given masked record/query results and writes the result to the relevant view path(s)
 
+
+
+* sudo
+    - called by 
 
 -----
 
