@@ -51,19 +51,20 @@ def main(event, context):
         if path and path[0] == 'connection' and len(path) >= 2 and uuid_valid(path[1]):
             connection_id = path[1]
             if len(path) == 2:
-                # - writes/deletes a connection configuration to /connection/{connection_id}.json
                 connection_object = bucket.Object('{system_root}/connection/{connection_id}.json'.format(system_root=env['system_root'], connection_id=connection_id))
                 try:
-                    connection_record = connection_object.get()['Body'].read().decode('utf-8')
+                    connection_record = json.loads(connection_object.get()['Body'].read().decode('utf-8'))
                 except:
                     connection_record = {'mask': {}}
                 if request_object['method'] in ['POST', 'PUT', 'PATCH']:
-                    if entity and type(entity) is dict:
+                    if entity and type(entity) is dict and len(entity) == 1 and type(list(entity.values())[0]) is dict:
                         connection_record = {**connection_record, **json.loads(lambda_client.invoke(FunctionName='{}-authenticate'.format(env['lambda_namespace']), InvocationType='RequestResponse', Payload=bytes(json.dumps(entity), 'utf-8'))['Payload'].read().decode('utf-8'))}
                     connection_object.put(Body=bytes(json.dumps(connection_record), 'utf-8'), ContentType='application/json')
+                    counter = counter + 1
                 elif request_object['method'] == 'DELETE':
                     try:
                         connection_object.delete()
+                        counter = counter + 1
                     except:
                         pass
             elif len(path) >= 4 and path[2] in ['asset', 'static']:
