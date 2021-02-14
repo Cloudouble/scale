@@ -3,6 +3,12 @@ env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scal
 import json, boto3, os, base64, uuid, time
 from urllib.parse import parse_qs
 
+def getpath(p):
+    p = p.strip('/?')
+    p = p[len(env['system_root']):] if p.startswith(env['system_root']) else p
+    p = p[:-len('.json')] if p.endswith('.json') else p
+    return p.strip('/').split('/')
+
 def uuid_valid(s):
     try:
         uuid.UUID(s).version == 4
@@ -47,7 +53,7 @@ def main(event, context):
             entity = json.loads(body)
         except: 
             entity = {k: v[0] for k, v in parse_qs(body).items()}
-        path = request_object['uri'].strip('/?').replace('{}/'.format(env['system_root']), '').replace('.json', '').split('/')
+        path = getpath(request_object['uri'])
         if path and path[0] == 'connection' and len(path) >= 2 and uuid_valid(path[1]):
             connection_id = path[1]
             if len(path) == 2:
@@ -99,7 +105,7 @@ def main(event, context):
                     switches = {'entity_type': entity_type, 'class_name': class_name, 'entity_id': entity_id}
                     entity_key = '{system_root}/{entity_type}/{class_name}/{entity_id}/{connection_id}.json'.format(system_root=env['system_root'], **switches, connection_id=connection_id) if entity_type in ['feed', 'subscription'] else '_/{entity_type}/{class_name}/{entity_id}.json'.format(**switches)
                 try:
-                    current_entity = s3.Object(os.environ['bucket'], entity_key).get()['Body'].read().decode('utf-8')
+                    current_entity = json.loads(s3.Object(env['bucket'], entity_key).get()['Body'].read().decode('utf-8'))
                 except:
                     current_entity = {}
                 if len(path) in [4, 5]:
@@ -144,7 +150,7 @@ def main(event, context):
                                 updated_fields = [f for f in entity if entity[f] != current_entity.get(f)]
                                 put_response = bucket.put_object(Body=bytes(json.dumps(entity_to_write), 'utf-8'), Key=entity_key, ContentType='application/json')
                                 if entity_type == 'record':
-                                    record_version_key = '{system_root}/version/{class_name}/{record_id}/{version_id}.json'.format(system_root=env['system_root'], class_name=entity['@type'], record_id=entity['@id'], version_id=put_response['VersionId'])
+                                    record_version_key = '{system_root}/version/{class_name}/{record_id}/{version_id}.json'.format(system_root=env['system_root'], class_name=entity['@type'], record_id=entity['@id'], version_id=put_response.version_id)
                                     bucket.put_object(Body=bytes(json.dumps(updated_fields), 'utf-8'), Key=record_version_key, ContentType='application/json')
                             elif request_object['method'] == 'DELETE' and current_entity:
                                 if entity_type in ['query', 'record', 'view', 'feed', 'subscription', 'system']:
