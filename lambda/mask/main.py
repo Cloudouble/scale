@@ -1,4 +1,6 @@
-import json, boto3, os, time
+env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_"}
+
+import json, boto3, time
 
 def chunks(lst, n):
     for i in range(0, len(lst), n):
@@ -13,8 +15,8 @@ def main(event, context):
     masked_entity = None
     if event.get('connection_id'):
         s3 = boto3.resource('s3')
-        bucket = s3.Bucket(os.environ['bucket'])
-        connection_object = bucket.Object('_/connection/{connection_id}.json'.format(connection_id=event['connection_id']))
+        bucket = s3.Bucket(env['bucket'])
+        connection_object = bucket.Object('{system_root}/connection/{connection_id}.json'.format(system_root=env['system_root'], connection_id=event['connection_id']))
         try:
             connection_record = json.loads(connection_object.get()['Body'].read().decode('utf-8'))
         except:
@@ -31,7 +33,7 @@ def main(event, context):
                     for p in event['path']:
                         if type(mask) is dict:
                             mask = mask.get(p) if p in mask else mask.get('*', {})
-                    if event['entity_type'] == 'static' and event['path'][0] == '_':
+                    if event['entity_type'] == 'static' and event['path'][0:len(env['system_root'])] == env['system_root']:
                         allowed = False
                     else:
                         if not mask:
@@ -39,14 +41,14 @@ def main(event, context):
                         elif mask == '*':
                             allowed = True
                         elif type(mask) is dict:
-                            allowed = all([json.loads(lambda_client.invoke(FunctionName=mask_name, Payload=bytes(json.dumps({
+                            allowed = all([json.loads(lambda_client.invoke(FunctionName='{lambda_namespace}-{mask_name}'.format(lambda_namespace=lambda_namespace, mask_name=mask_name), Payload=bytes(json.dumps({
                                 'purpose': 'mask', 'connection_id': event['connection_id'], 'path': event['path'], 'options': options}), 'utf-8'))['Payload'].read().decode('utf-8')) 
                                 for mask_name, options in mask.items()])
                     return allowed
                 elif all([event.get(k) for k in ['class_name', 'entity_id']]):
                     # event = {connection_id, entity_type, method, class_name, entity_id, entity}
                     s3 = boto3.resource('s3')
-                    bucket = s3.Bucket(os.environ['bucket'])
+                    bucket = s3.Bucket(env['bucket'])
                     lambda_client = boto3.client('lambda')
                     switches = {'entity_type': event['entity_type'], 'method': event['method'], 'class_name': event['class_name'], 'entity_id': event['entity_id']}
                     mask = connection_mask.get(switches['entity_type']) if switches['entity_type'] in connection_mask else connection_mask.get('*', {})
@@ -58,7 +60,7 @@ def main(event, context):
                     if type(event.get('entity')) is dict:
                         entity = event['entity']
                     else:
-                        entity = json.loads(bucket.get_object(Key='_/{entity_type}/{class_name}/{entity_id}.json'.format(entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id']))['Body'].read().decode('utf-8'))
+                        entity = json.loads(bucket.get_object(Key='{system_root}/{entity_type}/{class_name}/{entity_id}.json'.format(system_root=env['system_root'], entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id']))['Body'].read().decode('utf-8'))
                     constrained = True
                     allowfields = []
                     if not mask:

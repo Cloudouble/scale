@@ -61,15 +61,15 @@ FUNCTIONS
 
 * write.py (testing in progress...)
     - triggered as an endpoint for a CDN or API originated PUT / PATCH / POST / DELETE request, or a websocket $put/$post/$patch/$delete message
-    - writes/deletes a connection configuration to ~connection/{connection_id}.json OR
+    - writes/deletes a connection configuration to ~connection/{connection_id}.json OR (tested)
     - writes/deletes a view configuration to /view/{view_id}.json via /connection/{connection_id}/view/{view_id}.json OR
-    - writes/deletes an private asset to ~asset/{assetpath} via ~connection/{connection_id}/asset/{path}
-    - writes/deletes an static asset to {path} via ~connection/{connection_id}/static/{path}
+    - writes/deletes an private asset to ~asset/{assetpath} via ~connection/{connection_id}/asset/{path} OR
+    - writes/deletes an static asset to {path} via ~connection/{connection_id}/static/{path} OR
     - writes/deletes a query configuration to /query/{class_name}/{query_id}.json via /connection/{connection_id}/query/{class_name}/{query_id}.json  OR
     - writes/deletes a feed configuration to /feed/{class_name}/{query_id}/{connection_id}.json via /connection/{connection_id}/feed/{class_name}/{query_id}.json OR 
     - writes/deletes a subscription configuration to /subscription/{class_name}/{record_id}/{connection_id}.json via /connection/{connection_id}/subscription/{class_name}/{record_id}.json OR 
     - writes/deletes a system module configuration to /system/{scope}/{module}.json via /connection/{connection_id}/system/{scope}/{module}.json OR
-    - writes a record to /record/{class_name}/{record_id}.json via /connection/{connection_id}/record/{class_name}/{record_id}.json
+    - writes a record to /record/{class_name}/{record_id}.json via /connection/{connection_id}/record/{class_name}/{record_id}.json OR (testing)
     - writes a record field to /record/{class_name}/{record_id}[field_name].json via /connection/{connection_id}/record/{class_name}/{record_id}/{field_name}.json
     - generates a version record at /version/{class_name}/{record_id}/{version_id}.json
 
@@ -136,7 +136,7 @@ FUNCTIONS
     - triggered by react-query.py, react-version.py
     - executes the given query using the given record, returning True if matching
 
-* mask.py (ready for testing)
+* mask.py (tested)
     - triggered by write.py, react-version.py, react-index.py, react-connection-record.py, react-connection-index.py
     - given a connection_id and a record, writes the masked version of the record to /connection/{connection_id}/record/{class_name}/{record_id}.json
     
