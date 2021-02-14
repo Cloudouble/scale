@@ -64,7 +64,7 @@ def main(event, context):
                     connection_record = {'mask': {}}
                 if request_object['method'] in ['POST', 'PUT', 'PATCH']:
                     if entity and type(entity) is dict and len(entity) == 1 and type(list(entity.values())[0]) is dict:
-                        connection_record = {**connection_record, **json.loads(lambda_client.invoke(FunctionName='{}-authenticate'.format(env['lambda_namespace']), InvocationType='RequestResponse', Payload=bytes(json.dumps(entity), 'utf-8'))['Payload'].read().decode('utf-8'))}
+                        connection_record = {**connection_record, **json.loads(lambda_client.invoke(FunctionName='{}-core-authenticate'.format(env['lambda_namespace']), InvocationType='RequestResponse', Payload=bytes(json.dumps(entity), 'utf-8'))['Payload'].read().decode('utf-8'))}
                     connection_object.put(Body=bytes(json.dumps(connection_record), 'utf-8'), ContentType='application/json')
                     counter = counter + 1
                 elif request_object['method'] == 'DELETE':
@@ -76,7 +76,7 @@ def main(event, context):
             elif len(path) >= 4 and path[2] in ['asset', 'static']:
                 # {connection_id, entity_type, path, method}
                 usable_path = path[3:]
-                allowed = json.loads(lambda_client.invoke(FunctionName='{}-mask'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
+                allowed = json.loads(lambda_client.invoke(FunctionName='{}-core-mask'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
                     'connection_id': connection_id, 
                     'entity_type': path[2], 
                     'method': request_object['method'], 
@@ -126,9 +126,9 @@ def main(event, context):
                             entity = current_entity
                             del entity[record_field]
                             request_object['method'] = 'PUT'
-                if view_handle == 'json' and request_object['method'] in ['POST', 'PUT', 'PATCH'] and json.loads(lambda_client.invoke(FunctionName='{}-validate'.format(env['lambda_namespace']), Payload=bytes(json.dumps({'entity': entity, 'switches': switches}), 'utf-8'))['Payload'].read().decode('utf-8')):
+                if view_handle == 'json' and request_object['method'] in ['POST', 'PUT', 'PATCH'] and json.loads(lambda_client.invoke(FunctionName='{}-core-validate'.format(env['lambda_namespace']), Payload=bytes(json.dumps({'entity': entity, 'switches': switches}), 'utf-8'))['Payload'].read().decode('utf-8')):
                     # {connection_id, entity_type, method, class_name, entity_id, entity}
-                    masked_entity = json.loads(lambda_client.invoke(FunctionName='{}-mask'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
+                    masked_entity = json.loads(lambda_client.invoke(FunctionName='{}-core-mask'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
                         'connection_id': connection_id, 
                         'entity_type': entity_type, 
                         'method': request_object['method'],

@@ -41,7 +41,7 @@ def main(event, context):
                         elif mask == '*':
                             allowed = True
                         elif type(mask) is dict:
-                            allowed = all([json.loads(lambda_client.invoke(FunctionName='{lambda_namespace}-{mask_name}'.format(lambda_namespace=lambda_namespace, mask_name=mask_name), Payload=bytes(json.dumps({
+                            allowed = all([json.loads(lambda_client.invoke(FunctionName='{lambda_namespace}-extension-mask-{mask_name}'.format(lambda_namespace=env['lambda_namespace'], mask_name=mask_name), Payload=bytes(json.dumps({
                                 'purpose': 'mask', 'connection_id': event['connection_id'], 'path': event['path'], 'options': options}), 'utf-8'))['Payload'].read().decode('utf-8')) 
                                 for mask_name, options in mask.items()])
                     return allowed
@@ -72,7 +72,7 @@ def main(event, context):
                         options = options if type(options) is dict else {}
                         if constrained:
                             mask_payload = {'purpose': 'mask', 'entity': entity, 'connection_id': event['connection_id'], 'switches': switches, 'options': options}
-                            allowfields.extend(json.loads(lambda_client.invoke(FunctionName=mask_name, Payload=bytes(json.dumps(mask_payload), 'utf-8'))['Payload'].read().decode('utf-8')))
+                            allowfields.extend(json.loads(lambda_client.invoke(FunctionName='{lambda_namespace}-extension-mask-{mask_name}'.format(lambda_namespace=env['lambda_namespace'], mask_name=mask_name), Payload=bytes(json.dumps(mask_payload), 'utf-8'))['Payload'].read().decode('utf-8')))
                             if '*' in allowfields:
                                 constrained = False
                                 break
