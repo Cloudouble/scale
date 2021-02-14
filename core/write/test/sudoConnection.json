@@ -1,0 +1,15 @@
+{
+  "Records": [
+    {
+      "cf": {
+        "request": {
+          "method": "PUT",
+          "body": {
+            "data": "{\"sudo\": {\"key\": \"-----\"}}"
+          },
+          "uri": "_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6.json"
+        }
+      }
+    }
+  ]
+}

@@ -21,7 +21,7 @@ def main(event, context):
 
     if event.get('system_user_name') and event.get('system_user_key'):
         sudo_module_path = '{system_root}/system/authentication/sudo.json'.format(system_root=env['system_root'])
-        sudo_module_data = {'processor': '{}-sudo'.format(env['lambda_namespace']), 'options': {
+        sudo_module_data = {'processor': '{}-extension-authenticate-sudo'.format(env['lambda_namespace']), 'options': {
             'user_name': event.get('system_user_name', 'system'), 
             'key': hashlib.sha512(bytes(event.get('system_user_key'), 'utf-8')).hexdigest()
         }}
