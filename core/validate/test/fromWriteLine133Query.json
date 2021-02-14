@@ -1,0 +1,14 @@
+{
+  "entity": {
+    "processor": "books",
+    "vector": [
+      "name",
+      "numberOfPages"
+    ]
+  },
+  "switches": {
+    "entity_type": "query",
+    "class_name": "Book",
+    "entity_id": "9886c382-4b22-454d-8910-bb1415018421"
+  }
+}
