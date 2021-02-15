@@ -16,6 +16,7 @@ def main(event, context):
     if event.get('connection_id'):
         s3 = boto3.resource('s3')
         bucket = s3.Bucket(env['bucket'])
+        s3_client = boto3.client('s3')
         connection_object = bucket.Object('{system_root}/connection/{connection_id}.json'.format(system_root=env['system_root'], connection_id=event['connection_id']))
         try:
             connection_record = json.loads(connection_object.get()['Body'].read().decode('utf-8'))
@@ -44,6 +45,11 @@ def main(event, context):
                             allowed = all([json.loads(lambda_client.invoke(FunctionName='{lambda_namespace}-extension-mask-{mask_name}'.format(lambda_namespace=env['lambda_namespace'], mask_name=mask_name), Payload=bytes(json.dumps({
                                 'purpose': 'mask', 'connection_id': event['connection_id'], 'path': event['path'], 'options': options}), 'utf-8'))['Payload'].read().decode('utf-8')) 
                                 for mask_name, options in mask.items()])
+                    if allowed and event.get('write'):
+                        write_path = event.get('path') if event['entity_type'] == 'static' else '{system_root}/asset/{path}'.format(system_root=env['system_root'], path=event['path'])
+                        
+                        ### work to do here for file uploads
+
                     return allowed
                 elif all([event.get(k) for k in ['class_name', 'entity_id']]):
                     # event = {connection_id, entity_type, method, class_name, entity_id, entity}
@@ -84,5 +90,10 @@ def main(event, context):
                                 masked_entity[field] = entity[field]
                     else:
                         masked_entity = {**entity, '__constrained': constrained}
+                    if masked_entity and event.get('write'):
+                        writable_entity = {**masked_entity}
+                        del writable_entity['__constrained']
+                        write_key = '{system_root}/connection/{connection_id}/record/{record_id}.json'.format(system_root=env['system_root'], connection_id=event['connection_id'], record_id=event['entity_id'])
+                        bucket.put_object(Body=bytes(json.dumps(writable_entity), 'utf-8'), Key=write_key, ContentType='application/json')
 
     return masked_entity

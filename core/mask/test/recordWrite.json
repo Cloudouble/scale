@@ -1,0 +1,14 @@
+{
+  "connection_id": "74facaff-c792-4c70-b8a4-71b3ad78d3f6",
+  "entity_type": "record",
+  "method": "GET",
+  "class_name": "Book",
+  "entity_id": "87370050-971f-4cd9-9c32-1072c6ac3c52",
+  "entity": {
+    "@type": "Book",
+    "@id": "87370050-971f-4cd9-9c32-1072c6ac3c52",
+    "name": "Test Book",
+    "numberOfPages": 42
+  },
+  "write": true
+}

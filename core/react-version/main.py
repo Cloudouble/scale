@@ -17,9 +17,9 @@ def process_record(key_obj, bucket, lambda_client, record):
         'method': 'GET', 
         'class_name': class_name,
         'entity_id': record_id, 
-        'entity': record
+        'entity': record, 
+        'write': True
     }
-    print(mask_payload)
     lambda_client.invoke(FunctionName='{lambda_namespace}-core-mask'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps(mask_payload), 'utf-8'))
 
 def main(event, context):
