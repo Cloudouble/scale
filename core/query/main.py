@@ -1,3 +1,5 @@
+env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_"}
+
 import json, boto3, os
 
 def main(event, context):

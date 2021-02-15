@@ -1,0 +1,14 @@
+{
+    "purpose": "query", 
+    "record": {
+        "@type": "Book", 
+        "@id": "87370050-971f-4cd9-9c32-1072c6ac3c52", 
+        "name": "Test Book", 
+        "numberOfPages": 42
+    }, 
+    "options": {
+        "pagesFilter": true, 
+        "minPages": 1, 
+        "maxPages": 100
+    }
+}

@@ -78,7 +78,7 @@ CORE FUNCTIONS
     - triggered by writes at /connection/{connection_id}.json
     - deletes all objects under /connection/{connection_id}/
 
-* react-query.py (testing) ***CURRENT***
+* react-query.py (testing)
     - triggered by writes at /query/{class_name}/{query_id}.json
     - for each field in /vector/{class_name}/, remove the query_id if the field name is not in query->vector
     - for each query->vector, ensure that the query_id is present in /vector/{class_name}.json
@@ -132,7 +132,7 @@ CORE FUNCTIONS
     - takes care of authentication sub-processes
     - returns a connection object with (at least) a 'mask' property, which is overlaid onto _/connection/{connection_id}.json
 
-* query-record.py (ready for testing)
+* query (testing) ***CURRENT***
     - triggered by react-query.py, react-version.py
     - executes the given query using the given record, returning True if matching
 
@@ -148,8 +148,11 @@ CORE FUNCTIONS
 
 EXTENSION FUNCTIONS
 
-* sudo
+* authentication/sudo
     - a sudo authenticator
+
+* query/books
+    - a query processor for filtering book records
 
 -----
 
