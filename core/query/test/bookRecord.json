@@ -1,6 +1,11 @@
 {
   "query_id": "9886c382-4b22-454d-8910-bb1415018421",
   "processor": "books",
+  "options": {
+    "pagesFilter": true,
+    "minPages": 1,
+    "maxPages": 100
+  },
   "record": {
     "@type": "Book",
     "@id": "87370050-971f-4cd9-9c32-1072c6ac3c52"

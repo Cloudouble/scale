@@ -102,7 +102,7 @@ CORE FUNCTIONS
 * react-version.py (ready for testing)
     - triggered by new objects at /version/{class_name}/{record_id}/{version_id}.json
     - uses /vector/{class_name}/{field_name}.json to find affected queries 
-    - triggers query-record.py with the full record for each affected query to update the relevant indexes in /query/{class_name}/{query_id}/{record_initial}.json
+    - triggers query.py with the full record for each affected query to update the relevant indexes in /query/{class_name}/{query_id}/{record_initial}.json
     - uses /subscription/{class_name}/{record_id}/{connection_id}.json to find affected connections
     - triggers mask.py for each affected connection
 
@@ -132,7 +132,7 @@ CORE FUNCTIONS
     - takes care of authentication sub-processes
     - returns a connection object with (at least) a 'mask' property, which is overlaid onto _/connection/{connection_id}.json
 
-* query (testing) ***CURRENT***
+* query (tested)
     - triggered by react-query.py, react-version.py
     - executes the given query using the given record, returning True if matching
 
