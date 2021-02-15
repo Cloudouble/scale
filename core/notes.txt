@@ -67,7 +67,7 @@ CORE FUNCTIONS
     - writes/deletes an static asset to {path} via ~connection/{connection_id}/static/{path} OR
     - writes/deletes a query configuration to /query/{class_name}/{query_id}.json via /connection/{connection_id}/query/{class_name}/{query_id}.json  OR (tested)
     - writes/deletes a feed configuration to /feed/{class_name}/{query_id}/{connection_id}.json via /connection/{connection_id}/feed/{class_name}/{query_id}.json OR 
-    - writes/deletes a subscription configuration to /subscription/{class_name}/{record_id}/{connection_id}.json via /connection/{connection_id}/subscription/{class_name}/{record_id}.json OR 
+    - writes/deletes a subscription configuration to /subscription/{class_name}/{record_id}/{connection_id}.json via /connection/{connection_id}/subscription/{class_name}/{record_id}.json OR (testing)
     - writes/deletes a system module configuration to /system/{scope}/{module}.json via /connection/{connection_id}/system/{scope}/{module}.json OR
     - writes a record to /record/{class_name}/{record_id}.json via /connection/{connection_id}/record/{class_name}/{record_id}.json OR (tested)
     - writes a record field to /record/{class_name}/{record_id}[field_name].json via /connection/{connection_id}/record/{class_name}/{record_id}/{field_name}.json
@@ -164,9 +164,9 @@ view => {processor='', ?options={}, ?assets={alias: assetpath}, ?content_type=''
 
 query => {processor='', ?options={}, vector=[], ?count=0}
 
-feed => {view=[{view_id='', ?field_name, ?expires=0, ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}]}
+feed => [{view_id='', ?field_name, ?expires=0, ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}]
 
-subscription => {view=[{view_id='', field_name='', ?expires=0}]}
+subscription => [{view_id='', field_name='', ?expires=0}]
 
 system => {}
 
