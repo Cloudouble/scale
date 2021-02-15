@@ -106,11 +106,11 @@ CORE FUNCTIONS
     - use /feed/{class_name}/{query_id}/{connection_id}.json to get all affected connection feeds
     - trigger view.py for each view configuration in each affected feed->view of each affected connection
 
-* react-version.py (testing in progress) **CURRENT**
+* react-version.py (tested)
     - triggered by new objects at /version/{class_name}/{record_id}/{version_id}.json
     - uses /vector/{class_name}/{field_name}.json to find affected queries 
     - triggers query.py with the full record for each affected query to update the relevant indexes in /query/{class_name}/{query_id}/{record_initial}.json
-    - uses /subscription/{class_name}/{record_id}/{connection_id}.json to find affected connections
+    - lists /subscription/{class_name}/{record_id}/* to find affected connections
     - triggers mask.py for each affected connection
 
 * react-index.py (ready for testing)
