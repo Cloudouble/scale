@@ -111,21 +111,27 @@ def main(event, context):
                 if len(path) in [4, 5]:
                     entity_id, view_handle = (entity_id.split('.', 1) + ['json'])[:2]
                 elif len(path) == 6:
-                    record_field, view_handle = (path[5].split('.', 1) + ['json'])[:2]
-                    if request_object['method'] in ['POST', 'PUT']:
-                        entity = {record_field: entity}
-                        request_object['method'] = 'POST'
-                    elif request_object['method'] in ['DELETE', 'PATCH']:
-                        if request_object['method'] == 'PATCH':
-                            if current_entity:
-                                entity = {record_field: entity}
-                                request_object['method'] = 'POST'
-                            else:
-                                entity = {} 
-                        elif request_object['method'] == 'DELETE':
-                            entity = current_entity
-                            del entity[record_field]
-                            request_object['method'] = 'PUT'
+                    if entity_type in ['subscription']:
+                        switches['record_id'] = entity_id
+                        entity_id, view_handle = (path[5].split('.', 1) + ['json'])[:2]
+                        switches['entity_id'] = entity_id
+                        entity_key = '{system_root}/{entity_type}/{class_name}/{record_id}/{connection_id}/{entity_id}.json'.format(system_root=env['system_root'], **switches, connection_id=connection_id) if entity_type in ['feed', 'subscription'] else '_/{entity_type}/{class_name}/{entity_id}.json'.format(**switches)
+                    else:
+                        record_field, view_handle = (path[5].split('.', 1) + ['json'])[:2]
+                        if request_object['method'] in ['POST', 'PUT']:
+                            entity = {record_field: entity}
+                            request_object['method'] = 'POST'
+                        elif request_object['method'] in ['DELETE', 'PATCH']:
+                            if request_object['method'] == 'PATCH':
+                                if current_entity:
+                                    entity = {record_field: entity}
+                                    request_object['method'] = 'POST'
+                                else:
+                                    entity = {} 
+                            elif request_object['method'] == 'DELETE':
+                                entity = current_entity
+                                del entity[record_field]
+                                request_object['method'] = 'PUT'
                 if view_handle == 'json' and request_object['method'] in ['POST', 'PUT', 'PATCH'] and json.loads(lambda_client.invoke(FunctionName='{}-core-validate'.format(env['lambda_namespace']), Payload=bytes(json.dumps({'entity': entity, 'switches': switches}), 'utf-8'))['Payload'].read().decode('utf-8')):
                     # {connection_id, entity_type, method, class_name, entity_id, entity}
                     masked_entity = json.loads(lambda_client.invoke(FunctionName='{}-core-mask'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
@@ -147,7 +153,8 @@ def main(event, context):
                                 entity_to_write = {**current_entity, **masked_entity}
                         if entity_to_write:
                             if request_object['method'] in ['PUT', 'POST', 'PATCH']:
-                                updated_fields = [f for f in entity if entity[f] != current_entity.get(f)]
+                                if entity_type == 'record':
+                                    updated_fields = [f for f in entity if entity[f] != current_entity.get(f)]
                                 put_response = bucket.put_object(Body=bytes(json.dumps(entity_to_write), 'utf-8'), Key=entity_key, ContentType='application/json')
                                 if entity_type == 'record':
                                     record_version_key = '{system_root}/version/{class_name}/{record_id}/{version_id}.json'.format(system_root=env['system_root'], class_name=entity['@type'], record_id=entity['@id'], version_id=put_response.version_id)

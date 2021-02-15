@@ -1,0 +1,10 @@
+{
+  "entity": {
+    "view_id": "3365ffbb-b809-491b-86b4-833291eb2df1"
+  },
+  "switches": {
+    "entity_type": "subscription",
+    "class_name": "Book",
+    "entity_id": "87370050-971f-4cd9-9c32-1072c6ac3c52"
+  }
+}

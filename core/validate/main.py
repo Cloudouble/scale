@@ -58,14 +58,6 @@ def valid_feed_view(view):
         type(view.get('max_index', 0)) is int, 
         type(view.get('expires', 0)) is int])
 
-def valid_subscription_view(view):
-    return all([
-        type(view) is dict, 
-        type(view.get('view_id')) is str, 
-        type(view.get('field_name', '')) is str, 
-        type(view.get('suffix', '')) is str, 
-        type(view.get('expires', 0)) is int])
-
 
 def main(event, context):
     '''
@@ -92,8 +84,8 @@ def main(event, context):
             # feed => {view=[{view_id='', ?field_name, ?expires=0, ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}]}
             valid = type(entity.get('view')) is list and all([valid_feed_view(v) for v in entity['view']])
         elif entity_type == 'subscription':
-            # subscription => {view=[{view_id='', ?field_name, ?expires=0, ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}]}
-            valid = type(entity.get('view')) is list and all([valid_subscription_view(v) for v in entity['view']])
+            # subscription => {view_id='', ?tag='', ?field_name='', ?expires=0}
+            valid = all([type(entity) is dict, type(entity.get('view_id')) is str, type(entity.get('tag', '')) is str, type(entity.get('field_name', '')) is str, type(entity.get('expires', 0)) is int])
         elif entity_type == 'system':
             valid = type(entity) is dict
         elif entity_type == 'record':

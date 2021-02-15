@@ -14,8 +14,8 @@ SYSTEM PATHS
 /query/{class_name}/{query_id}.json => meta-data about the query {processor, vectors}
 /query/{class_name}/{query_id}/{record_initial}.json => a-z0-9 indexes each containing a list of query matching record_ids that start with that character
 
-/feed/{class_name}/{query_id}/{connection_id}.json => each connection that is interested in this query has a feed configuration object stored here
-/subscription/{class_name}/{record_id}/{connection_id}.json => each connection that is interested in this record has a subscription configuration object stored here
+/feed/{class_name}/{query_id}/{connection_id}/{feed_id}.json => each connection that is interested in this query has a feed configuration object stored here
+/subscription/{class_name}/{record_id}/{connection_id}/{subscription_id}.json => each connection that is interested in this record has a subscription configuration object stored here
 
 /view/{view_id}.json
 
@@ -31,12 +31,19 @@ SYSTEM PATHS
 CONNECTION PATHS
 
 /connection/{connection_id}.json => metadata about this connection
+
 /connection/{connection_id}/record/{class_name}/{record_id}.json => the masked record data for this connection
+
 /connection/{connection_id}/query/{class_name}/{query_id}.json => metadata about this query as curated to this connection
 /connection/{connection_id}/query/{class_name}/{query_id}/{index_initial}.json => a-z0-9 indexes, but only containing records that are non-empty when masked for this connection
-/connection/{connection_id}/feed/{class_name}/{query_id}/{sort_field}/{sort_direction}/{min-index}-{max-index}.{view_id} => query data as rendered by the given view
-/connection/{connection_id}/subscription/{class_name}/{record_id}.{view_id} => record data as rendered by the given view 
-/connection/{connection_id}/subscription/{class_name}/{record_id}/{record_field}.{view_id} => record field data as rendered by the given view
+
+/connection/{connection_id}/feed/{class_name}/{query_id}/{subscription_id}.json => use this path to write/delete feeds
+/connection/{connection_id}/feed/{class_name}/{query_id}/{sort_field}/{sort_direction}/{min-index}-{max-index}[.view_tag]?.{view_suffix} => query data as rendered by the given view, read only
+
+/connection/{connection_id}/subscription/{class_name}/{record_id}/{subscription_id}.json => use this path to write/delete subscriptions
+/connection/{connection_id}/subscription/{class_name}/{record_id}[.view_tag]?.{view_suffix} => record data as rendered by the given view, read only
+/connection/{connection_id}/subscription/{class_name}/{record_id}/{record_field}.{view_suffix} => record field data as rendered by the given view, read only
+
 /connection/{connection_id}/system/{scope}/{module}.json
 
 ---
@@ -67,7 +74,7 @@ CORE FUNCTIONS
     - writes/deletes an static asset to {path} via ~connection/{connection_id}/static/{path} OR
     - writes/deletes a query configuration to /query/{class_name}/{query_id}.json via /connection/{connection_id}/query/{class_name}/{query_id}.json  OR (tested)
     - writes/deletes a feed configuration to /feed/{class_name}/{query_id}/{connection_id}.json via /connection/{connection_id}/feed/{class_name}/{query_id}.json OR 
-    - writes/deletes a subscription configuration to /subscription/{class_name}/{record_id}/{connection_id}.json via /connection/{connection_id}/subscription/{class_name}/{record_id}.json OR (testing)
+    - writes/deletes a subscription configuration to /subscription/{class_name}/{record_id}/{connection_id}/{subscription_id}.json via /connection/{connection_id}/subscription/{class_name}/{record_id}/{subscription_id}.json OR (tested)
     - writes/deletes a system module configuration to /system/{scope}/{module}.json via /connection/{connection_id}/system/{scope}/{module}.json OR
     - writes a record to /record/{class_name}/{record_id}.json via /connection/{connection_id}/record/{class_name}/{record_id}.json OR (tested)
     - writes a record field to /record/{class_name}/{record_id}[field_name].json via /connection/{connection_id}/record/{class_name}/{record_id}/{field_name}.json
@@ -164,9 +171,9 @@ view => {processor='', ?options={}, ?assets={alias: assetpath}, ?content_type=''
 
 query => {processor='', ?options={}, vector=[], ?count=0}
 
-feed => [{view_id='', ?field_name, ?expires=0, ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}]
+feed => [{view_id='', ?tag='', ?field_name, ?expires=0, ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}]
 
-subscription => [{view_id='', field_name='', ?expires=0}]
+subscription => [ ... {view_id='', ?tag='', ?field_name='', ?expires=0} ... ]
 
 system => {}
 

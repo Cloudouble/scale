@@ -1,0 +1,15 @@
+{
+  "Records": [
+    {
+      "cf": {
+        "request": {
+          "method": "PUT",
+          "body": {
+            "data": "{\"view_id\": \"3365ffbb-b809-491b-86b4-833291eb2df1\"}"
+          },
+          "uri": "_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/subscription/Book/87370050-971f-4cd9-9c32-1072c6ac3c52/799e6c59-59c6-43a4-894d-3fce0672cd34.json"
+        }
+      }
+    }
+  ]
+}
