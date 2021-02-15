@@ -63,6 +63,7 @@ def main(event_data, context):
             lambda_client.invoke(FunctionName='{lambda_namespace}-core-query'.format(lambda_namespace=env['lambda_namespace']), Payload=bytes(json.dumps({
                 'query_id': query_id,
                 'processor': query_data.get('processor'), 
+                'options': query_data.get('options'), 
                 'record': {'@type': class_name, '@id': r_id}
             }), 'utf-8'))
         c = 1000000000
@@ -71,6 +72,8 @@ def main(event_data, context):
             for key_obj in record_list_response['Contents']:
                 lambda_client.invoke(FunctionName='{lambda_namespace}-core-query'.format(lambda_namespace=env['lambda_namespace']), Payload=bytes(json.dumps({
                     'query_id': query_id,
+                    'processor': query_data.get('processor'), 
+                    'options': query_data.get('options'), 
                     'record': {'@type': class_name, '@id': key_obj['Key'].replace(record_base_key, '').removesuffix('.json')}
                 }), 'utf-8'))
                 c = c - 1
