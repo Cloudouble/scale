@@ -1,9 +1,17 @@
-import json, boto3, os
+env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_"}
+
+import json, boto3
+
+def getpath(p):
+    p = p.strip('/?')
+    p = p[len(env['system_root']):] if p.startswith(env['system_root']) else p
+    p = p[:-len('.json')] if p.endswith('.json') else p
+    return p.strip('/').split('/')
 
 def process_entity(key_obj, bucket, lambda_client, entity_type):
-    entity_path = key_obj['Key'].strip('/?').removeprefix('_').removesuffix('.json').strip('/').split('/')
+    entity_path = getpath(key_obj['Key'])
     class_name, entity_id, connection_id = entity_path[1:]
-    lambda_client.invoke(FunctionName='mask', InvocationType='Event', Payload=bytes(json.dumps({
+    lambda_client.invoke(FunctionName='{lambda_namespace}-core-mask'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps({
         'connection_id': connection_id,
         'class_name': class_name, 
         'entity_type': entity_type, 
@@ -17,21 +25,21 @@ def main(event, context):
     - trigger view.py for each affected feed view
     '''
     s3 = boto3.resource('s3')
-    bucket = s3.Bucket(os.environ['bucket'])
+    bucket = s3.Bucket(env['bucket'])
     s3_client = boto3.client('s3')
     lambda_client = boto3.client('lambda')
     counter = 0
-    for record in event['Records']:
-        path = event['s3']['object']['key'].strip('/?').removeprefix('_').removesuffix('.json').strip('/').split('/')
+    for record_event in event['Records']:
+        path = getpath(record_event['s3']['object']['key'])
         if len(path) == 6:
             connection_id, entity_type, class_name, query_id, index = path[1:]
-            feed_path = '_/feed/{class_name}/{query_id}/{connection_id}.json'.format(class_name=class_name, query_id=query_id, connection_id=connection_id)
+            feed_path = '{system_root}/feed/{class_name}/{query_id}/{connection_id}.json'.format(system_root=env['system_root'], class_name=class_name, query_id=query_id, connection_id=connection_id)
             try:
                 feed_data = json.loads(bucket.get_object(Key=feed_path)['Body'].read().decode('utf-8'))
             except:
                 feed_data = {}
             for view_configuration in feed_data.get('view', []):
-                lambda_client.invoke(FunctionName='view', InvocationType='Event', Payload=bytes(json.dumps({
+                lambda_client.invoke(FunctionName='{lambda_namespace}-core-view'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps({
                     'connection_id': connection_id,
                     'class_name': class_name, 
                     'entity_type': 'query', 

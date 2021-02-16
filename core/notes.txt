@@ -113,23 +113,29 @@ CORE FUNCTIONS
     - lists /subscription/{class_name}/{record_id}/* to find affected connections
     - triggers mask.py for each affected connection
 
-* react-index.py (tested)
+* react-index.py (testing)
     - triggered by new/updated object at /query/{class_name}/{query_id}/{record_initial}.json
-    - uses /feed/{class_name}/{query_id}/{connection_id}.json to find affected connections
+    - uses /feed/{class_name}/{query_id}/{connection_id}/* to find affected connections
     - triggers mask.py for each record_id in the index that doesn't already exist in the /connection/{connection_id}/record/{class_name}/{record_id}.json
-    
+
 * react-connection-record.py (tested)
     - triggered by new/updated/deleted objects in /connection/{connection_id}/record/{class_name}/{record_id}.json
     - removes the relevant record_id from /connection/{connection_id}/query/{class_name}/{query_id}/{index_initial}.json if the masked value is empty
-    - uses /subscription/{class_name}/{record_id}/{connection_id}.json to find affected views for this connection and record
+    - uses /subscription/{class_name}/{record_id}/{connection_id}/* to find affected views for this connection and record
     - trigger view.py for each affected subscription view 
     
-* react-connection-index.py (ready for testing)
+* react-connection-index.py (testing)
     - triggered by new/updated/deleted /connection/{connection_id}/query/{class_name}/{query_id}/{index_initial}.json
-    - uses /feed/{class_name}/{query_id}/{connection_id}.json to find affected views for this connection and query
+    - uses /feed/{class_name}/{query_id}/{connection_id}/* to find affected views for this connection and query
     - trigger view.py for each affected feed view
 
 
+* index (ready for testing)
+    - triggered by react-index
+    - event => {'connection_id': affected_connection, 'class_name': class_name, 'query_id': query_id, 'index': index}
+    - gets the index
+    - for each record_id calls mask with the query_id to trigger mask to include the record_id into the relevant index if the masked record is non-empty
+    
 * validate (tested)
     - triggered by clean.py, write.py
     - validate the given record according to its datatype

@@ -10,7 +10,7 @@ def main(event, context):
     '''
     - triggered by write.py, react-version.py, react-index.py, react-connection-record.py, react-connection-index.py
     - given a connection_id and a record, writes the masked version of the record to /connection/{connection_id}/record/{class_name}/{record_id}.json
-    event = {'connection_id': '', 'entity_type': '', 'method': '', ?'path': [], ?'class_name': '', ?'entity_id': '', ?entity: {}}
+    event = {'connection_id': '', 'entity_type': '', 'method': '', ?'path': [], ?'class_name': '', ?'entity_id': '', ?entity: {}, ?query_id}
     '''
     masked_entity = None
     if event.get('connection_id'):
@@ -95,5 +95,19 @@ def main(event, context):
                         del writable_entity['__constrained']
                         write_key = '{system_root}/connection/{connection_id}/record/{record_id}.json'.format(system_root=env['system_root'], connection_id=event['connection_id'], record_id=event['entity_id'])
                         bucket.put_object(Body=bytes(json.dumps(writable_entity), 'utf-8'), Key=write_key, ContentType='application/json')
+                    if event.get('query_id'):
+                        index_key = '{system_root}/connection/query/{class_name}/{query_id}/{index}.json'.format(system_root=env['system_root'], class_name=class_name, query_id=query_id, index=event['entity_id'][0])
+                        try:
+                            index_record_ids = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=index_key)['Body'].read().decode('utf-8'))
+                        except:
+                            index_record_ids = []
+                        if masked_entity and event['entity_id'] not in index_record_ids:
+                            index_record_ids.append(event['entity_id'])
+                            index_record_ids.sort()
+                            bucket.put_object(Body=bytes(json.dumps(index_record_ids), 'utf-8'), Key=index_key, ContentType='application/json')
+                        elif not masked_entity and event['entity_id'] in index_record_ids:
+                            index_record_ids.remove(event['entity_id'])
+                            index_record_ids.sort()
+                            bucket.put_object(Body=bytes(json.dumps(index_record_ids), 'utf-8'), Key=index_key, ContentType='application/json')
 
     return masked_entity
