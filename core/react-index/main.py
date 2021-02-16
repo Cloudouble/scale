@@ -22,9 +22,9 @@ def main(event, context):
     counter = 0
     now = time.time()
     affected_connections = set()
-    for record in event['Records']:
-        path = getpath(event['s3']['object']['key'])
-        index_record_ids = set(json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['s3']['object']['key'])['Body'].read().decode('utf-8')))
+    for record_event in event['Records']:
+        path = getpath(record_event['s3']['object']['key'])
+        index_record_ids = set(json.loads(s3_client.get_object(Bucket=env['bucket'], Key=record_event['s3']['object']['key'])['Body'].read().decode('utf-8')))
         if len(path) == 4:
             class_name, query_id, index = path[1:]
             # '/_/feed/{class_name}/{query_id}/{connection_id}.json'
