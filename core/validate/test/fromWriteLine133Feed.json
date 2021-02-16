@@ -1,0 +1,11 @@
+{
+  "entity": {
+    "view_id": "3365ffbb-b809-491b-86b4-833291eb2df1"
+  },
+  "switches": {
+    "entity_type": "feed",
+    "class_name": "Book",
+    "entity_id": "6304074c-8666-41e5-b85f-9407bd992568",
+    "query_id": "9886c382-4b22-454d-8910-bb1415018421"
+  }
+}

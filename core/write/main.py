@@ -111,7 +111,7 @@ def main(event, context):
                 if len(path) in [4, 5]:
                     entity_id, view_handle = (entity_id.split('.', 1) + ['json'])[:2]
                 elif len(path) == 6:
-                    if entity_type in ['subscription']:
+                    if entity_type in ['subscription', 'feed']:
                         switches['record_id'] = entity_id
                         entity_id, view_handle = (path[5].split('.', 1) + ['json'])[:2]
                         switches['entity_id'] = entity_id
@@ -132,6 +132,9 @@ def main(event, context):
                                 entity = current_entity
                                 del entity[record_field]
                                 request_object['method'] = 'PUT'
+                if entity_type == 'feed':
+                    switches['query_id'] = switches['record_id']
+                    del switches['record_id']
                 if view_handle == 'json' and request_object['method'] in ['POST', 'PUT', 'PATCH'] and json.loads(lambda_client.invoke(FunctionName='{}-core-validate'.format(env['lambda_namespace']), Payload=bytes(json.dumps({'entity': entity, 'switches': switches}), 'utf-8'))['Payload'].read().decode('utf-8')):
                     # {connection_id, entity_type, method, class_name, entity_id, entity}
                     masked_entity = json.loads(lambda_client.invoke(FunctionName='{}-core-mask'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
