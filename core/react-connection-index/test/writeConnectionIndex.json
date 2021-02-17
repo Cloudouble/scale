@@ -27,7 +27,7 @@
           "arn": "arn:aws:s3:::scale.live-element.net"
         },
         "object": {
-          "key": "_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/record/Book/87370050-971f-4cd9-9c32-1072c6ac3c52.json",
+          "key": "_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/query/Book/9886c382-4b22-454d-8910-bb1415018421/8.json",
           "size": 1024,
           "eTag": "0123456789abcdef0123456789abcdef",
           "sequencer": "0A1B2C3D4E5F678901"

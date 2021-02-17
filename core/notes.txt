@@ -124,9 +124,9 @@ CORE FUNCTIONS
     - uses /subscription/{class_name}/{record_id}/{connection_id}/* to find affected views for this connection and record
     - trigger view.py for each affected subscription view 
     
-* react-connection-index.py (testing)
+* react-connection-index.py (tested)
     - triggered by new/updated/deleted /connection/{connection_id}/query/{class_name}/{query_id}/{index_initial}.json
-    - uses /feed/{class_name}/{query_id}/{connection_id}/* to find affected views for this connection and query
+    - use /feed/{class_name}/{query_id}/{connection_id}/* to find affected views for this connection and query
     - trigger view.py for each affected feed view
 
 
@@ -153,7 +153,7 @@ CORE FUNCTIONS
     - triggered by write.py, react-version.py, react-index.py, react-connection-record.py, react-connection-index.py, index.py
     - given a connection_id and a record, writes the masked version of the record to /connection/{connection_id}/record/{class_name}/{record_id}.json
     
-* view.py (ready for testing)
+* view.py (testing)
     - triggered by react-feed.py, react-subscription.py, react-view.py, react-connection-record.py, react-connection-index.py
     - runs the given view with the given masked record/query results and writes the result to the relevant view path(s)
 
