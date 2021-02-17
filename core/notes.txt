@@ -156,7 +156,7 @@ CORE FUNCTIONS
     - triggered by write.py, react-version.py, react-index.py, react-connection-record.py, react-connection-index.py, index.py
     - given a connection_id and a record, writes the masked version of the record to /connection/{connection_id}/record/{class_name}/{record_id}.json
     
-* view.py (testing)
+* view.py (tested)
     - triggered by react-feed.py, react-subscription.py, react-view.py, react-connection-record.py, react-connection-index.py
     - runs the given view with the given masked record/query results and writes the result to the relevant view path(s)
 
