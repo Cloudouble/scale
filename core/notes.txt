@@ -173,13 +173,13 @@ ENTITY TYPES
 
 connection => {mask=[]}
 
-view => {processor='', ?options={}, ?assets={alias: assetpath}, ?content_type='', ?suffix=''}
+view => {processor='', ?options={}, ?assets={alias: assetpath}, ?field_name='', ?content_type='', ?suffix='', ?expires=0, ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}
 
 query => {processor='', ?options={}, vector=[], ?count=0}
 
-feed => {view_id='', ?tag='', ?field_name, ?expires=0, ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}
+feed => {view='', processor='', ?options={}, ?assets={alias: assetpath}, ?field_name='', ?content_type='', ?suffix='', ?expires=0, ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}
 
-subscription => {view_id='', ?tag='', ?field_name='', ?expires=0}
+subscription => {view='', processor='', ?options={}, ?assets={alias: assetpath}, ?field_name='', ?content_type='', ?suffix='', ?expires=0}
 
 system => {}
 

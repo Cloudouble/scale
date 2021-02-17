@@ -19,13 +19,13 @@ def main(event, context):
         connection_id, class_name, entity_type, entity_id, view_configuration = [event[k] for k in ['connection_id', 'class_name', 'entity_type', 'entity_id', 'view_configuration']]
         view_data = json.loads(bucket.Object('_/view/{}.json'.format(view_configuration['view_id'])).get()['Body'].read().decode('utf-8'))
         if view_data and type(view_data.get('processor')) is str:
-            # {processor='', ?options={}, ?assets={alias: assetpath}}
+            # {processor='', ?options={}, ?assets={alias: assetpath}, ?content_type='', ?suffix=''}
             suffix = view_data.get('suffix', 'json')
             field_name = view_data.get('field_name')
             if view_data.get('assets'):
                 for asset_path in view_data['assets'].values():
-                    if lambda_client.invoke(FunctionName='mask', Payload=bytes(json.dumps({'connection_id': connection_id, 'entity_type': 'asset', 'path': asset_path, 'method': 'GET'}), 'utf-8'))['Payload'].read().decode('utf-8'):
-                        bucket.copy({'Bucket': os.environ['bucket'], 'Key': '_/asset/{}'.format(asset_path)}, '/_connection/{connection_id}/asset/{asset_path}'.format(connection_id=connection_id, asset_path=asset_path))
+                    if lambda_client.invoke(FunctionName='{lambda_namespace}-core-mask'.format(lambda_namespace=env['lambda_namespace']), Payload=bytes(json.dumps({'connection_id': connection_id, 'entity_type': 'asset', 'path': asset_path, 'method': 'GET'}), 'utf-8'))['Payload'].read().decode('utf-8'):
+                        bucket.copy({'Bucket': env['bucket'], 'Key': '_/asset/{}'.format(asset_path)}, '/_connection/{connection_id}/asset/{asset_path}'.format(connection_id=connection_id, asset_path=asset_path))
             if entity_type == 'record':
                 masked_record_data = json.loads(bucket.Object('_/connection/{connection_id}/record/{class_name}/{entity_id}.json'.format(connection_id=connection_id, class_name=class_name, entity_id=entity_id)).get()['Body'].read().decode('utf-8'))
                 if field_name:
