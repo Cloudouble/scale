@@ -1,0 +1,25 @@
+{
+  "options": {},
+  "assets": {},
+  "entity_type": "query",
+  "switches": {
+    "connection_id": "74facaff-c792-4c70-b8a4-71b3ad78d3f6",
+    "class_name": "Book",
+    "entity_id": "9886c382-4b22-454d-8910-bb1415018421",
+    "field_name": null,
+    "sort_field": "@id",
+    "sort_direction": "ascending",
+    "page_name": "0-999",
+    "suffix": "html"
+  },
+  "page": [
+    {
+      "@type": "Book",
+      "@id": "87370050-971f-4cd9-9c32-1072c6ac3c52",
+      "name": "Test Book",
+      "numberOfPages": 42
+    }
+  ],
+  "total_result_count": 1,
+  "view_result_count": 1
+}

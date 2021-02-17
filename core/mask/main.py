@@ -100,7 +100,7 @@ def main(event, context):
                         if event['entity_type'] == 'view':
                             write_key = '{system_root}/connection/{connection_id}/view/{entity_id}.json'.format(system_root=env['system_root'], connection_id=event['connection_id'], entity_id=event['entity_id'])
                         else:
-                            write_key = '{system_root}/connection/{connection_id}/{entity_type}/{entity_id}.json'.format(system_root=env['system_root'], connection_id=event['connection_id'], entity_type=event['entity_type'], entity_id=event['entity_id'])
+                            write_key = '{system_root}/connection/{connection_id}/{entity_type}/{class_name}/{entity_id}.json'.format(system_root=env['system_root'], connection_id=event['connection_id'], entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id'])
                         bucket.put_object(Body=bytes(json.dumps(writable_entity), 'utf-8'), Key=write_key, ContentType='application/json')
                     if event.get('query_id'):
                         index_key = '{system_root}/connection/{connection_id}/query/{class_name}/{query_id}/{index}.json'.format(
