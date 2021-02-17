@@ -44,6 +44,9 @@ CONNECTION PATHS
 /connection/{connection_id}/subscription/{class_name}/{record_id}[.view_tag]?.{view_suffix} => record data as rendered by the given view, read only
 /connection/{connection_id}/subscription/{class_name}/{record_id}/{record_field}.{view_suffix} => record field data as rendered by the given view, read only
 
+
+/connection/{connection_id}/view/{view_id}.json
+
 /connection/{connection_id}/system/{scope}/{module}.json
 
 ---

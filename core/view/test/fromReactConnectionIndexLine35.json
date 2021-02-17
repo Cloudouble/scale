@@ -3,7 +3,7 @@
   "class_name": "Book",
   "entity_type": "query",
   "entity_id": "9886c382-4b22-454d-8910-bb1415018421",
-  "feed": {
+  "view": {
     "view": "3365ffbb-b809-491b-86b4-833291eb2df1"
   }
 }
