@@ -51,7 +51,7 @@ def main(event, context):
                         ### work to do here for file uploads
 
                     return allowed
-                elif all([event.get(k) for k in ['class_name', 'entity_id']]):
+                elif event['entity_type'] == 'view' or all([event.get(k) for k in ['class_name', 'entity_id']]):
                     # event = {connection_id, entity_type, method, class_name, entity_id, entity}
                     s3 = boto3.resource('s3')
                     bucket = s3.Bucket(env['bucket'])
@@ -60,13 +60,17 @@ def main(event, context):
                     mask = connection_mask.get(switches['entity_type']) if switches['entity_type'] in connection_mask else connection_mask.get('*', {})
                     if type(mask) is dict:
                         mask = mask.get(switches['method']) if switches['method'] in mask else mask.get('*', {})
-                    if type(mask) is dict:
+                    if type(mask) is dict and event['entity_type'] != 'view':
                         mask = mask.get(switches['class_name']) if switches['class_name'] in mask else mask.get('*', {})
                     masked_entity = {}
                     if type(event.get('entity')) is dict:
                         entity = event['entity']
                     else:
-                        entity = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{system_root}/{entity_type}/{class_name}/{entity_id}.json'.format(system_root=env['system_root'], entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id']))['Body'].read().decode('utf-8'))
+                        if event['entity_type'] == 'view':
+                            entity_key = '{system_root}/{entity_type}/{entity_id}.json'.format(system_root=env['system_root'], entity_type=event['entity_type'], entity_id=event['entity_id'])
+                        else:
+                            entity_key = '{system_root}/{entity_type}/{class_name}/{entity_id}.json'.format(system_root=env['system_root'], entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id'])
+                        entity = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=entity_key)['Body'].read().decode('utf-8'))
                     constrained = True
                     allowfields = []
                     if not mask:
@@ -93,7 +97,10 @@ def main(event, context):
                     if masked_entity and event.get('write'):
                         writable_entity = {**masked_entity}
                         del writable_entity['__constrained']
-                        write_key = '{system_root}/connection/{connection_id}/record/{record_id}.json'.format(system_root=env['system_root'], connection_id=event['connection_id'], record_id=event['entity_id'])
+                        if event['entity_type'] == 'view':
+                            write_key = '{system_root}/connection/{connection_id}/view/{entity_id}.json'.format(system_root=env['system_root'], connection_id=event['connection_id'], entity_id=event['entity_id'])
+                        else:
+                            write_key = '{system_root}/connection/{connection_id}/{entity_type}/{entity_id}.json'.format(system_root=env['system_root'], connection_id=event['connection_id'], entity_type=event['entity_type'], entity_id=event['entity_id'])
                         bucket.put_object(Body=bytes(json.dumps(writable_entity), 'utf-8'), Key=write_key, ContentType='application/json')
                     if event.get('query_id'):
                         index_key = '{system_root}/connection/{connection_id}/query/{class_name}/{query_id}/{index}.json'.format(

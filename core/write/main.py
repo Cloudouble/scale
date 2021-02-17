@@ -135,6 +135,8 @@ def main(event, context):
                 if entity_type == 'feed':
                     switches['query_id'] = switches['record_id']
                     del switches['record_id']
+                elif entity_type == 'view':
+                    class_name = None
                 if view_handle == 'json' and request_object['method'] in ['POST', 'PUT', 'PATCH'] and json.loads(lambda_client.invoke(FunctionName='{}-core-validate'.format(env['lambda_namespace']), Payload=bytes(json.dumps({'entity': entity, 'switches': switches}), 'utf-8'))['Payload'].read().decode('utf-8')):
                     # {connection_id, entity_type, method, class_name, entity_id, entity}
                     masked_entity = json.loads(lambda_client.invoke(FunctionName='{}-core-mask'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
