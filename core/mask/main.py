@@ -66,7 +66,7 @@ def main(event, context):
                     if type(event.get('entity')) is dict:
                         entity = event['entity']
                     else:
-                        entity = json.loads(bucket.get_object(Key='{system_root}/{entity_type}/{class_name}/{entity_id}.json'.format(system_root=env['system_root'], entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id']))['Body'].read().decode('utf-8'))
+                        entity = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{system_root}/{entity_type}/{class_name}/{entity_id}.json'.format(system_root=env['system_root'], entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id']))['Body'].read().decode('utf-8'))
                     constrained = True
                     allowfields = []
                     if not mask:
@@ -96,7 +96,8 @@ def main(event, context):
                         write_key = '{system_root}/connection/{connection_id}/record/{record_id}.json'.format(system_root=env['system_root'], connection_id=event['connection_id'], record_id=event['entity_id'])
                         bucket.put_object(Body=bytes(json.dumps(writable_entity), 'utf-8'), Key=write_key, ContentType='application/json')
                     if event.get('query_id'):
-                        index_key = '{system_root}/connection/query/{class_name}/{query_id}/{index}.json'.format(system_root=env['system_root'], class_name=event['class_name'], query_id=event['query_id'], index=event['entity_id'][0])
+                        index_key = '{system_root}/connection/{connection_id}/query/{class_name}/{query_id}/{index}.json'.format(
+                            system_root=env['system_root'], connection_id=event['connection_id'], class_name=event['class_name'], query_id=event['query_id'], index=event['entity_id'][0])
                         try:
                             index_record_ids = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=index_key)['Body'].read().decode('utf-8'))
                         except:

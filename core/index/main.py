@@ -28,7 +28,7 @@ def main(event, context):
             system_root=env['system_root'], class_name=class_name, query_id=query_id, index=index))['Body'].read().decode('utf-8')))
         for record_id in index_record_ids:
             lambda_client.invoke(FunctionName='{lambda_namespace}-core-mask'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps({
-                'connection_id': affected_connection,
+                'connection_id': connection_id,
                 'entity_type': 'record', 
                 'method': 'GET', 
                 'class_name': class_name, 

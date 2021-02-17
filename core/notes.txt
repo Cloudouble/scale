@@ -113,7 +113,7 @@ CORE FUNCTIONS
     - lists /subscription/{class_name}/{record_id}/* to find affected connections
     - triggers mask.py for each affected connection
 
-* react-index.py (testing)
+* react-index.py (tested)
     - triggered by new/updated object at /query/{class_name}/{query_id}/{record_initial}.json
     - uses /feed/{class_name}/{query_id}/{connection_id}/* to find affected connections
     - triggers mask.py for each record_id in the index that doesn't already exist in the /connection/{connection_id}/record/{class_name}/{record_id}.json
@@ -130,7 +130,7 @@ CORE FUNCTIONS
     - trigger view.py for each affected feed view
 
 
-* index (ready for testing)
+* index (tested)
     - triggered by react-index
     - event => {'connection_id': affected_connection, 'class_name': class_name, 'query_id': query_id, 'index': index}
     - gets the index
@@ -150,7 +150,7 @@ CORE FUNCTIONS
     - executes the given query using the given record, returning True if matching
 
 * mask.py (tested)
-    - triggered by write.py, react-version.py, react-index.py, react-connection-record.py, react-connection-index.py
+    - triggered by write.py, react-version.py, react-index.py, react-connection-record.py, react-connection-index.py, index.py
     - given a connection_id and a record, writes the masked version of the record to /connection/{connection_id}/record/{class_name}/{record_id}.json
     
 * view.py (ready for testing)
