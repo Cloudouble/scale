@@ -17,8 +17,8 @@ def process_entity(key_obj, bucket, lambda_client, entity_type):
 def main(event_data, context):
     '''
     - triggered by writes at /view/{view_id}.json
-    - use /subscription/{class_name}/{record_id}/{connection_id}.json to get all affected connection subscriptions
-    - trigger view.py for each view configuration in each affected subscription->view of each affected connection
+    - use /subscription/{class_name}/{record_id}/{connection_id}/* to get all affected connection subscriptions
+    - trigger view.py for each view
     - use /feed/{class_name}/{query_id}/{connection_id}.json to get all affected connection feeds
     - trigger view.py for each view configuration in each affected feed->view of each affected connection
     '''

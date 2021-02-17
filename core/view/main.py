@@ -77,7 +77,6 @@ def main(event, context):
                         page_object_key = '{system_root}/connection/{connection_id}/feed/{class_name}/{entity_id}/{field_name}/{sort_field}/{sort_direction}/{page_name}.{suffix}'.format(system_root=env['system_root'], **switches)
                     else:
                         page_object_key = '{system_root}/connection/{connection_id}/feed/{class_name}/{entity_id}/-/{sort_field}/{sort_direction}/{page_name}.{suffix}'.format(system_root=env['system_root'], **switches)
-                    
                     view_return = lambda_client.invoke(FunctionName='{lambda_namespace}-extension-view-{processor}'.format(lambda_namespace=env['lambda_namespace'], processor=view['processor']), Payload=bytes(json.dumps({
                         'options': view['options'], 
                         'assets': view['assets'], 

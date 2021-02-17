@@ -94,15 +94,15 @@ CORE FUNCTIONS
     - for each query->vector, ensure that the query_id is present in /vector/{class_name}.json
     - trigger query-record.py for every record in /record/{class_name}
 
-* react-feed.py (ready for testing)
+* react-feed.py (tested)
     - triggered by writes at /feed/{class_name}/{query_id}/{connection_id}.json
     - trigger view.py for each view configuration in feed->view
 
-* react-subscription.py (ready for testing)
+* react-subscription.py (tested)
     - triggered by writes at /subscription/{class_name}/{record_id}/{connection_id}.json
     - trigger view.py for each view configuration in subscription->view
 
-* react-view.py (ready for testing)
+* react-view.py (testing) **CURRENT**
     - triggered by writes at /view/{view_id}.json
     - use /subscription/{class_name}/{record_id}/{connection_id}.json to get all affected connection subscriptions
     - trigger view.py for each view configuration in each affected subscription->view of each affected connection
