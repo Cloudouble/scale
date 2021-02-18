@@ -1,6 +1,6 @@
 env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_"}
 
-import json, boto3, time
+import json, boto3, time, base64
 
 def chunks(lst, n):
     for i in range(0, len(lst), n):
@@ -9,9 +9,9 @@ def chunks(lst, n):
 def main(event, context):
     '''
     - triggered by react-feed.py, react-subscription.py, react-view.py, react-connection-record.py, react-connection-index.py
-    - runs the given view with the given masked record/query results and writes the result to the relevant view path(s)
-    event => {'connection_id': '', 'class_name': '', 'entity_type': '',  'entity_id': '' 
+    - event => {'connection_id': '', 'class_name': '', 'entity_type': '',  'entity_id': '' 
         'view': {view='', processor='', ?options={}, ?assets={alias: assetpath}, ?field_name='', ?content_type='', ?suffix='', ?expires=0, ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}}
+    - runs the given view with the given masked record/query results and writes the result to the relevant view path(s)
     '''
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(env['bucket'])
@@ -29,10 +29,6 @@ def main(event, context):
         view = {**view_system, **view_local}
         view['assets'] = assets
         view['options'] = options
-        
-        # {processor='', ?options={}, ?assets={alias: assetpath}, ?field_name='', ?content_type='', ?suffix='', ?expires=0, 
-        #                   ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}
-            
         if view and type(view.get('processor')) is str:
             suffix = view.get('suffix', 'json')
             field_name = view.get('field_name')
@@ -77,7 +73,7 @@ def main(event, context):
                         page_object_key = '{system_root}/connection/{connection_id}/feed/{class_name}/{entity_id}/{field_name}/{sort_field}/{sort_direction}/{page_name}.{suffix}'.format(system_root=env['system_root'], **switches)
                     else:
                         page_object_key = '{system_root}/connection/{connection_id}/feed/{class_name}/{entity_id}/-/{sort_field}/{sort_direction}/{page_name}.{suffix}'.format(system_root=env['system_root'], **switches)
-                    view_return = lambda_client.invoke(FunctionName='{lambda_namespace}-extension-view-{processor}'.format(lambda_namespace=env['lambda_namespace'], processor=view['processor']), Payload=bytes(json.dumps({
+                    view_result = lambda_client.invoke(FunctionName='{lambda_namespace}-extension-view-{processor}'.format(lambda_namespace=env['lambda_namespace'], processor=view['processor']), Payload=bytes(json.dumps({
                         'options': view['options'], 
                         'assets': view['assets'], 
                         'entity_type': 'query',
@@ -86,6 +82,11 @@ def main(event, context):
                         'total_result_count': total_result_count, 
                         'view_result_count': view_result_count
                     }), 'utf-8'))['Payload'].read().decode('utf-8')
-                    bucket.put_object(Body=bytes(json.loads(view_return), 'utf-8'), Key=page_object_key, ContentType=view.get('content_type', 'application/json'))
+                    if type(view_result) is dict and view_result.get('body'):
+                        content_type = view_result.get('content_type', 'application/json')
+                        encoding = view_result.get('encoding', 'text')
+                        body = view_result.get('body', '')
+                        body = bytes(body, 'utf-8') if encoding == 'text' else base64.b64decode(body)
+                        bucket.put_object(Body=body, Key=page_object_key, ContentType=content_type)
                 counter = counter + 1
     return counter

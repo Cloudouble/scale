@@ -148,8 +148,10 @@ CORE FUNCTIONS
     - event = {'connection_id': '', 'entity_type': '', 'method': '', ?'path': [], ?'class_name': '', ?'entity_id': '', ?entity: {}, ?query_id}
     - given a connection_id and a record, writes the masked version of the record to /connection/{connection_id}/record/{class_name}/{record_id}.json
     
-* view.py (tested)
+* view.py (finalised)
     - triggered by react-feed.py, react-subscription.py, react-view.py, react-connection-record.py, react-connection-index.py
+    - event => {'connection_id': '', 'class_name': '', 'entity_type': '',  'entity_id': '' 
+        'view': {view='', processor='', ?options={}, ?assets={alias: assetpath}, ?field_name='', ?content_type='', ?suffix='', ?expires=0, ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}}
     - runs the given view with the given masked record/query results and writes the result to the relevant view path(s)
 
 
@@ -162,11 +164,18 @@ EXTENSION FUNCTIONS
     - returns a connection object with (at least) a 'mask' property, which is overlaid onto _/connection/{connection_id}.json to enable administrator access
     - remove this function completely to disable administrator access
 
-* query/books
-    - a query processor for filtering book records
+* query/books (finalised)
+    - triggered by query
+    - event => {'purpose': 'query', 'record': {}, 'options': {}}
+    - an example query to return various slices of book records
+    - returns True if the given record matches the query
 
-* view/element
-    - a view processor for generating HTML elements from records as per the LiveElement.Element and LiveElement.Schema libraries
+* view/element (finalised)
+    - triggered by view.py
+    - event => {"options", "assets", "entity_type", switches": {"connection_id", "class_name", "entity_id", "field_name", "sort_field", "sort_direction", "page_name", "suffix"},
+                    "page", "total_result_count": 1, "view_result_count"}
+    - an example view to return records as custom HTML elements
+    - returns an object with content_type, encoding and the base64-encoded text of the HTML element
 
 -----
 
