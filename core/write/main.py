@@ -20,17 +20,17 @@ def uuid_valid(s):
 def main(event, context):
     '''
     - triggered as an endpoint for a CDN or API originated PUT / PATCH / POST / DELETE request, or a websocket $put/$post/$patch/$delete message
-    - writes/deletes a connection configuration to _/connection/{connection_id}.json OR (finalised)
-    - writes/deletes a view configuration to /view/{view_id}.json via /connection/{connection_id}/view/{view_id}.json OR (finalised)
-    - writes/deletes an private asset to _/asset/{assetpath} via _/connection/{connection_id}/asset/{path} (testing)
-    - writes/deletes an static asset to {path} via ~connection/{connection_id}/static/{path}
-    - writes/deletes a query configuration to /query/{class_name}/{query_id}.json via /connection/{connection_id}/query/{class_name}/{query_id}.json  OR
-    - writes/deletes a feed configuration to /feed/{class_name}/{query_id}/{connection_id}.json via /connection/{connection_id}/feed/{class_name}/{query_id}.json OR 
-    - writes/deletes a subscription configuration to /subscription/{class_name}/{record_id}/{connection_id}.json via /connection/{connection_id}/subscription/{class_name}/{record_id}.json OR 
-    - writes/deletes a system module configuration to /system/{scope}/{module}.json via /connection/{connection_id}/system/{scope}/{module}.json OR
-    - writes a record to /record/{class_name}/{record_id}.json via /connection/{connection_id}/record/{class_name}/{record_id}.json
-    - writes a record field to /record/{class_name}/{record_id}[field_name].json via /connection/{connection_id}/record/{class_name}/{record_id}/{field_name}.json
-    - generates a version record at /version/{class_name}/{record_id}/{version_id}.json
+    - writes/deletes a connection configuration to _/connection/{connection_id}.json (finalised) OR
+    - writes/deletes a view configuration to /view/{view_id}.json via /connection/{connection_id}/view/{view_id}.json (finalised) OR
+    - writes/deletes an private asset to _/asset/{assetpath} via _/connection/{connection_id}/asset/{path} (finalised) OR
+    - writes/deletes an static asset to {path} via ~connection/{connection_id}/static/{path} (finalised) OR
+    - writes/deletes a query configuration to /query/{class_name}/{query_id}.json via /connection/{connection_id}/query/{class_name}/{query_id}.json (finalised) OR
+    - writes/deletes a feed configuration to /feed/{class_name}/{query_id}/{connection_id}.json via /connection/{connection_id}/feed/{class_name}/{query_id}.json (finalised) OR 
+    - writes/deletes a subscription configuration to /subscription/{class_name}/{record_id}/{connection_id}.json via /connection/{connection_id}/subscription/{class_name}/{record_id}.json (finalised) OR 
+    - writes/deletes a system module configuration to /system/{scope}/{module}.json via /connection/{connection_id}/system/{scope}/{module}.json (finalised) OR
+    - writes a record to /record/{class_name}/{record_id}.json via /connection/{connection_id}/record/{class_name}/{record_id}.json (finalised) OR 
+    - writes a record field to /record/{class_name}/{record_id}[field_name].json via /connection/{connection_id}/record/{class_name}/{record_id}/{field_name}.json (finalised)
+    - generates a version record at /version/{class_name}/{record_id}/{version_id}.json (finalised)
     '''
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(env['bucket'])
@@ -146,13 +146,14 @@ def main(event, context):
                                 entity = current_entity
                                 del entity[record_field]
                                 request_object['method'] = 'PUT'
+                        entity['@type'] = entity.get('@type', class_name)
+                        entity['@id'] = entity.get('@id', entity_id)
                 if entity_type == 'feed':
                     switches['query_id'] = switches['record_id']
                     del switches['record_id']
                 elif entity_type == 'view':
                     class_name = None
                 if view_handle == 'json' and request_object['method'] in ['POST', 'PUT', 'PATCH'] and json.loads(lambda_client.invoke(FunctionName='{}-core-validate'.format(env['lambda_namespace']), Payload=bytes(json.dumps({'entity': entity, 'switches': switches}), 'utf-8'))['Payload'].read().decode('utf-8')):
-                    # {connection_id, entity_type, method, class_name, entity_id, entity}
                     masked_entity = json.loads(lambda_client.invoke(FunctionName='{}-core-mask'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
                         'connection_id': connection_id, 
                         'entity_type': entity_type, 

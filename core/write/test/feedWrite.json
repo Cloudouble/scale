@@ -4,8 +4,17 @@
       "cf": {
         "request": {
           "method": "PUT",
+          "headers": {
+            "content-type": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
           "body": {
-            "data": "{\"view_id\": \"3365ffbb-b809-491b-86b4-833291eb2df1\"}"
+            "encoding": "text",
+            "data": "{\"view\": \"3365ffbb-b809-491b-86b4-833291eb2df1\"}"
           },
           "uri": "_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/feed/Book/9886c382-4b22-454d-8910-bb1415018421/6304074c-8666-41e5-b85f-9407bd992568.json"
         }

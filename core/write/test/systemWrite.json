@@ -14,9 +14,9 @@
           },
           "body": {
             "encoding": "text",
-            "data": "{\"processor\": \"books\", \"vector\": [\"name\", \"numberOfPages\"]}"
+            "data": "{\"processor\":\"liveelement-scale-extension-authentication-sudo\",\"options\":{\"name\":\"system\",\"key\":\"d0119461133df7012bcb1f1b684fe57ce4faa12644181fc84fa39e7a20d39683c987e2a65c3a79c02203213249e4491abb087d5da14e628c477f0dbd964e1a20\"}}"
           },
-          "uri": "_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/query/Book/9886c382-4b22-454d-8910-bb1415018421.json"
+          "uri": "_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/system/authentication/sudo.json"
         }
       }
     }
