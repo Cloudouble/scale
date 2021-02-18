@@ -1,10 +1,8 @@
-env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_"}
-
 import json, boto3
 
 def getpath(p):
     p = p.strip('/?')
-    p = p[len(env['system_root']):] if p.startswith(env['system_root']) else p
+    p = p[len(env['data_root']):] if p.startswith(env['data_root']) else p
     p = p[:-len('.json')] if p.endswith('.json') else p
     return p.strip('/').split('/')
 
@@ -14,6 +12,8 @@ def main(event, context):
     - triggered by writes at /subscription/{class_name}/{record_id}/{connection_id}/*
     - trigger view.py from the subscription
     '''
+    env = context.client_context.env
+    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8'))
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(env['bucket'])
     s3_client = boto3.client('s3')
@@ -29,6 +29,6 @@ def main(event, context):
             'entity_type': 'record', 
             'entity_id': record_id, 
             'view': view
-        }), 'utf-8'))
+        }), 'utf-8'), ClientContext=client_context)
         counter = counter + 1
     return counter    

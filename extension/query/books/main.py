@@ -1,4 +1,4 @@
-import json, boto3, hashlib
+import json, boto3
 
 def main(event, context):
     '''

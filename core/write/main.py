@@ -1,11 +1,11 @@
-env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_"}
+env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_", "shared": 0, "authentication_namespace": "liveelementscale"}
 
 import json, boto3, os, base64, uuid, time
 from urllib.parse import parse_qs
 
 def getpath(p):
     p = p.strip('/?')
-    p = p[len(env['system_root']):] if p.startswith(env['system_root']) else p
+    p = p[len(env['data_root']):] if p.startswith(env['data_root']) else p
     p = p[:-len('.json')] if p.endswith('.json') else p
     return p.strip('/').split('/')
 
@@ -66,18 +66,58 @@ def main(event, context):
                 entity = {}
         else:
             entity = {}
-        path = getpath(request_object['uri'])
-        if path and path[0] == 'connection' and len(path) >= 2 and uuid_valid(path[1]):
-            connection_id = path[1]
-            if len(path) == 2:
-                connection_object = bucket.Object('{system_root}/connection/{connection_id}.json'.format(system_root=env['system_root'], connection_id=connection_id))
+        if env['shared']:
+            host = request_object.get('headers', {}).get('host', {}).get('value')
+        else: 
+            host = ''
+        env['data_root'] = '{host}/{system_root}'.format(host=host, system_root=system_root).strip('/')
+        
+        env['connection_id'] = None
+        if request_object.get('headers', {}).get('cookie', {}).get('value'):
+            raw_cookie = request_object['headers']['cookie']['value'].lower()
+            cookie_name = '{authentication_namespace}connection'.format(authentication_namespace=env['authentication_namespace'])
+            if cookie_name in raw_cookie:
+                cookies = {c.split('=')[0]: c.split('=')[1] for c in c [raw_cookie.split('; ')]}
+                if cookie_name in cookies: 
+                    authorization_split = cookies[cookie_name].split(':')
+                    env['connection_id'] = authorization_split[0]
+        if not env['connection_id']:
+            if request_object.get('headers', {}).get('authorization', {}).get('value'):
+                authorization_header = request_object['headers']['authorization']['value']
+                if authorization_header[0:6] == 'Basic ':
+                    authorization_split = base64.b64decode(authorization_header[6:]).decode('utf-8').split(':')
+                    env['connection_id'] = authorization_split[0]
+        if not env['connection_id']:
+            header_name = '{authentication_namespace}connection'.format(authentication_namespace=env['authentication_namespace'])
+            if request_object.get('headers', {}).get(header_name, {}).get('value'):
+                authorization_split = request_object['headers'][header_name]['value'].split(':')
+                env['connection_id'] = authorization_split[0]
+        env['path'] = []
+        if not env['connection_id']:
+            system_root_connection_prefix = '{system_root}/connection/'.format(env['system_root'])
+            if request_object['uri'].startswith(system_root_connection_prefix):
+                working_path_split = request_object['uri'][len(system_root_connection_prefix):].split('/')
+                env['connection_id'] = working_path_split[0]
+                p = '/'.join(working_path_split[1:]).strip('/?')
+                p = p[:-len('.json')] if p.endswith('.json') else p
+                env['path'] = p.strip('/').split('/')
+        else:
+            if request_object['uri'].startswith(system_root_connection_prefix):
+                working_path_split = request_object['uri'][len(system_root_connection_prefix):].split('/')
+                p = '/'.join(working_path_split[1:]).strip('/?')
+                p = p[:-len('.json')] if p.endswith('.json') else p
+                env['path'] = p.strip('/').split('/')
+        client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8'))
+        if env['path'] and uuid_valid(env['connection_id']):
+            if len(path) == 1 and path[0] == 'connect':
+                connection_object = bucket.Object('{data_root}/connection/{connection_id}.json'.format(data_root=env['data_root'], connection_id=connection_id))
                 try:
                     connection_record = json.loads(connection_object.get()['Body'].read().decode('utf-8'))
                 except:
                     connection_record = {'mask': {}}
                 if request_object['method'] in ['POST', 'PUT', 'PATCH']:
                     if entity and type(entity) is dict and len(entity) == 1 and type(list(entity.values())[0]) is dict:
-                        connection_record = {**connection_record, **json.loads(lambda_client.invoke(FunctionName='{}-core-authentication'.format(env['lambda_namespace']), InvocationType='RequestResponse', Payload=bytes(json.dumps(entity), 'utf-8'))['Payload'].read().decode('utf-8'))}
+                        connection_record = {**connection_record, **json.loads(lambda_client.invoke(FunctionName='{}-core-authentication'.format(env['lambda_namespace']), InvocationType='RequestResponse', Payload=bytes(json.dumps(entity), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))}
                     connection_object.put(Body=bytes(json.dumps(connection_record), 'utf-8'), ContentType='application/json')
                     counter = counter + 1
                 elif request_object['method'] == 'DELETE':
@@ -86,17 +126,16 @@ def main(event, context):
                         counter = counter + 1
                     except:
                         pass
-            elif len(path) >= 4 and path[2] in ['asset', 'static']:
-                # {connection_id, entity_type, path, method}
-                usable_path = path[3:]
+            elif len(path) >= 2 and path[0] in ['asset', 'static']:
+                usable_path = path[1:]
                 allowed = json.loads(lambda_client.invoke(FunctionName='{}-core-mask'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
                     'connection_id': connection_id, 
-                    'entity_type': path[2], 
+                    'entity_type': path[0], 
                     'method': request_object['method'], 
                     'path': usable_path
-                }), 'utf-8'))['Payload'].read().decode('utf-8'))
+                }), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
                 if allowed:
-                    the_object = bucket.Object('{system_root}/asset/{usable_path}'.format(system_root=env['system_root'], usable_path='/'.join(usable_path))) if path[2] == 'asset' else bucket.Object('/'.join(usable_path))
+                    the_object = bucket.Object('{data_root}/asset/{usable_path}'.format(data_root=env['data_root'], usable_path='/'.join(usable_path))) if path[0] == 'asset' else bucket.Object('/'.join(usable_path))
                     canwrite = True
                     if request_object['method'] == 'PATCH':
                         try:
@@ -109,29 +148,29 @@ def main(event, context):
                         elif request_object['method'] == 'DELETE':
                             the_object.delete()
                         counter = counter + 1
-            elif len(path) >= 4:
-                if len(path) == 4:
-                    entity_type, entity_id = path[2:]
+            elif len(path) >= 2:
+                if len(path) == 2:
+                    entity_type, entity_id = path
                     switches = {'entity_type': entity_type, 'entity_id': entity_id}
-                    entity_key = '{system_root}/{entity_type}/{entity_id}.json'.format(system_root=env['system_root'], **switches)
+                    entity_key = '{data_root}/{entity_type}/{entity_id}.json'.format(data_root=env['data_root'], **switches)
                 else:
-                    entity_type, class_name, entity_id, record_field = (path[2:5] + [None])
+                    entity_type, class_name, entity_id, record_field = (path[0:3] + [None])
                     switches = {'entity_type': entity_type, 'class_name': class_name, 'entity_id': entity_id}
-                    entity_key = '{system_root}/{entity_type}/{class_name}/{entity_id}/{connection_id}.json'.format(system_root=env['system_root'], **switches, connection_id=connection_id) if entity_type in ['feed', 'subscription'] else '_/{entity_type}/{class_name}/{entity_id}.json'.format(**switches)
+                    entity_key = '{data_root}/{entity_type}/{class_name}/{entity_id}/{connection_id}.json'.format(data_root=env['data_root'], **switches, connection_id=env['connection_id']) if entity_type in ['feed', 'subscription'] else '{data_root}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], **switches)
                 try:
                     current_entity = json.loads(s3.Object(env['bucket'], entity_key).get()['Body'].read().decode('utf-8'))
                 except:
                     current_entity = {}
-                if len(path) in [4, 5]:
+                if len(path) in [2, 3]:
                     entity_id, view_handle = (entity_id.split('.', 1) + ['json'])[:2]
-                elif len(path) == 6:
+                elif len(path) == 4:
                     if entity_type in ['subscription', 'feed']:
                         switches['record_id'] = entity_id
-                        entity_id, view_handle = (path[5].split('.', 1) + ['json'])[:2]
+                        entity_id, view_handle = (path[3].split('.', 1) + ['json'])[:2]
                         switches['entity_id'] = entity_id
-                        entity_key = '{system_root}/{entity_type}/{class_name}/{record_id}/{connection_id}/{entity_id}.json'.format(system_root=env['system_root'], **switches, connection_id=connection_id) if entity_type in ['feed', 'subscription'] else '_/{entity_type}/{class_name}/{entity_id}.json'.format(**switches)
+                        entity_key = '{data_root}/{entity_type}/{class_name}/{record_id}/{connection_id}/{entity_id}.json'.format(data_root=env['data_root'], **switches, connection_id=env['connection_id']) if entity_type in ['feed', 'subscription'] else '{data_root}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], **switches)
                     else:
-                        record_field, view_handle = (path[5].split('.', 1) + ['json'])[:2]
+                        record_field, view_handle = (path[3].split('.', 1) + ['json'])[:2]
                         if request_object['method'] in ['POST', 'PUT']:
                             entity = {record_field: entity}
                             request_object['method'] = 'POST'
@@ -153,15 +192,14 @@ def main(event, context):
                     del switches['record_id']
                 elif entity_type == 'view':
                     class_name = None
-                if view_handle == 'json' and request_object['method'] in ['POST', 'PUT', 'PATCH'] and json.loads(lambda_client.invoke(FunctionName='{}-core-validate'.format(env['lambda_namespace']), Payload=bytes(json.dumps({'entity': entity, 'switches': switches}), 'utf-8'))['Payload'].read().decode('utf-8')):
+                if view_handle == 'json' and request_object['method'] in ['POST', 'PUT', 'PATCH'] and json.loads(lambda_client.invoke(FunctionName='{}-core-validate'.format(env['lambda_namespace']), Payload=bytes(json.dumps({'entity': entity, 'switches': switches}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8')):
                     masked_entity = json.loads(lambda_client.invoke(FunctionName='{}-core-mask'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
-                        'connection_id': connection_id, 
                         'entity_type': entity_type, 
                         'method': request_object['method'],
                         'class_name': class_name, 
                         'entity_id': entity_id, 
                         'entity': entity
-                    }), 'utf-8'))['Payload'].read().decode('utf-8'))
+                    }), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
                     constrained = masked_entity.get('__constrained', True)
                     del masked_entity['__constrained']
                     if masked_entity:
@@ -177,7 +215,7 @@ def main(event, context):
                                     updated_fields = [f for f in entity if entity[f] != current_entity.get(f)]
                                 put_response = bucket.put_object(Body=bytes(json.dumps(entity_to_write), 'utf-8'), Key=entity_key, ContentType='application/json')
                                 if entity_type == 'record':
-                                    record_version_key = '{system_root}/version/{class_name}/{record_id}/{version_id}.json'.format(system_root=env['system_root'], class_name=entity['@type'], record_id=entity['@id'], version_id=put_response.version_id)
+                                    record_version_key = '{data_root}/version/{class_name}/{record_id}/{version_id}.json'.format(data_root=env['data_root'], class_name=entity['@type'], record_id=entity['@id'], version_id=put_response.version_id)
                                     bucket.put_object(Body=bytes(json.dumps(updated_fields), 'utf-8'), Key=record_version_key, ContentType='application/json')
                             elif request_object['method'] == 'DELETE' and current_entity:
                                 if entity_type in ['query', 'record', 'view', 'feed', 'subscription', 'system']:

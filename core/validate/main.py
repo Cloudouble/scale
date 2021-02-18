@@ -1,6 +1,4 @@
-env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_"}
-
-import json, boto3, os, datetime, uuid
+import json, boto3, datetime, uuid
 from datetime import datetime
 from datetime import date
 from datetime import time
@@ -69,6 +67,8 @@ def main(event, context):
     - validate the given record according to its datatype
     - return True if valid else False
     '''
+    env = context.client_context.env
+    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8'))
     valid = False
     if event and type(event['entity']) is dict and type(event.get('switches')) is dict and event['switches'].get('entity_type') and event['switches'].get('entity_id'):
         s3 = boto3.resource('s3')
@@ -79,7 +79,6 @@ def main(event, context):
         if entity_type == 'view':
             valid = valid_view(entity, True)
         elif entity_type == 'query':
-            # {processor='', ?options={}, vector=[], ?count=0}
             valid = type(entity.get('processor')) is str and type(entity.get('vector')) is list and type(entity.get('options', {})) is dict and type(entity.get('count', 0)) is int
         elif entity_type == 'feed':
             valid = valid_view(entity)
@@ -89,7 +88,7 @@ def main(event, context):
             valid = type(entity) is dict
         elif entity_type == 'record':
             if entity.get('@type') and entity.get('@id'):
-                type_schema = json.loads(s3.Object(env['bucket'], '{system_root}/schema/classes/{entity_type}.json'.format(system_root=env['system_root'], entity_type=entity['@type'])).get()['Body'].read().decode('utf-8'))
+                type_schema = json.loads(s3.Object(env['bucket'], '{data_root}/schema/classes/{entity_type}.json'.format(data_root=env['data_root'], entity_type=entity['@type'])).get()['Body'].read().decode('utf-8'))
                 if type_schema and type(type_schema) is dict and entity['@type'] == class_name and entity['@id'] == entity_id:
                     type_properties_map = type_schema.get('properties', {})
                     non_core_record_properties = [p for p in entity if p and type(p) is str and p[0] != '@']

@@ -1,10 +1,8 @@
-env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_"}
-
 import json, boto3
 
 def getpath(p):
     p = p.strip('/?')
-    p = p[len(env['system_root']):] if p.startswith(env['system_root']) else p
+    p = p[len(env['data_root']):] if p.startswith(env['data_root']) else p
     p = p[:-len('.json')] if p.endswith('.json') else p
     return p.strip('/').split('/')
 
@@ -20,7 +18,7 @@ def process_record(key_obj, bucket, lambda_client, record):
         'entity': record, 
         'write': True
     }
-    lambda_client.invoke(FunctionName='{lambda_namespace}-core-mask'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps(mask_payload), 'utf-8'))
+    lambda_client.invoke(FunctionName='{lambda_namespace}-core-mask'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps(mask_payload), 'utf-8'), ClientContext=client_context)
 
 def main(event, context):
     '''
@@ -30,6 +28,8 @@ def main(event, context):
     - lists /subscription/{class_name}/{record_id}/* to find affected connections
     - triggers mask for each affected connection
     '''
+    env = context.client_context.env
+    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8'))
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(env['bucket'])
     s3_client = boto3.client('s3')
@@ -43,16 +43,16 @@ def main(event, context):
             query_list = []
             for field_name in updated_fields:
                 try:
-                    query_list.extend(json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{system_root}/vector/{class_name}/{field_name}.json'.format(system_root=env['system_root'], class_name=class_name, field_name=field_name))['Body'].read().decode('utf-8')))
+                    query_list.extend(json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/vector/{class_name}/{field_name}.json'.format(data_root=env['data_root'], class_name=class_name, field_name=field_name))['Body'].read().decode('utf-8')))
                 except:
                     pass
             query_list = sorted(list(set(query_list)))
             for query_id in query_list:
-                lambda_client.invoke(FunctionName='{lambda_namespace}-core-query'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps({'query': query_id, 'record': {'@type': class_name, '@id': record_id}}), 'utf-8'))
-            subscription_list_key = '{system_root}/subscription/{class_name}/{record_id}/'.format(system_root=env['system_root'], class_name=class_name, record_id=record_id)
+                lambda_client.invoke(FunctionName='{lambda_namespace}-core-query'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps({'query': query_id, 'record': {'@type': class_name, '@id': record_id}}), 'utf-8'), ClientContext=client_context)
+            subscription_list_key = '{data_root}/subscription/{class_name}/{record_id}/'.format(data_root=env['data_root'], class_name=class_name, record_id=record_id)
             subscription_list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix=subscription_list_key)
             if subscription_list_response.get('Contents', []):
-                record_data = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{system_root}/record/{class_name}/{record_id}.json'.format(system_root=env['system_root'], class_name=class_name, record_id=record_id))['Body'].read().decode('utf-8'))
+                record_data = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/record/{class_name}/{record_id}.json'.format(data_root=env['data_root'], class_name=class_name, record_id=record_id))['Body'].read().decode('utf-8'))
             else:
                 record_data = {}
             if record_data:

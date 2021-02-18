@@ -1,4 +1,4 @@
-env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_"}
+env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "data_root": "_"}
 
 import urllib.request, json, boto3
 
@@ -84,15 +84,15 @@ def main(event, context):
 
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(env['bucket'])
-    bucket.put_object(Body=bytes(json.dumps(classes), 'utf-8'), ContentType='application/json', Key='{system_root}/schema/classes.json'.format(system_root=env['system_root']))
-    bucket.put_object(Body=bytes(json.dumps(properties), 'utf-8'), ContentType='application/json', Key='{system_root}/schema/properties.json'.format(system_root=env['system_root']))
-    bucket.put_object(Body=bytes(json.dumps(datatypes), 'utf-8'), ContentType='application/json', Key='{system_root}/schema/datatypes.json'.format(system_root=env['system_root']))
+    bucket.put_object(Body=bytes(json.dumps(classes), 'utf-8'), ContentType='application/json', Key='{data_root}/schema/classes.json'.format(data_root=env['data_root']))
+    bucket.put_object(Body=bytes(json.dumps(properties), 'utf-8'), ContentType='application/json', Key='{data_root}/schema/properties.json'.format(data_root=env['data_root']))
+    bucket.put_object(Body=bytes(json.dumps(datatypes), 'utf-8'), ContentType='application/json', Key='{data_root}/schema/datatypes.json'.format(data_root=env['data_root']))
         
     for k, v in properties.items():
-        bucket.put_object(Body=bytes(json.dumps(v), 'utf-8'), ContentType='application/json', Key='{system_root}/schema/properties/{k}.json'.format(system_root=env['system_root'], k=k))
+        bucket.put_object(Body=bytes(json.dumps(v), 'utf-8'), ContentType='application/json', Key='{data_root}/schema/properties/{k}.json'.format(data_root=env['data_root'], k=k))
     for k, v in classes.items():
-        bucket.put_object(Body=bytes(json.dumps(v), 'utf-8'), ContentType='application/json', Key='{system_root}/schema/classes/{k}.json'.format(system_root=env['system_root'], k=k))
+        bucket.put_object(Body=bytes(json.dumps(v), 'utf-8'), ContentType='application/json', Key='{data_root}/schema/classes/{k}.json'.format(data_root=env['data_root'], k=k))
     for k, v in datatypes.items():
-        bucket.put_object(Body=bytes(json.dumps(v), 'utf-8'), ContentType='application/json', Key='{system_root}/schema/datatypes/{k}.json'.format(system_root=env['system_root'], k=k))
+        bucket.put_object(Body=bytes(json.dumps(v), 'utf-8'), ContentType='application/json', Key='{data_root}/schema/datatypes/{k}.json'.format(data_root=env['data_root'], k=k))
         
     return True
