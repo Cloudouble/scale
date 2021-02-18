@@ -5,7 +5,8 @@ import json, boto3, os
 def main(event, context):
     '''
     - triggered by react-query.py, react-version.py
-    - executes the given query using the given record, returning True if matching
+    - executes the given query using the given record 
+    - returns True if matching
     '''
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(env['bucket'])

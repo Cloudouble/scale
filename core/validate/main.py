@@ -64,11 +64,10 @@ def valid_view(view, direct=False):
 
 def main(event, context):
     '''
-    - triggered by clean.py, write.py
+    - triggered by write
+    - {'entity': entity, 'switches': {'entity_type': entity_type, 'class_name'?: class_name?, 'entity_id': entity_id}}
     - validate the given record according to its datatype
-    
-    {'entity': entity, 'switches': {'entity_type': entity_type, 'class_name'?: class_name?, 'entity_id': entity_id}}
-    entity_type => view query feed subscription system record
+    - return True if valid else False
     '''
     valid = False
     if event and type(event['entity']) is dict and type(event.get('switches')) is dict and event['switches'].get('entity_type') and event['switches'].get('entity_id'):

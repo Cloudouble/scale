@@ -13,7 +13,7 @@ def main(event, context):
     '''
     - triggered by new/updated objects at /query/{class_name}/{query_id}/{record_initial}.json
     - uses /feed/{class_name}/{query_id}/{connection_id}/* to find affected connections
-    - triggers mask.py for each record_id in the index that doesn't already exist in the /connection/{connection_id}/record/{class_name}/{record_id}.json
+    - triggers index.py for each affected connection
     '''
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(env['bucket'])

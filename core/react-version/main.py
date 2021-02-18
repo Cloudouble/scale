@@ -26,9 +26,9 @@ def main(event, context):
     '''
     - triggered by new objects at /version/{class_name}/{record_id}/{version_id}.json
     - uses /vector/{class_name}/{field_name}.json to find affected queries 
-    - triggers query-record.py with the full record for each affected query
+    - triggers query with the full record for each affected query
     - lists /subscription/{class_name}/{record_id}/* to find affected connections
-    - triggers mask.py for each affected connection
+    - triggers mask for each affected connection
     '''
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(env['bucket'])

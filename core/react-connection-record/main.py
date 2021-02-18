@@ -33,8 +33,8 @@ def main(event, context):
     '''
     - triggered by new/updated/deleted objects in /connection/{connection_id}/record/{class_name}/{record_id}.json
     - removes the relevant record_id from /connection/{connection_id}/query/{class_name}/{query_id}/{index_initial}.json if the masked value is empty
-    - uses /subscription/{class_name}/{record_id}/{connection_id}.json to find affected views for this connection and record
-    - trigger view.py for each affected subscription view 
+    - uses /subscription/{class_name}/{record_id}/{connection_id}/* to find affected views for this connection and record
+    - trigger view for each affected subscription view 
     '''
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(env['bucket'])
@@ -43,7 +43,6 @@ def main(event, context):
     counter = 0
     for record_event in event['Records']:
         path = getpath(record_event['s3']['object']['key'])
-        print(path)
         if len(path) == 5:
             connection_id, entity_type, class_name, record_id = path[1:]
             index = record_id[0]
@@ -75,7 +74,7 @@ def main(event, context):
                         'class_name': class_name, 
                         'entity_type': 'record', 
                         'entity_id': record_id, 
-                        'view_configuration': subscription_data
+                        'view': subscription_data
                     }), 'utf-8'))
             counter = counter + 1
     return counter

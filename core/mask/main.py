@@ -9,8 +9,8 @@ def chunks(lst, n):
 def main(event, context):
     '''
     - triggered by write.py, react-version.py, react-index.py, react-connection-record.py, react-connection-index.py
+    - event = {'connection_id': '', 'entity_type': '', 'method': '', ?'path': [], ?'class_name': '', ?'entity_id': '', ?entity: {}, ?query_id}
     - given a connection_id and a record, writes the masked version of the record to /connection/{connection_id}/record/{class_name}/{record_id}.json
-    event = {'connection_id': '', 'entity_type': '', 'method': '', ?'path': [], ?'class_name': '', ?'entity_id': '', ?entity: {}, ?query_id}
     '''
     masked_entity = None
     if event.get('connection_id'):

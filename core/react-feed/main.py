@@ -12,7 +12,7 @@ def getpath(p):
 def main(event, context):
     '''
     - triggered by writes at /feed/{class_name}/{query_id}/{connection_id}/*
-    - trigger view.py for each view configuration in feed->view
+    - trigger view for each view configuration in feed->view
     '''
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(env['bucket'])
