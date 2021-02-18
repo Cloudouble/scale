@@ -1,10 +1,4 @@
-env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_"}
-
-import json, boto3, time
-
-def chunks(lst, n):
-    for i in range(0, len(lst), n):
-        yield lst[i:i + n]
+import json, boto3, base64
 
 def main(event, context):
     '''
@@ -13,11 +7,13 @@ def main(event, context):
     - given a connection_id and a record, writes the masked version of the record to /connection/{connection_id}/record/{class_name}/{record_id}.json
     '''
     masked_entity = None
-    if event.get('connection_id'):
+    env = context.client_context.env
+    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8'))    
+    if env.get('connection_id'):
         s3 = boto3.resource('s3')
         bucket = s3.Bucket(env['bucket'])
         s3_client = boto3.client('s3')
-        connection_object = bucket.Object('{system_root}/connection/{connection_id}.json'.format(system_root=env['system_root'], connection_id=event['connection_id']))
+        connection_object = bucket.Object('{data_root}/connection/{connection_id}.json'.format(data_root=env['data_root'], connection_id=env['connection_id']))
         try:
             connection_record = json.loads(connection_object.get()['Body'].read().decode('utf-8'))
         except:
@@ -27,14 +23,13 @@ def main(event, context):
             if event.get('entity_type') and event.get('method'):
                 lambda_client = boto3.client('lambda')
                 if event['entity_type'] in ['asset', 'static'] and event.get('path'):
-                    # event = {connection_id, entity_type, path, method}
                     mask = connection_mask.get(event['entity_type']) if event['entity_type'] in mask else mask.get('*', {})
                     if type(mask) is dict:
                         mask = mask.get(event['method']) if event['method'] in mask else mask.get('*', {})
                     for p in event['path']:
                         if type(mask) is dict:
                             mask = mask.get(p) if p in mask else mask.get('*', {})
-                    if event['entity_type'] == 'static' and event['path'][0:len(env['system_root'])] == env['system_root']:
+                    if event['entity_type'] == 'static' and event['path'][0:len(env['data_root'])] == env['data_root']:
                         allowed = False
                     else:
                         if not mask:
@@ -43,19 +38,10 @@ def main(event, context):
                             allowed = True
                         elif type(mask) is dict:
                             allowed = all([json.loads(lambda_client.invoke(FunctionName='{lambda_namespace}-extension-mask-{mask_name}'.format(lambda_namespace=env['lambda_namespace'], mask_name=mask_name), Payload=bytes(json.dumps({
-                                'purpose': 'mask', 'connection_id': event['connection_id'], 'path': event['path'], 'options': options}), 'utf-8'))['Payload'].read().decode('utf-8')) 
+                                'purpose': 'mask', 'path': event['path'], 'options': options}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8')) 
                                 for mask_name, options in mask.items()])
-                    if allowed and event.get('write'):
-                        write_path = event.get('path') if event['entity_type'] == 'static' else '{system_root}/asset/{path}'.format(system_root=env['system_root'], path=event['path'])
-                        
-                        ### work to do here for file uploads
-
                     return allowed
                 elif event['entity_type'] == 'view' or all([event.get(k) for k in ['class_name', 'entity_id']]):
-                    # event = {connection_id, entity_type, method, class_name, entity_id, entity}
-                    s3 = boto3.resource('s3')
-                    bucket = s3.Bucket(env['bucket'])
-                    lambda_client = boto3.client('lambda')
                     switches = {'entity_type': event['entity_type'], 'method': event['method'], 'class_name': event['class_name'], 'entity_id': event['entity_id']}
                     mask = connection_mask.get(switches['entity_type']) if switches['entity_type'] in connection_mask else connection_mask.get('*', {})
                     if type(mask) is dict:
@@ -67,9 +53,9 @@ def main(event, context):
                         entity = event['entity']
                     else:
                         if event['entity_type'] == 'view':
-                            entity_key = '{system_root}/{entity_type}/{entity_id}.json'.format(system_root=env['system_root'], entity_type=event['entity_type'], entity_id=event['entity_id'])
+                            entity_key = '{data_root}/{entity_type}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=event['entity_type'], entity_id=event['entity_id'])
                         else:
-                            entity_key = '{system_root}/{entity_type}/{class_name}/{entity_id}.json'.format(system_root=env['system_root'], entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id'])
+                            entity_key = '{data_root}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id'])
                         entity = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=entity_key)['Body'].read().decode('utf-8'))
                     constrained = True
                     allowfields = []
@@ -82,7 +68,7 @@ def main(event, context):
                         options = options if type(options) is dict else {}
                         if constrained:
                             mask_payload = {'purpose': 'mask', 'entity': entity, 'connection_id': event['connection_id'], 'switches': switches, 'options': options}
-                            allowfields.extend(json.loads(lambda_client.invoke(FunctionName='{lambda_namespace}-extension-mask-{mask_name}'.format(lambda_namespace=env['lambda_namespace'], mask_name=mask_name), Payload=bytes(json.dumps(mask_payload), 'utf-8'))['Payload'].read().decode('utf-8')))
+                            allowfields.extend(json.loads(lambda_client.invoke(FunctionName='{lambda_namespace}-extension-mask-{mask_name}'.format(lambda_namespace=env['lambda_namespace'], mask_name=mask_name), Payload=bytes(json.dumps(mask_payload), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8')))
                             if '*' in allowfields:
                                 constrained = False
                                 break
@@ -98,13 +84,13 @@ def main(event, context):
                         writable_entity = {**masked_entity}
                         del writable_entity['__constrained']
                         if event['entity_type'] == 'view':
-                            write_key = '{system_root}/connection/{connection_id}/view/{entity_id}.json'.format(system_root=env['system_root'], connection_id=event['connection_id'], entity_id=event['entity_id'])
+                            write_key = '{data_root}/connection/{connection_id}/view/{entity_id}.json'.format(data_root=env['data_root'], connection_id=env['connection_id'], entity_id=event['entity_id'])
                         else:
-                            write_key = '{system_root}/connection/{connection_id}/{entity_type}/{class_name}/{entity_id}.json'.format(system_root=env['system_root'], connection_id=event['connection_id'], entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id'])
+                            write_key = '{data_root}/connection/{connection_id}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], connection_id=env['connection_id'], entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id'])
                         bucket.put_object(Body=bytes(json.dumps(writable_entity), 'utf-8'), Key=write_key, ContentType='application/json')
                     if event.get('query_id'):
-                        index_key = '{system_root}/connection/{connection_id}/query/{class_name}/{query_id}/{index}.json'.format(
-                            system_root=env['system_root'], connection_id=event['connection_id'], class_name=event['class_name'], query_id=event['query_id'], index=event['entity_id'][0])
+                        index_key = '{data_root}/connection/{connection_id}/query/{class_name}/{query_id}/{index}.json'.format(
+                            data_root=env['data_root'], connection_id=env['connection_id'], class_name=event['class_name'], query_id=event['query_id'], index=event['entity_id'][0])
                         try:
                             index_record_ids = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=index_key)['Body'].read().decode('utf-8'))
                         except:
@@ -117,5 +103,4 @@ def main(event, context):
                             index_record_ids.remove(event['entity_id'])
                             index_record_ids.sort()
                             bucket.put_object(Body=bytes(json.dumps(index_record_ids), 'utf-8'), Key=index_key, ContentType='application/json')
-
     return masked_entity
