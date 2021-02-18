@@ -7,8 +7,8 @@ def render_element(record, prefix, class_name):
     
 def main(event, context):
     '''
-    - triggered by view.py
-    - event => {"options", "assets", "entity_type", switches": {"connection_id", "class_name", "entity_id", "field_name", "sort_field", "sort_direction", "page_name", "suffix"},
+    - triggered by view
+    - event => {"options", "assets", "entity_type", switches": {"class_name", "entity_id", "field_name", "sort_field", "sort_direction", "page_name", "suffix"},
                     "page", "total_result_count": 1, "view_result_count"}
     - an example view to return records as custom HTML elements
     - returns an object with content_type, encoding and the base64-encoded text of the HTML element
