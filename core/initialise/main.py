@@ -12,25 +12,20 @@ def getpath(p):
 def main(event, context):
     '''
     - triggered by administrator to initialise a new installation
-    event => {system_user_key: '', system_user_name: ''}
+    - event => {key: '', ?name: ''}
+    - returns True when complete
     '''
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(env['bucket'])
     s3_client = boto3.client('s3')
 
-
-    if event.get('system_user_name') and event.get('system_user_key'):
+    if event.get('key'):
         sudo_module_path = '{system_root}/system/authentication/sudo.json'.format(system_root=env['system_root'])
-        sudo_module_data = {'processor': '{}-extension-authenticate-sudo'.format(env['lambda_namespace']), 'options': {
-            'user_name': event.get('system_user_name', 'system'), 
-            'key': hashlib.sha512(bytes(event.get('system_user_key'), 'utf-8')).hexdigest()
+        sudo_module_data = {'processor': '{}-extension-authentication-sudo'.format(env['lambda_namespace']), 'options': {
+            'name': event.get('name', 'system'), 
+            'key': hashlib.sha512(bytes(event.get('key'), 'utf-8')).hexdigest()
         }}
         bucket.put_object(Body=bytes(json.dumps(sudo_module_data), 'utf-8'), Key=sudo_module_path, ContentType='application/json')
-        hashlib.sha512(bytes(event.get('system_user_key'), 'utf-8')).hexdigest()
-
-
-
-
-
+        hashlib.sha512(bytes(event.get('key'), 'utf-8')).hexdigest()
 
     return True

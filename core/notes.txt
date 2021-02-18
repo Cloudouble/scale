@@ -55,9 +55,9 @@ CONNECTION PATHS
 CORE FUNCTIONS
 
 * initialise (tested)
-    - run once by an administrator to install the system into a AWS S3 Bucket
-    - take a set of parameters {"system_user_key": "-----", "system_user_name": "system"}
-    - return True when complete
+    - triggered by administrator to initialise a new installation
+    - event => {key: '', ?name: ''}
+    - returns True when complete
 
 * schema (tested)
     - triggered on-demand by an administrator
@@ -143,8 +143,9 @@ CORE FUNCTIONS
     - triggered by clean.py, write.py
     - validate the given record according to its datatype
         
-* authenticate (tested)
+* authentication (tested)
     - triggered by write.py
+    - event => {authentication_channel_name: {credentials}}
     - takes care of authentication sub-processes
     - returns a connection object with (at least) a 'mask' property, which is overlaid onto _/connection/{connection_id}.json
 
@@ -165,7 +166,10 @@ CORE FUNCTIONS
 EXTENSION FUNCTIONS
 
 * authentication/sudo
-    - a sudo authenticator
+    - triggered by authentication
+    - event => {credentials: {key: ''}, options: {key: ''}}
+    - returns a connection object with (at least) a 'mask' property, which is overlaid onto _/connection/{connection_id}.json to enable administrator access
+    - remove this function completely to disable administrator access
 
 * query/books
     - a query processor for filtering book records
