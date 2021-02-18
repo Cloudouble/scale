@@ -20,9 +20,9 @@ def uuid_valid(s):
 def main(event, context):
     '''
     - triggered as an endpoint for a CDN or API originated PUT / PATCH / POST / DELETE request, or a websocket $put/$post/$patch/$delete message
-    - writes/deletes a connection configuration to ~connection/{connection_id}.json OR
-    - writes/deletes a view configuration to /view/{view_id}.json via /connection/{connection_id}/view/{view_id}.json OR
-    - writes/deletes an private asset to ~asset/{assetpath} via ~connection/{connection_id}/asset/{path}
+    - writes/deletes a connection configuration to _/connection/{connection_id}.json OR (finalised)
+    - writes/deletes a view configuration to /view/{view_id}.json via /connection/{connection_id}/view/{view_id}.json OR (finalised)
+    - writes/deletes an private asset to _/asset/{assetpath} via _/connection/{connection_id}/asset/{path} (testing)
     - writes/deletes an static asset to {path} via ~connection/{connection_id}/static/{path}
     - writes/deletes a query configuration to /query/{class_name}/{query_id}.json via /connection/{connection_id}/query/{class_name}/{query_id}.json  OR
     - writes/deletes a feed configuration to /feed/{class_name}/{query_id}/{connection_id}.json via /connection/{connection_id}/feed/{class_name}/{query_id}.json OR 
@@ -48,11 +48,24 @@ def main(event, context):
         #CDN: PUT, POST or PATCH
         request_objects = event.get('Records', [])
     for request_object in [r['cf']['request'] for r in request_objects if r.get('cf', {}).get('request', {}).get('method', 'POST') in ['POST', 'PUT', 'PATCH', 'DELETE']]:
-        body = base64.b64decode(request_object['body']['data']) if request_object.get('isBase64Encoded') else request_object['body']['data']
-        try: 
-            entity = json.loads(body)
-        except: 
-            entity = {k: v[0] for k, v in parse_qs(body).items()}
+        body = bytes(request_object['body']['data'], 'utf-8') if request_object['body']['encoding'] == 'text' else base64.b64decode(request_object['body']['data'])
+        content_type = request_object.get('headers', {}).get('content-type', [])
+        if content_type and type(content_type[0]) is dict:
+            content_type = content_type[0].get('value', 'application/json')
+        else:
+            content_type = 'application/json'
+        if content_type == 'application/json':
+            try: 
+                entity = json.loads(body)
+            except: 
+                entity = {}
+        elif content_type == 'application/x-www-form-urlencoded':
+            try: 
+                entity = {k: v[0] for k, v in parse_qs(body.decode('utf-8')).items()}
+            except: 
+                entity = {}
+        else:
+            entity = {}
         path = getpath(request_object['uri'])
         if path and path[0] == 'connection' and len(path) >= 2 and uuid_valid(path[1]):
             connection_id = path[1]
@@ -64,7 +77,7 @@ def main(event, context):
                     connection_record = {'mask': {}}
                 if request_object['method'] in ['POST', 'PUT', 'PATCH']:
                     if entity and type(entity) is dict and len(entity) == 1 and type(list(entity.values())[0]) is dict:
-                        connection_record = {**connection_record, **json.loads(lambda_client.invoke(FunctionName='{}-core-authenticate'.format(env['lambda_namespace']), InvocationType='RequestResponse', Payload=bytes(json.dumps(entity), 'utf-8'))['Payload'].read().decode('utf-8'))}
+                        connection_record = {**connection_record, **json.loads(lambda_client.invoke(FunctionName='{}-core-authentication'.format(env['lambda_namespace']), InvocationType='RequestResponse', Payload=bytes(json.dumps(entity), 'utf-8'))['Payload'].read().decode('utf-8'))}
                     connection_object.put(Body=bytes(json.dumps(connection_record), 'utf-8'), ContentType='application/json')
                     counter = counter + 1
                 elif request_object['method'] == 'DELETE':
@@ -92,9 +105,10 @@ def main(event, context):
                             canwrite = False
                     if canwrite:
                         if request_object['method'] in ['PUT', 'POST', 'PATCH']:
-                            the_object.put(Body=bytes(body, 'utf-8'))
+                            the_object.put(Body=body, ContentType=content_type)
                         elif request_object['method'] == 'DELETE':
                             the_object.delete()
+                        counter = counter + 1
             elif len(path) >= 4:
                 if len(path) == 4:
                     entity_type, entity_id = path[2:]

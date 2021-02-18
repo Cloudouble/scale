@@ -54,20 +54,14 @@ CONNECTION PATHS
 
 CORE FUNCTIONS
 
-* initialise (tested)
+* initialise (finalised)
     - triggered by administrator to initialise a new installation
     - event => {key: '', ?name: ''}
     - returns True when complete
 
-* schema (tested)
+* schema (finalised)
     - triggered on-demand by an administrator
     - updates schema data to all system paths under /schema
-
-* clean.py (ready for testing)
-    - triggered on-demand by an administrator
-    - schema-enforce: runs validation over every record in the system and moves them to /trash/record/{record_id}.json if found invalid
-    - delete-marker-tidy: removes version objects related to deleted records
-
 
 * write.py (testing in progress...)
     - triggered as an endpoint for a CDN or API originated PUT / PATCH / POST / DELETE request, or a websocket $put/$post/$patch/$delete message
@@ -85,8 +79,8 @@ CORE FUNCTIONS
 
     
 * react-connection.py (ready for testing)
-    - triggered by writes at /connection/{connection_id}.json
-    - deletes all objects under /connection/{connection_id}/
+    - triggered by writes at _/connection/{connection_id}.json
+    - deletes all objects under _/connection/{connection_id}/*
 
 * react-query.py (tested)
     - triggered by writes at /query/{class_name}/{query_id}.json
@@ -143,7 +137,7 @@ CORE FUNCTIONS
     - triggered by clean.py, write.py
     - validate the given record according to its datatype
         
-* authentication (tested)
+* authentication (finalised)
     - triggered by write.py
     - event => {authentication_channel_name: {credentials}}
     - takes care of authentication sub-processes
@@ -165,7 +159,7 @@ CORE FUNCTIONS
 
 EXTENSION FUNCTIONS
 
-* authentication/sudo
+* authentication/sudo (finalised)
     - triggered by authentication
     - event => {credentials: {key: ''}, options: {key: ''}}
     - returns a connection object with (at least) a 'mask' property, which is overlaid onto _/connection/{connection_id}.json to enable administrator access
@@ -173,6 +167,9 @@ EXTENSION FUNCTIONS
 
 * query/books
     - a query processor for filtering book records
+
+* view/element
+    - a view processor for generating HTML elements from records as per the LiveElement.Element and LiveElement.Schema libraries
 
 -----
 

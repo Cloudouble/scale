@@ -4,7 +4,16 @@
       "cf": {
         "request": {
           "method": "PUT",
+          "headers": {
+            "content-type": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
           "body": {
+            "encoding": "text",
             "data": "{\"sudo\": {\"key\": \"-----\"}}"
           },
           "uri": "_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6.json"

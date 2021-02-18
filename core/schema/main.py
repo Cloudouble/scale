@@ -2,6 +2,7 @@ env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scal
 
 import urllib.request, json, boto3
 
+
 def main(event, context):
     '''
     - triggered on-demand by an administrator
@@ -34,7 +35,6 @@ def main(event, context):
         properties[rdfslabel]['classes'] = [r for r in properties[rdfslabel]['classes'] if r]
         properties[rdfslabel]['classes'] = [r.split(':')[-1] for r in properties[rdfslabel]['classes']]
         
-
     def get_parent_classes(c, all_parent_classes=[]):
         all_parent_classes = all_parent_classes if all_parent_classes else [c]
         sc = classes[c].get('subclassof', [])
@@ -69,7 +69,6 @@ def main(event, context):
     for n, d in classes.items():
         d['properties'] = { p: properties.get(p, {}).get('types', []) for p in sorted(list(set([pn for pn, pd in properties.items() if n in pd.get('classes', [])]))) }
 
-    
     datatype_list = [p for p in graph if (p.get('@type') and ((type(p['@type']) is str and p['@type'] == 'schema:DataType') or (type(p['@type']) is list and 'schema:DataType' in p['@type'])))]
     boolean_list = [p for p in graph if (p.get('@type') and ((type(p['@type']) is str and p['@type'] == 'schema:Boolean') or (type(p['@type']) is list and 'schema:Boolean' in p['@type'])))]
     other_list = [p for p in graph if p['@id'] in ['schema:Float', 'schema:Integer', 'schema:CssSelectorType', 'schema:PronounceableText', 'schema:URL', 'schema:XPathType']]
@@ -83,7 +82,6 @@ def main(event, context):
             'release': release
         }
 
-        
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(env['bucket'])
     bucket.put_object(Body=bytes(json.dumps(classes), 'utf-8'), ContentType='application/json', Key='{system_root}/schema/classes.json'.format(system_root=env['system_root']))
