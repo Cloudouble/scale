@@ -1,6 +1,6 @@
 import json, boto3, base64
 
-def getpath(p):
+def getpath(p, env):
     p = p.strip('/?')
     p = p[len(env['data_root']):] if p.startswith(env['data_root']) else p
     p = p[:-len('.json')] if p.endswith('.json') else p
@@ -14,8 +14,8 @@ def main(event, context):
     - takes care of authentication sub-processes
     - returns a connection object with (at least) a 'mask' property, which is overlaid onto _/connection/{connection_id}.json
     '''
-    env = context.client_context.env
-    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8'))
+    env = context.client_context.env if context.client_context and context.client_context.env else event.get('_env', {})
+    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')    
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(env['bucket'])
     s3_client = boto3.client('s3')
@@ -25,7 +25,7 @@ def main(event, context):
     system_authentication_base_key = '{data_root}/system/authentication/'.format(data_root=env['data_root'])
     system_authentication_list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix=system_authentication_base_key)
     for authentication_module_entry in system_authentication_list_response['Contents']:
-        module_name =  getpath(authentication_module_entry['Key'])[-1]
+        module_name =  getpath(authentication_module_entry['Key'], env)[-1]
         system_configuration['authentication'].append({module_name: json.loads(bucket.Object(authentication_module_entry['Key']).get()['Body'].read().decode('utf-8'))})
     system_configuration['authentication'].sort(key=lambda a: a.get('priority', 1000))
     for authentication_channel in system_configuration['authentication']:

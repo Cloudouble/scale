@@ -1,21 +1,19 @@
 {
   "connection_id": "74facaff-c792-4c70-b8a4-71b3ad78d3f6",
-  "entity_type": "view",
-  "method": "PUT",
-  "class_name": null,
-  "entity_id": "3365ffbb-b809-491b-86b4-833291eb2df1",
-  "entity": {
-    "processor": "element",
-    "content_type": "text/html",
-    "suffix": "html"
+  "class_name": "Book",
+  "entity_type": "query",
+  "entity_id": "9886c382-4b22-454d-8910-bb1415018421",
+  "view": {
+    "view": "3365ffbb-b809-491b-86b4-833291eb2df1",
+    "field_name": "numberOfPages"
   },
   "_env": {
     "bucket": "scale.live-element.net",
     "lambda_namespace": "liveelement-scale",
     "system_root": "_",
-    "data_root": "_",
     "shared": 0,
     "authentication_namespace": "liveelementscale",
+    "data_root": "_",
     "connection_id": "74facaff-c792-4c70-b8a4-71b3ad78d3f6"
   }
 }

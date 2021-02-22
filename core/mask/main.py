@@ -6,9 +6,9 @@ def main(event, context):
     - event = {'connection_id': '', 'entity_type': '', 'method': '', ?'path': [], ?'class_name': '', ?'entity_id': '', ?entity: {}, ?query_id}
     - given a connection_id and a record, writes the masked version of the record to /connection/{connection_id}/record/{class_name}/{record_id}.json
     '''
+    env = context.client_context.env if context.client_context and context.client_context.env else event.get('_env', {})
+    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')    
     masked_entity = None
-    env = context.client_context.env
-    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8'))    
     if env.get('connection_id'):
         s3 = boto3.resource('s3')
         bucket = s3.Bucket(env['bucket'])

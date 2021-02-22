@@ -1,24 +1,18 @@
 {
-  "entity": {
-    "processor": "test",
-    "options": {
-      "abc": 1
-    },
-    "assets": {
-      "alias": "assetpath"
-    },
-    "content_type": "plain/text",
-    "suffix": "txt"
+  "connection_id": "74facaff-c792-4c70-b8a4-71b3ad78d3f6",
+  "class_name": "Book",
+  "entity_type": "record",
+  "entity_id": "87370050-971f-4cd9-9c32-1072c6ac3c52",
+  "view": {
+    "view": "3365ffbb-b809-491b-86b4-833291eb2df1"
   },
-  "entity_type": "view",
-  "entity_id": "test",
   "_env": {
     "bucket": "scale.live-element.net",
     "lambda_namespace": "liveelement-scale",
     "system_root": "_",
-    "data_root": "_",
     "shared": 0,
     "authentication_namespace": "liveelementscale",
+    "data_root": "_", 
     "connection_id": "74facaff-c792-4c70-b8a4-71b3ad78d3f6"
   }
 }

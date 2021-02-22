@@ -1,4 +1,4 @@
-import json, boto3, datetime, uuid
+import json, boto3, base64, datetime, uuid
 from datetime import datetime
 from datetime import date
 from datetime import time
@@ -63,19 +63,19 @@ def valid_view(view, direct=False):
 def main(event, context):
     '''
     - triggered by write
-    - {'entity': entity, 'switches': {'entity_type': entity_type, 'class_name'?: class_name?, 'entity_id': entity_id}}
+    - {'entity': entity, 'entity_type': entity_type, 'class_name'?: class_name?, 'entity_id': entity_id}
     - validate the given record according to its datatype
     - return True if valid else False
     '''
-    env = context.client_context.env
-    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8'))
+    env = context.client_context.env if context.client_context and context.client_context.env else event.get('_env', {})
+    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')
     valid = False
-    if event and type(event['entity']) is dict and type(event.get('switches')) is dict and event['switches'].get('entity_type') and event['switches'].get('entity_id'):
+    if event and type(event['entity']) is dict and event.get('entity_type') and event.get('entity_id'):
         s3 = boto3.resource('s3')
         entity = event['entity']
-        entity_type = event['switches']['entity_type']
-        entity_id = event['switches']['entity_id']
-        class_name = event['switches'].get('class_name')
+        entity_type = event['entity_type']
+        entity_id = event['entity_id']
+        class_name = event.get('class_name')
         if entity_type == 'view':
             valid = valid_view(entity, True)
         elif entity_type == 'query':

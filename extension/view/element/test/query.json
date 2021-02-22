@@ -21,5 +21,14 @@
     }
   ],
   "total_result_count": 1,
-  "view_result_count": 1
+  "view_result_count": 1,
+  "_env": {
+    "bucket": "scale.live-element.net",
+    "lambda_namespace": "liveelement-scale",
+    "system_root": "_",
+    "data_root": "_",
+    "shared": 0,
+    "authentication_namespace": "liveelementscale",
+    "connection_id": "74facaff-c792-4c70-b8a4-71b3ad78d3f6"
+  }
 }

@@ -2,5 +2,14 @@
   "connection_id": "74facaff-c792-4c70-b8a4-71b3ad78d3f6",
   "class_name": "Book",
   "query_id": "9886c382-4b22-454d-8910-bb1415018421",
-  "index": "8"
+  "index": "8",
+  "_env": {
+    "bucket": "scale.live-element.net",
+    "lambda_namespace": "liveelement-scale",
+    "system_root": "_",
+    "data_root": "_",
+    "shared": 0,
+    "authentication_namespace": "liveelementscale",
+    "connection_id": "74facaff-c792-4c70-b8a4-71b3ad78d3f6"
+  }
 }

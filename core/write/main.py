@@ -151,12 +151,12 @@ def main(event, context):
             elif len(path) >= 2:
                 if len(path) == 2:
                     entity_type, entity_id = path
-                    switches = {'entity_type': entity_type, 'entity_id': entity_id}
-                    entity_key = '{data_root}/{entity_type}/{entity_id}.json'.format(data_root=env['data_root'], **switches)
+                    entity_key = '{data_root}/{entity_type}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=entity_type, entity_id=entity_id)
                 else:
                     entity_type, class_name, entity_id, record_field = (path[0:3] + [None])
-                    switches = {'entity_type': entity_type, 'class_name': class_name, 'entity_id': entity_id}
-                    entity_key = '{data_root}/{entity_type}/{class_name}/{entity_id}/{connection_id}.json'.format(data_root=env['data_root'], **switches, connection_id=env['connection_id']) if entity_type in ['feed', 'subscription'] else '{data_root}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], **switches)
+                    entity_key = '{data_root}/{entity_type}/{class_name}/{entity_id}/{connection_id}.json'.format(data_root=env['data_root'], 
+                        entity_type=entity_type, class_name=class_name, entity_id=entity_id, connection_id=env['connection_id']) if entity_type in ['feed', 'subscription'] else 
+                        '{data_root}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=entity_type, class_name=class_name, entity_id=entity_id)
                 try:
                     current_entity = json.loads(s3.Object(env['bucket'], entity_key).get()['Body'].read().decode('utf-8'))
                 except:
@@ -165,10 +165,11 @@ def main(event, context):
                     entity_id, view_handle = (entity_id.split('.', 1) + ['json'])[:2]
                 elif len(path) == 4:
                     if entity_type in ['subscription', 'feed']:
-                        switches['record_id'] = entity_id
+                        record_id = entity_id
                         entity_id, view_handle = (path[3].split('.', 1) + ['json'])[:2]
-                        switches['entity_id'] = entity_id
-                        entity_key = '{data_root}/{entity_type}/{class_name}/{record_id}/{connection_id}/{entity_id}.json'.format(data_root=env['data_root'], **switches, connection_id=env['connection_id']) if entity_type in ['feed', 'subscription'] else '{data_root}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], **switches)
+                        entity_key = '{data_root}/{entity_type}/{class_name}/{record_id}/{connection_id}/{entity_id}.json'.format(
+                            data_root=env['data_root'], entity_type=entity_type, class_name=class_name, record_id=record, connection_id=env['connection_id'], entity_id=entity_id) if entity_type in ['feed', 'subscription'] else 
+                            '{data_root}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=entity_type, class_name=class_name, entity_id=entity_id)
                     else:
                         record_field, view_handle = (path[3].split('.', 1) + ['json'])[:2]
                         if request_object['method'] in ['POST', 'PUT']:
@@ -187,12 +188,11 @@ def main(event, context):
                                 request_object['method'] = 'PUT'
                         entity['@type'] = entity.get('@type', class_name)
                         entity['@id'] = entity.get('@id', entity_id)
-                if entity_type == 'feed':
-                    switches['query_id'] = switches['record_id']
-                    del switches['record_id']
-                elif entity_type == 'view':
-                    class_name = None
-                if view_handle == 'json' and request_object['method'] in ['POST', 'PUT', 'PATCH'] and json.loads(lambda_client.invoke(FunctionName='{}-core-validate'.format(env['lambda_namespace']), Payload=bytes(json.dumps({'entity': entity, 'switches': switches}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8')):
+                if view_handle == 'json' and request_object['method'] in ['POST', 'PUT', 'PATCH'] and json.loads(lambda_client.invoke(FunctionName='{}-core-validate'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
+                    'entity': entity, 
+                    'entity_type': entity_type, 
+                    'class_name': None if entity_type == 'view' else class_name, 
+                    'entity_id': entity_id}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8')):
                     masked_entity = json.loads(lambda_client.invoke(FunctionName='{}-core-mask'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
                         'entity_type': entity_type, 
                         'method': request_object['method'],

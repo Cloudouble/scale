@@ -5,8 +5,8 @@ def main(event, context):
     - triggered by react-query.py, react-version.py
     - executes the given query using the given record 
     '''
-    env = context.client_context.env
-    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8'))
+    env = context.client_context.env if context.client_context and context.client_context.env else event.get('_env', {})
+    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(env['bucket'])
     s3_client = boto3.client('s3')
