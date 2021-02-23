@@ -1,12 +1,27 @@
-import json, boto3
+import json, boto3, base64
 
-def getpath(p):
+def getpath(p, env=None):
     p = p.strip('/?')
-    p = p[len(env['data_root']):] if p.startswith(env['data_root']) else p
+    if env and env.get('data_root'):
+        p = p[len(env['data_root']):] if p.startswith(env['data_root']) else p
     p = p[:-len('.json')] if p.endswith('.json') else p
     return p.strip('/').split('/')
 
-def process_record(key_obj, bucket, lambda_client, record):
+def build_env(record_event, context):
+    temp_path = getpath(record_event['s3']['object']['key'])
+    if len(temp_path) in [5, 6]:
+        shared = len(temp_path) == 6
+        return {
+            'bucket': record_event['s3']['bucket']['name'], 
+            'lambda_namespace': context.function_name.replace('-core-react-version', ''), 
+            'system_root': temp_path[-5],
+            'data_root': '{}/{}'.format(temp_path[-6], temp_path[-5]) if shared else temp_path[-5], 
+            'shared': 1 if shared else 0
+        }
+    else:
+        return {}
+
+def process_record(key_obj, lambda_client, record, env, client_context):
     entity_path = getpath(key_obj['Key'])
     class_name, record_id, connection_id = entity_path[1:4]
     mask_payload = {
@@ -28,17 +43,18 @@ def main(event, context):
     - lists /subscription/{class_name}/{record_id}/* to find affected connections
     - triggers mask for each affected connection
     '''
-    env = context.client_context.env
-    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8'))
     s3 = boto3.resource('s3')
-    bucket = s3.Bucket(env['bucket'])
     s3_client = boto3.client('s3')
     lambda_client = boto3.client('lambda')
     counter = 0
     for record_event in event['Records']:
-        path = getpath(record_event['s3']['object']['key'])
-        if len(path) == 4:
-            class_name, record_id, record_version = path[1:]
+        env = build_env(record_event, context)
+        if not env:
+            continue
+        env['path'] = getpath(record_event['s3']['object']['key'], env)
+        client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')
+        if len(env['path']) == 4:
+            class_name, record_id, record_version = env['path'][1:]
             updated_fields = sorted(json.loads(s3_client.get_object(Bucket=env['bucket'], Key=record_event['s3']['object']['key'])['Body'].read().decode('utf-8')))
             query_list = []
             for field_name in updated_fields:
@@ -57,12 +73,12 @@ def main(event, context):
                 record_data = {}
             if record_data:
                 for key_obj in subscription_list_response.get('Contents', []):
-                    process_record(key_obj, bucket, lambda_client, record_data)
+                    process_record(key_obj, lambda_client, record_data, env, client_context)
                 c = 1000000000
                 while c and subscription_list_response.get('IsTruncated') and subscription_list_response.get('NextContinuationToken'):
                     subscription_list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix=subscription_list_key, ContinuationToken=subscription_list_response.get('NextContinuationToken'))
                     for key_obj in subscription_list_response.get('Contents', []):
-                        process_record(key_obj, bucket, lambda_client, record_data)
+                        process_record(key_obj, lambda_client, record_data, env, client_context)
                         c = c - 1
             counter = counter + 1
     return counter
