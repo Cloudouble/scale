@@ -46,7 +46,7 @@ def main(event_data, context):
         vector_base_key = '{data_root}/vector/{class_name}/'.format(data_root=env['data_root'], class_name=class_name)
         vector_list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix=vector_base_key)
         for vector_listing in vector_list_response.get('Contents', []):
-            field_name = getpath(vector_listing['Key'])[2]
+            field_name = getpath(vector_listing['Key'], env)[2]
             if vector_listing['Key'] in vectors_to_update:
                 vector_queries = vectors_to_update[vector_listing['Key']]
             else:
@@ -71,7 +71,8 @@ def main(event_data, context):
                     vector_queries.append(query_id)
                     vector_queries.sort()
                     vectors_to_update[vector_key] = vector_queries
-    for key, vectors_queries in vectors_to_update.items():
+    print('line 75', vectors_to_update)
+    for key, vector_queries in vectors_to_update.items():
         vector_obj.put(Body=bytes(json.dumps(vector_queries), 'utf-8'), ContentType="application/json")
     for event_entry in event_data['Records']:
         env = build_env(event_entry, context)

@@ -3,12 +3,6 @@ env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scal
 import json, boto3, os, base64, uuid, time
 from urllib.parse import parse_qs
 
-def getpath(p):
-    p = p.strip('/?')
-    p = p[len(env['data_root']):] if p.startswith(env['data_root']) else p
-    p = p[:-len('.json')] if p.endswith('.json') else p
-    return p.strip('/').split('/')
-
 def uuid_valid(s):
     try:
         uuid.UUID(s).version == 4
@@ -70,7 +64,7 @@ def main(event, context):
             host = request_object.get('headers', {}).get('host', {}).get('value')
         else: 
             host = ''
-        env['data_root'] = '{host}/{system_root}'.format(host=host, system_root=system_root).strip('/')
+        env['data_root'] = '{host}/{system_root}'.format(host=host, system_root=env['system_root']).strip('/')
         
         env['connection_id'] = None
         if request_object.get('headers', {}).get('cookie', {}).get('value'):
@@ -93,23 +87,23 @@ def main(event, context):
                 authorization_split = request_object['headers'][header_name]['value'].split(':')
                 env['connection_id'] = authorization_split[0]
         env['path'] = []
+        root_connection_prefix = '{data_root}/connection/'.format(data_root=env['data_root'])
         if not env['connection_id']:
-            system_root_connection_prefix = '{system_root}/connection/'.format(env['system_root'])
-            if request_object['uri'].startswith(system_root_connection_prefix):
-                working_path_split = request_object['uri'][len(system_root_connection_prefix):].split('/')
+            if request_object['uri'].startswith(root_connection_prefix):
+                working_path_split = request_object['uri'][len(root_connection_prefix):].split('/')
                 env['connection_id'] = working_path_split[0]
                 p = '/'.join(working_path_split[1:]).strip('/?')
                 p = p[:-len('.json')] if p.endswith('.json') else p
                 env['path'] = p.strip('/').split('/')
         else:
-            if request_object['uri'].startswith(system_root_connection_prefix):
-                working_path_split = request_object['uri'][len(system_root_connection_prefix):].split('/')
+            if request_object['uri'].startswith(root_connection_prefix):
+                working_path_split = request_object['uri'][len(root_connection_prefix):].split('/')
                 p = '/'.join(working_path_split[1:]).strip('/?')
                 p = p[:-len('.json')] if p.endswith('.json') else p
                 env['path'] = p.strip('/').split('/')
-        client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8'))
+        client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')
         if env['path'] and uuid_valid(env['connection_id']):
-            if len(path) == 1 and path[0] == 'connect':
+            if len(env['path']) == 1 and env['path'][0] == 'connect':
                 connection_object = bucket.Object('{data_root}/connection/{connection_id}.json'.format(data_root=env['data_root'], connection_id=connection_id))
                 try:
                     connection_record = json.loads(connection_object.get()['Body'].read().decode('utf-8'))
@@ -126,16 +120,16 @@ def main(event, context):
                         counter = counter + 1
                     except:
                         pass
-            elif len(path) >= 2 and path[0] in ['asset', 'static']:
-                usable_path = path[1:]
+            elif len(env['path']) >= 2 and env['path'][0] in ['asset', 'static']:
+                usable_path = env['path'][1:]
                 allowed = json.loads(lambda_client.invoke(FunctionName='{}-core-mask'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
                     'connection_id': connection_id, 
-                    'entity_type': path[0], 
+                    'entity_type': env['path'][0], 
                     'method': request_object['method'], 
                     'path': usable_path
                 }), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
                 if allowed:
-                    the_object = bucket.Object('{data_root}/asset/{usable_path}'.format(data_root=env['data_root'], usable_path='/'.join(usable_path))) if path[0] == 'asset' else bucket.Object('/'.join(usable_path))
+                    the_object = bucket.Object('{data_root}/asset/{usable_path}'.format(data_root=env['data_root'], usable_path='/'.join(usable_path))) if env['path'][0] == 'asset' else bucket.Object('/'.join(usable_path))
                     canwrite = True
                     if request_object['method'] == 'PATCH':
                         try:
@@ -148,30 +142,38 @@ def main(event, context):
                         elif request_object['method'] == 'DELETE':
                             the_object.delete()
                         counter = counter + 1
-            elif len(path) >= 2:
-                if len(path) == 2:
-                    entity_type, entity_id = path
+            elif len(env['path']) >= 2:
+                if len(env['path']) == 2:
+                    entity_type, entity_id = env['path']
                     entity_key = '{data_root}/{entity_type}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=entity_type, entity_id=entity_id)
                 else:
-                    entity_type, class_name, entity_id, record_field = (path[0:3] + [None])
-                    entity_key = '{data_root}/{entity_type}/{class_name}/{entity_id}/{connection_id}.json'.format(data_root=env['data_root'], 
-                        entity_type=entity_type, class_name=class_name, entity_id=entity_id, connection_id=env['connection_id']) if entity_type in ['feed', 'subscription'] else 
-                        '{data_root}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=entity_type, class_name=class_name, entity_id=entity_id)
+                    entity_type, class_name, entity_id, record_field = (env['path'][0:3] + [None])
+                    if entity_type in ['feed', 'subscription']:
+                        entity_key = '{data_root}/{entity_type}/{class_name}/{entity_id}/{connection_id}.json'.format(
+                        data_root=env['data_root'], entity_type=entity_type, 
+                        class_name=class_name, entity_id=entity_id, connection_id=env['connection_id'])
+                    else:
+                        entity_key = '{data_root}/{entity_type}/{class_name}/{entity_id}.json'.format(
+                            data_root=env['data_root'], entity_type=entity_type, class_name=class_name, entity_id=entity_id)
                 try:
                     current_entity = json.loads(s3.Object(env['bucket'], entity_key).get()['Body'].read().decode('utf-8'))
                 except:
                     current_entity = {}
-                if len(path) in [2, 3]:
+                if len(env['path']) in [2, 3]:
                     entity_id, view_handle = (entity_id.split('.', 1) + ['json'])[:2]
-                elif len(path) == 4:
+                elif len(env['path']) == 4:
                     if entity_type in ['subscription', 'feed']:
                         record_id = entity_id
-                        entity_id, view_handle = (path[3].split('.', 1) + ['json'])[:2]
-                        entity_key = '{data_root}/{entity_type}/{class_name}/{record_id}/{connection_id}/{entity_id}.json'.format(
-                            data_root=env['data_root'], entity_type=entity_type, class_name=class_name, record_id=record, connection_id=env['connection_id'], entity_id=entity_id) if entity_type in ['feed', 'subscription'] else 
-                            '{data_root}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=entity_type, class_name=class_name, entity_id=entity_id)
+                        entity_id, view_handle = (env['path'][3].split('.', 1) + ['json'])[:2]
+                        if entity_type in ['feed', 'subscription']:
+                            entity_key = '{data_root}/{entity_type}/{class_name}/{record_id}/{connection_id}/{entity_id}.json'.format(
+                                data_root=env['data_root'], entity_type=entity_type, class_name=class_name, record_id=record, 
+                                connection_id=env['connection_id'], entity_id=entity_id) 
+                        else: 
+                            entity_key = '{data_root}/{entity_type}/{class_name}/{entity_id}.json'.format(
+                                data_root=env['data_root'], entity_type=entity_type, class_name=class_name, entity_id=entity_id)
                     else:
-                        record_field, view_handle = (path[3].split('.', 1) + ['json'])[:2]
+                        record_field, view_handle = (env['path'][3].split('.', 1) + ['json'])[:2]
                         if request_object['method'] in ['POST', 'PUT']:
                             entity = {record_field: entity}
                             request_object['method'] = 'POST'

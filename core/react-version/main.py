@@ -22,10 +22,9 @@ def build_env(record_event, context):
         return {}
 
 def process_record(key_obj, lambda_client, record, env, client_context):
-    entity_path = getpath(key_obj['Key'])
+    entity_path = getpath(key_obj['Key'], env)
     class_name, record_id, connection_id = entity_path[1:4]
     mask_payload = {
-        'connection_id': connection_id,
         'entity_type': 'record', 
         'method': 'GET', 
         'class_name': class_name,
@@ -33,7 +32,8 @@ def process_record(key_obj, lambda_client, record, env, client_context):
         'entity': record, 
         'write': True
     }
-    lambda_client.invoke(FunctionName='{lambda_namespace}-core-mask'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps(mask_payload), 'utf-8'), ClientContext=client_context)
+    mask_payload['_env'] = {'connection_id': connection_id, **env}
+    lambda_client.invoke(FunctionName='{lambda_namespace}-core-mask'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps(mask_payload), 'utf-8'))
 
 def main(event, context):
     '''
