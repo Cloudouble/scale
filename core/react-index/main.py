@@ -55,6 +55,6 @@ def main(event, context):
                     c = c - 1
             for affected_connection in affected_connections:
                 lambda_client.invoke(FunctionName='{lambda_namespace}-core-index'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', 
-                    Payload=bytes(json.dumps({'connection_id': affected_connection, 'class_name': class_name, 'query_id': query_id, 'index': index}), 'utf-8'), ClientContext=client_context)
+                    Payload=bytes(json.dumps({'class_name': class_name, 'query_id': query_id, 'index': index, '_env': {**env, 'connection_id': affected_connection}}), 'utf-8'))
             counter = counter + 1
     return counter

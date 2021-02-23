@@ -49,11 +49,11 @@ def main(event, context):
                     view = {}
                 if view:
                     lambda_client.invoke(FunctionName='{lambda_namespace}-core-view'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps({
-                        'connection_id': connection_id,
                         'class_name': class_name, 
                         'entity_type': 'query', 
                         'entity_id': query_id, 
-                        'view': view
+                        'view': view, 
+                        '_env': {**env, 'connection_id': connection_id}
                     }), 'utf-8'))
             counter = counter + 1
 

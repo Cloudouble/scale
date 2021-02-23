@@ -26,7 +26,8 @@ def main(event, context):
                 'class_name': class_name, 
                 'entity_id': record_id, 
                 'write': True, 
-                'query_id': query_id
-            }), 'utf-8'), ClientContext=client_context)
+                'query_id': query_id, 
+                '_env': env
+            }), 'utf-8'))
             counter = counter + 1
     return counter

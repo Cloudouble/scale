@@ -76,11 +76,11 @@ def main(event, context):
                     subscription_data = {}
                 if subscription_data:
                     lambda_client.invoke(FunctionName='{lambda_namespace}-core-view'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps({
-                        'connection_id': connection_id,
                         'class_name': class_name, 
                         'entity_type': 'record', 
                         'entity_id': record_id, 
-                        'view': subscription_data
+                        'view': subscription_data, 
+                        '_env': {**env, 'connection_id': connection_id}
                     }), 'utf-8'))
             counter = counter + 1
     return counter

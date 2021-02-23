@@ -86,11 +86,12 @@ def main(event_data, context):
         for key_obj in record_list_response['Contents']:
             r_id = key_obj['Key'].replace(record_base_key, '')
             r_id = r_id[:-len('.json')] if r_id.endswith('.json') else r_id
-            lambda_client.invoke(FunctionName='{lambda_namespace}-core-query'.format(lambda_namespace=env['lambda_namespace']), Payload=bytes(json.dumps({
+            lambda_client.invoke(FunctionName='{lambda_namespace}-core-query'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps({
                 'query_id': query_id,
                 'processor': query_data.get('processor'), 
                 'options': query_data.get('options'), 
-                'record': {'@type': class_name, '@id': r_id}
+                'record': {'@type': class_name, '@id': r_id}, 
+                '_env': env
             }), 'utf-8'), ClientContext=client_context)
         c = 1000000000
         while c and record_list_response.get('IsTruncated') and record_list_response.get('NextContinuationToken'):
@@ -99,11 +100,12 @@ def main(event_data, context):
                 record_id = key_obj['Key'].replace(record_base_key, '')
                 if record_id.endswith('.json'):
                     record_id = record_id[0:-5]
-                lambda_client.invoke(FunctionName='{lambda_namespace}-core-query'.format(lambda_namespace=env['lambda_namespace']), Payload=bytes(json.dumps({
+                lambda_client.invoke(FunctionName='{lambda_namespace}-core-query'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps({
                     'query_id': query_id,
                     'processor': query_data.get('processor'), 
                     'options': query_data.get('options'), 
-                    'record': {'@type': class_name, '@id': record_id}
+                    'record': {'@type': class_name, '@id': record_id}, 
+                    '_env': env
                 }), 'utf-8'), ClientContext=client_context)
                 c = c - 1
         counter = counter + 1

@@ -40,11 +40,11 @@ def main(event, context):
         class_name, record_id, connection_id = env['path'][1:4]
         view = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event_entry['s3']['object']['key'])['Body'].read().decode('utf-8'))
         lambda_client.invoke(FunctionName='{lambda_namespace}-core-view'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps({
-            'connection_id': connection_id,
             'class_name': class_name, 
             'entity_type': 'record', 
             'entity_id': record_id, 
-            'view': view
+            'view': view, 
+            '_env': {**env, 'connection_id': connection_id}
         }), 'utf-8'), ClientContext=client_context)
         counter = counter + 1
     return counter    
