@@ -97,10 +97,8 @@ def main(event, context):
                             index_record_ids = []
                         if masked_entity and event['entity_id'] not in index_record_ids:
                             index_record_ids.append(event['entity_id'])
-                            index_record_ids.sort()
-                            bucket.put_object(Body=bytes(json.dumps(index_record_ids), 'utf-8'), Key=index_key, ContentType='application/json')
                         elif not masked_entity and event['entity_id'] in index_record_ids:
                             index_record_ids.remove(event['entity_id'])
-                            index_record_ids.sort()
-                            bucket.put_object(Body=bytes(json.dumps(index_record_ids), 'utf-8'), Key=index_key, ContentType='application/json')
+                        index_record_ids.sort()
+                        bucket.put_object(Body=bytes(json.dumps(index_record_ids), 'utf-8'), Key=index_key, ContentType='application/json')
     return masked_entity

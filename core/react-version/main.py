@@ -64,7 +64,11 @@ def main(event, context):
                     pass
             query_list = sorted(list(set(query_list)))
             for query_id in query_list:
-                lambda_client.invoke(FunctionName='{lambda_namespace}-core-query'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps({'query': query_id, 'record': {'@type': class_name, '@id': record_id}, '_env': env}), 'utf-8'))
+                lambda_client.invoke(
+                    FunctionName='{lambda_namespace}-core-query'.format(lambda_namespace=env['lambda_namespace']), 
+                    InvocationType='Event', 
+                    Payload=bytes(json.dumps({'query_id': query_id, 'record': {'@type': class_name, '@id': record_id}, '_env':env}), 'utf-8')
+                )
             subscription_list_key = '{data_root}/subscription/{class_name}/{record_id}/'.format(data_root=env['data_root'], class_name=class_name, record_id=record_id)
             subscription_list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix=subscription_list_key)
             if subscription_list_response.get('Contents', []):

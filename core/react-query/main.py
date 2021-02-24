@@ -71,7 +71,6 @@ def main(event_data, context):
                     vector_queries.append(query_id)
                     vector_queries.sort()
                     vectors_to_update[vector_key] = vector_queries
-    print('line 75', vectors_to_update)
     for key, vector_queries in vectors_to_update.items():
         vector_obj.put(Body=bytes(json.dumps(vector_queries), 'utf-8'), ContentType="application/json")
     for event_entry in event_data['Records']:

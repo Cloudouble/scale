@@ -1,6 +1,6 @@
 env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_", "shared": 0, "authentication_namespace": "liveelementscale"}
 
-import json, boto3, os, base64, uuid, time
+import json, boto3, base64, uuid, time
 from urllib.parse import parse_qs
 
 def uuid_valid(s):
@@ -65,7 +65,6 @@ def main(event, context):
         else: 
             host = ''
         env['data_root'] = '{host}/{system_root}'.format(host=host, system_root=env['system_root']).strip('/')
-        
         env['connection_id'] = None
         if request_object.get('headers', {}).get('cookie', {}).get('value'):
             raw_cookie = request_object['headers']['cookie']['value'].lower()
@@ -104,7 +103,7 @@ def main(event, context):
         client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')
         if env['path'] and uuid_valid(env['connection_id']):
             if len(env['path']) == 1 and env['path'][0] == 'connect':
-                connection_object = bucket.Object('{data_root}/connection/{connection_id}.json'.format(data_root=env['data_root'], connection_id=connection_id))
+                connection_object = bucket.Object('{data_root}/connection/{connection_id}.json'.format(data_root=env['data_root'], connection_id=env['connection_id']))
                 try:
                     connection_record = json.loads(connection_object.get()['Body'].read().decode('utf-8'))
                 except:
@@ -123,7 +122,7 @@ def main(event, context):
             elif len(env['path']) >= 2 and env['path'][0] in ['asset', 'static']:
                 usable_path = env['path'][1:]
                 allowed = json.loads(lambda_client.invoke(FunctionName='{}-core-mask'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
-                    'connection_id': connection_id, 
+                    'connection_id': env['connection_id'], 
                     'entity_type': env['path'][0], 
                     'method': request_object['method'], 
                     'path': usable_path
@@ -167,7 +166,7 @@ def main(event, context):
                         entity_id, view_handle = (env['path'][3].split('.', 1) + ['json'])[:2]
                         if entity_type in ['feed', 'subscription']:
                             entity_key = '{data_root}/{entity_type}/{class_name}/{record_id}/{connection_id}/{entity_id}.json'.format(
-                                data_root=env['data_root'], entity_type=entity_type, class_name=class_name, record_id=record, 
+                                data_root=env['data_root'], entity_type=entity_type, class_name=class_name, record_id=record_id, 
                                 connection_id=env['connection_id'], entity_id=entity_id) 
                         else: 
                             entity_key = '{data_root}/{entity_type}/{class_name}/{entity_id}.json'.format(
@@ -198,7 +197,7 @@ def main(event, context):
                     masked_entity = json.loads(lambda_client.invoke(FunctionName='{}-core-mask'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
                         'entity_type': entity_type, 
                         'method': request_object['method'],
-                        'class_name': class_name, 
+                        'class_name': None if entity_type == 'view' else class_name, 
                         'entity_id': entity_id, 
                         'entity': entity
                     }), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))

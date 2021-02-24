@@ -9,13 +9,13 @@ def getpath(p, env=None):
 
 def build_env(entry, context):
     temp_path = getpath(entry['s3']['object']['key'])
-    if len(temp_path) in [6, 7]:
-        shared = len(temp_path) == 7
+    if len(temp_path) in [7, 8]:
+        shared = len(temp_path) == 8
         return {
             'bucket': entry['s3']['bucket']['name'], 
-            'lambda_namespace': context.function_name.replace('-core-react-connection-record', ''), 
-            'system_root': temp_path[-6],
-            'data_root': '{}/{}'.format(temp_path[-7], temp_path[-6]) if shared else temp_path[-6], 
+            'lambda_namespace': context.function_name.replace('-core-react-connection-index', ''), 
+            'system_root': temp_path[-7],
+            'data_root': '{}/{}'.format(temp_path[-8], temp_path[-7]) if shared else temp_path[-7], 
             'shared': 1 if shared else 0
         }
     else:
@@ -40,7 +40,7 @@ def main(event, context):
         client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')
         if len(env['path']) == 6:
             connection_id, entity_type, class_name, query_id, index = env['path'][1:]
-            connection_feed_list_path = '{system_root}/feed/{class_name}/{query_id}/{connection_id}/'.format(system_root=env['system_root'], class_name=class_name, query_id=query_id, connection_id=connection_id)
+            connection_feed_list_path = '{data_root}/feed/{class_name}/{query_id}/{connection_id}/'.format(data_root=env['data_root'], class_name=class_name, query_id=query_id, connection_id=connection_id)
             connection_feed_list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix=connection_feed_list_path)
             for key_obj in connection_feed_list_response.get('Contents', []):
                 try:

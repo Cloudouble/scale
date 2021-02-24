@@ -1,0 +1,20 @@
+{
+  "query_id": "9886c382-4b22-454d-8910-bb1415018421",
+  "record": {
+    "@type": "Book",
+    "@id": "87370050-971f-4cd9-9c32-1072c6ac3c52"
+  },
+  "_env": {
+    "bucket": "scale.live-element.net",
+    "lambda_namespace": "liveelement-scale",
+    "system_root": "_",
+    "data_root": "_",
+    "shared": 0,
+    "path": [
+      "version",
+      "Book",
+      "87370050-971f-4cd9-9c32-1072c6ac3c52",
+      "WlmlAe3MXBGdXI65XOkMIPtQtV9eTs6S"
+    ]
+  }
+}

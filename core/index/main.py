@@ -8,8 +8,8 @@ def main(event, context):
     - gets the index
     - for each record_id calls mask with the query_id to trigger mask to include the record_id into the relevant index if the masked record is non-empty
     '''
-    env = context.client_context.env
-    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8'))
+    env = context.client_context.env if context.client_context and context.client_context.env else event.get('_env', {})
+    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')
     s3_client = boto3.client('s3')
     lambda_client = boto3.client('lambda')
     counter = 0
