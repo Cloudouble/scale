@@ -90,7 +90,7 @@ def main(event, context):
         if not env['connection_id']:
             if request_object['uri'].startswith(root_connection_prefix):
                 working_path_split = request_object['uri'][len(root_connection_prefix):].split('/')
-                env['connection_id'] = working_path_split[0]
+                env['connection_id'] = working_path_split[0][:-len('.json')] if working_path_split[0].endswith('.json') else working_path_split[0]
                 p = '/'.join(working_path_split[1:]).strip('/?')
                 p = p[:-len('.json')] if p.endswith('.json') else p
                 env['path'] = p.strip('/').split('/')
@@ -122,7 +122,6 @@ def main(event, context):
             elif len(env['path']) >= 2 and env['path'][0] in ['asset', 'static']:
                 usable_path = env['path'][1:]
                 allowed = json.loads(lambda_client.invoke(FunctionName='{}-core-mask'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
-                    'connection_id': env['connection_id'], 
                     'entity_type': env['path'][0], 
                     'method': request_object['method'], 
                     'path': usable_path
