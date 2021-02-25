@@ -4,13 +4,18 @@ def chunks(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
         
-def write_view(view_result, result_key, bucket):
+def write_view(view_result, result_key, bucket, s3_client, env):
     if type(view_result) is dict and view_result.get('body'):
         content_type = view_result.get('content_type', 'application/json')
         encoding = view_result.get('encoding', 'text')
         body = view_result.get('body', '')
         body = bytes(body, 'utf-8') if encoding == 'text' else base64.b64decode(body)
-        bucket.put_object(Body=body, Key=result_key, ContentType=content_type)
+        try: 
+            existing_view_bytes = s3_client.get_object(Bucket=env['bucket'], Key=result_key)['Body'].read()
+        except:
+            existing_view_bytes = bytes('', 'utf-8')
+        if existing_view_bytes != body:
+            bucket.put_object(Body=body, Key=result_key, ContentType=content_type)
         return True
     else: 
         return False
@@ -69,7 +74,7 @@ def main(event, context):
                     }), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
                 except:
                     view_result = {}
-                if write_view(view_result, view_result_key, bucket):
+                if write_view(view_result, view_result_key, bucket, s3_client, env):
                     counter = counter + 1
             elif entity_type == 'query':
                 query_base_key = '{data_root}/connection/{connection_id}/query/{class_name}/{entity_id}/'.format(data_root=env['data_root'], connection_id=env['connection_id'], class_name=class_name, entity_id=entity_id)
@@ -109,7 +114,6 @@ def main(event, context):
                         }), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
                     except:
                         view_result = {}
-                    if write_view(view_result, page_object_key, bucket):
+                    if write_view(view_result, page_object_key, bucket, s3_client, env):
                         counter = counter + 1
-                counter = counter + 1
     return counter

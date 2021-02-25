@@ -23,7 +23,7 @@ def main(event, context):
             if event.get('entity_type') and event.get('method'):
                 lambda_client = boto3.client('lambda')
                 if event['entity_type'] in ['asset', 'static'] and event.get('path'):
-                    mask = connection_mask.get(event['entity_type']) if event['entity_type'] in mask else mask.get('*', {})
+                    mask = connection_mask[event['entity_type']] if event['entity_type'] in connection_mask else connection_mask.get('*', {})
                     if type(mask) is dict:
                         mask = mask.get(event['method']) if event['method'] in mask else mask.get('*', {})
                     for p in event['path']:
@@ -80,6 +80,7 @@ def main(event, context):
                                 masked_entity[field] = entity[field]
                     else:
                         masked_entity = {**entity, '__constrained': constrained}
+                    did_write = False
                     if masked_entity and event.get('write'):
                         writable_entity = {**masked_entity}
                         del writable_entity['__constrained']
@@ -87,7 +88,12 @@ def main(event, context):
                             write_key = '{data_root}/connection/{connection_id}/view/{entity_id}.json'.format(data_root=env['data_root'], connection_id=env['connection_id'], entity_id=event['entity_id'])
                         else:
                             write_key = '{data_root}/connection/{connection_id}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], connection_id=env['connection_id'], entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id'])
-                        bucket.put_object(Body=bytes(json.dumps(writable_entity), 'utf-8'), Key=write_key, ContentType='application/json')
+
+                        current_writable_entity_json = s3_client.get_object(Bucket=env['bucket'], Key=write_key)['Body'].read().decode('utf-8')
+                        new_writable_entity_json = json.dumps(writable_entity)
+                        if current_writable_entity_json != new_writable_entity_json:
+                            bucket.put_object(Body=bytes(json.dumps(writable_entity), 'utf-8'), Key=write_key, ContentType='application/json')
+                            did_write = False
                     if event.get('query_id'):
                         index_key = '{data_root}/connection/{connection_id}/query/{class_name}/{query_id}/{index}.json'.format(
                             data_root=env['data_root'], connection_id=env['connection_id'], class_name=event['class_name'], query_id=event['query_id'], index=event['entity_id'][0])
@@ -95,10 +101,14 @@ def main(event, context):
                             index_record_ids = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=index_key)['Body'].read().decode('utf-8'))
                         except:
                             index_record_ids = []
+                        index_changed = False
                         if masked_entity and event['entity_id'] not in index_record_ids:
                             index_record_ids.append(event['entity_id'])
+                            index_changed = True
                         elif not masked_entity and event['entity_id'] in index_record_ids:
                             index_record_ids.remove(event['entity_id'])
+                            index_changed = True
                         index_record_ids.sort()
-                        bucket.put_object(Body=bytes(json.dumps(index_record_ids), 'utf-8'), Key=index_key, ContentType='application/json')
+                        if index_changed or did_write:
+                            bucket.put_object(Body=bytes(json.dumps(index_record_ids), 'utf-8'), Key=index_key, ContentType='application/json')
     return masked_entity
