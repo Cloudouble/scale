@@ -6,6 +6,8 @@ def getpath(p, env):
     p = p[:-len('.json')] if p.endswith('.json') else p
     return p.strip('/').split('/')
 
+def getprocessor(env, name, source='core', scope=None):
+    return name if ':' in name else '{lambda_namespace}-{source}-{name}'.format(lambda_namespace=env['lambda_namespace'], source=source, name='{}-{}'.format(scope, name) if scope else name)
  
 def main(event, context):
     '''
@@ -32,7 +34,7 @@ def main(event, context):
         authentication_channel_name, authentication_channel_config = list(authentication_channel.items())[0]
         if type(event.get(authentication_channel_name)) is dict and authentication_channel_config.get('processor'):
             authentication_payload = {'credentials': event[authentication_channel_name], 'options': authentication_channel_config.get('options', {})}
-            authentication_channel_result = json.loads(lambda_client.invoke(FunctionName='{lambda_namespace}-extension-authentication-{processor}'.format(lambda_namespace=env['lambda_namespace'], processor=authentication_channel_config['processor']), InvocationType='RequestResponse', Payload=bytes(json.dumps(authentication_payload), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
+            authentication_channel_result = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, authentication_channel_config['processor'], 'extension', 'authentication'), InvocationType='RequestResponse', Payload=bytes(json.dumps(authentication_payload), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
             if authentication_channel_result and type(authentication_channel_result) is dict and type(authentication_channel_result.get('mask')) is dict:
                 connection_record = authentication_channel_result
                 break

@@ -21,6 +21,9 @@ def build_env(record_event, context):
     else:
         return {}
 
+def getprocessor(env, name, source='core', scope=None):
+    return name if ':' in name else '{lambda_namespace}-{source}-{name}'.format(lambda_namespace=env['lambda_namespace'], source=source, name='{}-{}'.format(scope, name) if scope else name)
+
 
 def main(event_data, context):
     '''
@@ -85,7 +88,7 @@ def main(event_data, context):
         for key_obj in record_list_response['Contents']:
             r_id = key_obj['Key'].replace(record_base_key, '')
             r_id = r_id[:-len('.json')] if r_id.endswith('.json') else r_id
-            lambda_client.invoke(FunctionName='{lambda_namespace}-core-query'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps({
+            lambda_client.invoke(FunctionName=getprocessor(env, 'query'), InvocationType='Event', Payload=bytes(json.dumps({
                 'query_id': query_id,
                 'processor': query_data.get('processor'), 
                 'options': query_data.get('options'), 
@@ -99,7 +102,7 @@ def main(event_data, context):
                 record_id = key_obj['Key'].replace(record_base_key, '')
                 if record_id.endswith('.json'):
                     record_id = record_id[0:-5]
-                lambda_client.invoke(FunctionName='{lambda_namespace}-core-query'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps({
+                lambda_client.invoke(FunctionName=getprocessor(env, 'query'), InvocationType='Event', Payload=bytes(json.dumps({
                     'query_id': query_id,
                     'processor': query_data.get('processor'), 
                     'options': query_data.get('options'), 

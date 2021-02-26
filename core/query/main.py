@@ -1,5 +1,9 @@
 import json, boto3, base64
 
+def getprocessor(env, name, source='core', scope=None):
+    return name if ':' in name else '{lambda_namespace}-{source}-{name}'.format(lambda_namespace=env['lambda_namespace'], source=source, name='{}-{}'.format(scope, name) if scope else name)
+ 
+ 
 def main(event, context):
     '''
     - triggered by react-query.py, react-version.py
@@ -25,7 +29,7 @@ def main(event, context):
             query_processor = query_data.get('processor')
             query_options = query_data.get('options')
         query_payload = {'record': record_data, 'options': query_options}
-        query_result = json.loads(lambda_client.invoke(FunctionName='{lambda_namespace}-extension-query-{query_processor}'.format(lambda_namespace=env['lambda_namespace'], query_processor=query_processor), InvocationType='RequestResponse', Payload=bytes(json.dumps(query_payload), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
+        query_result = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, query_processor, 'extension', 'query'), InvocationType='RequestResponse', Payload=bytes(json.dumps(query_payload), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
         query_index_key = '{data_root}/query/{class_name}/{query_id}/{record_initial}.json'.format(data_root=env['data_root'], class_name=class_name, query_id=query_id, record_initial=record_id[0])
         try:
             query_index = json.loads(bucket.get_object(Key=query_index_key)['Body'].read().decode('utf-8'))

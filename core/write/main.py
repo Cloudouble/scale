@@ -10,6 +10,9 @@ def uuid_valid(s):
         return False
     return True
 
+def getprocessor(env, name, source='core', scope=None):
+    return name if ':' in name else '{lambda_namespace}-{source}-{name}'.format(lambda_namespace=env['lambda_namespace'], source=source, name='{}-{}'.format(scope, name) if scope else name)
+    
  
 def main(event, context):
     '''
@@ -110,7 +113,7 @@ def main(event, context):
                     connection_record = {'mask': {}}
                 if request_object['method'] in ['POST', 'PUT', 'PATCH']:
                     if entity and type(entity) is dict and len(entity) == 1 and type(list(entity.values())[0]) is dict:
-                        connection_record = {**connection_record, **json.loads(lambda_client.invoke(FunctionName='{}-core-authentication'.format(env['lambda_namespace']), InvocationType='RequestResponse', Payload=bytes(json.dumps(entity), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))}
+                        connection_record = {**connection_record, **json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'authentication'), InvocationType='RequestResponse', Payload=bytes(json.dumps(entity), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))}
                     connection_object.put(Body=bytes(json.dumps(connection_record), 'utf-8'), ContentType='application/json')
                     counter = counter + 1
                 elif request_object['method'] == 'DELETE':
@@ -121,7 +124,7 @@ def main(event, context):
                         pass
             elif len(env['path']) >= 2 and env['path'][0] in ['asset', 'static']:
                 usable_path = env['path'][1:]
-                allowed = json.loads(lambda_client.invoke(FunctionName='{}-core-mask'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
+                allowed = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), Payload=bytes(json.dumps({
                     'entity_type': env['path'][0], 
                     'method': request_object['method'], 
                     'path': usable_path
@@ -188,12 +191,12 @@ def main(event, context):
                                 request_object['method'] = 'PUT'
                         entity['@type'] = entity.get('@type', class_name)
                         entity['@id'] = entity.get('@id', entity_id)
-                if view_handle == 'json' and request_object['method'] in ['POST', 'PUT', 'PATCH'] and json.loads(lambda_client.invoke(FunctionName='{}-core-validate'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
+                if view_handle == 'json' and request_object['method'] in ['POST', 'PUT', 'PATCH'] and json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'validate'), Payload=bytes(json.dumps({
                     'entity': entity, 
                     'entity_type': entity_type, 
                     'class_name': None if entity_type == 'view' else class_name, 
                     'entity_id': entity_id}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8')):
-                    masked_entity = json.loads(lambda_client.invoke(FunctionName='{}-core-mask'.format(env['lambda_namespace']), Payload=bytes(json.dumps({
+                    masked_entity = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), Payload=bytes(json.dumps({
                         'entity_type': entity_type, 
                         'method': request_object['method'],
                         'class_name': None if entity_type == 'view' else class_name, 

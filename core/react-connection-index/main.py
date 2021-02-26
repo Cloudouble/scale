@@ -21,6 +21,9 @@ def build_env(entry, context):
     else:
         return {}
 
+def getprocessor(env, name, source='core', scope=None):
+    return name if ':' in name else '{lambda_namespace}-{source}-{name}'.format(lambda_namespace=env['lambda_namespace'], source=source, name='{}-{}'.format(scope, name) if scope else name)
+
 
 def main(event, context):
     '''
@@ -48,7 +51,7 @@ def main(event, context):
                 except:
                     view = {}
                 if view:
-                    lambda_client.invoke(FunctionName='{lambda_namespace}-core-view'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps({
+                    lambda_client.invoke(FunctionName=getprocessor(env, 'view'), InvocationType='Event', Payload=bytes(json.dumps({
                         'class_name': class_name, 
                         'entity_type': 'query', 
                         'entity_id': query_id, 

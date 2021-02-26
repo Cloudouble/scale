@@ -20,6 +20,9 @@ def write_view(view_result, result_key, bucket, s3_client, env):
     else: 
         return False
     
+def getprocessor(env, name, source='core', scope=None):
+    return name if ':' in name else '{lambda_namespace}-{source}-{name}'.format(lambda_namespace=env['lambda_namespace'], source=source, name='{}-{}'.format(scope, name) if scope else name)
+    
 
 def main(event, context):
     '''
@@ -51,7 +54,7 @@ def main(event, context):
             field_name = view.get('field_name')
             if view.get('assets'):
                 for asset_path in view['assets'].values():
-                    if lambda_client.invoke(FunctionName='{lambda_namespace}-core-mask'.format(lambda_namespace=env['lambda_namespace']), Payload=bytes(json.dumps({'entity_type': 'asset', 'path': asset_path, 'method': 'GET'}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'):
+                    if lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), Payload=bytes(json.dumps({'entity_type': 'asset', 'path': asset_path, 'method': 'GET'}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'):
                         bucket.copy({'Bucket': env['bucket'], 'Key': '{data_root}/asset/{asset_path}'.format(data_root=env['data_root'], asset_path=asset_path)}, 
                             '{data_root}/connection/{connection_id}/asset/{asset_path}'.format(connection_id=env['connection_id'], asset_path=asset_path))
             if entity_type == 'record':
@@ -61,7 +64,7 @@ def main(event, context):
                 else:
                     view_result_key = '{data_root}/connection/{connection_id}/subscription/{class_name}/{entity_id}.{suffix}'.format(data_root=env['data_root'], connection_id=env['connection_id'], class_name=class_name, entity_id=entity_id, suffix=suffix)
                 try:
-                    view_result = json.loads(lambda_client.invoke(FunctionName='{lambda_namespace}-extension-view-{processor}'.format(lambda_namespace=env['lambda_namespace'], processor=view['processor']), Payload=bytes(json.dumps({
+                    view_result = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, view['processor'], 'extension', 'view'), Payload=bytes(json.dumps({
                         'options': view['options'], 
                         'assets': view['assets'], 
                         'entity_type': 'record', 
@@ -97,7 +100,7 @@ def main(event, context):
                         data_root=env['data_root'], connection_id=env['connection_id'], class_name=class_name, entity_id=entity_id, field_name=(field_name if field_name else '-'), 
                         sort_field=sort_field, sort_direction=sort_direction, page_name=page_name, suffix=suffix)
                     try:
-                        view_result = json.loads(lambda_client.invoke(FunctionName='{lambda_namespace}-extension-view-{processor}'.format(lambda_namespace=env['lambda_namespace'], processor=view['processor']), Payload=bytes(json.dumps({
+                        view_result = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, view['processor'], 'extension', 'view'), Payload=bytes(json.dumps({
                             'options': view['options'], 
                             'assets': view['assets'], 
                             'entity_type': 'query',

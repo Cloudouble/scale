@@ -21,6 +21,9 @@ def build_env(record_event, context):
     else:
         return {}
 
+def getprocessor(env, name, source='core', scope=None):
+    return name if ':' in name else '{lambda_namespace}-{source}-{name}'.format(lambda_namespace=env['lambda_namespace'], source=source, name='{}-{}'.format(scope, name) if scope else name)
+ 
 
 def main(event, context):
     '''
@@ -54,7 +57,7 @@ def main(event, context):
                     affected_connections.add(getpath(feed_entry['Key'])[-2])
                     c = c - 1
             for affected_connection in affected_connections:
-                lambda_client.invoke(FunctionName='{lambda_namespace}-core-index'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', 
+                lambda_client.invoke(FunctionName=getprocessor(env, 'index'), InvocationType='Event', 
                     Payload=bytes(json.dumps({'class_name': class_name, 'query_id': query_id, 'index': index, '_env': {**env, 'connection_id': affected_connection}}), 'utf-8'))
             counter = counter + 1
     return counter

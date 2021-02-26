@@ -20,6 +20,9 @@ def build_env(record_event, context):
         }
     else:
         return {}
+        
+def getprocessor(env, name, source='core', scope=None):
+    return name if ':' in name else '{lambda_namespace}-{source}-{name}'.format(lambda_namespace=env['lambda_namespace'], source=source, name='{}-{}'.format(scope, name) if scope else name)
 
 def process_record(key_obj, lambda_client, record, env, client_context):
     entity_path = getpath(key_obj['Key'], env)
@@ -33,7 +36,7 @@ def process_record(key_obj, lambda_client, record, env, client_context):
         'write': True
     }
     mask_payload['_env'] = {'connection_id': connection_id, **env}
-    lambda_client.invoke(FunctionName='{lambda_namespace}-core-mask'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps(mask_payload), 'utf-8'))
+    lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), InvocationType='Event', Payload=bytes(json.dumps(mask_payload), 'utf-8'))
 
 def main(event, context):
     '''
@@ -65,7 +68,7 @@ def main(event, context):
             query_list = sorted(list(set(query_list)))
             for query_id in query_list:
                 lambda_client.invoke(
-                    FunctionName='{lambda_namespace}-core-query'.format(lambda_namespace=env['lambda_namespace']), 
+                    FunctionName=getprocessor(env, 'query'), 
                     InvocationType='Event', 
                     Payload=bytes(json.dumps({'query_id': query_id, 'record': {'@type': class_name, '@id': record_id}, '_env':env}), 'utf-8')
                 )

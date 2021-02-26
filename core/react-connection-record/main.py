@@ -21,6 +21,9 @@ def build_env(entry, context):
     else:
         return {}
 
+def getprocessor(env, name, source='core', scope=None):
+    return name if ':' in name else '{lambda_namespace}-{source}-{name}'.format(lambda_namespace=env['lambda_namespace'], source=source, name='{}-{}'.format(scope, name) if scope else name)
+ 
 def process_query(key_obj, index, s3_client, env, record_id):
     connection_query_path = getpath(key_obj['Key'])
     connection_id, entity_type, class_name, query_id = env['path'][1:]
@@ -75,7 +78,7 @@ def main(event, context):
                 except:
                     subscription_data = {}
                 if subscription_data:
-                    lambda_client.invoke(FunctionName='{lambda_namespace}-core-view'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps({
+                    lambda_client.invoke(FunctionName=getprocessor(env, 'view'), InvocationType='Event', Payload=bytes(json.dumps({
                         'class_name': class_name, 
                         'entity_type': 'record', 
                         'entity_id': record_id, 

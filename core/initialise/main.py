@@ -1,4 +1,5 @@
-import json, boto3, hashlib, base64
+import json, boto3, base64, hashlib
+
 
 def main(event, context):
     '''
@@ -6,8 +7,8 @@ def main(event, context):
     - event => {key: '', ?name: ''}
     - returns True when complete
     '''
-    env = context.client_context.env
-    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8'))
+    env = context.client_context.env if context.client_context and context.client_context.env else event.get('_env', {})
+    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(env['bucket'])
     s3_client = boto3.client('s3')

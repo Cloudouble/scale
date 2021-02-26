@@ -1,5 +1,8 @@
 import json, boto3, base64
 
+def getprocessor(env, name, source='core', scope=None):
+    return name if ':' in name else '{lambda_namespace}-{source}-{name}'.format(lambda_namespace=env['lambda_namespace'], source=source, name='{}-{}'.format(scope, name) if scope else name)
+ 
 
 def main(event, context):
     '''
@@ -20,7 +23,7 @@ def main(event, context):
         index_record_ids = set(json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/query/{class_name}/{query_id}/{index}.json'.format(
             data_root=env['data_root'], class_name=class_name, query_id=query_id, index=index))['Body'].read().decode('utf-8')))
         for record_id in index_record_ids:
-            lambda_client.invoke(FunctionName='{lambda_namespace}-core-mask'.format(lambda_namespace=env['lambda_namespace']), InvocationType='Event', Payload=bytes(json.dumps({
+            lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), InvocationType='Event', Payload=bytes(json.dumps({
                 'entity_type': 'record', 
                 'method': 'GET', 
                 'class_name': class_name, 
