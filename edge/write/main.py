@@ -29,6 +29,7 @@ def main(event, context):
     - writes a record field to /record/{class_name}/{record_id}[field_name].json via /connection/{connection_id}/record/{class_name}/{record_id}/{field_name}.json (finalised)
     - generates a version record at /version/{class_name}/{record_id}/{version_id}.json (finalised)
     '''
+    print(json.dumps(event, sort_keys=True, indent=4))
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(env['bucket'])
     lambda_client = boto3.client('lambda')
