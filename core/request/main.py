@@ -16,7 +16,7 @@ def getprocessor(env, name, source='core', scope=None):
  
 def main(event, context):
     '''
-    - triggered by request objects written to to a dedicated regional request bucket
+    - triggered by request objects written to the core request bucket
     - writes/deletes a connection configuration to _/connection/{connection_id}/connect.json (finalised) OR
     - writes/deletes a view configuration to /view/{view_id}.json via /connection/{connection_id}/view/{view_id}.json (finalised) OR
     - writes/deletes an private asset to _/asset/{assetpath} via _/connection/{connection_id}/asset/{path} (finalised) OR
@@ -33,18 +33,9 @@ def main(event, context):
     requests = []
     for entry in [ent for ent in [{**r.get('s3', {}).get('bucket', {}), **r.get('s3', {}).get('object', {})} for r in event.get('Records', [])] if ent.get('key') and ent.get('name')]:
         try:
-            request_data = json.loads(s3_client.get_object(Bucket=entry['name'], Key=entry['key'])['Body'].read().decode('utf-8'))
+            requests.append(json.loads(s3_client.get_object(Bucket=entry['name'], Key=entry['key'])['Body'].read().decode('utf-8')))
         except:
-            request_data = {}
-        if type(request_data) is dict and all([k in request_data for k in ['body', 'content-type', 'headers', 'method', 'uri']]):
-            if request_data['content-type'] == 'application/json':
-                try:
-                    request_data['entity'] = json.loads(base64.b64decode(request_data['body']).decode('utf-8'))
-                    requests.append(request_data)
-                except:
-                    pass
-            else:
-                requests.append(request_data)
+            pass
     if not requests:
         return 0
 
