@@ -16,17 +16,17 @@ def getprocessor(env, name, source='core', scope=None):
 def main(event, context):
     '''
     - triggered by request objects written to the core request bucket
-    - writes/deletes a connection configuration to _/connection/{connection_id}/connect.json (finalised) OR
-    - writes/deletes a view configuration to /view/{view_id}.json via /connection/{connection_id}/view/{view_id}.json (finalised) OR
-    - writes/deletes an private asset to _/asset/{assetpath} via _/connection/{connection_id}/asset/{path} (finalised) OR
-    - writes/deletes an static asset to {path} via ~connection/{connection_id}/static/{path} (finalised) OR
-    - writes/deletes a query configuration to /query/{class_name}/{query_id}.json via /connection/{connection_id}/query/{class_name}/{query_id}.json (finalised) OR
-    - writes/deletes a feed configuration to /feed/{class_name}/{query_id}/{connection_id}.json via /connection/{connection_id}/feed/{class_name}/{query_id}.json (finalised) OR 
-    - writes/deletes a subscription configuration to /subscription/{class_name}/{record_id}/{connection_id}.json via /connection/{connection_id}/subscription/{class_name}/{record_id}.json (finalised) OR 
-    - writes/deletes a system module configuration to /system/{scope}/{module}.json via /connection/{connection_id}/system/{scope}/{module}.json (finalised) OR
-    - writes a record to /record/{class_name}/{record_id}.json via /connection/{connection_id}/record/{class_name}/{record_id}.json (finalised) OR 
-    - writes a record field to /record/{class_name}/{record_id}[field_name].json via /connection/{connection_id}/record/{class_name}/{record_id}/{field_name}.json (finalised)
-    - generates a version record at /version/{class_name}/{record_id}/{version_id}.json (finalised)
+    - writes/deletes a connection configuration to _/connection/{connection_id}/connect.json (tested) OR
+    - writes/deletes a view configuration to _/view/{view_id}.json via _/connection/{connection_id}/view/{view_id}.json (tested) OR
+    - writes/deletes an private asset to _/asset/{assetpath} via _/connection/{connection_id}/asset/{path} (tested) OR
+    - writes/deletes an static asset to {path} via _/connection/{connection_id}/static/{path} (tested) OR
+    - writes/deletes a query configuration to _/query/{class_name}/{query_id}.json via _/connection/{connection_id}/query/{class_name}/{query_id}.json (tested) OR
+    - writes/deletes a feed configuration to _/feed/{class_name}/{query_id}/{connection_id}.json via _/connection/{connection_id}/feed/{class_name}/{query_id}.json (tested) OR 
+    - writes/deletes a subscription configuration to _/subscription/{class_name}/{record_id}/{connection_id}.json via _/connection/{connection_id}/subscription/{class_name}/{record_id}.json (tested) OR 
+    - writes/deletes a system module configuration to _/system/{scope}/{module}.json via _/connection/{connection_id}/system/{scope}/{module}.json (tested) OR
+    - writes a record to _/record/{class_name}/{record_id}.json via _/connection/{connection_id}/record/{class_name}/{record_id}.json (tested) OR 
+    - writes a record field to _/record/{class_name}/{record_id}[field_name].json via _/connection/{connection_id}/record/{class_name}/{record_id}/{field_name}.json (tested)
+    - generates a version record at _/version/{class_name}/{record_id}/{version_id}.json (tested)
     '''
     s3_client = boto3.client('s3')
     requests = []
@@ -115,7 +115,7 @@ def main(event, context):
                             canwrite = False
                     if canwrite:
                         if request['method'] in ['PUT', 'POST', 'PATCH']:
-                            the_object.put(Body=body, ContentType=content_type)
+                            the_object.put(Body=base64.b64decode(request['body']), ContentType=request['content-type'])
                         elif request['method'] == 'DELETE':
                             the_object.delete()
                         counter = counter + 1

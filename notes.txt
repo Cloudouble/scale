@@ -56,11 +56,17 @@ _/connection/{connection_id}/system/{scope}/{module}.json  => GET, POST, PUT, PA
 
 BEHAVIOR PATHS
 
+# arn:aws:lambda:us-east-1:771795544492:function:liveelement-scale-edge-accept:8
+
 _/connection/????????-????-????-????-????????????/connect.json => GET, POST, PUT, PATCH => origin request write.py no cache
 
 _/connection/????????-????-????-????-????????????/view/????????-????-????-????-????????????.json  => GET, POST, PUT, PATCH => origin request write.py no cache
 
+_/connection/????????-????-????-????-????????????/asset/*  => GET, POST, PUT, PATCH => origin request write.py no cache
+_/connection/????????-????-????-????-????????????/static/*  => GET, POST, PUT, PATCH => origin request write.py no cache
+
 _/connection/????????-????-????-????-????????????/record/*/????????-????-????-????-????????????.json => GET, POST, PUT, PATCH => origin request write.py no cache
+_/connection/????????-????-????-????-????????????/record/*/????????-????-????-????-????????????/*.json => GET, POST, PUT, PATCH => origin request write.py no cache
 
 _/connection/????????-????-????-????-????????????/query/*/????????-????-????-????-????????????.json => GET, POST, PUT, PATCH => origin request write.py no cache
 
@@ -280,4 +286,84 @@ All Active Regions
 * create a bucket within that region to receive requests (a "request bucket")
 * deploy the region/request function to the region
 * region/request function is triggered by all object creation in it's region request bucket
+
+---
+
+Browser Tests: 
+
+PUT connection:
+fetch(
+    'https://scale.live-element.net/_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/connect.json', 
+    {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(
+        {sudo: {key: "9536576b-74ae-4894-b285-ba14c3391f0a"}}
+    ) }
+).then(r => console.log(r))
+
+PUT view:
+fetch(
+    'https://scale.live-element.net/_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/view/479a63f9-a2b4-4f94-8047-74b6fe2f22b5.json', 
+    {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(
+        {"processor": "json", "content_type": "application/json", "suffix": "json"}
+    ) }
+).then(r => console.log(r))
+
+PUT asset:
+fetch(
+    'https://scale.live-element.net/_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/asset/pixel.png', 
+    {method: 'PUT', headers: {"Content-Type": "image/png"}, body: "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mNMN27/z0AEYBxVSF+FAIOrFUtBFtYjAAAAAElFTkSuQmCC" }
+).then(r => console.log(r))
+
+PUT static:
+fetch(
+    'https://scale.live-element.net/_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/static/pixel.png', 
+    {method: 'PUT', headers: {"Content-Type": "image/png"}, body: "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mNMN27/z0AEYBxVSF+FAIOrFUtBFtYjAAAAAElFTkSuQmCC" }
+).then(r => console.log(r))
+
+PUT query:
+fetch(
+    'https://scale.live-element.net/_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/query/Book/9886c382-4b22-454d-8910-bb1415018421.json', 
+    {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(
+        {"processor": "books", "vector": ["name", "numberOfPages"]}
+    ) }
+).then(r => console.log(r))
+
+PUT feed:
+fetch(
+    'https://scale.live-element.net/_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/feed/Book/9886c382-4b22-454d-8910-bb1415018421/c85a6fe3-1082-4e32-8075-92ea3b34bc1e.json', 
+    {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(
+        {"view": "479a63f9-a2b4-4f94-8047-74b6fe2f22b5"}
+    ) }
+).then(r => console.log(r))
+
+PUT subscription:
+fetch(
+    'https://scale.live-element.net/_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/subscription/Book/87370050-971f-4cd9-9c32-1072c6ac3c52/46976fe6-599d-47e9-82a2-bb465da27307.json', 
+    {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(
+        {"view": "479a63f9-a2b4-4f94-8047-74b6fe2f22b5"}
+    ) }
+).then(r => console.log(r))
+
+PUT system:
+fetch(
+    'https://scale.live-element.net/_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/system/authentication/sudo.json', 
+    {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(
+        {"processor":"liveelement-scale-extension-authentication-sudo","options":{"name":"system","key":"d0119461133df7012bcb1f1b684fe57ce4faa12644181fc84fa39e7a20d39683c987e2a65c3a79c02203213249e4491abb087d5da14e628c477f0dbd964e1a20"}}
+    ) }
+).then(r => console.log(r))
+
+PUT record:
+fetch(
+    'https://scale.live-element.net/_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/record/Book/87370050-971f-4cd9-9c32-1072c6ac3c52.json', 
+    {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(
+        {"@type": "Book", "@id": "87370050-971f-4cd9-9c32-1072c6ac3c52", "name": "Test Book", "numberOfPages": 10}
+    ) }
+).then(r => console.log(r))
+
+PUT record field:
+fetch(
+    'https://scale.live-element.net/_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/record/Book/87370050-971f-4cd9-9c32-1072c6ac3c52/numberOfPages.json', 
+    {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(
+        11
+    ) }
+).then(r => console.log(r))
 
