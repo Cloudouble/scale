@@ -26,7 +26,6 @@ def main(event, context):
                 requests[entry['key']] = request_data
     if not requests:
         return 0
-
     counter = 0
     for key, request in requests.items():
         try:

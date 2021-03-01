@@ -2,7 +2,7 @@ import json, boto3, base64
 
 def main(event, context):
     '''
-    - triggered by query
+    - triggered by core/query
     - event => {'record': {}, 'options': {}}
     - an example query to return various slices of book records
     - returns True if the given record matches the query

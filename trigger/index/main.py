@@ -1,4 +1,4 @@
-import json, boto3, base64, time
+import json, boto3, base64
 
 def getpath(p, env=None):
     p = p.strip('/?')

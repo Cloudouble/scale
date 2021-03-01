@@ -47,5 +47,4 @@ def main(event, context):
                         '_env': {**env, 'connection_id': connection_id}
                     }), 'utf-8'))
             counter = counter + 1
-
     return counter

@@ -40,7 +40,6 @@ def main(event, context):
     '''
     counter = 0
     if event.get('key'):
-        s3 = boto3.resource('s3')
         s3_client = boto3.client('s3')
         lambda_client = boto3.client('lambda')
         env, client_context = get_env_context(event, context)    

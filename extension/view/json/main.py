@@ -3,7 +3,7 @@ import json, boto3, base64
 
 def main(event, context):
     '''
-    - triggered by view
+    - triggered by core/view
     - event => {"options", "assets", "entity_type", "class_name", "entity_id", "field_name", "sort_field", "sort_direction", "page_name", "suffix",
                     "entity", page", "total_result_count": 1, "view_result_count"}
     - an example view to return records as non-traversed JSON records

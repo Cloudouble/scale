@@ -6,9 +6,9 @@ def getprocessor(env, name, source='core', scope=None):
 
 def main(event, context):
     '''
-    - triggered by write.py, react-version.py, react-index.py, react-connection-record.py, react-connection-index.py
+    - triggered by core/request, trigger/version, trigger/index, trigger/connection-record, trigger/connection-index
     - event = {'connection_id': '', 'entity_type': '', 'method': '', ?'path': [], ?'class_name': '', ?'entity_id': '', ?entity: {}, ?query_id}
-    - given a connection_id and a record, writes the masked version of the record to /connection/{connection_id}/record/{class_name}/{record_id}.json
+    - given a connection_id and a record, writes the masked version of the record to _/connection/{connection_id}/record/{class_name}/{record_id}.json
     '''
     env = context.client_context.env if context.client_context and context.client_context.env else event.get('_env', {})
     client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')    

@@ -11,10 +11,10 @@ def getprocessor(env, name, source='core', scope=None):
  
 def main(event, context):
     '''
-    - triggered by write.py
+    - triggered by core/request
     - event => {authentication_channel_name: {credentials}}
     - takes care of authentication sub-processes
-    - returns a connection object with (at least) a 'mask' property, which is overlaid onto _/connection/{connection_id}.json
+    - returns a connection object with (at least) a 'mask' property, which is overlaid onto _/connection/{connection_id}/connect.json
     '''
     env = context.client_context.env if context.client_context and context.client_context.env else event.get('_env', {})
     client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')    

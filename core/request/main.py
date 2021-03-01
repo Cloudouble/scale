@@ -1,7 +1,6 @@
 env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_", "shared": 0, "authentication_namespace": "liveelementscale"}
 
-import json, boto3, base64, uuid, time
-from urllib.parse import parse_qs
+import json, boto3, base64, uuid
 
 def uuid_valid(s):
     try:
@@ -38,12 +37,10 @@ def main(event, context):
             pass
     if not requests:
         return 0
-
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(env['bucket'])
     lambda_client = boto3.client('lambda')
     counter = 0
-    now = time.time()
     for request in requests:
         host = request.get('headers', {}).get('host') if env['shared'] else ''
         env['data_root'] = '{host}/{system_root}'.format(host=host, system_root=env['system_root']).strip('/')
@@ -92,7 +89,7 @@ def main(event, context):
                     connection_record = {'mask': {}}
                 if request['method'] in ['POST', 'PUT', 'PATCH']:
                     if request['entity'] and type(request['entity']) is dict and len(request['entity']) == 1 and type(list(request['entity'].values())[0]) is dict:
-                        connection_record = {**connection_record, **json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'authentication'), InvocationType='RequestResponse', Payload=bytes(json.dumps(request['entity']), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))}
+                        connection_record = {**connection_record, **json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'authentication'), Payload=bytes(json.dumps(request['entity']), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))}
                     connection_object.put(Body=bytes(json.dumps(connection_record), 'utf-8'), ContentType='application/json')
                     counter = counter + 1
                 elif request['method'] == 'DELETE':

@@ -8,7 +8,7 @@ triggers = {
 
 def main(event_data, context):
     '''
-    - triggered by all write events in bucket
+    - triggered by all write events in main bucket
     - invokes other trigger functions according to their capturing path
     '''
     counter = 0

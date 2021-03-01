@@ -2,7 +2,7 @@ import json, boto3, base64, hashlib
 
 def main(event, context):
     '''
-    - triggered by authentication
+    - triggered by core/authentication
     - event => {credentials: {key: ''}, options: {key: ''}}
     - returns a connection object with (at least) a 'mask' property, which is overlaid onto _/connection/{connection_id}.json to enable administrator access
     - remove this function completely to disable administrator access

@@ -62,7 +62,7 @@ def valid_view(view, direct=False):
 
 def main(event, context):
     '''
-    - triggered by write
+    - triggered by core/request
     - {'entity': entity, 'entity_type': entity_type, 'class_name'?: class_name?, 'entity_id': entity_id}
     - validate the given record according to its datatype
     - return True if valid else False

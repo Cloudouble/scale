@@ -6,7 +6,7 @@ def getprocessor(env, name, source='core', scope=None):
  
 def main(event, context):
     '''
-    - triggered by react-query.py, react-version.py
+    - triggered by trigger/query, trigger/version
     - executes the given query using the given record 
     '''
     env = context.client_context.env if context.client_context and context.client_context.env else event.get('_env', {})
@@ -29,7 +29,7 @@ def main(event, context):
             query_processor = query_data.get('processor')
             query_options = query_data.get('options')
         query_payload = {'record': record_data, 'options': query_options}
-        query_result = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, query_processor, 'extension', 'query'), InvocationType='RequestResponse', Payload=bytes(json.dumps(query_payload), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
+        query_result = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, query_processor, 'extension', 'query'), Payload=bytes(json.dumps(query_payload), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
         query_index_key = '{data_root}/query/{class_name}/{query_id}/{record_initial}.json'.format(data_root=env['data_root'], class_name=class_name, query_id=query_id, record_initial=record_id[0])
         try:
             query_index = json.loads(bucket.get_object(Key=query_index_key)['Body'].read().decode('utf-8'))

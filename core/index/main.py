@@ -6,7 +6,7 @@ def getprocessor(env, name, source='core', scope=None):
 
 def main(event, context):
     '''
-    - triggered by react-index
+    - triggered by trigger/index
     - event => {'connection_id': affected_connection, 'class_name': class_name, 'query_id': query_id, 'index': index}
     - gets the index
     - for each record_id calls mask with the query_id to trigger mask to include the record_id into the relevant index if the masked record is non-empty

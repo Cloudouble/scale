@@ -26,7 +26,7 @@ def getprocessor(env, name, source='core', scope=None):
 
 def main(event, context):
     '''
-    - triggered by react-feed.py, react-subscription.py, react-view.py, react-connection-record.py, react-connection-index.py
+    - triggered by trigger/feed, trigger/subscription, trigger/view, trigger/connection-record, trigger/connection-index
     - event => {'class_name': '', 'entity_type': '',  'entity_id': '' 
         'view': {view='', processor='', ?options={}, ?assets={alias: assetpath}, ?field_name='', ?content_type='', ?suffix='', ?expires=0, ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}}
     - runs the given view with the given masked record/query results and writes the result to the relevant view path(s)
