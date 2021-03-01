@@ -16,8 +16,8 @@ def getprocessor(env, name, source='core', scope=None):
  
 def main(event, context):
     '''
-    - triggered by request objects written to _/request or to a dedicated regional request bucket
-    - writes/deletes a connection configuration to _/connection/{connection_id}.json (finalised) OR
+    - triggered by request objects written to to a dedicated regional request bucket
+    - writes/deletes a connection configuration to _/connection/{connection_id}/connect.json (finalised) OR
     - writes/deletes a view configuration to /view/{view_id}.json via /connection/{connection_id}/view/{view_id}.json (finalised) OR
     - writes/deletes an private asset to _/asset/{assetpath} via _/connection/{connection_id}/asset/{path} (finalised) OR
     - writes/deletes an static asset to {path} via ~connection/{connection_id}/static/{path} (finalised) OR
@@ -94,7 +94,7 @@ def main(event, context):
         client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')
         if env['path'] and uuid_valid(env['connection_id']):
             if len(env['path']) == 1 and env['path'][0] == 'connect' and request['entity']:
-                connection_object = bucket.Object('{data_root}/connection/{connection_id}.json'.format(data_root=env['data_root'], connection_id=env['connection_id']))
+                connection_object = bucket.Object('{data_root}/connection/{connection_id}/connect.json'.format(data_root=env['data_root'], connection_id=env['connection_id']))
                 try:
                     connection_record = json.loads(connection_object.get()['Body'].read().decode('utf-8'))
                 except:

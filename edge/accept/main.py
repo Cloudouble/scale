@@ -3,21 +3,21 @@ from urllib.parse import parse_qs
 
 
 buckets = {
-    '_': 'scale.live-element.net/_/request', 
-    'ap-southeast-2': 'ap-southeast-2.scale.live-element.net'
+    '_': 'us-east-1.request.scale.live-element.net', 
+    'ap-southeast-2': 'ap-southeast-2.request.scale.live-element.net'
 }
 
 
 def main(event, context):
     '''
     - triggered as an endpoint for a CDN or API originated PUT / PATCH / POST / DELETE request, or a websocket $put/$post/$patch/$delete message
-    - writes a request entry to the _/write folder or geo-optimised write bucket
+    - writes a request entry to a geo-optimised write bucket
     - request {method, uri, headers, content-type, body}
     - returns {status: '202'} on success or {status: '50x'} | {status: '40x'} on failure
     '''
     status = 202
     try:
-        bucket_name, path = [v.strip('/?') for v in (buckets.get(context.invoked_function_arn.split(':')[3], buckets['_']).strip('/') + '/').split('/', 1)]
+        bucket_name = buckets.get(context.invoked_function_arn.split(':')[3], buckets['_'])
     except:
         status = 500
     s3_client = boto3.client('s3')
@@ -47,7 +47,7 @@ def main(event, context):
                         status = 202 if request_uuid else 500
                         if status == 202:
                             try:
-                                s3_client.put_object(Bucket=bucket_name, Key='{}/{}.json'.format(path, request_uuid).strip('/?'), Body=bytes(json.dumps(request_entry), 'utf-8'), ContentType='application/json')
+                                s3_client.put_object(Bucket=bucket_name, Key='{}.json'.format(request_uuid), Body=bytes(json.dumps(request_entry), 'utf-8'), ContentType='application/json')
                             except: 
                                 status = 500
         except:

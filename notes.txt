@@ -268,3 +268,16 @@ of Book record the connection can GET (view)
 {"asset": {"GET": {"profiles/": {"testuser.png": "*"} } } }  => cam view the file _/profiles/testuser.png
 
 {"asset": {"GET": {"profiles/": {"testuser.png": {"mask-function-id": {"option1": 123}}}}}}  => if the result of mask-function-id is True, then can view _/profiles/testuser.png
+
+---
+
+REGIONAL OPTIMISATION
+
+US-EAST-1 "Edge"
+* "edge" functions are deployed in the us-east-1 region, and then used as Lambda@Edge functions with the CDN behaviours
+
+All Active Regions
+* create a bucket within that region to receive requests (a "request bucket")
+* deploy the region/request function to the region
+* region/request function is triggered by all object creation in it's region request bucket
+
