@@ -7,19 +7,11 @@ def getpath(p, env=None):
     p = p[:-len('.json')] if p.endswith('.json') else p
     return p.strip('/').split('/')
 
-def build_env(record_event, context):
-    temp_path = getpath(record_event['s3']['object']['key'])
-    if len(temp_path) in [4, 5]:
-        shared = len(temp_path) == 5
-        return {
-            'bucket': record_event['s3']['bucket']['name'], 
-            'lambda_namespace': context.function_name.replace('-core-react-query', ''), 
-            'system_root': temp_path[-4],
-            'data_root': '{}/{}'.format(temp_path[-5], temp_path[-4]) if shared else temp_path[-4], 
-            'shared': 1 if shared else 0
-        }
-    else:
-        return {}
+def get_env_context(event, context):
+    env = context.client_context.env if context.client_context and context.client_context.env else event.get('_env', {})
+    env['path'] = getpath(event['key'], env)
+    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')    
+    return env, client_context
 
 def getprocessor(env, name, source='core', scope=None):
     return name if ':' in name else '{lambda_namespace}-{source}-{name}'.format(lambda_namespace=env['lambda_namespace'], source=source, name='{}-{}'.format(scope, name) if scope else name)
@@ -32,20 +24,16 @@ def main(event_data, context):
     - for each query->vector, ensure that the query_id is present in /vector/{class_name}.json
     - trigger query for every record in /record/{class_name}
     '''
-    s3 = boto3.resource('s3')
-    s3_client = boto3.client('s3')
-    lambda_client = boto3.client('lambda')
     counter = 0
     vectors_to_update = {}
-    for event_entry in event_data['Records']:
-        env = build_env(event_entry, context)
-        if not env:
-            continue
-        env['path'] = getpath(event_entry['s3']['object']['key'], env)
-        client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')
+    if event.get('key'):
+        s3 = boto3.resource('s3')
+        s3_client = boto3.client('s3')
+        lambda_client = boto3.client('lambda')
+        env, client_context = get_env_context(event, context)    
         bucket = s3.Bucket(env['bucket'])
         class_name, query_id = env['path'][1:3]
-        query_data = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event_entry['s3']['object']['key'])['Body'].read().decode('utf-8'))
+        query_data = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
         vector_base_key = '{data_root}/vector/{class_name}/'.format(data_root=env['data_root'], class_name=class_name)
         vector_list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix=vector_base_key)
         for vector_listing in vector_list_response.get('Contents', []):
@@ -76,13 +64,7 @@ def main(event_data, context):
                     vectors_to_update[vector_key] = vector_queries
     for key, vector_queries in vectors_to_update.items():
         vector_obj.put(Body=bytes(json.dumps(vector_queries), 'utf-8'), ContentType="application/json")
-    for event_entry in event_data['Records']:
-        env = build_env(event_entry, context)
-        if not env:
-            continue
-        env['path'] = getpath(event_entry['s3']['object']['key'], env)
-        client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')
-        class_name, query_id = env['path'][1:3]
+    if event.get('key'):
         record_base_key = '{data_root}/record/{class_name}/'.format(data_root=env['data_root'], class_name=class_name)
         record_list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix=record_base_key)
         for key_obj in record_list_response['Contents']:
@@ -94,7 +76,7 @@ def main(event_data, context):
                 'options': query_data.get('options'), 
                 'record': {'@type': class_name, '@id': r_id}, 
                 '_env': env
-            }), 'utf-8'), ClientContext=client_context)
+            }), 'utf-8'))
         c = 1000000000
         while c and record_list_response.get('IsTruncated') and record_list_response.get('NextContinuationToken'):
             record_list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix='{data_root}/record/{class_name}/'.format(data_root=env['data_root'], class_name=class_name), ContinuationToken=record_list_response.get('NextContinuationToken'))
@@ -108,7 +90,7 @@ def main(event_data, context):
                     'options': query_data.get('options'), 
                     'record': {'@type': class_name, '@id': record_id}, 
                     '_env': env
-                }), 'utf-8'), ClientContext=client_context)
+                }), 'utf-8'))
                 c = c - 1
         counter = counter + 1
     return counter

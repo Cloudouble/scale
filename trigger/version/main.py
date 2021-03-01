@@ -7,20 +7,12 @@ def getpath(p, env=None):
     p = p[:-len('.json')] if p.endswith('.json') else p
     return p.strip('/').split('/')
 
-def build_env(record_event, context):
-    temp_path = getpath(record_event['s3']['object']['key'])
-    if len(temp_path) in [5, 6]:
-        shared = len(temp_path) == 6
-        return {
-            'bucket': record_event['s3']['bucket']['name'], 
-            'lambda_namespace': context.function_name.replace('-core-react-version', ''), 
-            'system_root': temp_path[-5],
-            'data_root': '{}/{}'.format(temp_path[-6], temp_path[-5]) if shared else temp_path[-5], 
-            'shared': 1 if shared else 0
-        }
-    else:
-        return {}
-        
+def get_env_context(event, context):
+    env = context.client_context.env if context.client_context and context.client_context.env else event.get('_env', {})
+    env['path'] = getpath(event['key'], env)
+    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')    
+    return env, client_context
+
 def getprocessor(env, name, source='core', scope=None):
     return name if ':' in name else '{lambda_namespace}-{source}-{name}'.format(lambda_namespace=env['lambda_namespace'], source=source, name='{}-{}'.format(scope, name) if scope else name)
 
@@ -33,9 +25,9 @@ def process_record(key_obj, lambda_client, record, env, client_context):
         'class_name': class_name,
         'entity_id': record_id, 
         'entity': record, 
-        'write': True
+        'write': True, 
+        '_env': {'connection_id': connection_id, **env}
     }
-    mask_payload['_env'] = {'connection_id': connection_id, **env}
     lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), InvocationType='Event', Payload=bytes(json.dumps(mask_payload), 'utf-8'))
 
 def main(event, context):
@@ -46,19 +38,15 @@ def main(event, context):
     - lists /subscription/{class_name}/{record_id}/* to find affected connections
     - triggers mask for each affected connection
     '''
-    s3 = boto3.resource('s3')
-    s3_client = boto3.client('s3')
-    lambda_client = boto3.client('lambda')
     counter = 0
-    for record_event in event['Records']:
-        env = build_env(record_event, context)
-        if not env:
-            continue
-        env['path'] = getpath(record_event['s3']['object']['key'], env)
-        client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')
+    if event.get('key'):
+        s3 = boto3.resource('s3')
+        s3_client = boto3.client('s3')
+        lambda_client = boto3.client('lambda')
+        env, client_context = get_env_context(event, context)    
         if len(env['path']) == 4:
             class_name, record_id, record_version = env['path'][1:]
-            updated_fields = sorted(json.loads(s3_client.get_object(Bucket=env['bucket'], Key=record_event['s3']['object']['key'])['Body'].read().decode('utf-8')))
+            updated_fields = sorted(json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8')))
             query_list = []
             for field_name in updated_fields:
                 try:

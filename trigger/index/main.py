@@ -7,19 +7,11 @@ def getpath(p, env=None):
     p = p[:-len('.json')] if p.endswith('.json') else p
     return p.strip('/').split('/')
 
-def build_env(record_event, context):
-    temp_path = getpath(record_event['s3']['object']['key'])
-    if len(temp_path) in [5, 6]:
-        shared = len(temp_path) == 6
-        return {
-            'bucket': record_event['s3']['bucket']['name'], 
-            'lambda_namespace': context.function_name.replace('-core-react-index', ''), 
-            'system_root': temp_path[-5],
-            'data_root': '{}/{}'.format(temp_path[-6], temp_path[-5]) if shared else temp_path[-5], 
-            'shared': 1 if shared else 0
-        }
-    else:
-        return {}
+def get_env_context(event, context):
+    env = context.client_context.env if context.client_context and context.client_context.env else event.get('_env', {})
+    env['path'] = getpath(event['key'], env)
+    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')    
+    return env, client_context
 
 def getprocessor(env, name, source='core', scope=None):
     return name if ':' in name else '{lambda_namespace}-{source}-{name}'.format(lambda_namespace=env['lambda_namespace'], source=source, name='{}-{}'.format(scope, name) if scope else name)
@@ -31,19 +23,14 @@ def main(event, context):
     - uses /feed/{class_name}/{query_id}/{connection_id}/* to find affected connections
     - triggers index.py for each affected connection
     '''
-    s3 = boto3.resource('s3')
-    s3_client = boto3.client('s3')
-    lambda_client = boto3.client('lambda')
     counter = 0
-    now = time.time()
-    affected_connections = set()
-    for record_event in event['Records']:
-        env = build_env(record_event, context)
-        if not env:
-            continue
-        env['path'] = getpath(record_event['s3']['object']['key'], env)
-        client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')
+    if event.get('key'):
+        s3 = boto3.resource('s3')
+        s3_client = boto3.client('s3')
+        lambda_client = boto3.client('lambda')
+        env, client_context = get_env_context(event, context)    
         index_record_ids = set(json.loads(s3_client.get_object(Bucket=env['bucket'], Key=record_event['s3']['object']['key'])['Body'].read().decode('utf-8')))
+        affected_connections = set()
         if len(env['path']) == 4:
             class_name, query_id, index = env['path'][1:]
             feed_base_key = '{data_root}/feed/{class_name}/{query_id}/'.format(data_root=env['data_root'], class_name=class_name, query_id=query_id)
