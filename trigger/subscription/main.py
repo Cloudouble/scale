@@ -20,7 +20,7 @@ def getprocessor(env, name, source='core', scope=None):
 def main(event, context):
     '''
     - triggered by writes at _/subscription/{class_name}/{record_id}/{connection_id}/*
-    - trigger view.py from the subscription
+    - trigger core/view from the subscription
     '''
     counter = 0
     if event.get('key'):

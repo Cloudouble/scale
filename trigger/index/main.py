@@ -19,8 +19,8 @@ def getprocessor(env, name, source='core', scope=None):
 
 def main(event, context):
     '''
-    - triggered by new/updated objects at /query/{class_name}/{query_id}/{record_initial}.json
-    - uses /feed/{class_name}/{query_id}/{connection_id}/* to find affected connections
+    - triggered by new/updated objects at _/query/{class_name}/{query_id}/{record_initial}.json
+    - uses _/feed/{class_name}/{query_id}/{connection_id}/* to find affected connections
     - triggers core/index for each affected connection
     '''
     counter = 0

@@ -6,7 +6,7 @@ import urllib.request, json, boto3
 def main(event, context):
     '''
     - triggered on-demand by an administrator
-    - updates schema data to all system paths under /schema
+    - updates schema data to all system paths under _/schema
     '''
     release = '11.01'
     feed = 'https://schema.org/version/{}/schemaorg-all-https.jsonld'.format(release)

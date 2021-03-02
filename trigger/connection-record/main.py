@@ -28,9 +28,9 @@ def process_query(key_obj, index, s3_client, env, record_id):
 
 def main(event, context):
     '''
-    - triggered by new/updated/deleted objects in /connection/{connection_id}/record/{class_name}/{record_id}.json
-    - removes the relevant record_id from /connection/{connection_id}/query/{class_name}/{query_id}/{index_initial}.json if the masked value is empty
-    - uses /subscription/{class_name}/{record_id}/{connection_id}/* to find affected views for this connection and record
+    - triggered by new/updated/deleted objects in _/connection/{connection_id}/record/{class_name}/{record_id}.json
+    - removes the relevant record_id from _/connection/{connection_id}/query/{class_name}/{query_id}/{index_initial}.json if the masked value is empty
+    - uses _/subscription/{class_name}/{record_id}/{connection_id}/* to find affected views for this connection and record
     - trigger view for each affected subscription view 
     '''
     counter = 0

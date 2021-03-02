@@ -19,10 +19,10 @@ def getprocessor(env, name, source='core', scope=None):
 
 def main(event, context):
     '''
-    - triggered by new objects at /version/{class_name}/{record_id}/{version_id}.json
-    - uses /vector/{class_name}/{field_name}.json to find affected queries 
+    - triggered by new objects at _/version/{class_name}/{record_id}/{version_id}.json
+    - uses _/vector/{class_name}/{field_name}.json to find affected queries 
     - triggers query with the full record for each affected query
-    - lists /subscription/{class_name}/{record_id}/* to find affected connections
+    - lists _/subscription/{class_name}/{record_id}/* to find affected connections
     - triggers mask for each affected connection
     '''
     counter = 0

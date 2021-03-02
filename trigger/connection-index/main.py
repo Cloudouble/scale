@@ -19,8 +19,8 @@ def getprocessor(env, name, source='core', scope=None):
 
 def main(event, context):
     '''
-    - triggered by new/updated/deleted /connection/{connection_id}/query/{class_name}/{query_id}/{index_initial}.json
-    - use /feed/{class_name}/{query_id}/{connection_id}/* to find affected views for this connection and query
+    - triggered by new/updated/deleted _/connection/{connection_id}/query/{class_name}/{query_id}/{index_initial}.json
+    - use _/feed/{class_name}/{query_id}/{connection_id}/* to find affected views for this connection and query
     - trigger view for each affected feed view
     '''
     counter = 0
