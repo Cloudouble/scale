@@ -19,7 +19,7 @@ def getprocessor(env, name, source='core', scope=None):
 
 def main(event, context):
     '''
-    - triggered by writes at /subscription/{class_name}/{record_id}/{connection_id}/*
+    - triggered by writes at _/subscription/{class_name}/{record_id}/{connection_id}/*
     - trigger view.py from the subscription
     '''
     counter = 0

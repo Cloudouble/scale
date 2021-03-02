@@ -18,8 +18,7 @@ def getprocessor(env, name, source='core', scope=None):
  
 def process_query(key_obj, index, s3_client, env, record_id):
     connection_query_path = getpath(key_obj['Key'])
-    connection_id, entity_type, class_name, query_id = env['path'][1:]
-    connection_query_index_path = '{system_root}/connection/{connection_id}/query/{class_name}/{query_id}/{index}.json'.format(system_root=env['system_root'], connection_id=connection_id, class_name=class_name, query_id=query_id, index=index)
+    connection_query_index_path = connection_query_path.replace('.json', '/{index}.json'.format(index=index))
     connection_query_index_data = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=connection_query_index_path)['Body'].read().decode('utf-8'))
     if record_id in connection_query_index_data:
         connection_query_index_data.remove(record_id)
@@ -44,11 +43,11 @@ def main(event, context):
             connection_id, entity_type, class_name, record_id = env['path'][1:]
             index = record_id[0]
             try:
-                masked_record_data = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=entry['key'])['Body'].read().decode('utf-8'))
+                masked_record_data = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
             except:
                 masked_record_data = {}
             if not masked_record_data:
-                connection_query_list_key = '{system_root}/connection/{connection_id}/query/{class_name}/'.format(system_root=env['system_root'], connection_id=connection_id, class_name=class_name)
+                connection_query_list_key = '{data_root}/connection/{connection_id}/query/{class_name}/'.format(data_root=env['data_root'], connection_id=connection_id, class_name=class_name)
                 connection_query_list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix=connection_query_list_key)
                 for key_obj in connection_query_list_response.get('Contents', []):
                     process_query(key_obj, index, s3_client, env, record_id)
@@ -58,7 +57,7 @@ def main(event, context):
                     for key_obj in connection_query_list_response.get('Contents', []):
                         process_query(key_obj, index, s3_client, env, record_id)
                         c = c - 1
-            connection_subscription_list_path = '{system_root}/subscription/{class_name}/{record_id}/{connection_id}/'.format(system_root=env['system_root'], class_name=class_name, record_id=record_id, connection_id=connection_id)
+            connection_subscription_list_path = '{data_root}/subscription/{class_name}/{record_id}/{connection_id}/'.format(data_root=env['data_root'], class_name=class_name, record_id=record_id, connection_id=connection_id)
             connection_subscription_list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix=connection_subscription_list_path)
             for key_obj in connection_subscription_list_response.get('Contents', []):
                 try:

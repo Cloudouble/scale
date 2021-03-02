@@ -16,19 +16,6 @@ def get_env_context(event, context):
 def getprocessor(env, name, source='core', scope=None):
     return name if ':' in name else '{lambda_namespace}-{source}-{name}'.format(lambda_namespace=env['lambda_namespace'], source=source, name='{}-{}'.format(scope, name) if scope else name)
 
-def process_record(key_obj, lambda_client, record, env, client_context):
-    entity_path = getpath(key_obj['Key'], env)
-    class_name, record_id, connection_id = entity_path[1:4]
-    mask_payload = {
-        'entity_type': 'record', 
-        'method': 'GET', 
-        'class_name': class_name,
-        'entity_id': record_id, 
-        'entity': record, 
-        'write': True, 
-        '_env': {'connection_id': connection_id, **env}
-    }
-    lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), InvocationType='Event', Payload=bytes(json.dumps(mask_payload), 'utf-8'))
 
 def main(event, context):
     '''
@@ -66,13 +53,25 @@ def main(event, context):
             else:
                 record_data = {}
             if record_data:
+                process_connections = set()
                 for key_obj in subscription_list_response.get('Contents', []):
-                    process_record(key_obj, lambda_client, record_data, env, client_context)
+                    process_connections.add(getpath(key_obj['Key'], env)[3])
                 c = 1000000000
                 while c and subscription_list_response.get('IsTruncated') and subscription_list_response.get('NextContinuationToken'):
                     subscription_list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix=subscription_list_key, ContinuationToken=subscription_list_response.get('NextContinuationToken'))
                     for key_obj in subscription_list_response.get('Contents', []):
-                        process_record(key_obj, lambda_client, record_data, env, client_context)
+                        process_connections.add(getpath(key_obj['Key'], env)[3])
                         c = c - 1
+                for connection_id in process_connections:
+                    mask_payload = {
+                        'entity_type': 'record', 
+                        'method': 'GET', 
+                        'class_name': class_name,
+                        'entity_id': record_id, 
+                        'entity': record_data, 
+                        'write': True, 
+                        '_env': {'connection_id': connection_id, **env}
+                    }
+                    lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), InvocationType='Event', Payload=bytes(json.dumps(mask_payload), 'utf-8'))
             counter = counter + 1
     return counter

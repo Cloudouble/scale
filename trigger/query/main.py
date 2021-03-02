@@ -17,7 +17,7 @@ def getprocessor(env, name, source='core', scope=None):
     return name if ':' in name else '{lambda_namespace}-{source}-{name}'.format(lambda_namespace=env['lambda_namespace'], source=source, name='{}-{}'.format(scope, name) if scope else name)
 
 
-def main(event_data, context):
+def main(event, context):
     '''
     - triggered by writes at /query/{class_name}/{query_id}.json
     - for each field in /vector/{class_name}/, remove the query_id if the field name is not in query->vector
@@ -26,9 +26,9 @@ def main(event_data, context):
     '''
     counter = 0
     vectors_to_update = {}
+    s3_client = boto3.client('s3')
     if event.get('key'):
         s3 = boto3.resource('s3')
-        s3_client = boto3.client('s3')
         lambda_client = boto3.client('lambda')
         env, client_context = get_env_context(event, context)    
         bucket = s3.Bucket(env['bucket'])
@@ -63,7 +63,7 @@ def main(event_data, context):
                     vector_queries.sort()
                     vectors_to_update[vector_key] = vector_queries
     for key, vector_queries in vectors_to_update.items():
-        vector_obj.put(Body=bytes(json.dumps(vector_queries), 'utf-8'), ContentType="application/json")
+        s3_client.put_object(Bucket=env['bucket'], Key=key, Body=bytes(json.dumps(vector_queries), 'utf-8'), ContentType='application/json')
     if event.get('key'):
         record_base_key = '{data_root}/record/{class_name}/'.format(data_root=env['data_root'], class_name=class_name)
         record_list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix=record_base_key)
@@ -73,7 +73,7 @@ def main(event_data, context):
             lambda_client.invoke(FunctionName=getprocessor(env, 'query'), InvocationType='Event', Payload=bytes(json.dumps({
                 'query_id': query_id,
                 'processor': query_data.get('processor'), 
-                'options': query_data.get('options'), 
+                'options': query_data.get('options', {}), 
                 'record': {'@type': class_name, '@id': r_id}, 
                 '_env': env
             }), 'utf-8'))
@@ -87,7 +87,7 @@ def main(event_data, context):
                 lambda_client.invoke(FunctionName=getprocessor(env, 'query'), InvocationType='Event', Payload=bytes(json.dumps({
                     'query_id': query_id,
                     'processor': query_data.get('processor'), 
-                    'options': query_data.get('options'), 
+                    'options': query_data.get('options', {}), 
                     'record': {'@type': class_name, '@id': record_id}, 
                     '_env': env
                 }), 'utf-8'))

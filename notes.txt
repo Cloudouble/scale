@@ -323,7 +323,7 @@ PUT query:
 fetch(
     'https://scale.live-element.net/_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/query/Book/9886c382-4b22-454d-8910-bb1415018421.json', 
     {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(
-        {"processor": "books", "vector": ["name", "numberOfPages"]}
+        {"processor": "books", "vector": ["name", "numberOfPages"], "options": {"pagesFilter": true, "minPages": 1, "maxPages": 99}}
     ) }
 ).then(r => console.log(r))
 

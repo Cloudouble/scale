@@ -32,7 +32,7 @@ def main(event, context):
         query_result = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, query_processor, 'extension', 'query'), Payload=bytes(json.dumps(query_payload), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
         query_index_key = '{data_root}/query/{class_name}/{query_id}/{record_initial}.json'.format(data_root=env['data_root'], class_name=class_name, query_id=query_id, record_initial=record_id[0])
         try:
-            query_index = json.loads(bucket.get_object(Key=query_index_key)['Body'].read().decode('utf-8'))
+            query_index = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=query_index_key)['Body'].read().decode('utf-8'))
         except:
             query_index = []
         if query_result is True and record_id not in query_index:

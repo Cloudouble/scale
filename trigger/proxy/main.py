@@ -3,7 +3,14 @@ import json, boto3, base64, re
 env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_", "shared": 0, "authentication_namespace": "liveelementscale"}
 
 triggers = {
-    'connection/[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}/connect.json': ['connection']
+    'connection/{uuid}/connect.json': ['connection'], 
+    'query/{class_name}/{uuid}.json': ['query'], 
+    'query/{class_name}/{uuid}/[a-z0-9].json': ['index'], 
+    'connection/{uuid}/record/{class_name}/{uuid}.json': ['connection-record'], 
+    'connection/{uuid}/query/{class_name}/{uuid}/[a-z0-9].json': ['connection-index'], 
+    'feed/{class_name}/{uuid}/{uuid}/{uuid}.json': ['feed'], 
+    'subscription/{class_name}/{uuid}/{uuid}/{uuid}.json': ['subscription'], 
+    'version/{class_name}/{uuid}/[a-zA-Z0-9\._-]+.json': ['version']
 }
 
 def main(event_data, context):
@@ -11,6 +18,8 @@ def main(event_data, context):
     - triggered by all write events in main bucket
     - invokes other trigger functions according to their capturing path
     '''
+    uuid_pattern = '[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}'
+    class_pattern = '[a-zA-Z0-9]+'
     counter = 0
     keys = []
     for entry in event_data['Records']:
@@ -27,7 +36,7 @@ def main(event_data, context):
                continue
         else:
            env['data_root'] = env['system_root']
-        trigger_re_compiled = {k: re.compile('{data_root}/{path}'.format(data_root=env['data_root'], path=k.strip('/'))) for k in triggers}
+        trigger_re_compiled = {k: re.compile('{data_root}/{path}'.format(data_root=env['data_root'], path=k.strip('/').format(uuid=uuid_pattern, class_name=class_pattern))) for k in triggers}
         for key_re, trigger_processors in triggers.items():
             if trigger_re_compiled[key_re].fullmatch(key):
                 for trigger_processor in trigger_processors:

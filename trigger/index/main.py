@@ -21,7 +21,7 @@ def main(event, context):
     '''
     - triggered by new/updated objects at /query/{class_name}/{query_id}/{record_initial}.json
     - uses /feed/{class_name}/{query_id}/{connection_id}/* to find affected connections
-    - triggers index.py for each affected connection
+    - triggers core/index for each affected connection
     '''
     counter = 0
     if event.get('key'):
@@ -29,7 +29,7 @@ def main(event, context):
         s3_client = boto3.client('s3')
         lambda_client = boto3.client('lambda')
         env, client_context = get_env_context(event, context)    
-        index_record_ids = set(json.loads(s3_client.get_object(Bucket=env['bucket'], Key=record_event['s3']['object']['key'])['Body'].read().decode('utf-8')))
+        index_record_ids = set(json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8')))
         affected_connections = set()
         if len(env['path']) == 4:
             class_name, query_id, index = env['path'][1:]

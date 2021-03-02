@@ -17,7 +17,7 @@ def main(event, context):
         s3 = boto3.resource('s3')
         bucket = s3.Bucket(env['bucket'])
         s3_client = boto3.client('s3')
-        connection_object = bucket.Object('{data_root}/connection/{connection_id}.json'.format(data_root=env['data_root'], connection_id=env['connection_id']))
+        connection_object = bucket.Object('{data_root}/connection/{connection_id}/connect.json'.format(data_root=env['data_root'], connection_id=env['connection_id']))
         try:
             connection_record = json.loads(connection_object.get()['Body'].read().decode('utf-8'))
         except:
@@ -92,12 +92,11 @@ def main(event, context):
                             write_key = '{data_root}/connection/{connection_id}/view/{entity_id}.json'.format(data_root=env['data_root'], connection_id=env['connection_id'], entity_id=event['entity_id'])
                         else:
                             write_key = '{data_root}/connection/{connection_id}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], connection_id=env['connection_id'], entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id'])
-
                         current_writable_entity_json = s3_client.get_object(Bucket=env['bucket'], Key=write_key)['Body'].read().decode('utf-8')
                         new_writable_entity_json = json.dumps(writable_entity)
                         if current_writable_entity_json != new_writable_entity_json:
                             bucket.put_object(Body=bytes(json.dumps(writable_entity), 'utf-8'), Key=write_key, ContentType='application/json')
-                            did_write = False
+                            did_write = True
                     if event.get('query_id'):
                         index_key = '{data_root}/connection/{connection_id}/query/{class_name}/{query_id}/{index}.json'.format(
                             data_root=env['data_root'], connection_id=env['connection_id'], class_name=event['class_name'], query_id=event['query_id'], index=event['entity_id'][0])
@@ -113,6 +112,5 @@ def main(event, context):
                             index_record_ids.remove(event['entity_id'])
                             index_changed = True
                         index_record_ids.sort()
-                        if index_changed or did_write:
-                            bucket.put_object(Body=bytes(json.dumps(index_record_ids), 'utf-8'), Key=index_key, ContentType='application/json')
+                        bucket.put_object(Body=bytes(json.dumps(index_record_ids), 'utf-8'), Key=index_key, ContentType='application/json')
     return masked_entity

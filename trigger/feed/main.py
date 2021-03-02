@@ -19,7 +19,7 @@ def getprocessor(env, name, source='core', scope=None):
 
 def main(event, context):
     '''
-    - triggered by writes at /feed/{class_name}/{query_id}/{connection_id}/*
+    - triggered by writes at _/feed/{class_name}/{query_id}/{connection_id}/*
     - trigger view for each view configuration in feed->view
     '''
     counter = 0

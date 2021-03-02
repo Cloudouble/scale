@@ -190,14 +190,19 @@ def main(event, context):
                                 entity_to_write = {**current_entity, **masked_entity}
                         if entity_to_write:
                             if request['method'] in ['PUT', 'POST', 'PATCH']:
-                                if entity_type == 'record':
-                                    updated_fields = [f for f in request['entity'] if request['entity'][f] != current_entity.get(f)]
-                                put_response = bucket.put_object(Body=bytes(json.dumps(entity_to_write), 'utf-8'), Key=entity_key, ContentType='application/json')
-                                if entity_type == 'record':
-                                    record_version_key = '{data_root}/version/{class_name}/{record_id}/{version_id}.json'.format(data_root=env['data_root'], class_name=request['entity']['@type'], record_id=request['entity']['@id'], version_id=put_response.version_id)
-                                    bucket.put_object(Body=bytes(json.dumps(updated_fields), 'utf-8'), Key=record_version_key, ContentType='application/json')
+                                if json.dumps(current_entity) != json.dumps(entity_to_write):
+                                    if entity_type == 'record':
+                                        updated_fields = [f for f in request['entity'] if request['entity'][f] != current_entity.get(f)]
+                                    put_response = bucket.put_object(Body=bytes(json.dumps(entity_to_write), 'utf-8'), Key=entity_key, ContentType='application/json')
+                                    if entity_type == 'record':
+                                        record_version_key = '{data_root}/version/{class_name}/{record_id}/{version_id}.json'.format(data_root=env['data_root'], class_name=request['entity']['@type'], record_id=request['entity']['@id'], version_id=put_response.version_id)
+                                        bucket.put_object(Body=bytes(json.dumps(updated_fields), 'utf-8'), Key=record_version_key, ContentType='application/json')
                             elif request['method'] == 'DELETE' and current_entity:
                                 if entity_type in ['query', 'record', 'view', 'feed', 'subscription', 'system']:
-                                    current_entity.delete()
+                                    s3_client.delete_object(Bucket=env['bucket'], Key=entity_key)
+                                    if entity_type == 'record':
+                                        updated_fields = [f for f in current_entity]
+                                        record_version_key = '{data_root}/version/{class_name}/{record_id}/{version_id}.json'.format(data_root=env['data_root'], class_name=request['entity']['@type'], record_id=request['entity']['@id'], version_id='-deleted-')
+                                        bucket.put_object(Body=bytes(json.dumps(updated_fields), 'utf-8'), Key=record_version_key, ContentType='application/json')
                             counter = counter + 1
     return counter
