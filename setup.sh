@@ -25,11 +25,10 @@ aws iam create-policy --policy-name $lambdaPolicyName --policy-document "$lambda
 aws iam create-role --role-name $lambdaRoleName --assume-role-policy-document "$assumeRolePolicy"
 '
 
-# create lambdas in main region
-
+# create core lambdas in core region
+: '
 cd core
-for functionName in *
-do
+for functionName in *; do
     lambdaName="$lambdaNamespace-core-$functionName"
     echo $lambdaName
     cd "$functionName/"
@@ -54,6 +53,66 @@ do
     cd ../
 done
 cd ..
+'
+
+# create trigger lambdas in core region
+: '
+cd trigger
+for functionName in *; do
+    lambdaName="$lambdaNamespace-trigger-$functionName"
+    echo $lambdaName
+    cd "$functionName/"
+    if [ ! -d 'temp' ]; then
+        mkdir temp
+    fi
+    cp main.py ./temp
+    cd temp
+    if [ 'proxy' = $functionName ]; then
+        sed -i "1s/.*/$lambdaEnvTriggerProxy/" main.py
+    fi
+    zip ../$functionName.zip main.py &> /dev/null
+    cd ../
+    #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn \
+    #    --zip-file fileb://$functionName.zip --timeout 900 --publish true 
+    unlink temp/main.py
+    rmdir temp
+    unlink $functionName.zip
+    cd ../
+done
+cd ..
+'
+
+# create extension lambdas in core region
+: '
+cd extension
+for scope in *; do
+    cd $scope
+    for functionName in *; do
+        if [ '*' = $functionName ]; then
+            break
+        fi
+        lambdaName="$lambdaNamespace-extension-$scope-$functionName"
+        echo $lambdaName
+        cd "$functionName/"
+        if [ ! -d 'temp' ]; then
+            mkdir temp
+        fi
+        cp main.py ./temp
+        cd temp
+        zip ../$functionName.zip main.py &> /dev/null
+        cd ../
+        #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn \
+        #    --zip-file fileb://$functionName.zip --timeout 900 --publish true 
+        unlink temp/main.py
+        rmdir temp
+        unlink $functionName.zip
+        cd ../
+    done
+    cd ../
+done
+cd ..
+'
+
 
 # create triggers between selected Lambdas and the two main buckets
 

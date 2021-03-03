@@ -1,6 +1,6 @@
-import json, boto3, base64, re
-
 env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_", "shared": 0, "authentication_namespace": "liveelementscale"}
+
+import json, boto3, base64, re
 
 triggers = {
     'connection/{uuid}/connect.json': ['connection'], 
