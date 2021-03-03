@@ -1,5 +1,57 @@
+accountId="771795544492"
+systemProperName="LiveElementScale"
 coreBucket="test.scale.live-element.net"
 coreRegion="ap-southeast-1"
 logBucket="log.test.scale.live-element.net"
 requestBucket="request.test.scale.live-element.net"
 
+# ---GENERATED BUT CUSTOMIZABLE---
+lambdaRoleName="$systemProperName"
+lambdaRoleArn='arn:aws:iam::'$accountId':role/'$lambdaRoleName
+lambdaPolicyStatement='{"Effect": "Allow","Principal": {"AWS": "'$roleArn'"},"Action": ["s3:DeleteObject","s3:GetObject","s3:PutObject"],"Resource": "arn:aws:s3:::'$coreBucket'/*"}'
+
+lambdaPolicy='
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "lambda:InvokeFunction",
+            "Resource": "*"
+        },
+        {
+            "Sid": "LiveElement1",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "sts:AssumeRole",
+                "logs:CreateLogStream",
+                "s3:DeleteObjectVersion",
+                "s3:ListBucketVersions",
+                "s3:ListBucket",
+                "s3:DeleteObject",
+                "s3:GetObjectVersion"
+            ],
+            "Resource": [
+                "arn:aws:iam::'$accountId':role/'$lambdaRoleName'",
+                "arn:aws:logs:*:'$accountId':log-group:*",
+                "arn:aws:s3:::'$coreBucket'",
+                "arn:aws:s3:::*/*"
+            ]
+        },
+        {
+            "Sid": "LiveElement2",
+            "Effect": "Allow",
+            "Action": "logs:PutLogEvents",
+            "Resource": "arn:aws:logs:*:'$accountId':log-group:*:log-stream:*"
+        },
+        {
+            "Sid": "LiveElement3",
+            "Effect": "Allow",
+            "Action": "logs:CreateLogGroup",
+            "Resource": "arn:aws:logs:*:'$accountId':log-group:*"
+        }
+    ]
+}
+'
