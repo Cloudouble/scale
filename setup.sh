@@ -114,17 +114,45 @@ cd ..
 '
 
 
-# create triggers between selected Lambdas and the two main buckets
+# for the edge region NOT COMPLETE YET:
+: '
+cd edge
+for functionName in *; do
+    lambdaName="$lambdaNamespace-edge-$functionName"
+    echo $lambdaName
+    cd "$functionName/"
+    if [ ! -d 'temp' ]; then
+        mkdir temp
+    fi
+    cp main.py ./temp
+    cd temp
+    if [ 'proxy' = $functionName ]; then
+        sed -i "1s/.*/$lambdaEnvTriggerProxy/" main.py
+    fi
+    zip ../$functionName.zip main.py &> /dev/null
+    cd ../
+    #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn \
+    #    --zip-file fileb://$functionName.zip --timeout 900 --publish true 
+    unlink temp/main.py
+    rmdir temp
+    unlink $functionName.zip
+    cd ../
+done
+cd ..
+'
 
-# for the us-east-1 region:
-    # create the edge lambda
 
 # for each supported region:
     # create regional request bucket
     # create the regional lambdas
     # create trigger between the regional lambda and bucket
-    
+
+
+# create triggers between selected Lambdas and the two main buckets
+
+
 # create Cloudfront Distribution - including behaviours
+
 
 #set core Bucket policy to allow Cloudfront access
 : '

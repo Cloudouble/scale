@@ -1,11 +1,8 @@
+buckets = {'_': 'us-east-1.request.scale.live-element.net', 'ap-southeast-2': 'ap-southeast-2.request.scale.live-element.net'}
+
+
 import json, boto3, base64, uuid
 from urllib.parse import parse_qs
-
-
-buckets = {
-    '_': 'us-east-1.request.scale.live-element.net', 
-    'ap-southeast-2': 'ap-southeast-2.request.scale.live-element.net'
-}
 
 
 def main(event, context):
