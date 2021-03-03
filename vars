@@ -86,3 +86,7 @@ lambdaEnvCoreSchema='env = {"bucket": "'$coreBucket'", "lambda_namespace": "'$la
 lambdaEnvTriggerProxy='env = {"bucket": "'$coreBucket'", "lambda_namespace": "'$lambdaNamespace'", "system_root": "'$envSystemRoot'", "shared": '$envShared', "authentication_namespace": "'$envAuthenticationNamespace'"}'
 
 
+declare -A requestBuckets
+requestBuckets["_"]="$coreRegion.$requestBucket"
+requestBuckets["ap-southeast-2"]="ap-southeast-2.$requestBucket"
+

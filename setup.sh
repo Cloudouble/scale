@@ -46,7 +46,7 @@ for functionName in *; do
     zip ../$functionName.zip main.py &> /dev/null
     cd ../
     #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn \
-    #    --zip-file fileb://$functionName.zip --timeout 900 --publish true 
+    #    --zip-file fileb://$functionName.zip --timeout 900 --publish true --region $coreRegion
     unlink temp/main.py
     rmdir temp
     unlink $functionName.zip
@@ -73,7 +73,7 @@ for functionName in *; do
     zip ../$functionName.zip main.py &> /dev/null
     cd ../
     #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn \
-    #    --zip-file fileb://$functionName.zip --timeout 900 --publish true 
+    #    --zip-file fileb://$functionName.zip --timeout 900 --publish true --region $coreRegion
     unlink temp/main.py
     rmdir temp
     unlink $functionName.zip
@@ -102,7 +102,7 @@ for scope in *; do
         zip ../$functionName.zip main.py &> /dev/null
         cd ../
         #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn \
-        #    --zip-file fileb://$functionName.zip --timeout 900 --publish true 
+        #    --zip-file fileb://$functionName.zip --timeout 900 --publish true --region $coreRegion
         unlink temp/main.py
         rmdir temp
         unlink $functionName.zip
@@ -112,6 +112,9 @@ for scope in *; do
 done
 cd ..
 '
+
+for key in ${!requestBuckets[@]}; do echo $key; done
+for value in ${requestBuckets[@]}; do echo $value; done
 
 
 # for the edge region NOT COMPLETE YET:
@@ -132,7 +135,7 @@ for functionName in *; do
     zip ../$functionName.zip main.py &> /dev/null
     cd ../
     #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn \
-    #    --zip-file fileb://$functionName.zip --timeout 900 --publish true 
+    #    --zip-file fileb://$functionName.zip --timeout 900 --publish true --region $edgeRegion
     unlink temp/main.py
     rmdir temp
     unlink $functionName.zip
