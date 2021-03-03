@@ -20,10 +20,40 @@ aws s3api put-bucket-logging --bucket $requestBucket --bucket-logging-status '{"
 '
 
 # create main server role as used by lambdas (include ...)
-
-echo "$lambdaPolicy"
+: '
+aws iam create-policy --policy-name $lambdaPolicyName --policy-document "$lambdaPolicy"
+aws iam create-role --role-name $lambdaRoleName --assume-role-policy-document "$assumeRolePolicy"
+'
 
 # create lambdas in main region
+
+cd core
+for functionName in *
+do
+    lambdaName="$lambdaNamespace-core-$functionName"
+    echo $lambdaName
+    cd "$functionName/"
+    if [ ! -d 'temp' ]; then
+        mkdir temp
+    fi
+    cp main.py ./temp
+    cd temp
+    if [ 'request' = $functionName ]; then
+        sed -i "1s/.*/$lambdaEnvCoreRequest/" main.py
+    fi
+    if [ 'schema' = $functionName ]; then
+        sed -i "1s/.*/$lambdaEnvCoreSchema/" main.py
+    fi
+    zip ../$functionName.zip main.py &> /dev/null
+    cd ../
+    #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn \
+    #    --zip-file fileb://$functionName.zip --timeout 900 --publish true 
+    unlink temp/main.py
+    rmdir temp
+    unlink $functionName.zip
+    cd ../
+done
+cd ..
 
 # create triggers between selected Lambdas and the two main buckets
 
@@ -31,7 +61,6 @@ echo "$lambdaPolicy"
     # create the edge lambda
 
 # for each supported region:
-
     # create regional request bucket
     # create the regional lambdas
     # create trigger between the regional lambda and bucket
@@ -42,8 +71,7 @@ echo "$lambdaPolicy"
 : '
 cloudfrontDistributionId='E2OGJS7FJAAP6W'
 cloudfrontS3PolicyStatement='{"Effect": "Allow","Principal": {"AWS": "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity '$cloudfrontDistributionId'"},"Action": ["s3:GetObject","s3:PutObject"],"Resource": "arn:aws:s3:::'$coreBucket'/*"}'
-policy='{"Statement": ['$lambdaPolicyStatement','$cloudfrontS3PolicyStatement']}'
-aws s3api put-bucket-policy --bucket $coreBucket --policy $policy
+aws s3api put-bucket-policy --bucket $coreBucket --policy '{"Statement": ['$lambdaPolicyStatement','$cloudfrontS3PolicyStatement']}'
 '
 
 # run core/initialise

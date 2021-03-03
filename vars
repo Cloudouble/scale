@@ -1,14 +1,20 @@
 accountId="771795544492"
-systemProperName="LiveElementScale"
+systemProperName="TestLiveElementScale"
+lambdaNamespace="testliveelement-scale"
 coreBucket="test.scale.live-element.net"
 coreRegion="ap-southeast-1"
 logBucket="log.test.scale.live-element.net"
 requestBucket="request.test.scale.live-element.net"
+envSystemRoot="_"
+envShared="0"
+envAuthenticationNamespace="$systemProperName"
 
 # ---GENERATED BUT CUSTOMIZABLE---
 lambdaRoleName="$systemProperName"
 lambdaRoleArn='arn:aws:iam::'$accountId':role/'$lambdaRoleName
 lambdaPolicyStatement='{"Effect": "Allow","Principal": {"AWS": "'$roleArn'"},"Action": ["s3:DeleteObject","s3:GetObject","s3:PutObject"],"Resource": "arn:aws:s3:::'$coreBucket'/*"}'
+
+lambdaPolicyName="$lambdaRoleName"
 
 lambdaPolicy='
 {
@@ -55,3 +61,28 @@ lambdaPolicy='
     ]
 }
 '
+
+assumeRolePolicy='
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": [
+          "lambda.amazonaws.com",
+          "edgelambda.amazonaws.com"
+        ]
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+'
+
+lambdaEnvCoreRequest='env = {"bucket": "'$coreBucket'", "lambda_namespace": "'$lambdaNamespace'", "system_root": "'$envSystemRoot'", "shared": '$envShared', "authentication_namespace": "'$envAuthenticationNamespace'"}'
+lambdaEnvCoreSchema='env = {"bucket": "'$coreBucket'", "lambda_namespace": "'$lambdaNamespace'", "system_root": "'$envSystemRoot'", "data_root": "'$envSystemRoot'"}'
+
+
+
+
