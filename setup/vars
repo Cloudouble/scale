@@ -1,0 +1,5 @@
+coreBucket="test.scale.live-element.net"
+coreRegion="ap-southeast-1"
+logBucket="log.test.scale.live-element.net"
+requestBucket="request.test.scale.live-element.net"
+
