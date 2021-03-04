@@ -8,10 +8,10 @@ logBucket="log.test.scale.live-element.net"
 requestBucket="request.test.scale.live-element.net"
 envSystemRoot="_"
 envShared="0"
-envAuthenticationNamespace="$systemProperName"
 sudoName="system"
 
 # ---GENERATED BUT CUSTOMIZABLE---
+envAuthenticationNamespace="$systemProperName"
 lambdaRoleName="$systemProperName"
 lambdaRoleArn='arn:aws:iam::'$accountId':role/'$lambdaRoleName
 lambdaPolicyStatement='{"Effect": "Allow","Principal": {"AWS": "'$roleArn'"},"Action": ["s3:DeleteObject","s3:GetObject","s3:PutObject"],"Resource": "arn:aws:s3:::'$coreBucket'/*"}'
