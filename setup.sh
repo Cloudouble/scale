@@ -1,32 +1,66 @@
 . ./vars
 
+echo "Starting...
+...
+"
+
 # create log bucket
-: '
-aws s3api create-bucket --bucket $logBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion # 2> /dev/null
+echo "Retrieving list of existing buckets..."
+bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
+echo "Retrieved list of existing buckets."
+echo "
+...
+"
+
+echo "Checking if logBucket ($logBucket) exists..."
+if [[ " $bucketNames " =~ " $logBucket " ]]; then
+    echo "logBucket ($logBucket) already exists."
+else
+    echo "logBucket ($logBucket) NOT exists. Creating now in coreRegion ($coreRegion)..."
+    aws s3api create-bucket --bucket $logBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
+    echo "logBucket ($logBucket) now created."
+fi
+echo "Ensuring correct log delivery permissions are in place..."
 aws s3api put-bucket-acl --bucket $logBucket --grant-write URI=http://acs.amazonaws.com/groups/s3/LogDelivery --grant-read-acp URI=http://acs.amazonaws.com/groups/s3/LogDelivery
-'
+echo "Correct log delivery permissions are in place."
+echo "
+...
+"
 
 # create core bucket - including set bucket policy
-: '
-aws s3api create-bucket --bucket $coreBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
-aws s3api put-bucket-versioning --bucket $coreBucket --versioning-configuration Status=Enabled
-aws s3api put-bucket-logging --bucket $coreBucket --bucket-logging-status '{"LoggingEnabled":{"TargetBucket":"'$logBucket'","TargetPrefix":"s3/'$coreBucket'/"}}'
-'
+
+echo "Checking if coreBucket ($coreBucket) exists..."
+if [[ " $bucketNames " =~ " $coreBucket " ]]; then
+    echo "coreBucket ($coreBucket) already exists."
+else
+    echo "coreBucket ($coreBucket) NOT exists. Creating now in coreRegion ($coreRegion)..."
+    aws s3api create-bucket --bucket $coreBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
+    aws s3api put-bucket-versioning --bucket $coreBucket --versioning-configuration Status=Enabled
+    aws s3api put-bucket-logging --bucket $coreBucket --bucket-logging-status '{"LoggingEnabled":{"TargetBucket":"'$logBucket'","TargetPrefix":"s3/'$coreBucket'/"}}'
+    echo "coreBucket ($coreBucket) now created."
+fi
+echo "
+...
+"
+
+
+exit 0 
+
 
 # create main request bucket - including bucket policy
-: '
+<< COMMENT
 aws s3api create-bucket --bucket $requestBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion 2> /dev/null
 aws s3api put-bucket-logging --bucket $requestBucket --bucket-logging-status '{"LoggingEnabled":{"TargetBucket":"'$logBucket'","TargetPrefix":"s3/'$requestBucket'/"}}'
-'
+COMMENT
 
 # create main server role as used by lambdas (include ...)
-: '
+<< COMMENT
 aws iam create-policy --policy-name $lambdaPolicyName --policy-document "$lambdaPolicy" --region $coreRegion
 aws iam create-role --role-name $lambdaRoleName --assume-role-policy-document "$assumeRolePolicy" --region $coreRegion
-'
+COMMENT
 
 # create core lambdas in core region
-: '
+<< COMMENT
 cd core
 for functionName in *; do
     lambdaName="$lambdaNamespace-core-$functionName"
@@ -56,10 +90,10 @@ for functionName in *; do
     cd ../
 done
 cd ..
-'
+COMMENT
 
 # create trigger lambdas in core region
-: '
+<< COMMENT
 cd trigger
 for functionName in *; do
     lambdaName="$lambdaNamespace-trigger-$functionName"
@@ -87,10 +121,10 @@ for functionName in *; do
     cd ../
 done
 cd ..
-'
+COMMENT
 
 # create extension lambdas in core region
-: '
+<< COMMENT
 cd extension
 for scope in *; do
     cd $scope
@@ -117,11 +151,11 @@ for scope in *; do
     cd ../
 done
 cd ..
-'
+COMMENT
 
 
 # for the edge region NOT COMPLETE YET:
-: '
+<< COMMENT
 cd edge
 bucketsArray=()
 for key in ${!requestBuckets[@]}; do 
@@ -147,11 +181,11 @@ for functionName in *; do
     cd ../
 done
 cd ..
-'
+COMMENT
 
 
 # for each supported region:
-: '
+<< COMMENT
 cd region
 for key in ${!requestBuckets[@]}; do 
     if [ '_' = $key ]; then
@@ -188,11 +222,11 @@ for key in ${!requestBuckets[@]}; do
     done
 done
 cd ../
-'
+COMMENT
 
 
 # create Cloudfront Distribution - including behaviours
-
+<< COMMENT
 dCoreOrigin='{"Id": "'$coreBucket'", "DomainName": "'$coreBucket'.s3.amazonaws.com", "OriginPath": "", "OriginShield": false, "ConnectionAttempts": 3, "ConnectionTimeout": 10}'
 dErrorOrigin='{"Id": "'$coreBucket'-403", "DomainName": "'$coreBucket'.s3.amazonaws.com", "OriginPath": "/'$envSystemRoot'/error/403.html", "OriginShield": false, "ConnectionAttempts": 3, "ConnectionTimeout": 10}'
 dOrigins='{"Quantity": 2, "Items": ['$dCoreOrigin', '$dErrorOrigin']}'
@@ -225,7 +259,7 @@ dCacheBehaviorItemsArray=()
 for PathPattern in ${!cacheBehaviors[@]}; do 
     dCacheBehaviorItemsArray+='{"PathPattern": "'$PathPattern'", "TargetOriginId": "'${cacheBehaviors[$PathPattern]['TargetOriginId']}'", "ViewerProtocolPolicy": "redirect-to-https", "AllowedMethods": '${cacheBehaviors[$PathPattern]['AllowedMethods']}', '\
     '"CachedMethods": {"Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"]}, "Compress": true, '\
-    '"LambdaFunctionAssociations": '${cacheBehaviors[$PathPattern]['LambdaFunctionAssociations']}', "CachePolicyId": "'${cacheBehaviors[$PathPattern]['CachePolicyId']'", "OriginRequestPolicyId": "'${cacheBehaviors[$PathPattern]['OriginRequestPolicyId']'"}, '
+    '"LambdaFunctionAssociations": '${cacheBehaviors[$PathPattern]['LambdaFunctionAssociations']}', "CachePolicyId": "'${cacheBehaviors[$PathPattern]['CachePolicyId']}'", "OriginRequestPolicyId": "'${cacheBehaviors[$PathPattern]['OriginRequestPolicyId']}'"}, '
 done
 dCacheBehaviorItems="[${dCacheBehaviorItemsArray::-2}]"
 dCacheBehaviors='{"Quantity": 15, "Items": '$dCacheBehaviorItems'}'
@@ -253,6 +287,8 @@ aws s3api put-bucket-policy --bucket $coreBucket --policy '{"Statement": ['$lamb
     sudoKey=uuidgen
     initialisePayload='{"key": "'$sudoKey'", "name": "'$sudoName'", "_env": {"bucket": "'$coreBucket'", "lambda_namespace": "'$lambdaNamespace'", "data_root": "'$envSystemRoot'"}}'
     aws lambda invoke --function-name "$lambdaNamespace-core-initialise" --invocation-type "RequestResponse" --log-type "Tail" --payload $initialisePayload
+    
+COMMENT
     
 #print sudoKey to console
 echo "Your sudo key is: " 

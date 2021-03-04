@@ -100,14 +100,14 @@ readBehavior["LambdaFunctionAssociations"]='{}'
 
 declare -A writeBehavior
 writeBehavior["TargetOriginId"]=$coreBucket
-writeBehavior["AllowedMethods"]=["GET" "HEAD" "OPTIONS" "PUT" "POST" "PATCH" "DELETE"]
+writeBehavior["AllowedMethods"]='{"Quantity": 7, "Items": ["GET" "HEAD" "OPTIONS" "PUT" "POST" "PATCH" "DELETE"]}'
 writeBehavior["CachePolicyId"]=$dCachePolicyIdDisabled
 writeBehavior["OriginRequestPolicyId"]=$dOriginRequestPolicyIdStandard
 writeBehavior["LambdaFunctionAssociations"]=$dLambdaFunctionAssociations
 
 declare -A blockedBehaviour
 blockedBehaviour["TargetOriginId"]=$coreBucket'-403'
-blockedBehaviour["AllowedMethods"]=["GET" "HEAD" "OPTIONS" "PUT" "POST" "PATCH" "DELETE"]
+blockedBehaviour["AllowedMethods"]='{"Quantity": 7, "Items": ["GET" "HEAD" "OPTIONS" "PUT" "POST" "PATCH" "DELETE"]}'
 blockedBehaviour["CachePolicyId"]=$dCachePolicyIdStandard
 blockedBehaviour["OriginRequestPolicyId"]=$dOriginRequestPolicyIdStandard
 blockedBehaviour["LambdaFunctionAssociations"]='{}'
