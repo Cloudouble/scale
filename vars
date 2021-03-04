@@ -84,7 +84,7 @@ assumeRolePolicy='
 lambdaEnvCoreRequest='env = {"bucket": "'$coreBucket'", "lambda_namespace": "'$lambdaNamespace'", "system_root": "'$envSystemRoot'", "shared": '$envShared', "authentication_namespace": "'$envAuthenticationNamespace'"}'
 lambdaEnvCoreSchema='env = {"bucket": "'$coreBucket'", "lambda_namespace": "'$lambdaNamespace'", "system_root": "'$envSystemRoot'", "data_root": "'$envSystemRoot'"}'
 lambdaEnvTriggerProxy='env = {"bucket": "'$coreBucket'", "lambda_namespace": "'$lambdaNamespace'", "system_root": "'$envSystemRoot'", "shared": '$envShared', "authentication_namespace": "'$envAuthenticationNamespace'"}'
-
+lambdaEnvRegion='env = {"bucket": "'$coreBucket'", "core_request_bucket": "'$requestBucket'"}'
 
 declare -A requestBuckets
 requestBuckets["_"]="$coreRegion.$requestBucket"

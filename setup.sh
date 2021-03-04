@@ -49,6 +49,10 @@ for functionName in *; do
     unlink temp/main.py
     rmdir temp
     unlink $functionName.zip
+    if [ 'request' = $functionName ]; then
+        # create trigger between the core request lambda and core request bucket
+        aws s3api put-bucket-notification-configuration --bucket $requestBucket --notification-configuration '{"LambdaFunctionConfigurations": [{"LambdaFunctionArn": "arn:aws:lambda:'$coreRegion':'$accountId:'function:'$lambdaName'","Events": ["s3:ObjectCreated:*"]}]}'
+    fi
     cd ../
 done
 cd ..
@@ -75,6 +79,11 @@ for functionName in *; do
     unlink temp/main.py
     rmdir temp
     unlink $functionName.zip
+    if [ 'proxy' = $functionName ]; then
+        # create trigger between the trigger proxy lambda and core bucket
+        '{"LambdaFunctionConfigurations": [{"LambdaFunctionArn": "arn:aws:lambda:'$coreRegion':'$accountId:'function:'$lambdaName'","Events": ["s3:ObjectCreated:*","s3:ObjectRemoved:*"]}]}'
+        aws s3api put-bucket-notification-configuration --bucket $coreBucket --notification-configuration 
+    fi
     cd ../
 done
 cd ..
@@ -141,14 +150,45 @@ cd ..
 '
 
 
-
 # for each supported region:
+: '
+cd region
+for key in ${!requestBuckets[@]}; do 
+    if [ '_' = $key ]; then
+        useRegion=$coreRegion
+    fi
+    if [ '_' != $key ]; then
+        useRegion=$key
+    fi
     # create regional request bucket
+    aws s3api create-bucket --bucket ${requestBuckets[$key]} --region $useRegion --create-bucket-configuration LocationConstraint=$useRegion
+    aws s3api put-bucket-logging --bucket ${requestBuckets[$key]} --bucket-logging-status '{"LoggingEnabled":{"TargetBucket":"'$logBucket'","TargetPrefix":"s3/'${requestBuckets[$key]}'/"}}'
     # create the regional lambdas
-    # create trigger between the regional lambda and bucket
-
-
-# create triggers between selected Lambdas and the two main buckets
+    for functionName in *; do
+        lambdaName="$lambdaNamespace-region-$functionName"
+        echo $lambdaName
+        cd "$functionName/"
+        if [ ! -d 'temp' ]; then
+            mkdir temp
+        fi
+        cp main.py ./temp
+        cd temp
+        sed -i "1s/.*/$lambdaEnvRegion/" main.py
+        zip ../$functionName.zip main.py
+        cd ../
+        #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn --zip-file fileb://$functionName.zip --timeout 900 --publish true --region $useRegion
+        unlink temp/main.py
+        rmdir temp
+        unlink $functionName.zip
+        if [ 'request' = $functionName ]; then
+            # create trigger between the regional lambda and bucket
+            aws s3api put-bucket-notification-configuration --bucket ${requestBuckets[$key]} --notification-configuration '{"LambdaFunctionConfigurations": [{"LambdaFunctionArn": "arn:aws:lambda:'$useRegion':'$accountId:'function:'$lambdaName'","Events": ["s3:ObjectCreated:*"]}]}'
+        fi
+        cd ../
+    done
+done
+cd ../
+'
 
 
 # create Cloudfront Distribution - including behaviours
