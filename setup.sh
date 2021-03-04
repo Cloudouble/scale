@@ -196,7 +196,6 @@ cd ../
 dCoreOrigin='{"Id": "'$coreBucket'", "DomainName": "'$coreBucket'.s3.amazonaws.com", "OriginPath": "", "OriginShield": false, "ConnectionAttempts": 3, "ConnectionTimeout": 10}'
 dErrorOrigin='{"Id": "'$coreBucket'-403", "DomainName": "'$coreBucket'.s3.amazonaws.com", "OriginPath": "/'$envSystemRoot'/error/403.html", "OriginShield": false, "ConnectionAttempts": 3, "ConnectionTimeout": 10}'
 dOrigins='{"Quantity": 2, "Items": ['$dCoreOrigin', '$dErrorOrigin']}'
-
 dCachePolicyIdStandard=$(aws cloudfront list-cache-policies --type custom --query 'CachePolicyList.Items[?CachePolicy.CachePolicyConfig.Name == "'$systemProperName'Standard"].CachePolicy.Id')
 if [ ! $dCachePolicyIdStandard ]; then
     dCachePolicyIdStandard=$(aws cloudfront create-cache-policy --query "Id" --cache-policy-config '{"Name": "'$systemProperName'Standard", '\
@@ -209,41 +208,57 @@ if [ ! $dCachePolicyIdDisabled ]; then
         '"ParametersInCacheKeyAndForwardedToOrigin": {"EnableAcceptEncodingGzip": true, "EnableAcceptEncodingBrotli": true, "DefaultTTL": 0, "MinTTL": 0, "MaxTTL": 0 '\
         '"HeadersConfig": {"Quantity": 3, "Items": ["Accept", "Access-Control-Request-Method", "Access-Control-Request-Headers"]}}}')
 fi
-dOriginRequestPolicyIdStandard=$(aws cloudfront list-origin-request-policies --type custom --query 'OriginRequestPolicyList.Items[?OriginRequestPolicy.OriginRequestPolicyConfig.Name == "'$systemProperName'Standard"].OriginRequestPolicy.Id')
+dOriginRequestPolicyIdStandard=$(aws cloudfront list-origin-request-policies --type custom --query "OriginRequestPolicyList.Items[?OriginRequestPolicy.OriginRequestPolicyConfig.Name == "'$systemProperName'Standard"].OriginRequestPolicy.Id")
 if [ ! $dOriginRequestPolicyIdStandard ]; then
     dOriginRequestPolicyIdStandard=$(aws cloudfront create-origin-request-policy --query "Id" --cache-policy-config '{"Name": "'$systemProperName'Standard", '\
         '"HeadersConfig": {"HeaderBehavior": "whitelist", "Headers": {"Quantity": 3, "Items: ["Accept", "Access-Control-Request-Method", "Access-Control-Request-Headers"]}}, '\
         '"CookiesConfig": {"CookieBehavior": "none"}, "QueryStringsConfig": {"QueryStringBehavior": "none"}}')
 fi
-
 dLambdaFunctionAssociations='{"Quantity": 1, "Items": [{"LambdaFunctionARN": "arn:aws:lambda:'$edgeRegion':'$accountId':function:'$lambdaNamespace'-edge-accept", "EventType": "origin-request", "IncludeBody": true}]}'
-
 dDefaultCacheBehaviour='{"TargetOriginId": "'$coreBucket'", "ViewerProtocolPolicy": "redirect-to-https", "AllowedMethods": {"Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"], '\
     '"CachedMethods": {"Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"]}}, "Compress": true, '\
     '"LambdaFunctionAssociations": '$dLambdaFunctionAssociations', "CachePolicyId": "'$dCachePolicyIdStandard'", "OriginRequestPolicyId": "'$dOriginRequestPolicyIdStandard'"}'
-
 dWriteCacheBehavior='{"TargetOriginId": "'$coreBucket'", "ViewerProtocolPolicy": "redirect-to-https", "AllowedMethods": {"Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"], '\
     '"CachedMethods": {"Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"]}}, "Compress": true, '\
     '"LambdaFunctionAssociations": '$dLambdaFunctionAssociations', "CachePolicyId": "'$dCachePolicyIdStandard'", "OriginRequestPolicyId": "'$dOriginRequestPolicyIdStandard'"}'
-    
-    
+dCacheBehaviorItemsArray=()
+for PathPattern in ${!cacheBehaviors[@]}; do 
+    dCacheBehaviorItemsArray+='{"PathPattern": "'$PathPattern'", "TargetOriginId": "'${cacheBehaviors[$PathPattern]['TargetOriginId']}'", "ViewerProtocolPolicy": "redirect-to-https", "AllowedMethods": '${cacheBehaviors[$PathPattern]['AllowedMethods']}', '\
+    '"CachedMethods": {"Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"]}, "Compress": true, '\
+    '"LambdaFunctionAssociations": '${cacheBehaviors[$PathPattern]['LambdaFunctionAssociations']}', "CachePolicyId": "'${cacheBehaviors[$PathPattern]['CachePolicyId']'", "OriginRequestPolicyId": "'${cacheBehaviors[$PathPattern]['OriginRequestPolicyId']'"}, '
+done
+dCacheBehaviorItems="[${dCacheBehaviorItemsArray::-2}]"
+dCacheBehaviors='{"Quantity": 15, "Items": '$dCacheBehaviorItems'}'
 
-dCacheBehaviors='{"Quantity": 15, "Items": [{"PathPattern": "", }]}'
-dCustomErrorResponses='{}'
-dLogging='{}'
+dCustomErrorResponses='{"Quantity": 1, "Items": [{"ErrorCode": 403, "ResponsePagePath": "/'$envSystemRoot'/error/403.html", "ResponseCode": 403, "ErrorCachingMinTTL": 10}]}'
+dLogging='{"Enabled": true, "IncludeCookies": true, "Bucket": "'$logBucket'", "Prefix": "cloudfront/'$systemProperName'/"}'
 
 distributionConfig='{"CallerReference": "'$systemProperName'", "DefaultRootObject": "index.html", "Origins": '\
     $dOrigins', "DefaultCacheBehavior": '$dDefaultCacheBehaviour', "CacheBehaviors": '$dCacheBehaviors', "CustomErrorResponses": '$dCustomErrorResponses' "Comment": "'\
     $systemProperName'" "Logging": '$dLogging', "PriceClass": "PriceClass_All", "Enabled": true, "ViewerCertificate": {"CloudFrontDefaultCertificate": true}, "IsIPV6Enabled": true}'
 
 cloudfrontDistributionId=$(aws cloudfront create-distribution --query "Distribution.Id" --distribution-config $distributionConfig)
+'
 
 #set core Bucket policy to allow Cloudfront access
 : '
 cloudfrontS3PolicyStatement='{"Effect": "Allow","Principal": {"AWS": "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity '$cloudfrontDistributionId'"},"Action": ["s3:GetObject","s3:PutObject"],"Resource": "arn:aws:s3:::'$coreBucket'/*"}'
 aws s3api put-bucket-policy --bucket $coreBucket --policy '{"Statement": ['$lambdaPolicyStatement','$cloudfrontS3PolicyStatement']}'
-'
+
+
+# run core/schema
+    aws lambda invoke --function-name "$lambdaNamespace-core-schema" --invocation-type "RequestResponse" --log-type "Tail" --payload '{}'
 
 # run core/initialise
-# run core/schema
+    sudoKey=uuidgen
+    initialisePayload='{"key": "'$sudoKey'", "name": "'$sudoName'", "_env": {"bucket": "'$coreBucket'", "lambda_namespace": "'$lambdaNamespace'", "data_root": "'$envSystemRoot'"}}'
+    aws lambda invoke --function-name "$lambdaNamespace-core-initialise" --invocation-type "RequestResponse" --log-type "Tail" --payload $initialisePayload
+    
+#print sudoKey to console
+echo "Your sudo key is: " 
+echo ""
+echo "$sudoKey"
+echo ""
+echo "Copy it now as it will not be displayed again"
+
 
