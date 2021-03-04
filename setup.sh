@@ -194,6 +194,11 @@ cd ../
 # create Cloudfront Distribution - including behaviours
 
 
+
+cloudfrontDistributionId=$(aws cloudfront get-distribution --id E32C1YQKBN0ZY --query "Distribution.Id")
+
+echo $cloudfrontDistributionId
+
 #set core Bucket policy to allow Cloudfront access
 : '
 cloudfrontDistributionId='E2OGJS7FJAAP6W'
