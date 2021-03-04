@@ -4,7 +4,6 @@ echo "Starting...
 ...
 "
 
-# create log bucket
 echo "Retrieving list of existing buckets..."
 bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
 echo "Retrieved list of existing buckets."
@@ -27,8 +26,6 @@ echo "
 ...
 "
 
-# create core bucket - including set bucket policy
-
 echo "Checking if coreBucket ($coreBucket) exists..."
 if [[ " $bucketNames " =~ " $coreBucket " ]]; then
     echo "coreBucket ($coreBucket) already exists."
@@ -43,15 +40,26 @@ echo "
 ...
 "
 
+# create main request bucket - including bucket policy
+echo "Checking if requestBucket ($requestBucket) exists..."
+if [[ " $bucketNames " =~ " $requestBucket " ]]; then
+    echo "requestBucket ($requestBucket) already exists."
+else
+    echo "requestBucket ($requestBucket) NOT exists. Creating now in coreRegion ($coreRegion)..."
+    aws s3api create-bucket --bucket $requestBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
+    aws s3api put-bucket-logging --bucket $requestBucket --bucket-logging-status '{"LoggingEnabled":{"TargetBucket":"'$logBucket'","TargetPrefix":"s3/'$requestBucket'/"}}'
+    echo "requestBucket ($requestBucket) now created."
+fi
+echo "
+...
+"
+
+
+
 
 exit 0 
 
 
-# create main request bucket - including bucket policy
-<< COMMENT
-aws s3api create-bucket --bucket $requestBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion 2> /dev/null
-aws s3api put-bucket-logging --bucket $requestBucket --bucket-logging-status '{"LoggingEnabled":{"TargetBucket":"'$logBucket'","TargetPrefix":"s3/'$requestBucket'/"}}'
-COMMENT
 
 # create main server role as used by lambdas (include ...)
 << COMMENT
