@@ -193,11 +193,22 @@ cd ../
 
 # create Cloudfront Distribution - including behaviours
 
+dCoreOrigin='{"Id": "'$coreBucket'", "DomainName": "'$coreBucket'.s3.amazonaws.com", "OriginPath": "", "OriginShield": false, "ConnectionAttempts": 3, "ConnectionTimeout": 10}'
+dErrorOrigin='{"Id": "'$coreBucket'", "DomainName": "'$coreBucket'.s3.amazonaws.com", "OriginPath": "/'$envSystemRoot'/error/403.html", "OriginShield": false, "ConnectionAttempts": 3, "ConnectionTimeout": 10}'
+dOrigins='{"Quantity": 2, "Items": ['$dCoreOrigin', '$dErrorOrigin']}'
+
+dDefaultCacheBehaviour='{}'
+dCacheBehaviors='[]'
+dCustomErrorResponses='{}'
+dLogging='{}'
+
+distributionConfig='{"CallerReference": "'$systemProperName'", "DefaultRootObject": "index.html", "Origins": '\
+    $dOrigins', "DefaultCacheBehavior": '$dDefaultCacheBehaviour', "CacheBehaviors": '$dCacheBehaviors', "CustomErrorResponses": '$dCustomErrorResponses' "Comment": "'\
+    $systemProperName'" "Logging": '$dLogging', "PriceClass": "PriceClass_All", "Enabled": true, "ViewerCertificate": {"CloudFrontDefaultCertificate": true}, "IsIPV6Enabled": true}'
 
 
-cloudfrontDistributionId=$(aws cloudfront get-distribution --id E32C1YQKBN0ZY --query "Distribution.Id")
-
-echo $cloudfrontDistributionId
+#cloudfrontDistributionId=$(aws cloudfront create-distribution --query "Distribution.Id")
+#echo $cloudfrontDistributionId
 
 #set core Bucket policy to allow Cloudfront access
 : '
