@@ -194,11 +194,41 @@ cd ../
 # create Cloudfront Distribution - including behaviours
 
 dCoreOrigin='{"Id": "'$coreBucket'", "DomainName": "'$coreBucket'.s3.amazonaws.com", "OriginPath": "", "OriginShield": false, "ConnectionAttempts": 3, "ConnectionTimeout": 10}'
-dErrorOrigin='{"Id": "'$coreBucket'", "DomainName": "'$coreBucket'.s3.amazonaws.com", "OriginPath": "/'$envSystemRoot'/error/403.html", "OriginShield": false, "ConnectionAttempts": 3, "ConnectionTimeout": 10}'
+dErrorOrigin='{"Id": "'$coreBucket'-403", "DomainName": "'$coreBucket'.s3.amazonaws.com", "OriginPath": "/'$envSystemRoot'/error/403.html", "OriginShield": false, "ConnectionAttempts": 3, "ConnectionTimeout": 10}'
 dOrigins='{"Quantity": 2, "Items": ['$dCoreOrigin', '$dErrorOrigin']}'
 
-dDefaultCacheBehaviour='{}'
-dCacheBehaviors='[]'
+dCachePolicyIdStandard=$(aws cloudfront list-cache-policies --type custom --query 'CachePolicyList.Items[?CachePolicy.CachePolicyConfig.Name == "'$systemProperName'Standard"].CachePolicy.Id')
+if [ ! $dCachePolicyIdStandard ]; then
+    dCachePolicyIdStandard=$(aws cloudfront create-cache-policy --query "Id" --cache-policy-config '{"Name": "'$systemProperName'Standard", '\
+        '"ParametersInCacheKeyAndForwardedToOrigin": {"EnableAcceptEncodingGzip": true, "EnableAcceptEncodingBrotli": true, '\
+        '"HeadersConfig": {"Quantity": 3, "Items": ["Accept", "Access-Control-Request-Method", "Access-Control-Request-Headers"]}}}')
+fi
+dCachePolicyIdDisabled=$(aws cloudfront list-cache-policies --type custom --query 'CachePolicyList.Items[?CachePolicy.CachePolicyConfig.Name == "'$systemProperName'Disabled"].CachePolicy.Id')
+if [ ! $dCachePolicyIdDisabled ]; then
+    dCachePolicyIdDisabled=$(aws cloudfront create-cache-policy --query "Id" --cache-policy-config '{"Name": "'$systemProperName'Disabled", '\
+        '"ParametersInCacheKeyAndForwardedToOrigin": {"EnableAcceptEncodingGzip": true, "EnableAcceptEncodingBrotli": true, "DefaultTTL": 0, "MinTTL": 0, "MaxTTL": 0 '\
+        '"HeadersConfig": {"Quantity": 3, "Items": ["Accept", "Access-Control-Request-Method", "Access-Control-Request-Headers"]}}}')
+fi
+dOriginRequestPolicyIdStandard=$(aws cloudfront list-origin-request-policies --type custom --query 'OriginRequestPolicyList.Items[?OriginRequestPolicy.OriginRequestPolicyConfig.Name == "'$systemProperName'Standard"].OriginRequestPolicy.Id')
+if [ ! $dOriginRequestPolicyIdStandard ]; then
+    dOriginRequestPolicyIdStandard=$(aws cloudfront create-origin-request-policy --query "Id" --cache-policy-config '{"Name": "'$systemProperName'Standard", '\
+        '"HeadersConfig": {"HeaderBehavior": "whitelist", "Headers": {"Quantity": 3, "Items: ["Accept", "Access-Control-Request-Method", "Access-Control-Request-Headers"]}}, '\
+        '"CookiesConfig": {"CookieBehavior": "none"}, "QueryStringsConfig": {"QueryStringBehavior": "none"}}')
+fi
+
+dLambdaFunctionAssociations='{"Quantity": 1, "Items": [{"LambdaFunctionARN": "arn:aws:lambda:'$edgeRegion':'$accountId':function:'$lambdaNamespace'-edge-accept", "EventType": "origin-request", "IncludeBody": true}]}'
+
+dDefaultCacheBehaviour='{"TargetOriginId": "'$coreBucket'", "ViewerProtocolPolicy": "redirect-to-https", "AllowedMethods": {"Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"], '\
+    '"CachedMethods": {"Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"]}}, "Compress": true, '\
+    '"LambdaFunctionAssociations": '$dLambdaFunctionAssociations', "CachePolicyId": "'$dCachePolicyIdStandard'", "OriginRequestPolicyId": "'$dOriginRequestPolicyIdStandard'"}'
+
+dWriteCacheBehavior='{"TargetOriginId": "'$coreBucket'", "ViewerProtocolPolicy": "redirect-to-https", "AllowedMethods": {"Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"], '\
+    '"CachedMethods": {"Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"]}}, "Compress": true, '\
+    '"LambdaFunctionAssociations": '$dLambdaFunctionAssociations', "CachePolicyId": "'$dCachePolicyIdStandard'", "OriginRequestPolicyId": "'$dOriginRequestPolicyIdStandard'"}'
+    
+    
+
+dCacheBehaviors='{"Quantity": 15, "Items": [{"PathPattern": "", }]}'
 dCustomErrorResponses='{}'
 dLogging='{}'
 
@@ -206,13 +236,10 @@ distributionConfig='{"CallerReference": "'$systemProperName'", "DefaultRootObjec
     $dOrigins', "DefaultCacheBehavior": '$dDefaultCacheBehaviour', "CacheBehaviors": '$dCacheBehaviors', "CustomErrorResponses": '$dCustomErrorResponses' "Comment": "'\
     $systemProperName'" "Logging": '$dLogging', "PriceClass": "PriceClass_All", "Enabled": true, "ViewerCertificate": {"CloudFrontDefaultCertificate": true}, "IsIPV6Enabled": true}'
 
-
-#cloudfrontDistributionId=$(aws cloudfront create-distribution --query "Distribution.Id")
-#echo $cloudfrontDistributionId
+cloudfrontDistributionId=$(aws cloudfront create-distribution --query "Distribution.Id" --distribution-config $distributionConfig)
 
 #set core Bucket policy to allow Cloudfront access
 : '
-cloudfrontDistributionId='E2OGJS7FJAAP6W'
 cloudfrontS3PolicyStatement='{"Effect": "Allow","Principal": {"AWS": "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity '$cloudfrontDistributionId'"},"Action": ["s3:GetObject","s3:PutObject"],"Resource": "arn:aws:s3:::'$coreBucket'/*"}'
 aws s3api put-bucket-policy --bucket $coreBucket --policy '{"Statement": ['$lambdaPolicyStatement','$cloudfrontS3PolicyStatement']}'
 '
