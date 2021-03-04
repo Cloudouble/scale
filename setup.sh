@@ -2,13 +2,13 @@
 
 # create log bucket
 : '
-aws s3api create-bucket --bucket $logBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion 2> /dev/null
+aws s3api create-bucket --bucket $logBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion # 2> /dev/null
 aws s3api put-bucket-acl --bucket $logBucket --grant-write URI=http://acs.amazonaws.com/groups/s3/LogDelivery --grant-read-acp URI=http://acs.amazonaws.com/groups/s3/LogDelivery
 '
 
 # create core bucket - including set bucket policy
 : '
-aws s3api create-bucket --bucket $coreBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion 2> /dev/null
+aws s3api create-bucket --bucket $coreBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
 aws s3api put-bucket-versioning --bucket $coreBucket --versioning-configuration Status=Enabled
 aws s3api put-bucket-logging --bucket $coreBucket --bucket-logging-status '{"LoggingEnabled":{"TargetBucket":"'$logBucket'","TargetPrefix":"s3/'$coreBucket'/"}}'
 '
@@ -21,8 +21,8 @@ aws s3api put-bucket-logging --bucket $requestBucket --bucket-logging-status '{"
 
 # create main server role as used by lambdas (include ...)
 : '
-aws iam create-policy --policy-name $lambdaPolicyName --policy-document "$lambdaPolicy"
-aws iam create-role --role-name $lambdaRoleName --assume-role-policy-document "$assumeRolePolicy"
+aws iam create-policy --policy-name $lambdaPolicyName --policy-document "$lambdaPolicy" --region $coreRegion
+aws iam create-role --role-name $lambdaRoleName --assume-role-policy-document "$assumeRolePolicy" --region $coreRegion
 '
 
 # create core lambdas in core region
@@ -43,10 +43,9 @@ for functionName in *; do
     if [ 'schema' = $functionName ]; then
         sed -i "1s/.*/$lambdaEnvCoreSchema/" main.py
     fi
-    zip ../$functionName.zip main.py &> /dev/null
+    zip ../$functionName.zip main.py
     cd ../
-    #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn \
-    #    --zip-file fileb://$functionName.zip --timeout 900 --publish true --region $coreRegion
+    #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn --zip-file fileb://$functionName.zip --timeout 900 --publish true --region $coreRegion
     unlink temp/main.py
     rmdir temp
     unlink $functionName.zip
@@ -70,10 +69,9 @@ for functionName in *; do
     if [ 'proxy' = $functionName ]; then
         sed -i "1s/.*/$lambdaEnvTriggerProxy/" main.py
     fi
-    zip ../$functionName.zip main.py &> /dev/null
+    zip ../$functionName.zip main.py
     cd ../
-    #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn \
-    #    --zip-file fileb://$functionName.zip --timeout 900 --publish true --region $coreRegion
+    #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn --zip-file fileb://$functionName.zip --timeout 900 --publish true --region $coreRegion
     unlink temp/main.py
     rmdir temp
     unlink $functionName.zip
@@ -99,10 +97,9 @@ for scope in *; do
         fi
         cp main.py ./temp
         cd temp
-        zip ../$functionName.zip main.py &> /dev/null
+        zip ../$functionName.zip main.py
         cd ../
-        #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn \
-        #    --zip-file fileb://$functionName.zip --timeout 900 --publish true --region $coreRegion
+        #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn --zip-file fileb://$functionName.zip --timeout 900 --publish true --region $coreRegion
         unlink temp/main.py
         rmdir temp
         unlink $functionName.zip
@@ -113,13 +110,15 @@ done
 cd ..
 '
 
-for key in ${!requestBuckets[@]}; do echo $key; done
-for value in ${requestBuckets[@]}; do echo $value; done
-
 
 # for the edge region NOT COMPLETE YET:
 : '
 cd edge
+bucketsArray=()
+for key in ${!requestBuckets[@]}; do 
+    bucketsArray+="'$key': '${requestBuckets[$key]}', "
+done
+bucketsString="buckets = {${bucketsArray::-2}}"
 for functionName in *; do
     lambdaName="$lambdaNamespace-edge-$functionName"
     echo $lambdaName
@@ -129,13 +128,10 @@ for functionName in *; do
     fi
     cp main.py ./temp
     cd temp
-    if [ 'proxy' = $functionName ]; then
-        sed -i "1s/.*/$lambdaEnvTriggerProxy/" main.py
-    fi
-    zip ../$functionName.zip main.py &> /dev/null
+    sed -i "1s/.*/$bucketsString/" main.py
+    zip ../$functionName.zip main.py
     cd ../
-    #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn \
-    #    --zip-file fileb://$functionName.zip --timeout 900 --publish true --region $edgeRegion
+    #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn --zip-file fileb://$functionName.zip --timeout 900 --publish true --region $edgeRegion
     unlink temp/main.py
     rmdir temp
     unlink $functionName.zip
@@ -143,6 +139,7 @@ for functionName in *; do
 done
 cd ..
 '
+
 
 
 # for each supported region:
