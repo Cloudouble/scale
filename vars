@@ -12,20 +12,19 @@ sudoName="system"
 
 # ---GENERATED BUT CUSTOMIZABLE---
 envAuthenticationNamespace="$systemProperName"
-lambdaRoleName="$systemProperName"
-lambdaRoleArn='arn:aws:iam::'$accountId':role/'$lambdaRoleName
+lambdaRole="$systemProperName"
+lambdaRoleArn='arn:aws:iam::'$accountId':role/'$lambdaRole
 lambdaPolicyStatement='{"Effect": "Allow","Principal": {"AWS": "'$roleArn'"},"Action": ["s3:DeleteObject","s3:GetObject","s3:PutObject"],"Resource": "arn:aws:s3:::'$coreBucket'/*"}'
+lambdaPolicyName="$lambdaRole"
 
-lambdaPolicyName="$lambdaRoleName"
-
-lambdaPolicy='
-{
+lambdaPolicy='{
     "Version": "2012-10-17",
     "Statement": [
         {
+            "Sid": "LiveElement0",
             "Effect": "Allow",
             "Action": "lambda:InvokeFunction",
-            "Resource": "*"
+            "Resource": "arn:aws:lambda:*:'$accountId':function:*"
         },
         {
             "Sid": "LiveElement1",
@@ -42,7 +41,7 @@ lambdaPolicy='
                 "s3:GetObjectVersion"
             ],
             "Resource": [
-                "arn:aws:iam::'$accountId':role/'$lambdaRoleName'",
+                "arn:aws:iam::'$accountId':role/'$lambdaRole'",
                 "arn:aws:logs:*:'$accountId':log-group:*",
                 "arn:aws:s3:::'$coreBucket'",
                 "arn:aws:s3:::*/*"
@@ -61,26 +60,24 @@ lambdaPolicy='
             "Resource": "arn:aws:logs:*:'$accountId':log-group:*"
         }
     ]
-}
-'
+}'
 
-assumeRolePolicy='
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": [
-          "lambda.amazonaws.com",
-          "edgelambda.amazonaws.com"
-        ]
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-'
+assumeRolePolicy='{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": [
+                    "edgelambda.amazonaws.com",
+                    "lambda.amazonaws.com"
+                ]
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}'
+
 
 lambdaEnvCoreRequest='env = {"bucket": "'$coreBucket'", "lambda_namespace": "'$lambdaNamespace'", "system_root": "'$envSystemRoot'", "shared": '$envShared', "authentication_namespace": "'$envAuthenticationNamespace'"}'
 lambdaEnvCoreSchema='env = {"bucket": "'$coreBucket'", "lambda_namespace": "'$lambdaNamespace'", "system_root": "'$envSystemRoot'", "data_root": "'$envSystemRoot'"}'

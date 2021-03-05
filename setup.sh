@@ -13,11 +13,11 @@ echo "
 
 echo "Checking if logBucket ($logBucket) exists..."
 if [[ " $bucketNames " =~ " $logBucket " ]]; then
-    echo "logBucket ($logBucket) already exists."
+    echo "... already exists."
 else
-    echo "logBucket ($logBucket) NOT exists. Creating now in coreRegion ($coreRegion)..."
+    echo "... NOT exists, creating now in coreRegion ($coreRegion)..."
     aws s3api create-bucket --bucket $logBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
-    echo "logBucket ($logBucket) now created."
+    echo "... now created."
 fi
 echo "Ensuring correct log delivery permissions are in place..."
 aws s3api put-bucket-acl --bucket $logBucket --grant-write URI=http://acs.amazonaws.com/groups/s3/LogDelivery --grant-read-acp URI=http://acs.amazonaws.com/groups/s3/LogDelivery
@@ -28,32 +28,82 @@ echo "
 
 echo "Checking if coreBucket ($coreBucket) exists..."
 if [[ " $bucketNames " =~ " $coreBucket " ]]; then
-    echo "coreBucket ($coreBucket) already exists."
+    echo "... already exists."
 else
-    echo "coreBucket ($coreBucket) NOT exists. Creating now in coreRegion ($coreRegion)..."
+    echo "... NOT exists, creating now in coreRegion ($coreRegion)..."
     aws s3api create-bucket --bucket $coreBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
     aws s3api put-bucket-versioning --bucket $coreBucket --versioning-configuration Status=Enabled
     aws s3api put-bucket-logging --bucket $coreBucket --bucket-logging-status '{"LoggingEnabled":{"TargetBucket":"'$logBucket'","TargetPrefix":"s3/'$coreBucket'/"}}'
-    echo "coreBucket ($coreBucket) now created."
+    echo "... now created."
 fi
 echo "
 ...
 "
 
-# create main request bucket - including bucket policy
 echo "Checking if requestBucket ($requestBucket) exists..."
 if [[ " $bucketNames " =~ " $requestBucket " ]]; then
-    echo "requestBucket ($requestBucket) already exists."
+    echo "... already exists."
 else
-    echo "requestBucket ($requestBucket) NOT exists. Creating now in coreRegion ($coreRegion)..."
+    echo "... NOT exists, creating now in coreRegion ($coreRegion)..."
     aws s3api create-bucket --bucket $requestBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
     aws s3api put-bucket-logging --bucket $requestBucket --bucket-logging-status '{"LoggingEnabled":{"TargetBucket":"'$logBucket'","TargetPrefix":"s3/'$requestBucket'/"}}'
-    echo "requestBucket ($requestBucket) now created."
+    echo "... now created."
 fi
 echo "
 ...
 "
 
+echo "Ensuring lambdaPolicy ($lambdaPolicyName) is correct..."
+lambdaPolicy="${lambdaPolicy#"${lambdaPolicy%%[![:space:]]*}"}"
+lambdaPolicy="${lambdaPolicy%"${lambdaPolicy##*[![:space:]]}"}" 
+lambdaPolicyVersion=$(aws iam get-policy --policy-arn "arn:aws:iam::$accountId:policy/$lambdaPolicyName" --query "Policy.DefaultVersionId" --output text)
+if [ ! "$lambdaPolicyVersion" ]; then
+    echo "... NOT exists, creating now..."
+    aws iam create-policy --policy-name $lambdaPolicyName --policy-document "$lambdaPolicy" --region $coreRegion
+    echo "... lambdaPolicy ($lambdaPolicyName) created."
+else
+    echo "... already exists, checking policy document..."
+    lambdaPolicyDocument=$(aws iam get-policy-version --policy-arn "arn:aws:iam::$accountId:policy/$lambdaPolicyName" --version-id "$lambdaPolicyVersion" --query "PolicyVersion.Document" --output json)
+    if [ "$lambdaPolicyDocument" != "$lambdaPolicy" ]; then
+        echo "... ... policy document is not correct, correcting now..."
+        deleteVersion=$(aws iam list-policy-versions --policy-arn "arn:aws:iam::$accountId:policy/$lambdaPolicyName" --query "Versions[?!IsDefaultVersion].VersionId | [0]" --output text)
+        aws iam delete-policy-version --policy-arn "arn:aws:iam::$accountId:policy/$lambdaPolicyName" --version-id "$deleteVersion"
+        aws iam create-policy-version --policy-arn "arn:aws:iam::$accountId:policy/$lambdaPolicyName" --policy-document "$lambdaPolicy" --set-as-default --region $coreRegion
+        echo "... ... now corrected."
+    fi
+fi
+echo "lambdaPolicy policy is correct."
+echo "
+...
+"
+
+echo "Ensuring lambdaRole ($lambdaRole) exists..."
+lambdaRoleAssumeRolePolicyDocument=$(aws iam list-roles --query "Roles[?RoleName == '$lambdaRole'].AssumeRolePolicyDocument | [0]" --output json)
+if [ "${#lambdaRoleAssumeRolePolicyDocument}" -le 10 ]; then 
+    echo "... NOT exists, creating now..."
+    aws iam create-role --role-name "$lambdaRole" --assume-role-policy-document "$assumeRolePolicy" --region $coreRegion
+    echo "... now created."
+    echo "... attaching policy ($lambdaPolicyName) to role."
+    aws iam put-role-policy --role-name "$lambdaRole" --policy-name "$lambdaPolicyName"  --region $coreRegion
+    echo "... now attached."
+else
+    echo "... already exists, checking assumeRolePolicy..."
+    if [ "$lambdaRoleAssumeRolePolicyDocument" != "$assumeRolePolicy" ]; then
+        echo "... ... assumeRolePolicy is NOT correct, correcting now..."
+        aws iam update-assume-role-policy --role-name "$lambdaRole" --assume-role-policy-document "$assumeRolePolicy" --region $coreRegion
+        echo "... ... now corrected."
+    fi
+    echo "... checking if lambdaPolicy ($lambdaPolicyName) is attached..."
+    attachedPolicyArn=$(aws iam list-attached-role-policies --role-name "$lambdaRole" --region $coreRegion --query "AttachedPolicies[?PolicyName == '$lambdaPolicyName'].PolicyArn" --output text)
+    if [ ! "$attachedPolicyArn" ]; then
+        echo "... ... lambdaPolicy is NOT attached, attaching now..."
+        aws iam put-role-policy --role-name "$lambdaRole" --policy-name "$lambdaPolicyName"  --region $coreRegion
+        echo "... ... not attached."
+    fi
+fi
+echo "
+...
+"
 
 
 
@@ -61,11 +111,6 @@ exit 0
 
 
 
-# create main server role as used by lambdas (include ...)
-<< COMMENT
-aws iam create-policy --policy-name $lambdaPolicyName --policy-document "$lambdaPolicy" --region $coreRegion
-aws iam create-role --role-name $lambdaRoleName --assume-role-policy-document "$assumeRolePolicy" --region $coreRegion
-COMMENT
 
 # create core lambdas in core region
 << COMMENT
