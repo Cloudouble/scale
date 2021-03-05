@@ -17,10 +17,30 @@ if [[ " $bucketNames " =~ " $logBucket " ]]; then
 else
     echo "... NOT exists, creating now in coreRegion ($coreRegion)..."
     aws s3api create-bucket --bucket $logBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
-    echo "... now created."
+        bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
+        if [[ " $bucketNames " =~ " $logBucket " ]]; then
+            echo "... now created."
+        else
+            echo "... ... error creating logBucket ($logBucket), please try again or create this bucket manually in the  $coreRegion region. Exiting now."
+            exit 1
+        fi
 fi
 echo "Ensuring correct log delivery permissions are in place..."
 aws s3api put-bucket-acl --bucket $logBucket --grant-write URI=http://acs.amazonaws.com/groups/s3/LogDelivery --grant-read-acp URI=http://acs.amazonaws.com/groups/s3/LogDelivery
+grantWrite=$(aws s3api get-bucket-acl --bucket $logBucket --query "Grants[?Permission == 'WRITE'].Grantee.URI | [0]" --output text)
+if [ $grantWrite == http://acs.amazonaws.com/groups/s3/LogDelivery ]; then
+    echo "Write permissions in place for LogDelivery group."
+else
+    echo "Write permissions NOT in place for LogDelivery group, please try again or create these permissions manually for logBucket ($logBucket). Exiting now."
+    exit 1
+fi
+grantReadACP=$(aws s3api get-bucket-acl --bucket $logBucket --query "Grants[?Permission == 'READ_ACP'].Grantee.URI | [0]" --output text)
+if [ $grantWrite == http://acs.amazonaws.com/groups/s3/LogDelivery ]; then
+    echo "Read ACP permissions in place for LogDelivery group."
+else
+    echo "Read ACP permissions NOT in place for LogDelivery group, please try again or create these permissions manually for logBucket ($logBucket). Exiting now."
+    exit 1
+fi
 echo "Correct log delivery permissions are in place."
 echo "
 ...
@@ -32,13 +52,33 @@ if [[ " $bucketNames " =~ " $coreBucket " ]]; then
 else
     echo "... NOT exists, creating now in coreRegion ($coreRegion)..."
     aws s3api create-bucket --bucket $coreBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
+    bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
+    if [[ " $bucketNames " =~ " $coreBucket " ]]; then
+        echo "... now created."
+    else
+        echo "... ... error creating coreBucket ($coreBucket), please try again or create this bucket manually in the  $coreRegion region. Exiting now."
+        exit 1
+    fi
+    echo "... enabled bucket versioning for $coreBucket..."
     aws s3api put-bucket-versioning --bucket $coreBucket --versioning-configuration Status=Enabled
+    coreBucketVersioning=$(aws s3api get-bucket-versioning --bucket $coreBucket --query "Status" --output text)
+    if [ "$coreBucketVersioning" == "Enabled" ]; then
+        echo "... ... bucket versioning enabled."
+    else
+        echo "... ... error enabling bucket versioning, please try again or enable this manually. Exiting now."
+    fi
+    # UP TO HERE #
     aws s3api put-bucket-logging --bucket $coreBucket --bucket-logging-status '{"LoggingEnabled":{"TargetBucket":"'$logBucket'","TargetPrefix":"s3/'$coreBucket'/"}}'
     echo "... now created."
 fi
 echo "
 ...
 "
+
+exit 0
+
+
+
 
 echo "Checking if requestBucket ($requestBucket) exists..."
 if [[ " $bucketNames " =~ " $requestBucket " ]]; then
@@ -133,15 +173,14 @@ for functionName in *; do
     fi
     zip ../$functionName.zip main.py
     cd ../
-    echo "$lambdaName"
-    #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn --zip-file fileb://$functionName.zip --timeout 900 --publish true --region $coreRegion
+    aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn --zip-file fileb://$functionName.zip --timeout 900 --publish --region $coreRegion
     unlink temp/main.py
     rmdir temp
     unlink $functionName.zip
     if [ 'request' = $functionName ]; then
         echo "... ... creating trigger from requestBucket ($requestBucket) and request lambda ($lambdaName)..."
-        # create trigger between the core request lambda and core request bucket
-        #aws s3api put-bucket-notification-configuration --bucket $requestBucket --notification-configuration '{"LambdaFunctionConfigurations": [{"LambdaFunctionArn": "arn:aws:lambda:'$coreRegion':'$accountId:'function:'$lambdaName'","Events": ["s3:ObjectCreated:*"]}]}'
+        notificationConfiguration='{"LambdaFunctionConfigurations": [{"Id": "request", "LambdaFunctionArn": "arn:aws:lambda:'$coreRegion':'$accountId':function:'$lambdaName'","Events": ["s3:ObjectCreated:*"]}]}'
+        aws s3api put-bucket-notification-configuration --bucket $requestBucket --notification-configuration "$notificationConfiguration"
         echo "... ... ... trigger created."
     fi
     cd ../
