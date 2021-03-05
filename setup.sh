@@ -107,19 +107,18 @@ echo "
 ...
 "
 
-
-
-exit 0 
-
-
-
-
 # create core lambdas in core region
-<< COMMENT
+echo "Creating core Lambda functions in $coreRegion..."
 cd core
 for functionName in *; do
     lambdaName="$lambdaNamespace-core-$functionName"
-    echo $lambdaName
+    echo "... creating $lambdaName..."
+    $existingFunctionArn=$(aws lambda get-function --function-name "$lambdaName" --region "$coreRegion" --query "Configuration.FunctionArn" --output text 2>/dev/null) 2>/dev/null
+    if [ "$existingFunctionArn" ]; then
+        echo "... ... already exists."
+        continue
+    fi
+
     cd "$functionName/"
     if [ ! -d 'temp' ]; then
         mkdir temp
@@ -134,18 +133,29 @@ for functionName in *; do
     fi
     zip ../$functionName.zip main.py
     cd ../
+    echo "$lambdaName"
     #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn --zip-file fileb://$functionName.zip --timeout 900 --publish true --region $coreRegion
     unlink temp/main.py
     rmdir temp
     unlink $functionName.zip
     if [ 'request' = $functionName ]; then
+        echo "... ... creating trigger from requestBucket ($requestBucket) and request lambda ($lambdaName)..."
         # create trigger between the core request lambda and core request bucket
-        aws s3api put-bucket-notification-configuration --bucket $requestBucket --notification-configuration '{"LambdaFunctionConfigurations": [{"LambdaFunctionArn": "arn:aws:lambda:'$coreRegion':'$accountId:'function:'$lambdaName'","Events": ["s3:ObjectCreated:*"]}]}'
+        #aws s3api put-bucket-notification-configuration --bucket $requestBucket --notification-configuration '{"LambdaFunctionConfigurations": [{"LambdaFunctionArn": "arn:aws:lambda:'$coreRegion':'$accountId:'function:'$lambdaName'","Events": ["s3:ObjectCreated:*"]}]}'
+        echo "... ... ... trigger created."
     fi
     cd ../
+    echo "... $lambdaName created."
 done
 cd ..
-COMMENT
+
+
+
+
+exit 0 
+
+
+
 
 # create trigger lambdas in core region
 << COMMENT
