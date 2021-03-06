@@ -216,12 +216,16 @@ echo "Ensuring lambdaRole ($lambdaRole) exists and if correctly configured..."
     fi
     echo "... checking that the Assume Role Policy is correct..."
     lambdaRoleAssumeRolePolicyDocument=$(aws iam list-roles --query "Roles[?RoleName == '$lambdaRole'].AssumeRolePolicyDocument | [0]" --output json)
+    lambdaRoleAssumeRolePolicyDocument="${lambdaRoleAssumeRolePolicyDocument#"${lambdaRoleAssumeRolePolicyDocument%%[![:space:]]*}"}"
+    lambdaRoleAssumeRolePolicyDocument="${lambdaRoleAssumeRolePolicyDocument%"${lambdaRoleAssumeRolePolicyDocument##*[![:space:]]}"}" 
     if [ "$lambdaRoleAssumeRolePolicyDocument" == "$assumeRolePolicy" ]; then
         echo "... ... assumeRolePolicy is correct."
     else
         echo "... ... assumeRolePolicy is NOT correct, correcting now..."
         aws iam update-assume-role-policy --role-name "$lambdaRole" --policy-document "$assumeRolePolicy" --region $coreRegion
         lambdaRoleAssumeRolePolicyDocument=$(aws iam list-roles --query "Roles[?RoleName == '$lambdaRole'].AssumeRolePolicyDocument | [0]" --output json)
+        lambdaRoleAssumeRolePolicyDocument="${lambdaRoleAssumeRolePolicyDocument#"${lambdaRoleAssumeRolePolicyDocument%%[![:space:]]*}"}"
+        lambdaRoleAssumeRolePolicyDocument="${lambdaRoleAssumeRolePolicyDocument%"${lambdaRoleAssumeRolePolicyDocument##*[![:space:]]}"}" 
         if [ "$lambdaRoleAssumeRolePolicyDocument" == "$assumeRolePolicy" ]; then
             echo "... ... now corrected."
         else
@@ -286,10 +290,27 @@ for functionName in *; do
         rmdir temp
         unlink $functionName.zip
         if [ 'request' = $functionName ]; then
-            echo "... ... creating trigger from requestBucket ($requestBucket) to request lambda ($lambdaName)..."
-            notificationConfiguration='{"LambdaFunctionConfigurations": [{"Id": "request", "LambdaFunctionArn": "arn:aws:lambda:'$coreRegion':'$accountId':function:'$lambdaName'","Events": ["s3:ObjectCreated:*"]}]}'
-            aws s3api put-bucket-notification-configuration --bucket $requestBucket --notification-configuration "$notificationConfiguration"
-            echo "... ... ... trigger created."
+            echo "... ... ... checking if trigger from requestBucket ($requestBucket) to request lambda ($lambdaName) exists..."
+            getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket $requestBucket --query "LambdaFunctionConfigurations[?Id == 'request'].Id | [0]" --output text)
+            if [ "request" != "$getNotificationConfigurations" ]; then
+                echo "... ... ... ... NOT exists, creating now..."
+                notificationConfiguration='{"LambdaFunctionConfigurations": [{"Id": "request", "LambdaFunctionArn": "arn:aws:lambda:'$coreRegion':'$accountId':function:'$lambdaName'","Events": ["s3:ObjectCreated:*"]}]}'
+                aws s3api put-bucket-notification-configuration --bucket $requestBucket --notification-configuration "$notificationConfiguration"
+                getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket $requestBucket --query "LambdaFunctionConfigurations[?Id == 'request'].Id | [0]" --output text)
+                if [ "request" == "$getNotificationConfigurations" ]; then
+                    echo "... ... ... ... ... trigger created."
+                else 
+                    echo "... ... ... ... ... error creating trigger, please try again or create it manually: "
+                    echo "Lambda Function: $lambdaName"
+                    echo "Trigger Type: S3"
+                    echo "Trigger Event: Any Object Created"
+                    echo "Bucket: $requestBucket"
+                    echo "... ... ... ... ... exiting now."
+                    exit 1
+                fi
+            else
+                echo "... ... ... ... already exists."
+            fi
         fi
         cd ../
         existingFunctionArn="$(aws lambda list-functions --region $coreRegion --query "Functions[?FunctionName == '$lambdaName'].FunctionArn | [0]" --output text)"
@@ -302,13 +323,13 @@ for functionName in *; do
             echo "Handler: main.main"
             echo "Role: $lambdaRoleArn"
             echo "Timeout: 900"
-            echo "Code: use $functionName/main.py"
+            echo "Code: use core/$functionName/main.py"
             echo "... ... ... exiting now..."
             exit 1
         fi
     fi
 done
-cd ..
+cd ../
 echo "
 ---------
 "
@@ -340,9 +361,27 @@ for functionName in *; do
         rmdir temp
         unlink $functionName.zip
         if [ 'proxy' = $functionName ]; then
-            echo "... ... creating trigger from coreBucket ($coreBucket) to trigger proxy lambda ($lambdaName)..."
-            notificationConfiguration='{"LambdaFunctionConfigurations": [{"LambdaFunctionArn": "arn:aws:lambda:'$coreRegion':'$accountId:'function:'$lambdaName'","Events": ["s3:ObjectCreated:*","s3:ObjectRemoved:*"]}]}'
-            aws s3api put-bucket-notification-configuration --bucket $coreBucket --notification-configuration "$notificationConfiguration"
+            echo "... ... ... checking if trigger from coreBucket ($coreBucket) to proxy lambda ($lambdaName) exists..."
+            getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket $coreBucket --query "LambdaFunctionConfigurations[?Id == 'request'].Id | [0]" --output text)
+            if [ "request" != "$getNotificationConfigurations" ]; then
+                echo "... ... ... ... NOT exists, creating now..."
+                notificationConfiguration='{"LambdaFunctionConfigurations": [{"Id": "request", "LambdaFunctionArn": "arn:aws:lambda:'$coreRegion':'$accountId:'function:'$lambdaName'","Events": ["s3:ObjectCreated:*","s3:ObjectRemoved:*"]}]}'
+                aws s3api put-bucket-notification-configuration --bucket $coreBucket --notification-configuration "$notificationConfiguration"
+                getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket $coreBucket --query "LambdaFunctionConfigurations[?Id == 'request'].Id | [0]" --output text)
+                if [ "request" == "$getNotificationConfigurations" ]; then
+                    echo "... ... ... ... ... trigger created."
+                else 
+                    echo "... ... ... ... ... error creating trigger, please try again or create it manually: "
+                    echo "Lambda Function: $lambdaName"
+                    echo "Trigger Type: S3"
+                    echo "Trigger Event: Any Object created, Any Object removed"
+                    echo "Bucket: $coreBucket"
+                    echo "... ... ... ... ... exiting now."
+                    exit 1
+                fi
+            else
+                echo "... ... ... ... already exists."
+            fi
         fi
         cd ../
         existingFunctionArn="$(aws lambda list-functions --region $coreRegion --query "Functions[?FunctionName == '$lambdaName'].FunctionArn | [0]" --output text)"
@@ -355,27 +394,19 @@ for functionName in *; do
             echo "Handler: main.main"
             echo "Role: $lambdaRoleArn"
             echo "Timeout: 900"
-            echo "Code: use $functionName/main.py"
+            echo "Code: use trigger/$functionName/main.py"
             echo "... ... ... exiting now..."
             exit 1
         fi
     fi
 done
-cd ..
+cd ../
 echo "
 ---------
 "
 
 
-exit 0 
-
-
-
-
-
-
-# create extension lambdas in core region
-<< COMMENT
+echo "Ensuring extension Lambda functions are available in $coreRegion..."
 cd extension
 for scope in *; do
     cd $scope
@@ -384,29 +415,50 @@ for scope in *; do
             break
         fi
         lambdaName="$lambdaNamespace-extension-$scope-$functionName"
-        echo $lambdaName
-        cd "$functionName/"
-        if [ ! -d 'temp' ]; then
-            mkdir temp
+        echo "... checking if $lambdaName exists..."
+        existingFunctionArn="$(aws lambda list-functions --region $coreRegion --query "Functions[?FunctionName == '$lambdaName'].FunctionArn | [0]" --output text)"
+        if [ "$existingFunctionArn" ]; then
+            echo "... ... $lambdaName already exists."
+        else
+            echo "... ... $lambdaName NOT exists, creating now..."
+            cd "$functionName/"
+            if [ ! -d 'temp' ]; then
+                mkdir temp
+            fi
+            cp main.py ./temp
+            cd temp
+            zip ../$functionName.zip main.py
+            cd ../
+            aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn --zip-file fileb://$functionName.zip --timeout 900 --publish --region $coreRegion
+            unlink temp/main.py
+            rmdir temp
+            unlink $functionName.zip
+            cd ../
+            existingFunctionArn="$(aws lambda list-functions --region $coreRegion --query "Functions[?FunctionName == '$lambdaName'].FunctionArn | [0]" --output text)"
+            if [ "$existingFunctionArn" ]; then
+                echo "... ... ... $lambdaName created."
+            else
+                echo "... ... ... error creating $lambdaName, please try again or create it manually in $coreRegion: "
+                echo "Function Name: $lambdaName"
+                echo "Runtime: Python3.8"
+                echo "Handler: main.main"
+                echo "Role: $lambdaRoleArn"
+                echo "Timeout: 900"
+                echo "Code: use extension/$scope/$functionName/main.py"
+                echo "... ... ... exiting now..."
+                exit 1
+            fi
         fi
-        cp main.py ./temp
-        cd temp
-        zip ../$functionName.zip main.py
-        cd ../
-        #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn --zip-file fileb://$functionName.zip --timeout 900 --publish true --region $coreRegion
-        unlink temp/main.py
-        rmdir temp
-        unlink $functionName.zip
-        cd ../
     done
     cd ../
 done
-cd ..
-COMMENT
+cd ../
+echo "
+---------
+"
 
 
-# for the edge region NOT COMPLETE YET:
-<< COMMENT
+echo "Ensuring edge Lambda functions are available in $edgeRegion..."
 cd edge
 bucketsArray=()
 for key in ${!requestBuckets[@]}; do 
@@ -415,28 +467,65 @@ done
 bucketsString="buckets = {${bucketsArray::-2}}"
 for functionName in *; do
     lambdaName="$lambdaNamespace-edge-$functionName"
-    echo $lambdaName
-    cd "$functionName/"
-    if [ ! -d 'temp' ]; then
-        mkdir temp
+    echo "... checking if $lambdaName exists..."
+    existingFunctionArn="$(aws lambda list-functions --region $edgeRegion --query "Functions[?FunctionName == '$lambdaName'].FunctionArn | [0]" --output text)"
+    if [ "${#existingFunctionArn}" -ge 10 ]; then
+        echo "... ... $lambdaName already exists."
+    else
+        echo "... ... $lambdaName NOT exists, creating now..."
+        cd "$functionName/"
+        if [ ! -d 'temp' ]; then
+            mkdir temp
+        fi
+        cp main.py ./temp
+        cd temp
+        sed -i "1s/.*/$bucketsString/" main.py
+        zip ../$functionName.zip main.py
+        cd ../
+        aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn --zip-file fileb://$functionName.zip --timeout 30 --publish --region $edgeRegion
+        unlink temp/main.py
+        rmdir temp
+        unlink $functionName.zip
+        cd ../
+        existingFunctionArn="$(aws lambda list-functions --region $edgeRegion --query "Functions[?FunctionName == '$lambdaName'].FunctionArn | [0]" --output text)"
+        if [ "$existingFunctionArn" ]; then
+            echo "... ... ... $lambdaName created."
+        else
+            echo "... ... ... error creating $lambdaName, please try again or create it manually in $edgeRegion: "
+            echo "Function Name: $lambdaName"
+            echo "Runtime: Python3.8"
+            echo "Handler: main.main"
+            echo "Role: $lambdaRoleArn"
+            echo "Timeout: 30"
+            echo "Code: use edge/$functionName/main.py"
+            echo "... ... ... exiting now..."
+            exit 1
+        fi
     fi
-    cp main.py ./temp
-    cd temp
-    sed -i "1s/.*/$bucketsString/" main.py
-    zip ../$functionName.zip main.py
-    cd ../
-    #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn --zip-file fileb://$functionName.zip --timeout 900 --publish true --region $edgeRegion
-    unlink temp/main.py
-    rmdir temp
-    unlink $functionName.zip
-    cd ../
+    if [ "accept" == "$functionName" ]; then
+        echo "... ... getting version number of latest version of accept function..."
+        acceptFunctionVersion=$(aws lambda list-versions-by-function --region $edgeRegion --function-name "$lambdaName" --query "Versions[?Version != '\$LATEST'].Version | [0]" --output text)
+        if [ ! "$acceptFunctionVersion" ]; then
+            echo "... ... ... no version created, creating one now..."
+            acceptFunctionVersion=$(aws lambda publish-version --region $edgeRegion --function-name "$lambdaName" --query "Version" --output text)
+            if [ "$acceptFunctionVersion" ]; then
+                echo "... ... ... ... version $acceptFunctionVersion created."                
+            else
+                echo "... ... ... ... error creating version for $lambdaName, please try again or create it manually. Exiting now."
+                exit 1
+            fi
+        else
+            echo "... ... ... version $acceptFunctionVersion already exists."
+        fi
+    fi
 done
-cd ..
-COMMENT
+cd ../
+echo "
+---------
+"
 
 
-# for each supported region:
-<< COMMENT
+echo "Ensuring region Lambda functions and request buckets are available in each supported region..."
 cd region
 for key in ${!requestBuckets[@]}; do 
     if [ '_' = $key ]; then
@@ -445,35 +534,83 @@ for key in ${!requestBuckets[@]}; do
     if [ '_' != $key ]; then
         useRegion=$key
     fi
-    # create regional request bucket
-    aws s3api create-bucket --bucket ${requestBuckets[$key]} --region $useRegion --create-bucket-configuration LocationConstraint=$useRegion
-    aws s3api put-bucket-logging --bucket ${requestBuckets[$key]} --bucket-logging-status '{"LoggingEnabled":{"TargetBucket":"'$logBucket'","TargetPrefix":"s3/'${requestBuckets[$key]}'/"}}'
-    # create the regional lambdas
-    for functionName in *; do
-        lambdaName="$lambdaNamespace-region-$functionName"
-        echo $lambdaName
-        cd "$functionName/"
-        if [ ! -d 'temp' ]; then
-            mkdir temp
+    echo "... checking region $useRegion..."
+        echo "... ... checking if bucket ${requestBuckets[$key]} exists in $useRegion..."
+        bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
+        if [[ " $bucketNames " =~ " ${requestBuckets[$key]} " ]]; then
+            echo "... ... ... already exists."
+        else
+            echo "... ... ... NOT exists, creating now in $useRegion..."
+            aws s3api create-bucket --bucket ${requestBuckets[$key]} --region $useRegion --create-bucket-configuration LocationConstraint=$useRegion
+            bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
+            if [[ " $bucketNames " =~ " ${requestBuckets[$key]} " ]]; then
+                echo "... ... ... now created."
+            else
+                echo "... ... ... error creating bucket ${requestBuckets[$key]} in $useRegion, please try again or create manually. Exiting now."
+                exit 1
+            fi
         fi
-        cp main.py ./temp
-        cd temp
-        sed -i "1s/.*/$lambdaEnvRegion/" main.py
-        zip ../$functionName.zip main.py
-        cd ../
-        #aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn --zip-file fileb://$functionName.zip --timeout 900 --publish true --region $useRegion
-        unlink temp/main.py
-        rmdir temp
-        unlink $functionName.zip
-        if [ 'request' = $functionName ]; then
-            # create trigger between the regional lambda and bucket
-            aws s3api put-bucket-notification-configuration --bucket ${requestBuckets[$key]} --notification-configuration '{"LambdaFunctionConfigurations": [{"LambdaFunctionArn": "arn:aws:lambda:'$useRegion':'$accountId:'function:'$lambdaName'","Events": ["s3:ObjectCreated:*"]}]}'
-        fi
-        cd ../
-    done
+        for functionName in *; do
+            lambdaName="$lambdaNamespace-region-$functionName"
+            echo "... ... ... ... checking if $lambdaName exists..."
+            existingFunctionArn="$(aws lambda list-functions --region $useRegion --query "Functions[?FunctionName == '$lambdaName'].FunctionArn | [0]" --output text)"
+            if [ "${#existingFunctionArn}" -ge 10 ]; then
+                echo "... ... ... ... ... $lambdaName already exists."
+            else
+                echo "... ... ... ... ... $lambdaName NOT exists, creating now..."
+                cd "$functionName/"
+                if [ ! -d 'temp' ]; then
+                    mkdir temp
+                fi
+                cp main.py ./temp
+                cd temp
+                sed -i "1s/.*/$lambdaEnvRegion/" main.py
+                zip ../$functionName.zip main.py
+                cd ../
+                aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn --zip-file fileb://$functionName.zip --timeout 900 --publish --region $useRegion
+                unlink temp/main.py
+                rmdir temp
+                unlink $functionName.zip
+                if [ 'request' = $functionName ]; then
+                    echo "... ... ... ... ... ... checking if trigger from regional request bucket (${requestBuckets[$key]}) to request lambda ($lambdaName) exists..."
+                    getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket ${requestBuckets[$key]} --query "LambdaFunctionConfigurations[?Id == 'request'].Id | [0]" --output text)
+                    if [ "request" != "$getNotificationConfigurations" ]; then
+                        echo "... ... ... ... ... ... .. NOT exists, creating now..."
+                        notificationConfiguration='{"LambdaFunctionConfigurations": [{"Id": "request", "LambdaFunctionArn": "arn:aws:lambda:'$useRegion':'$accountId:'function:'$lambdaName'","Events": ["s3:ObjectCreated:*"]}]}'
+                        aws s3api put-bucket-notification-configuration --bucket ${requestBuckets[$key]} --notification-configuration "$notificationConfiguration"
+                        getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket ${requestBuckets[$key]} --query "LambdaFunctionConfigurations[?Id == 'request'].Id | [0]" --output text)
+                        if [ "request" == "$getNotificationConfigurations" ]; then
+                            echo "... ... ... ... ... ... ... ... trigger created."
+                        else 
+                            echo "... ... ... ... ... ... ... ... error creating trigger, please try again or create it manually: "
+                            echo "Lambda Function: $lambdaName"
+                            echo "Trigger Type: S3"
+                            echo "Trigger Event: Any Object created"
+                            echo "Bucket: ${requestBuckets[$key]}"
+                            echo "... ... ... ... ... ... ... ... exiting now."
+                            exit 1
+                        fi
+                    else
+                        echo "... ... ... ... ... ... ... already exists."
+                    fi
+                fi
+                cd ../
+            fi
+        done
 done
 cd ../
-COMMENT
+echo "
+---------
+"
+
+
+
+
+exit 0
+
+
+
+
 
 
 # create Cloudfront Distribution - including behaviours
