@@ -194,38 +194,63 @@ echo "Ensuring lambdaPolicy ($lambdaPolicyName) is created correctly..."
     fi
     echo "... lambdaPolicy policy is correct."
 echo "
-...
+---------
 "
 
 
-echo "Ensuring lambdaRole ($lambdaRole) exists..."
-lambdaRoleAssumeRolePolicyDocument=$(aws iam list-roles --query "Roles[?RoleName == '$lambdaRole'].AssumeRolePolicyDocument | [0]" --output json)
-if [ "${#lambdaRoleAssumeRolePolicyDocument}" -le 10 ]; then 
-    echo "... NOT exists, creating now..."
-    aws iam create-role --role-name "$lambdaRole" --assume-role-policy-document "$assumeRolePolicy" --region $coreRegion
-    echo "... now created."
-    echo "... attaching policy ($lambdaPolicyName) to role."
-    aws iam attach-role-policy --role-name "$lambdaRole" --policy-arn "arn:aws:iam::$accountId:policy/$lambdaPolicyName"  --region $coreRegion
-    echo "... now attached."
-else
-    echo "... already exists, checking assumeRolePolicy..."
-    if [ "$lambdaRoleAssumeRolePolicyDocument" != "$assumeRolePolicy" ]; then
+echo "Ensuring lambdaRole ($lambdaRole) exists and if correctly configured..."
+    lambdaRoleListGetName=$(aws iam list-roles --query "Roles[?RoleName == '$lambdaRole'].RoleName | [0]" --output text)
+    echo "... checking exists..."
+    if [ "$lambdaRoleListGetName" != "$lambdaRole" ]; then 
+        echo "... ... NOT exists, creating now..."
+        aws iam create-role --role-name "$lambdaRole" --assume-role-policy-document "$assumeRolePolicy" --region $coreRegion
+        lambdaRoleListGetName=$(aws iam list-roles --query "Roles[?RoleName == '$lambdaRole'].RoleName | [0]" --output text)
+        if [ "$lambdaRoleListGetName" == "$lambdaRole" ]; then 
+            echo "... ... ... now created."
+        else 
+            echo "... ... ... error creating role $lambdaRole, please try again or create this manually. Exiting now."
+            exit 1
+        fi
+    fi
+    echo "... checking that the Assume Role Policy is correct..."
+    lambdaRoleAssumeRolePolicyDocument=$(aws iam list-roles --query "Roles[?RoleName == '$lambdaRole'].AssumeRolePolicyDocument | [0]" --output json)
+    if [ "$lambdaRoleAssumeRolePolicyDocument" == "$assumeRolePolicy" ]; then
+        echo "... ... assumeRolePolicy is correct."
+    else:
         echo "... ... assumeRolePolicy is NOT correct, correcting now..."
         aws iam update-assume-role-policy --role-name "$lambdaRole" --policy-document "$assumeRolePolicy" --region $coreRegion
-        echo "... ... now corrected."
+        lambdaRoleAssumeRolePolicyDocument=$(aws iam list-roles --query "Roles[?RoleName == '$lambdaRole'].AssumeRolePolicyDocument | [0]" --output json)
+        if [ "$lambdaRoleAssumeRolePolicyDocument" == "$assumeRolePolicy" ]; then
+            echo "... ... now corrected."
+        else
+            echo "... ... ... error correcting the Assume Role Policy for role $lambdaRole, please try again or correct this manually:"
+            echo ""
+            echo "Role Name: $lambdaName"
+            echo "Assume Role Policy Document: "
+            echo "$assumeRolePolicy"
+            echo ""
+            echo "... ... ... Exiting now."
+        fi
     fi
-    echo "... checking if lambdaPolicy ($lambdaPolicyName) is attached..."
-    attachedPolicyArn=$(aws iam list-attached-role-policies --role-name "$lambdaRole" --region $coreRegion --query "AttachedPolicies[?PolicyName == '$lambdaPolicyName'].PolicyArn" --output text)
-    if [ ! "$attachedPolicyArn" ]; then
-        echo "... ... lambdaPolicy is NOT attached, attaching now..."
+    echo "... check that the $lambdaPolicyName is attached to $lambdaRole..."
+    attachPolicyArn="arn:aws:iam::$accountId:policy/$lambdaPolicyName"
+    attachedRolePoliciesArn=$(aws iam list-attached-role-policies --role-name $lambdaRole --query "AttachedPolicies[?PolicyName == '$lambdaPolicyName'].PolicyArn" --output text)
+    if [ "$attachPolicyArn" == "$attachedRolePoliciesArn" ]; then
+        echo "... ... is already attached."
+    else 
+        echo "... ... is NOT attached, attaching now..."
         aws iam attach-role-policy --role-name "$lambdaRole" --policy-arn "arn:aws:iam::$accountId:policy/$lambdaPolicyName"  --region $coreRegion
-        echo "... ... now attached."
-    else
-        echo "... ... lambdaPolicy is already attached."
+        attachedRolePoliciesArn=$(aws iam list-attached-role-policies --role-name $lambdaRole --query "AttachedPolicies[?PolicyName == '$lambdaPolicyName'].PolicyArn" --output text)
+        if [ "$attachPolicyArn" == "$attachedRolePoliciesArn" ]; then
+            echo "... ... ... now attached."        
+        else
+            echo "... ... ... error attaching policy ($lambdaPolicyName) to role ($lambdaRole), please try again or do this manually. Exiting now."
+            exit 1
+        fi
     fi
-fi
+    echo "... lambdaRole exists and is properly configured."    
 echo "
-...
+---------
 "
 
 
