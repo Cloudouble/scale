@@ -1,83 +1,116 @@
 . ./vars
 
 echo "Starting...
-...
+---------
 "
 
-echo "Retrieving list of existing buckets..."
-bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
-echo "Retrieved list of existing buckets."
-echo "
-...
-"
-
-echo "Checking if logBucket ($logBucket) exists..."
-if [[ " $bucketNames " =~ " $logBucket " ]]; then
-    echo "... already exists."
-else
-    echo "... NOT exists, creating now in coreRegion ($coreRegion)..."
-    aws s3api create-bucket --bucket $logBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
-        bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
-        if [[ " $bucketNames " =~ " $logBucket " ]]; then
-            echo "... now created."
+echo "Checking logBucket set up for $logBucket..."
+    echo "... checking if logBucket ($logBucket) exists..."
+    bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
+    if [[ " $bucketNames " =~ " $logBucket " ]]; then
+        echo "... ... already exists."
+    else
+        echo "... ... NOT exists, creating now in coreRegion ($coreRegion)..."
+        aws s3api create-bucket --bucket $logBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
+            bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
+            if [[ " $bucketNames " =~ " $logBucket " ]]; then
+                echo "... ... ... now created."
+            else
+                echo "... ... ... error creating logBucket ($logBucket), please try again or create this bucket manually in the  $coreRegion region. Exiting now."
+                exit 1
+            fi
+    fi
+    echo "... ensuring correct log delivery write permissions are in place..."
+    ownerId=$(aws s3api get-bucket-acl --bucket $logBucket --query "Owner.ID" --output text)
+    grantWrite=$(aws s3api get-bucket-acl --bucket $logBucket --query "Grants[?Permission == 'WRITE'].Grantee.URI | [0]" --output text)
+    if [ "$grantWrite" == "http://acs.amazonaws.com/groups/s3/LogDelivery" ]; then
+        echo "... ... write permissions in place for LogDelivery group."
+    else
+        echo "... ... write permissions NOT in place for LogDelivery group, enabling now..."
+        aws s3api put-bucket-acl --bucket $logBucket --grant-full-control "id=$ownerId" --grant-write URI=http://acs.amazonaws.com/groups/s3/LogDelivery --grant-read-acp URI=http://acs.amazonaws.com/groups/s3/LogDelivery
+        grantWrite=$(aws s3api get-bucket-acl --bucket $logBucket --query "Grants[?Permission == 'WRITE'].Grantee.URI | [0]" --output text)
+        if [ "$grantWrite" == "http://acs.amazonaws.com/groups/s3/LogDelivery" ]; then
+            echo "... ... ... now enabled."
         else
-            echo "... ... error creating logBucket ($logBucket), please try again or create this bucket manually in the  $coreRegion region. Exiting now."
+            echo "... ... ... error enabling write permissions for LogDelivery group, please try again or create these permissions manually for logBucket ($logBucket). Exiting now."
             exit 1
         fi
-fi
-echo "Ensuring correct log delivery permissions are in place..."
-aws s3api put-bucket-acl --bucket $logBucket --grant-write URI=http://acs.amazonaws.com/groups/s3/LogDelivery --grant-read-acp URI=http://acs.amazonaws.com/groups/s3/LogDelivery
-grantWrite=$(aws s3api get-bucket-acl --bucket $logBucket --query "Grants[?Permission == 'WRITE'].Grantee.URI | [0]" --output text)
-if [ $grantWrite == http://acs.amazonaws.com/groups/s3/LogDelivery ]; then
-    echo "Write permissions in place for LogDelivery group."
-else
-    echo "Write permissions NOT in place for LogDelivery group, please try again or create these permissions manually for logBucket ($logBucket). Exiting now."
-    exit 1
-fi
-grantReadACP=$(aws s3api get-bucket-acl --bucket $logBucket --query "Grants[?Permission == 'READ_ACP'].Grantee.URI | [0]" --output text)
-if [ $grantWrite == http://acs.amazonaws.com/groups/s3/LogDelivery ]; then
-    echo "Read ACP permissions in place for LogDelivery group."
-else
-    echo "Read ACP permissions NOT in place for LogDelivery group, please try again or create these permissions manually for logBucket ($logBucket). Exiting now."
-    exit 1
-fi
-echo "Correct log delivery permissions are in place."
-echo "
-...
-"
-
-echo "Checking if coreBucket ($coreBucket) exists..."
-if [[ " $bucketNames " =~ " $coreBucket " ]]; then
-    echo "... already exists."
-else
-    echo "... NOT exists, creating now in coreRegion ($coreRegion)..."
-    aws s3api create-bucket --bucket $coreBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
-    bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
-    if [[ " $bucketNames " =~ " $coreBucket " ]]; then
-        echo "... now created."
-    else
-        echo "... ... error creating coreBucket ($coreBucket), please try again or create this bucket manually in the  $coreRegion region. Exiting now."
-        exit 1
     fi
-    echo "... enabled bucket versioning for $coreBucket..."
-    aws s3api put-bucket-versioning --bucket $coreBucket --versioning-configuration Status=Enabled
-    coreBucketVersioning=$(aws s3api get-bucket-versioning --bucket $coreBucket --query "Status" --output text)
-    if [ "$coreBucketVersioning" == "Enabled" ]; then
-        echo "... ... bucket versioning enabled."
+    echo "... ensuring correct log delivery read ACP permissions are in place..."
+    grantReadACP=$(aws s3api get-bucket-acl --bucket $logBucket --query "Grants[?Permission == 'READ_ACP'].Grantee.URI | [0]" --output text)
+    if [ "$grantReadACP" == "http://acs.amazonaws.com/groups/s3/LogDelivery" ]; then
+        echo "... ... read ACP permissions in place for LogDelivery group."
     else
-        echo "... ... error enabling bucket versioning, please try again or enable this manually. Exiting now."
+        echo "... ... read ACP permissions NOT in place for LogDelivery group, enabling now..."
+        aws s3api put-bucket-acl --bucket $logBucket --grant-full-control "id=$ownerId" --grant-write URI=http://acs.amazonaws.com/groups/s3/LogDelivery --grant-read-acp URI=http://acs.amazonaws.com/groups/s3/LogDelivery
+        grantReadACP=$(aws s3api get-bucket-acl --bucket $logBucket --query "Grants[?Permission == 'READ_ACP'].Grantee.URI | [0]" --output text)
+        if [ "$grantReadACP" == "http://acs.amazonaws.com/groups/s3/LogDelivery" ]; then
+            echo "... ... ... now enabled."
+        else
+            echo "... ... ... read ACP permissions NOT in place for LogDelivery group, please try again or create these permissions manually for logBucket ($logBucket). Exiting now."
+            exit 1
+        fi
     fi
-    # UP TO HERE #
-    aws s3api put-bucket-logging --bucket $coreBucket --bucket-logging-status '{"LoggingEnabled":{"TargetBucket":"'$logBucket'","TargetPrefix":"s3/'$coreBucket'/"}}'
-    echo "... now created."
-fi
+    echo "... logBucket ($logBucket) correctly set up."
 echo "
-...
+---------
 "
 
 exit 0
 
+echo "Checking coreBucket set up for $coreBucket..."
+    echo "... checking if coreBucket ($coreBucket) exists..."
+    bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
+    if [[ " $bucketNames " =~ " $coreBucket " ]]; then
+        echo "... ... already exists."
+    else
+        echo "... ... NOT exists, creating now in coreRegion ($coreRegion)..."
+        aws s3api create-bucket --bucket $coreBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
+        bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
+        if [[ " $bucketNames " =~ " $coreBucket " ]]; then
+            echo "... ... ... now created."
+        else
+            echo "... ... error creating coreBucket ($coreBucket), please try again or create this bucket manually in the  $coreRegion region. Exiting now."
+            exit 1
+        fi
+    fi
+    echo "... ensuring bucket versioning is enabled..."
+    coreBucketVersioning=$(aws s3api get-bucket-versioning --bucket $coreBucket --query "Status" --output text)
+    if [ "$coreBucketVersioning" == "Enabled" ]; then
+        echo "... ... bucket versioning enabled."
+    else
+        echo "... ... bucket versioning NOT enabled, enabling now..."
+        aws s3api put-bucket-versioning --bucket $coreBucket --versioning-configuration Status=Enabled
+        coreBucketVersioning=$(aws s3api get-bucket-versioning --bucket $coreBucket --query "Status" --output text)
+        if [ "$coreBucketVersioning" == "Enabled" ]; then
+            echo "... ... ... now enabled."
+        else
+            echo "... ... ... error enabling bucket versioning, please try again or enable this manually. Exiting now."
+            exit 1
+        fi
+    fi
+    echo "... ensuring bucket logging is correctly configured..."
+    coreBucketLogging=$(aws s3api get-bucket-logging --bucket $coreBucket --query "LoggingEnabled" --output json)
+    if [ "$coreBucketLogging" -a "$coreBucketLogging['TargetPrefix']" == "s3/'$coreBucket'/" -a "$coreBucketLogging['TargetBucket']" == "$logBucket" ]; then
+        echo "... ... bucket logging correctly configured."
+    else
+        echo "... ... bucket logging NOT correctly configured, cpnfiguring now..."
+        aws s3api put-bucket-logging --bucket $coreBucket --bucket-logging-status '{"LoggingEnabled":{"TargetBucket":"'$logBucket'","TargetPrefix":"s3/'$coreBucket'/"}}'
+        coreBucketLogging=$(aws s3api get-bucket-logging --bucket $coreBucket --query "LoggingEnabled")
+        if [ $coreBucketLogging -a $coreBucketLogging['TargetPrefix'] == "s3/'$coreBucket'/" -a $coreBucketLogging['TargetBucket'] == $logBucket ]; then
+            echo "... ... ... now correctly configured."
+        else
+            echo "... ... ... error configuring bucket logging, please try again or enable this manually (log to $logBucket/s3/$coreBucket). Exiting now."
+            exit 1
+        fi
+    fi
+    echo "... coreBucket ($coreBucket) correctly set up."
+echo "
+---------
+"
 
+
+exit 0
 
 
 echo "Checking if requestBucket ($requestBucket) exists..."
