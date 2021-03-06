@@ -56,8 +56,6 @@ echo "
 ---------
 "
 
-exit 0
-
 echo "Checking coreBucket set up for $coreBucket..."
     echo "... checking if coreBucket ($coreBucket) exists..."
     bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
@@ -90,14 +88,16 @@ echo "Checking coreBucket set up for $coreBucket..."
         fi
     fi
     echo "... ensuring bucket logging is correctly configured..."
-    coreBucketLogging=$(aws s3api get-bucket-logging --bucket $coreBucket --query "LoggingEnabled" --output json)
-    if [ "$coreBucketLogging" -a "$coreBucketLogging['TargetPrefix']" == "s3/'$coreBucket'/" -a "$coreBucketLogging['TargetBucket']" == "$logBucket" ]; then
+    coreBucketLoggingTargetPrefix=$(aws s3api get-bucket-logging --bucket $coreBucket --query "LoggingEnabled.TargetPrefix" --output text)
+    coreBucketLoggingTargetBucket=$(aws s3api get-bucket-logging --bucket $coreBucket --query "LoggingEnabled.TargetBucket" --output text)
+    if [ "$coreBucketLoggingTargetPrefix" == "s3/$coreBucket/" -a "$coreBucketLoggingTargetBucket" == "$logBucket" ]; then
         echo "... ... bucket logging correctly configured."
     else
-        echo "... ... bucket logging NOT correctly configured, cpnfiguring now..."
+        echo "... ... bucket logging NOT correctly configured, configuring now..."
         aws s3api put-bucket-logging --bucket $coreBucket --bucket-logging-status '{"LoggingEnabled":{"TargetBucket":"'$logBucket'","TargetPrefix":"s3/'$coreBucket'/"}}'
-        coreBucketLogging=$(aws s3api get-bucket-logging --bucket $coreBucket --query "LoggingEnabled")
-        if [ $coreBucketLogging -a $coreBucketLogging['TargetPrefix'] == "s3/'$coreBucket'/" -a $coreBucketLogging['TargetBucket'] == $logBucket ]; then
+        coreBucketLoggingTargetPrefix=$(aws s3api get-bucket-logging --bucket $coreBucket --query "LoggingEnabled.TargetPrefix" --output text)
+        coreBucketLoggingTargetBucket=$(aws s3api get-bucket-logging --bucket $coreBucket --query "LoggingEnabled.TargetBucket" --output text)
+        if [ "$coreBucketLoggingTargetPrefix" == "s3/$coreBucket/" -a "$coreBucketLoggingTargetBucket" == "$logBucket" ]; then
             echo "... ... ... now correctly configured."
         else
             echo "... ... ... error configuring bucket logging, please try again or enable this manually (log to $logBucket/s3/$coreBucket). Exiting now."
@@ -110,45 +110,93 @@ echo "
 "
 
 
-exit 0
-
-
-echo "Checking if requestBucket ($requestBucket) exists..."
-if [[ " $bucketNames " =~ " $requestBucket " ]]; then
-    echo "... already exists."
-else
-    echo "... NOT exists, creating now in coreRegion ($coreRegion)..."
-    aws s3api create-bucket --bucket $requestBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
-    aws s3api put-bucket-logging --bucket $requestBucket --bucket-logging-status '{"LoggingEnabled":{"TargetBucket":"'$logBucket'","TargetPrefix":"s3/'$requestBucket'/"}}'
-    echo "... now created."
-fi
-echo "
-...
-"
-
-echo "Ensuring lambdaPolicy ($lambdaPolicyName) is correct..."
-lambdaPolicy="${lambdaPolicy#"${lambdaPolicy%%[![:space:]]*}"}"
-lambdaPolicy="${lambdaPolicy%"${lambdaPolicy##*[![:space:]]}"}" 
-lambdaPolicyVersion=$(aws iam get-policy --policy-arn "arn:aws:iam::$accountId:policy/$lambdaPolicyName" --query "Policy.DefaultVersionId" --output text)
-if [ ! "$lambdaPolicyVersion" ]; then
-    echo "... NOT exists, creating now..."
-    aws iam create-policy --policy-name $lambdaPolicyName --policy-document "$lambdaPolicy" --region $coreRegion
-    echo "... lambdaPolicy ($lambdaPolicyName) created."
-else
-    echo "... already exists, checking policy document..."
-    lambdaPolicyDocument=$(aws iam get-policy-version --policy-arn "arn:aws:iam::$accountId:policy/$lambdaPolicyName" --version-id "$lambdaPolicyVersion" --query "PolicyVersion.Document" --output json)
-    if [ "$lambdaPolicyDocument" != "$lambdaPolicy" ]; then
-        echo "... ... policy document is not correct, correcting now..."
-        deleteVersion=$(aws iam list-policy-versions --policy-arn "arn:aws:iam::$accountId:policy/$lambdaPolicyName" --query "Versions[?!IsDefaultVersion].VersionId | [0]" --output text)
-        aws iam delete-policy-version --policy-arn "arn:aws:iam::$accountId:policy/$lambdaPolicyName" --version-id "$deleteVersion"
-        aws iam create-policy-version --policy-arn "arn:aws:iam::$accountId:policy/$lambdaPolicyName" --policy-document "$lambdaPolicy" --set-as-default --region $coreRegion
-        echo "... ... now corrected."
+echo "Checking requestBucket set up for $requestBucket..."
+    echo "... checking if requestBucket ($requestBucket) exists..."
+    bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
+    if [[ " $bucketNames " =~ " $requestBucket " ]]; then
+        echo "... ... already exists."
+    else
+        echo "... ... NOT exists, creating now in coreRegion ($coreRegion)..."
+        aws s3api create-bucket --bucket $requestBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
+        bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
+        if [[ " $bucketNames " =~ " $requestBucket " ]]; then
+            echo "... ... ... now created."
+        else
+            echo "... ... error creating requestBucket ($requestBucket), please try again or create this bucket manually in the  $coreRegion region. Exiting now."
+            exit 1
+        fi
     fi
-fi
-echo "lambdaPolicy policy is correct."
+    echo "... ensuring bucket logging is correctly configured..."
+    requestBucketLoggingTargetPrefix=$(aws s3api get-bucket-logging --bucket $requestBucket --query "LoggingEnabled.TargetPrefix" --output text)
+    requestBucketLoggingTargetBucket=$(aws s3api get-bucket-logging --bucket $requestBucket --query "LoggingEnabled.TargetBucket" --output text)
+    if [ "$requestBucketLoggingTargetPrefix" == "s3/$requestBucket/" -a "$requestBucketLoggingTargetBucket" == "$logBucket" ]; then
+        echo "... ... bucket logging correctly configured."
+    else
+        echo "... ... bucket logging NOT correctly configured, configuring now..."
+        aws s3api put-bucket-logging --bucket $requestBucket --bucket-logging-status '{"LoggingEnabled":{"TargetBucket":"'$logBucket'","TargetPrefix":"s3/'$requestBucket'/"}}'
+        requestBucketLoggingTargetPrefix=$(aws s3api get-bucket-logging --bucket $requestBucket --query "LoggingEnabled.TargetPrefix" --output text)
+        requestBucketLoggingTargetBucket=$(aws s3api get-bucket-logging --bucket $requestBucket --query "LoggingEnabled.TargetBucket" --output text)
+        if [ "$requestBucketLoggingTargetPrefix" == "s3/$requestBucket/" -a "$requestBucketLoggingTargetBucket" == "$logBucket" ]; then
+            echo "... ... ... now correctly configured."
+        else
+            echo "... ... ... error configuring bucket logging, please try again or enable this manually (log to $logBucket/s3/$requestBucket). Exiting now."
+            exit 1
+        fi
+    fi
+    echo "... requestBucket ($requestBucket) correctly set up."
+echo "
+---------
+"
+
+
+echo "Ensuring lambdaPolicy ($lambdaPolicyName) is created correctly..."
+    lambdaPolicy="${lambdaPolicy#"${lambdaPolicy%%[![:space:]]*}"}"
+    lambdaPolicy="${lambdaPolicy%"${lambdaPolicy##*[![:space:]]}"}" 
+    lambdaPolicyVersion=$(aws iam get-policy --policy-arn "arn:aws:iam::$accountId:policy/$lambdaPolicyName" --query "Policy.DefaultVersionId" --output text)
+    if [ ! "$lambdaPolicyVersion" ]; then
+        echo "... ... NOT exists, creating now..."
+        aws iam create-policy --policy-name $lambdaPolicyName --policy-document "$lambdaPolicy" --region $coreRegion
+        lambdaPolicyVersion=$(aws iam get-policy --policy-arn "arn:aws:iam::$accountId:policy/$lambdaPolicyName" --query "Policy.DefaultVersionId" --output text)
+        if [ "$lambdaPolicyVersion" ]; then
+            echo "... ... ... lambdaPolicy ($lambdaPolicyName) created."
+        else 
+            echo "... ... ... error creating lambdaPolicy ($lambdaPolicyName), please try again or create this manually:"
+            echo ""
+            echo "Policy Name: $lambdaPolicyName"
+            echo "Policy Document: "
+            echo "$lambdaPolicy"
+            echo ""
+            echo "... ... ... Exiting now."
+            exit 1
+        fi
+    else
+        echo "... already exists, checking policy document..."
+        lambdaPolicyDocument=$(aws iam get-policy-version --policy-arn "arn:aws:iam::$accountId:policy/$lambdaPolicyName" --version-id "$lambdaPolicyVersion" --query "PolicyVersion.Document" --output json)
+        if [ "$lambdaPolicyDocument" != "$lambdaPolicy" ]; then
+            echo "... ... policy document is not correct, correcting now..."
+            deleteVersion=$(aws iam list-policy-versions --policy-arn "arn:aws:iam::$accountId:policy/$lambdaPolicyName" --query "Versions[?!IsDefaultVersion].VersionId | [0]" --output text)
+            aws iam delete-policy-version --policy-arn "arn:aws:iam::$accountId:policy/$lambdaPolicyName" --version-id "$deleteVersion"
+            aws iam create-policy-version --policy-arn "arn:aws:iam::$accountId:policy/$lambdaPolicyName" --policy-document "$lambdaPolicy" --set-as-default --region $coreRegion
+            lambdaPolicyDocument=$(aws iam get-policy-version --policy-arn "arn:aws:iam::$accountId:policy/$lambdaPolicyName" --version-id "$lambdaPolicyVersion" --query "PolicyVersion.Document" --output json)
+            if [ "$lambdaPolicyDocument" == "$lambdaPolicy" ]; then
+                echo "... ... ... now corrected."
+            else 
+                echo "... ... ... error correcting lambdaPolicy ($lambdaPolicyName), please try again or correct this manually:"
+                echo ""
+                echo "Policy Name: $lambdaPolicyName"
+                echo "Policy Document: "
+                echo "$lambdaPolicy"
+                echo ""
+                echo "... ... ... Exiting now."
+                exit 1
+            fi
+        fi
+    fi
+    echo "... lambdaPolicy policy is correct."
 echo "
 ...
 "
+
 
 echo "Ensuring lambdaRole ($lambdaRole) exists..."
 lambdaRoleAssumeRolePolicyDocument=$(aws iam list-roles --query "Roles[?RoleName == '$lambdaRole'].AssumeRolePolicyDocument | [0]" --output json)
@@ -179,6 +227,14 @@ fi
 echo "
 ...
 "
+
+
+
+
+exit 0
+
+
+
 
 # create core lambdas in core region
 echo "Creating core Lambda functions in $coreRegion..."
