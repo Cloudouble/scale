@@ -267,7 +267,7 @@ for functionName in *; do
     lambdaName="$lambdaNamespace-core-$functionName"
     echo "... checking if $lambdaName exists..."
     existingFunctionArn="$(aws lambda list-functions --region $coreRegion --query "Functions[?FunctionName == '$lambdaName'].FunctionArn | [0]" --output text)"
-    if [ "$existingFunctionArn" ]; then
+    if [ ${#existingFunctionArn} -ge 10 ]; then
         echo "... ... $lambdaName already exists."
     else
         echo "... ... $lambdaName NOT exists, creating now..."
@@ -289,30 +289,6 @@ for functionName in *; do
         unlink temp/main.py
         rmdir temp
         unlink $functionName.zip
-        if [ 'request' = $functionName ]; then
-            echo "... ... ... checking if trigger from requestBucket ($requestBucket) to request lambda ($lambdaName) exists..."
-            getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket $requestBucket --query "LambdaFunctionConfigurations[?Id == 'request'].Id | [0]" --output text)
-            if [ "request" != "$getNotificationConfigurations" ]; then
-                echo "... ... ... ... NOT exists, creating now..."
-                notificationConfiguration='{"LambdaFunctionConfigurations": [{"Id": "request", "LambdaFunctionArn": "arn:aws:lambda:'$coreRegion':'$accountId':function:'$lambdaName'","Events": ["s3:ObjectCreated:*"]}]}'
-                aws s3api put-bucket-notification-configuration --bucket $requestBucket --notification-configuration "$notificationConfiguration"
-                getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket $requestBucket --query "LambdaFunctionConfigurations[?Id == 'request'].Id | [0]" --output text)
-                if [ "request" == "$getNotificationConfigurations" ]; then
-                    echo "... ... ... ... ... trigger created."
-                else 
-                    echo "... ... ... ... ... error creating trigger, please try again or create it manually: "
-                    echo "Lambda Function: $lambdaName"
-                    echo "Trigger Type: S3"
-                    echo "Trigger Event: Any Object Created"
-                    echo "Bucket: $requestBucket"
-                    echo "... ... ... ... ... exiting now."
-                    exit 1
-                fi
-            else
-                echo "... ... ... ... already exists."
-            fi
-        fi
-        cd ../
         existingFunctionArn="$(aws lambda list-functions --region $coreRegion --query "Functions[?FunctionName == '$lambdaName'].FunctionArn | [0]" --output text)"
         if [ "$existingFunctionArn" ]; then
             echo "... ... ... $lambdaName created."
@@ -326,6 +302,32 @@ for functionName in *; do
             echo "Code: use core/$functionName/main.py"
             echo "... ... ... exiting now..."
             exit 1
+        fi
+        cd ../
+    fi
+    if [ 'request' = $functionName ]; then
+        echo "... ... checking if trigger from requestBucket ($requestBucket) to request lambda ($lambdaName) exists..."
+        getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket $requestBucket --query "LambdaFunctionConfigurations[?Id == '$functionName'].Id | [0]" --output text)
+        if [ ! "$getNotificationConfigurations" == "$functionName" ]; then
+            echo "... ... ... NOT exists, creating now..."
+            notificationConfiguration='{"LambdaFunctionConfigurations": [{"Id": "'$functionName'","LambdaFunctionArn": "arn:aws:lambda:'$coreRegion':'$accountId':function:'$lambdaName'","Events":["s3:ObjectCreated:*"]}]}'
+            aws lambda add-permission --region $coreRegion --function-name "arn:aws:lambda:$coreRegion:$accountId:function:$lambdaName" --action "lambda:InvokeFunction" --statement-id "request" --principal "s3.amazonaws.com" --source-account "$accountId" --source-arn "arn:aws:s3:::$requestBucket"
+            aws s3api put-bucket-notification-configuration --bucket $requestBucket --notification-configuration "$notificationConfiguration"
+            getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket $requestBucket --query "LambdaFunctionConfigurations[?Id == '$functionName'].Id | [0]" --output text)
+            if [ "$functionName" == "$getNotificationConfigurations" ]; then
+                echo "... ... ... ... trigger created."
+            else 
+                echo "... ... ... ... error creating trigger, please try again or create it manually: "
+                echo "Lambda Function: $lambdaName"
+                echo "Trigger Name: $functionName"
+                echo "Trigger Type: S3"
+                echo "Trigger Event: Any Object Created"
+                echo "Bucket: $requestBucket"
+                echo "... ... ... ... exiting now."
+                exit 1
+            fi
+        else
+            echo "... ... ... already exists."
         fi
     fi
 done
@@ -341,7 +343,7 @@ for functionName in *; do
     lambdaName="$lambdaNamespace-trigger-$functionName"
     echo "... checking if $lambdaName exists..."
     existingFunctionArn="$(aws lambda list-functions --region $coreRegion --query "Functions[?FunctionName == '$lambdaName'].FunctionArn | [0]" --output text)"
-    if [ "$existingFunctionArn" ]; then
+    if [ ${#existingFunctionArn} -ge 10 ]; then
         echo "... ... $lambdaName already exists."
     else
         echo "... ... $lambdaName NOT exists, creating now..."
@@ -360,30 +362,6 @@ for functionName in *; do
         unlink temp/main.py
         rmdir temp
         unlink $functionName.zip
-        if [ 'proxy' = $functionName ]; then
-            echo "... ... ... checking if trigger from coreBucket ($coreBucket) to proxy lambda ($lambdaName) exists..."
-            getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket $coreBucket --query "LambdaFunctionConfigurations[?Id == 'request'].Id | [0]" --output text)
-            if [ "request" != "$getNotificationConfigurations" ]; then
-                echo "... ... ... ... NOT exists, creating now..."
-                notificationConfiguration='{"LambdaFunctionConfigurations": [{"Id": "request", "LambdaFunctionArn": "arn:aws:lambda:'$coreRegion':'$accountId:'function:'$lambdaName'","Events": ["s3:ObjectCreated:*","s3:ObjectRemoved:*"]}]}'
-                aws s3api put-bucket-notification-configuration --bucket $coreBucket --notification-configuration "$notificationConfiguration"
-                getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket $coreBucket --query "LambdaFunctionConfigurations[?Id == 'request'].Id | [0]" --output text)
-                if [ "request" == "$getNotificationConfigurations" ]; then
-                    echo "... ... ... ... ... trigger created."
-                else 
-                    echo "... ... ... ... ... error creating trigger, please try again or create it manually: "
-                    echo "Lambda Function: $lambdaName"
-                    echo "Trigger Type: S3"
-                    echo "Trigger Event: Any Object created, Any Object removed"
-                    echo "Bucket: $coreBucket"
-                    echo "... ... ... ... ... exiting now."
-                    exit 1
-                fi
-            else
-                echo "... ... ... ... already exists."
-            fi
-        fi
-        cd ../
         existingFunctionArn="$(aws lambda list-functions --region $coreRegion --query "Functions[?FunctionName == '$lambdaName'].FunctionArn | [0]" --output text)"
         if [ "$existingFunctionArn" ]; then
             echo "... ... ... $lambdaName created."
@@ -397,6 +375,32 @@ for functionName in *; do
             echo "Code: use trigger/$functionName/main.py"
             echo "... ... ... exiting now..."
             exit 1
+        fi
+        cd ../
+    fi
+    if [ 'proxy' = $functionName ]; then
+        echo "... ... checking if trigger from coreBucket ($coreBucket) to proxy lambda ($lambdaName) exists..."
+        getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket $coreBucket --query "LambdaFunctionConfigurations[?Id == '$functionName'].Id | [0]" --output text)
+        if [ ! "$getNotificationConfigurations" == "$functionName" ]; then
+            echo "... ... ... NOT exists, creating now..."
+            notificationConfiguration='{"LambdaFunctionConfigurations": [{"Id": "'$functionName'", "LambdaFunctionArn": "arn:aws:lambda:'$coreRegion':'$accountId:'function:'$lambdaName'","Events":["s3:ObjectCreated:*","s3:ObjectRemoved:*"]}]}'
+            aws lambda add-permission --region $coreRegion --function-name "arn:aws:lambda:$coreRegion:$accountId:function:$lambdaName" --action "lambda:InvokeFunction" --statement-id "request" --principal "s3.amazonaws.com" --source-account "$accountId" --source-arn "arn:aws:s3:::$coreBucket"
+            aws s3api put-bucket-notification-configuration --bucket $coreBucket --notification-configuration "$notificationConfiguration"
+            getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket $coreBucket --query "LambdaFunctionConfigurations[?Id == '$functionName'].Id | [0]" --output text)
+            if [ "$functionName" == "$getNotificationConfigurations" ]; then
+                echo "... ... ... ... trigger created."
+            else 
+                echo "... ... ... ... error creating trigger, please try again or create it manually: "
+                echo "Lambda Function: $lambdaName"
+                echo "Trigger Name: $functionName"
+                echo "Trigger Type: S3"
+                echo "Trigger Event: Any Object created, Any Object removed"
+                echo "Bucket: $coreBucket"
+                echo "... ... ... ... exiting now."
+                exit 1
+            fi
+        else
+            echo "... ... ... already exists."
         fi
     fi
 done
@@ -417,7 +421,7 @@ for scope in *; do
         lambdaName="$lambdaNamespace-extension-$scope-$functionName"
         echo "... checking if $lambdaName exists..."
         existingFunctionArn="$(aws lambda list-functions --region $coreRegion --query "Functions[?FunctionName == '$lambdaName'].FunctionArn | [0]" --output text)"
-        if [ "$existingFunctionArn" ]; then
+        if [ ${#existingFunctionArn} -ge 10 ]; then
             echo "... ... $lambdaName already exists."
         else
             echo "... ... $lambdaName NOT exists, creating now..."
@@ -571,31 +575,33 @@ for key in ${!requestBuckets[@]}; do
                 unlink temp/main.py
                 rmdir temp
                 unlink $functionName.zip
-                if [ 'request' = $functionName ]; then
-                    echo "... ... ... ... ... ... checking if trigger from regional request bucket (${requestBuckets[$key]}) to request lambda ($lambdaName) exists..."
-                    getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket ${requestBuckets[$key]} --query "LambdaFunctionConfigurations[?Id == 'request'].Id | [0]" --output text)
-                    if [ "request" != "$getNotificationConfigurations" ]; then
-                        echo "... ... ... ... ... ... .. NOT exists, creating now..."
-                        notificationConfiguration='{"LambdaFunctionConfigurations": [{"Id": "request", "LambdaFunctionArn": "arn:aws:lambda:'$useRegion':'$accountId:'function:'$lambdaName'","Events": ["s3:ObjectCreated:*"]}]}'
-                        aws s3api put-bucket-notification-configuration --bucket ${requestBuckets[$key]} --notification-configuration "$notificationConfiguration"
-                        getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket ${requestBuckets[$key]} --query "LambdaFunctionConfigurations[?Id == 'request'].Id | [0]" --output text)
-                        if [ "request" == "$getNotificationConfigurations" ]; then
-                            echo "... ... ... ... ... ... ... ... trigger created."
-                        else 
-                            echo "... ... ... ... ... ... ... ... error creating trigger, please try again or create it manually: "
-                            echo "Lambda Function: $lambdaName"
-                            echo "Trigger Type: S3"
-                            echo "Trigger Event: Any Object created"
-                            echo "Bucket: ${requestBuckets[$key]}"
-                            echo "... ... ... ... ... ... ... ... exiting now."
-                            exit 1
-                        fi
-                    else
-                        echo "... ... ... ... ... ... ... already exists."
-                    fi
-                fi
-                cd ../
             fi
+            if [ 'request' = $functionName ]; then
+                echo "... ... ... ... ... ... checking if trigger from regional request bucket (${requestBuckets[$key]}) to request lambda ($lambdaName) exists..."
+                getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket ${requestBuckets[$key]} --query "LambdaFunctionConfigurations[?Id == '$functionName'].Id | [0]" --output text)
+                if [ ! "$getNotificationConfigurations" == "$functionName" ]; then
+                    echo "... ... ... ... ... ... .. NOT exists, creating now..."
+                    notificationConfiguration='{"LambdaFunctionConfigurations": [{"Id": "'$functionName'", "LambdaFunctionArn": "arn:aws:lambda:'$useRegion':'$accountId:'function:'$lambdaName'","Events": ["s3:ObjectCreated:*"]}]}'
+                    aws lambda add-permission --region $useRegion --function-name "arn:aws:lambda:$useRegion:$accountId:function:$lambdaName" --action "lambda:InvokeFunction" --statement-id "request" --principal "s3.amazonaws.com" --source-account "$accountId" --source-arn "arn:aws:s3:::${requestBuckets[$key]}"
+                    aws s3api put-bucket-notification-configuration --bucket ${requestBuckets[$key]} --notification-configuration "$notificationConfiguration"
+                    getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket ${requestBuckets[$key]} --query "LambdaFunctionConfigurations[?Id == '$functionName'].Id | [0]" --output text)
+                    if [ "$functionName" == "$getNotificationConfigurations" ]; then
+                        echo "... ... ... ... ... ... ... ... trigger created."
+                    else 
+                        echo "... ... ... ... ... ... ... ... error creating trigger, please try again or create it manually: "
+                        echo "Lambda Function: $lambdaName"
+                        echo "Trigger Name: $functionName"
+                        echo "Trigger Type: S3"
+                        echo "Trigger Event: Any Object created"
+                        echo "Bucket: ${requestBuckets[$key]}"
+                        echo "... ... ... ... ... ... ... ... exiting now."
+                        exit 1
+                    fi
+                else
+                    echo "... ... ... ... ... ... ... already exists."
+                fi
+            fi
+            cd ../
         done
 done
 cd ../
