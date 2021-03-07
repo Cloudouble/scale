@@ -539,7 +539,7 @@ for key in ${!requestBuckets[@]}; do
         useRegion=$key
     fi
     echo "... checking region $useRegion..."
-        echo "... ... checking if bucket ${requestBuckets[$key]} exists in $useRegion..."
+        echo "... ... checking if bucket ${requestBuckets[$key]} exists..."
         bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
         if [[ " $bucketNames " =~ " ${requestBuckets[$key]} " ]]; then
             echo "... ... ... already exists."
@@ -556,12 +556,12 @@ for key in ${!requestBuckets[@]}; do
         fi
         for functionName in *; do
             lambdaName="$lambdaNamespace-region-$functionName"
-            echo "... ... ... ... checking if $lambdaName exists..."
+            echo "... ... ... checking if $lambdaName exists..."
             existingFunctionArn="$(aws lambda list-functions --region $useRegion --query "Functions[?FunctionName == '$lambdaName'].FunctionArn | [0]" --output text)"
             if [ "${#existingFunctionArn}" -ge 10 ]; then
-                echo "... ... ... ... ... $lambdaName already exists."
+                echo "... ... ... ... $lambdaName already exists."
             else
-                echo "... ... ... ... ... $lambdaName NOT exists, creating now..."
+                echo "... ... ... ... $lambdaName NOT exists, creating now..."
                 cd "$functionName/"
                 if [ ! -d 'temp' ]; then
                     mkdir temp
@@ -575,9 +575,10 @@ for key in ${!requestBuckets[@]}; do
                 unlink temp/main.py
                 rmdir temp
                 unlink $functionName.zip
+                cd ../
             fi
             if [ 'request' = $functionName ]; then
-                echo "... ... ... ... ... ... checking if trigger from regional request bucket (${requestBuckets[$key]}) to request lambda ($lambdaName) exists..."
+                echo "... ... ... ... checking if trigger from regional request bucket (${requestBuckets[$key]}) to request lambda ($lambdaName) exists..."
                 getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket ${requestBuckets[$key]} --query "LambdaFunctionConfigurations[?Id == '$functionName'].Id | [0]" --output text)
                 if [ ! "$getNotificationConfigurations" == "$functionName" ]; then
                     echo "... ... ... ... ... ... .. NOT exists, creating now..."
@@ -586,31 +587,27 @@ for key in ${!requestBuckets[@]}; do
                     aws s3api put-bucket-notification-configuration --bucket ${requestBuckets[$key]} --notification-configuration "$notificationConfiguration"
                     getNotificationConfigurations=$(aws s3api get-bucket-notification-configuration --bucket ${requestBuckets[$key]} --query "LambdaFunctionConfigurations[?Id == '$functionName'].Id | [0]" --output text)
                     if [ "$functionName" == "$getNotificationConfigurations" ]; then
-                        echo "... ... ... ... ... ... ... ... trigger created."
+                        echo "... ... ... ... ... ... trigger created."
                     else 
-                        echo "... ... ... ... ... ... ... ... error creating trigger, please try again or create it manually: "
+                        echo "... ... ... ... ... ... error creating trigger, please try again or create it manually: "
                         echo "Lambda Function: $lambdaName"
                         echo "Trigger Name: $functionName"
                         echo "Trigger Type: S3"
                         echo "Trigger Event: Any Object created"
                         echo "Bucket: ${requestBuckets[$key]}"
-                        echo "... ... ... ... ... ... ... ... exiting now."
+                        echo "... ... ... ... ... ... exiting now."
                         exit 1
                     fi
                 else
-                    echo "... ... ... ... ... ... ... already exists."
+                    echo "... ... ... ... ... already exists."
                 fi
             fi
-            cd ../
         done
 done
 cd ../
 echo "
 ---------
 "
-
-
-
 
 exit 0
 
