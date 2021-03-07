@@ -47,7 +47,7 @@ def main(event, context):
         env['connection_id'] = None
         if request.get('headers', {}).get('cookie'):
             raw_cookie = request['headers']['cookie'].lower()
-            cookie_name = '{authentication_namespace}connection'.format(authentication_namespace=env['authentication_namespace'])
+            cookie_name = '{authentication_namespace}Connection'.format(authentication_namespace=env['authentication_namespace'])
             if cookie_name in raw_cookie:
                 cookies = {c.split('=')[0]: c.split('=')[1] for c in c [raw_cookie.split('; ')]}
                 if cookie_name in cookies: 
@@ -60,7 +60,7 @@ def main(event, context):
                     authorization_split = base64.b64decode(authorization_header[6:]).decode('utf-8').split(':')
                     env['connection_id'] = authorization_split[0]
         if not env['connection_id']:
-            header_name = '{authentication_namespace}connection'.format(authentication_namespace=env['authentication_namespace'])
+            header_name = '{authentication_namespace}Connection'.format(authentication_namespace=env['authentication_namespace'])
             if request.get('headers', {}).get(header_name):
                 authorization_split = request['headers'][header_name].split(':')
                 env['connection_id'] = authorization_split[0]

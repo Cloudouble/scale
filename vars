@@ -88,6 +88,51 @@ declare -A requestBuckets
 requestBuckets["_"]="$coreRegion.$requestBucket"
 requestBuckets["ap-southeast-2"]="ap-southeast-2.$requestBucket"
 
+cachePolicyDocumentStandard='{
+    "Name": "'$systemProperName'Standard",
+    "DefaultTTL": 86400,
+    "MaxTTL": 31536000,
+    "MinTTL": 1,
+    "ParametersInCacheKeyAndForwardedToOrigin": {
+        "CookiesConfig": {
+            "CookieBehavior": "all"
+        },
+        "QueryStringsConfig": {
+            "QueryStringBehavior": "all"
+        },
+        "EnableAcceptEncodingGzip": true,
+        "EnableAcceptEncodingBrotli": true,
+        "HeadersConfig": {
+            "HeaderBehavior": "whitelist",
+            "Headers": {
+                "Quantity": 5,
+                "Items":["Accept","Access-Control-Request-Method","Access-Control-Request-Headers","Authorization","'$envAuthenticationNamespace'Connection"]
+            }
+        }
+    }
+}'
+
+cachePolicyDocumentDisabled='{
+    "Name": "'$systemProperName'Disabled",
+    "DefaultTTL": 0,
+    "MaxTTL": 0,
+    "MinTTL": 0,
+    "ParametersInCacheKeyAndForwardedToOrigin": {
+        "CookiesConfig": {
+            "CookieBehavior": "none"
+        },
+        "QueryStringsConfig": {
+            "QueryStringBehavior": "none"
+        },
+        "EnableAcceptEncodingGzip": false,
+        "EnableAcceptEncodingBrotli": false,
+        "HeadersConfig": {
+            "HeaderBehavior": "none"
+        }
+    }
+}'
+
+
 declare -A readBehavior
 readBehavior["TargetOriginId"]=$coreBucket
 readBehavior["AllowedMethods"]='{"Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"]}'
