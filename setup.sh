@@ -616,7 +616,36 @@ COMMENT
 
 echo "Ensuring CloudFront distribution is created and configured correctly..."
 
-    originAccessIdentityId=$()
+    echo "... checking for origin access identity..."
+    originAccessIdentityId=$(aws cloudfront list-cloud-front-origin-access-identities --query "CloudFrontOriginAccessIdentityList.Items[?Comment == '$systemProperName'].Id | [0]" --output text)
+    if [ ${#originAccessIdentityId} -ge 10 ]; then
+        echo "... ... already exists with Id $originAccessIdentityId."
+    else
+        echo "... ... NOT exists, creating now..."
+        originAccessIdentityConfig='{
+            "CallerReference": "'$systemProperName'",
+            "Comment": "'$systemProperName'"
+        }'
+        originAccessIdentityId=$(aws cloudfront create-cloud-front-origin-access-identity --cloud-front-origin-access-identity-config "$originAccessIdentityConfig" --query "CloudFrontOriginAccessIdentity.Id" --output text)
+    fi
+    
+    echo "... ensuring coreBucket policy to allow Cloudfront access via the origin access identity is correct..."
+    cloudfrontS3PolicyStatement='{
+        "Effect": "Allow",
+        "Principal": {
+            "AWS": "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity '$originAccessIdentityId'"
+        },
+        "Action": ["s3:GetObject","s3:PutObject"],
+        "Resource": "arn:aws:s3:::'$coreBucket'/*"
+    }'
+    bucketPolicy='{
+        "Statement": [
+            '"$lambdaPolicyStatement"',
+            '"$cloudfrontS3PolicyStatement"'
+        ]
+    }'
+    aws s3api put-bucket-policy --bucket $coreBucket --policy "$bucketPolicy"
+    echo "... Cloudfront access granted to $coreBucket."
 
     dCoreOrigin='{
         "Id": "'$coreBucket'",
@@ -898,23 +927,10 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
             exit 1
         fi
     fi
-
-    exit 0
-
     
-
-    #set core Bucket policy to allow Cloudfront access
-    cloudfrontS3PolicyStatement='{
-        "Effect": "Allow",
-        "Principal": {
-            "AWS": "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity '$cloudfrontDistributionId'"
-        },
-        "Action": ["s3:GetObject","s3:PutObject"],
-        "Resource": "arn:aws:s3:::'$coreBucket'/*"
-    }'
-    
-    aws s3api put-bucket-policy --bucket $coreBucket --policy '{"Statement": ['$lambdaPolicyStatement','$cloudfrontS3PolicyStatement']}'
-    
+    echo "... confirming your Cloudfront distribution URL: "
+    distributionURL=$(aws cloudfront get-distribution --id "$cloudfrontDistributionId" --query "Distribution.DomainName" --output text)
+    echo "$distributionURL"
 echo "
 ---------
 "
