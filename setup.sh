@@ -615,22 +615,31 @@ COMMENT
 
 
 echo "Ensuring CloudFront distribution is created and configured correctly..."
+
+    originAccessIdentityId=$()
+
     dCoreOrigin='{
         "Id": "'$coreBucket'",
-        "DomainName": "'$coreBucket'.s3.amazonaws.com",
+        "DomainName": "'$coreBucket'.s3.'$coreRegion'.amazonaws.com",
         "OriginPath": "",
         "OriginShield": {
             "Enabled": false
+        },
+        "S3OriginConfig": {
+            "OriginAccessIdentity": "origin-access-identity/cloudfront/'$originAccessIdentityId'"
         },
         "ConnectionAttempts": 3,
         "ConnectionTimeout": 10
     }'
     dErrorOrigin='{
         "Id": "'$coreBucket'-403",
-        "DomainName": "'$coreBucket'.s3.amazonaws.com",
+        "DomainName": "'$coreBucket'.s3.'$coreRegion'.amazonaws.com",
         "OriginPath": "/'$envSystemRoot'/error/403.html",
         "OriginShield": {
             "Enabled": false
+        },
+        "S3OriginConfig": {
+            "OriginAccessIdentity": "origin-access-identity/cloudfront/'$originAccessIdentityId'"
         },
         "ConnectionAttempts": 3,
         "ConnectionTimeout": 10
@@ -842,7 +851,7 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
             {
                 "ErrorCode": 403, 
                 "ResponsePagePath": "/'$envSystemRoot'/error/403.html", 
-                "ResponseCode": 403, 
+                "ResponseCode": "403", 
                 "ErrorCachingMinTTL": 10
             }
         ]
@@ -851,7 +860,7 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
     dLogging='{
         "Enabled": true, 
         "IncludeCookies": true, 
-        "Bucket": "'$logBucket'", 
+        "Bucket": "'$logBucket'.s3.amazonaws.com", 
         "Prefix": "cloudfront/'$systemProperName'/"
     }'
     
