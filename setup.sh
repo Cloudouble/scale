@@ -4,6 +4,8 @@ echo "Starting...
 ---------
 "
 
+<< "COMMENT"
+
 echo "Checking logBucket set up for $logBucket..."
     echo "... checking if logBucket ($logBucket) exists..."
     bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
@@ -609,6 +611,8 @@ echo "
 ---------
 "
 
+COMMENT
+
 
 echo "Ensuring CloudFront distribution is created and configured correctly..."
     dCoreOrigin='{"Id": "'$coreBucket'", "DomainName": "'$coreBucket'.s3.amazonaws.com", "OriginPath": "", "OriginShield": false, "ConnectionAttempts": 3, "ConnectionTimeout": 10}'
@@ -643,7 +647,7 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
         fi
     fi
     echo "... checking to see if origin request policy ${systemProperName}Standard exists..."
-    dOriginRequestPolicyIdStandard=$(aws cloudfront list-origin-request-policies --type custom --query "OriginRequestPolicyList.Items[?OriginRequestPolicy.OriginRequestPolicyConfig.Name == "'$systemProperName'Standard"].OriginRequestPolicy.Id" --output text)
+    dOriginRequestPolicyIdStandard=$(aws cloudfront list-origin-request-policies --type custom --query "OriginRequestPolicyList.Items[?OriginRequestPolicy.OriginRequestPolicyConfig.Name == '${systemProperName}Standard'].OriginRequestPolicy.Id" --output text)
     if [ ${#dOriginRequestPolicyIdStandard} -ge 10 ]; then
         echo "... ... already exists."
     else
@@ -657,37 +661,180 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
         fi
     fi
 
+    defaultCacheBehaviour='{
+        "TargetOriginId": "'$coreBucket'", 
+        "ViewerProtocolPolicy": "redirect-to-https", 
+        "AllowedMethods": {
+            "Quantity": 3, 
+            "Items": ["GET", "HEAD", "OPTIONS"], 
+            "CachedMethods": {
+                "Quantity": 3, 
+                "Items": ["GET", "HEAD", "OPTIONS"]
+            }
+        }, 
+        "Compress": true, 
+        "LambdaFunctionAssociations": '$lambdaFunctionAssociations', 
+        "CachePolicyId": "'$dCachePolicyIdStandard'", 
+        "OriginRequestPolicyId": "'$dOriginRequestPolicyIdStandard'"
+    }'
+    
+    writeCacheBehavior='{
+        "TargetOriginId": "'$coreBucket'", 
+        "ViewerProtocolPolicy": "redirect-to-https", 
+        "AllowedMethods": {
+            "Quantity": 3, 
+            "Items": ["GET", "HEAD", "OPTIONS"], 
+            "CachedMethods": {
+                "Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"]
+            }
+        }, 
+        "Compress": true, 
+        "LambdaFunctionAssociations": '$lambdaFunctionAssociations', 
+        "CachePolicyId": "'$dCachePolicyIdStandard'", 
+        "OriginRequestPolicyId": "'$dOriginRequestPolicyIdStandard'"
+    }'
+    
+    
+    declare -A readBehavior
+    readBehavior["TargetOriginId"]=$coreBucket
+    readBehavior["AllowedMethods"]='{"Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"]}'
+    readBehavior["CachePolicyId"]=$dCachePolicyIdDisabled
+    readBehavior["OriginRequestPolicyId"]=$dOriginRequestPolicyIdStandard
+    readBehavior["LambdaFunctionAssociations"]='{}'
+    
+    declare -A writeBehavior
+    writeBehavior["TargetOriginId"]=$coreBucket
+    writeBehavior["AllowedMethods"]='{"Quantity": 7, "Items": ["GET" "HEAD" "OPTIONS" "PUT" "POST" "PATCH" "DELETE"]}'
+    writeBehavior["CachePolicyId"]=$dCachePolicyIdDisabled
+    writeBehavior["OriginRequestPolicyId"]=$dOriginRequestPolicyIdStandard
+    writeBehavior["LambdaFunctionAssociations"]=$dLambdaFunctionAssociations
+    
+    declare -A blockedBehaviour
+    blockedBehaviour["TargetOriginId"]=$coreBucket'-403'
+    blockedBehaviour["AllowedMethods"]='{"Quantity": 7, "Items": ["GET" "HEAD" "OPTIONS" "PUT" "POST" "PATCH" "DELETE"]}'
+    blockedBehaviour["CachePolicyId"]=$dCachePolicyIdStandard
+    blockedBehaviour["OriginRequestPolicyId"]=$dOriginRequestPolicyIdStandard
+    blockedBehaviour["LambdaFunctionAssociations"]='{}'
+    
+    declare -A cacheBehaviors
+    cacheBehaviors["$envSystemRoot/connection/????????-????-????-????-????????????/subscription/*/????????-????-????-????-????????????/*.*"]='readBehavior'
+    cacheBehaviors["$envSystemRoot/connection/????????-????-????-????-????????????/subscription/*/????????-????-????-????-????????????.*"]='readBehavior'
+    cacheBehaviors["$envSystemRoot/connection/????????-????-????-????-????????????/feed/*/????????-????-????-????-????????????/*/*/*/*-*.*"]='readBehavior'
+    cacheBehaviors["$envSystemRoot/connection/????????-????-????-????-????????????/record/*/????????-????-????-????-????????????/*.json"]='writeBehavior'
+    cacheBehaviors["$envSystemRoot/connection/????????-????-????-????-????????????/record/*/????????-????-????-????-????????????.json"]='writeBehavior'
+    cacheBehaviors["$envSystemRoot/connection/????????-????-????-????-????????????/subscription/*/????????-????-????-????-????????????/????????-????-????-????-????????????.json"]='writeBehavior'
+    cacheBehaviors["$envSystemRoot/connection/????????-????-????-????-????????????/feed/*/????????-????-????-????-????????????/????????-????-????-????-????????????.json"]='writeBehavior'
+    cacheBehaviors["$envSystemRoot/connection/????????-????-????-????-????????????/query/*/????????-????-????-????-????????????.json"]='writeBehavior'
+    cacheBehaviors["$envSystemRoot/connection/????????-????-????-????-????????????/asset/*"]='writeBehavior'
+    cacheBehaviors["$envSystemRoot/connection/????????-????-????-????-????????????/static/*"]='writeBehavior'
+    cacheBehaviors["$envSystemRoot/connection/????????-????-????-????-????????????/view/????????-????-????-????-????????????.json"]='writeBehavior'
+    cacheBehaviors["$envSystemRoot/connection/????????-????-????-????-????????????/connect.json"]='writeBehavior'
+    cacheBehaviors["$envSystemRoot/connection/????????-????-????-????-????????????/system/*/*.json"]='writeBehavior'
+    cacheBehaviors["$envSystemRoot/connection/????????-????-????-????-????????????/error/*.html"]='writeBehavior'
+    cacheBehaviors["$envSystemRoot/*"]='blockedBehavior'
+    
 
 
+    dCacheBehaviorItemsArray=()
+    for PathPattern in ${!cacheBehaviors[@]}; do 
+        if [ "readBehavior" == "${cacheBehaviors[$PathPattern]}" ]; then
+            TargetOriginId="${readBehavior['TargetOriginId']}"
+            AllowedMethods="${readBehavior['AllowedMethods']}"
+            LambdaFunctionAssociations="${readBehavior['LambdaFunctionAssociations']}"
+            CachePolicyId="${readBehavior['CachePolicyId']}"
+            OriginRequestPolicyId="${readBehavior['OriginRequestPolicyId']}"
+        fi
+        if [ "writeBehavior" == "${cacheBehaviors[$PathPattern]}" ]; then
+            TargetOriginId="${writeBehavior['TargetOriginId']}"
+            AllowedMethods="${writeBehavior['AllowedMethods']}"
+            LambdaFunctionAssociations="${writeBehavior['LambdaFunctionAssociations']}"
+            CachePolicyId="${writeBehavior['CachePolicyId']}"
+            OriginRequestPolicyId="${writeBehavior['OriginRequestPolicyId']}"
+        fi
+        if [ "blockBehavior" == "${cacheBehaviors[$PathPattern]}" ]; then
+            TargetOriginId="${blockBehavior['TargetOriginId']}"
+            AllowedMethods="${blockBehavior['AllowedMethods']}"
+            LambdaFunctionAssociations="${blockBehavior['LambdaFunctionAssociations']}"
+            CachePolicyId="${blockBehavior['CachePolicyId']}"
+            OriginRequestPolicyId="${blockBehavior['OriginRequestPolicyId']}"
+        fi
+
+        dCacheBehaviorItemsArray+='{
+            "PathPattern": "'$PathPattern'", 
+            "TargetOriginId": "'$TargetOriginId'", 
+            "ViewerProtocolPolicy": "redirect-to-https", 
+            "AllowedMethods": '$AllowedMethods', 
+            "CachedMethods": {
+                "Quantity": 3, 
+                "Items": ["GET", "HEAD", "OPTIONS"]
+            }, 
+            "Compress": true, 
+            "LambdaFunctionAssociations": '$LambdaFunctionAssociations', 
+            "CachePolicyId": "'$CachePolicyId'", 
+            "OriginRequestPolicyId": "'$OriginRequestPolicyId'"
+        }, '
+    done
+    dCacheBehaviorItems="[${dCacheBehaviorItemsArray::-2}]"
+    dCacheBehaviors='{
+        "Quantity": 15, 
+        "Items": '$dCacheBehaviorItems'
+    }'
+    
+    
+    echo "$dCacheBehaviors"
     
     
     exit 0
     
     
+    dCustomErrorResponses='{
+        "Quantity": 1, 
+        "Items": [
+            {
+                "ErrorCode": 403, 
+                "ResponsePagePath": "/'$envSystemRoot'/error/403.html", 
+                "ResponseCode": 403, 
+                "ErrorCachingMinTTL": 10
+            }
+        ]
+    }'
+    
+    dLogging='{
+        "Enabled": true, 
+        "IncludeCookies": true, 
+        "Bucket": "'$logBucket'", 
+        "Prefix": "cloudfront/'$systemProperName'/"
+    }'
+    
+    distributionConfig='{
+        "CallerReference": "'$systemProperName'", 
+        "DefaultRootObject": "index.html", 
+        "Origins": '$dOrigins', 
+        "DefaultCacheBehavior": '$dDefaultCacheBehaviour', 
+        "CacheBehaviors": '$dCacheBehaviors', 
+        "CustomErrorResponses": '$dCustomErrorResponses',  
+        "Comment": "'$systemProperName'", 
+        "Logging": '$dLogging', 
+        "PriceClass": "PriceClass_All", 
+        "Enabled": true, 
+        "ViewerCertificate": {
+            "CloudFrontDefaultCertificate": true
+        }, 
+        "IsIPV6Enabled": true
+    }'
+    
+    cloudfrontDistributionId=$(aws cloudfront create-distribution --query "Distribution.Id" --distribution-config $distributionConfig --output text)
 
-    
-    dCacheBehaviorItemsArray=()
-    for PathPattern in ${!cacheBehaviors[@]}; do 
-        dCacheBehaviorItemsArray+='{"PathPattern": "'$PathPattern'", "TargetOriginId": "'${cacheBehaviors[$PathPattern]['TargetOriginId']}'", "ViewerProtocolPolicy": "redirect-to-https", "AllowedMethods": '${cacheBehaviors[$PathPattern]['AllowedMethods']}', '\
-        '"CachedMethods": {"Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"]}, "Compress": true, '\
-        '"LambdaFunctionAssociations": '${cacheBehaviors[$PathPattern]['LambdaFunctionAssociations']}', "CachePolicyId": "'${cacheBehaviors[$PathPattern]['CachePolicyId']}'", "OriginRequestPolicyId": "'${cacheBehaviors[$PathPattern]['OriginRequestPolicyId']}'"}, '
-    done
-    dCacheBehaviorItems="[${dCacheBehaviorItemsArray::-2}]"
-    dCacheBehaviors='{"Quantity": 15, "Items": '$dCacheBehaviorItems'}'
-    
-    dCustomErrorResponses='{"Quantity": 1, "Items": [{"ErrorCode": 403, "ResponsePagePath": "/'$envSystemRoot'/error/403.html", "ResponseCode": 403, "ErrorCachingMinTTL": 10}]}'
-    dLogging='{"Enabled": true, "IncludeCookies": true, "Bucket": "'$logBucket'", "Prefix": "cloudfront/'$systemProperName'/"}'
-    
-    distributionConfig='{"CallerReference": "'$systemProperName'", "DefaultRootObject": "index.html", "Origins": '\
-        $dOrigins', "DefaultCacheBehavior": '$dDefaultCacheBehaviour', "CacheBehaviors": '$dCacheBehaviors', "CustomErrorResponses": '$dCustomErrorResponses' "Comment": "'\
-        $systemProperName'" "Logging": '$dLogging', "PriceClass": "PriceClass_All", "Enabled": true, "ViewerCertificate": {"CloudFrontDefaultCertificate": true}, "IsIPV6Enabled": true}'
-    
-    cloudfrontDistributionId=$(aws cloudfront create-distribution --query "Distribution.Id" --distribution-config $distributionConfig)
-    '
-    
     #set core Bucket policy to allow Cloudfront access
-    : '
-    cloudfrontS3PolicyStatement='{"Effect": "Allow","Principal": {"AWS": "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity '$cloudfrontDistributionId'"},"Action": ["s3:GetObject","s3:PutObject"],"Resource": "arn:aws:s3:::'$coreBucket'/*"}'
+    cloudfrontS3PolicyStatement='{
+        "Effect": "Allow",
+        "Principal": {
+            "AWS": "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity '$cloudfrontDistributionId'"
+        },
+        "Action": ["s3:GetObject","s3:PutObject"],
+        "Resource": "arn:aws:s3:::'$coreBucket'/*"
+    }'
+    
     aws s3api put-bucket-policy --bucket $coreBucket --policy '{"Statement": ['$lambdaPolicyStatement','$cloudfrontS3PolicyStatement']}'
     
 echo "
