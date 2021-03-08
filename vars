@@ -132,6 +132,68 @@ cachePolicyDocumentDisabled='{
     }
 }'
 
+originRequestPolicyStandard='{
+    "Name": "'$systemProperName'Standard", 
+    "HeadersConfig": {
+        "HeaderBehavior": "whitelist", 
+        "Headers": {
+            "Quantity": 4,
+            "Items":["Accept","Access-Control-Request-Method","Access-Control-Request-Headers","'$envAuthenticationNamespace'Connection"]
+        }
+    }, 
+    "CookiesConfig": {
+        "CookieBehavior": "all"
+    }, 
+    "QueryStringsConfig": {
+        "QueryStringBehavior": "all"
+    }
+}'
+
+
+lambdaFunctionAssociations='{
+    "Quantity": 1, 
+    "Items": [
+        {
+            "LambdaFunctionARN": "arn:aws:lambda:'$edgeRegion':'$accountId':function:'$lambdaNamespace'-edge-accept", 
+            "EventType": "origin-request", 
+            "IncludeBody": true
+        }
+    ]
+}'
+
+defaultCacheBehaviour='{
+    "TargetOriginId": "'$coreBucket'", 
+    "ViewerProtocolPolicy": "redirect-to-https", 
+    "AllowedMethods": {
+        "Quantity": 3, 
+        "Items": ["GET", "HEAD", "OPTIONS"], 
+        "CachedMethods": {
+            "Quantity": 3, 
+            "Items": ["GET", "HEAD", "OPTIONS"]
+        }
+    }, 
+    "Compress": true, 
+    "LambdaFunctionAssociations": '$lambdaFunctionAssociations', 
+    "CachePolicyId": "'$dCachePolicyIdStandard'", 
+    "OriginRequestPolicyId": "'$dOriginRequestPolicyIdStandard'"
+}'
+    
+writeCacheBehavior='{
+    "TargetOriginId": "'$coreBucket'", 
+    "ViewerProtocolPolicy": "redirect-to-https", 
+    "AllowedMethods": {
+        "Quantity": 3, 
+        "Items": ["GET", "HEAD", "OPTIONS"], 
+        "CachedMethods": {
+            "Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"]
+        }
+    }, 
+    "Compress": true, 
+    "LambdaFunctionAssociations": '$lambdaFunctionAssociations', 
+    "CachePolicyId": "'$dCachePolicyIdStandard'", 
+    "OriginRequestPolicyId": "'$dOriginRequestPolicyIdStandard'"
+}'
+
 
 declare -A readBehavior
 readBehavior["TargetOriginId"]=$coreBucket

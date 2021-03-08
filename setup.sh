@@ -628,9 +628,8 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
             echo ""
         fi
     fi
-    
     echo "... checking to see if cache policy ${systemProperName}Disabled exists..."
-    dCachePolicyIdDisabled=$(aws cloudfront list-cache-policies --type custom --query "CachePolicyList.Items[?CachePolicy.CachePolicyConfig.Name == '${systemProperName}Disabled'] | [0].CachePolicy.Id")
+    dCachePolicyIdDisabled=$(aws cloudfront list-cache-policies --type custom --query "CachePolicyList.Items[?CachePolicy.CachePolicyConfig.Name == '${systemProperName}Disabled'] | [0].CachePolicy.Id" --output text)
     if [ ${#dCachePolicyIdDisabled} -ge 10 ]; then
         echo "... ... already exists."
     else
@@ -643,31 +642,30 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
             echo ""
         fi
     fi
-    
+    echo "... checking to see if origin request policy ${systemProperName}Standard exists..."
+    dOriginRequestPolicyIdStandard=$(aws cloudfront list-origin-request-policies --type custom --query "OriginRequestPolicyList.Items[?OriginRequestPolicy.OriginRequestPolicyConfig.Name == "'$systemProperName'Standard"].OriginRequestPolicy.Id" --output text)
+    if [ ${#dOriginRequestPolicyIdStandard} -ge 10 ]; then
+        echo "... ... already exists."
+    else
+        echo "... ... NOT exists, creating now..."
+        dOriginRequestPolicyIdStandard=$(aws cloudfront create-origin-request-policy --origin-request-policy-config "$originRequestPolicyStandard" --query "OriginRequestPolicy.Id" --output text)
+        if [ ${#dOriginRequestPolicyIdStandard} -ge 10 ]; then
+            echo "... ... ... now created."        
+        else
+            echo "... ... ... error creating origin request policy ${systemProperName}Standard, please try again or create it manually:"
+            echo ""
+        fi
+    fi
+
+
+
     
     
     exit 0
     
     
-    dCachePolicyIdDisabled=$(aws cloudfront list-cache-policies --type custom --query 'CachePolicyList.Items[?CachePolicy.CachePolicyConfig.Name == "'$systemProperName'Disabled"].CachePolicy.Id')
-    if [ ! $dCachePolicyIdDisabled ]; then
-        dCachePolicyIdDisabled=$(aws cloudfront create-cache-policy --query "Id" --cache-policy-config '{"Name": "'$systemProperName'Disabled", '\
-            '"ParametersInCacheKeyAndForwardedToOrigin": {"EnableAcceptEncodingGzip": true, "EnableAcceptEncodingBrotli": true, "DefaultTTL": 0, "MinTTL": 0, "MaxTTL": 0 '\
-            '"HeadersConfig": {"Quantity": 3, "Items": ["Accept", "Access-Control-Request-Method", "Access-Control-Request-Headers"]}}}')
-    fi
-    dOriginRequestPolicyIdStandard=$(aws cloudfront list-origin-request-policies --type custom --query "OriginRequestPolicyList.Items[?OriginRequestPolicy.OriginRequestPolicyConfig.Name == "'$systemProperName'Standard"].OriginRequestPolicy.Id")
-    if [ ! $dOriginRequestPolicyIdStandard ]; then
-        dOriginRequestPolicyIdStandard=$(aws cloudfront create-origin-request-policy --query "Id" --cache-policy-config '{"Name": "'$systemProperName'Standard", '\
-            '"HeadersConfig": {"HeaderBehavior": "whitelist", "Headers": {"Quantity": 3, "Items: ["Accept", "Access-Control-Request-Method", "Access-Control-Request-Headers"]}}, '\
-            '"CookiesConfig": {"CookieBehavior": "none"}, "QueryStringsConfig": {"QueryStringBehavior": "none"}}')
-    fi
-    dLambdaFunctionAssociations='{"Quantity": 1, "Items": [{"LambdaFunctionARN": "arn:aws:lambda:'$edgeRegion':'$accountId':function:'$lambdaNamespace'-edge-accept", "EventType": "origin-request", "IncludeBody": true}]}'
-    dDefaultCacheBehaviour='{"TargetOriginId": "'$coreBucket'", "ViewerProtocolPolicy": "redirect-to-https", "AllowedMethods": {"Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"], '\
-        '"CachedMethods": {"Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"]}}, "Compress": true, '\
-        '"LambdaFunctionAssociations": '$dLambdaFunctionAssociations', "CachePolicyId": "'$dCachePolicyIdStandard'", "OriginRequestPolicyId": "'$dOriginRequestPolicyIdStandard'"}'
-    dWriteCacheBehavior='{"TargetOriginId": "'$coreBucket'", "ViewerProtocolPolicy": "redirect-to-https", "AllowedMethods": {"Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"], '\
-        '"CachedMethods": {"Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"]}}, "Compress": true, '\
-        '"LambdaFunctionAssociations": '$dLambdaFunctionAssociations', "CachePolicyId": "'$dCachePolicyIdStandard'", "OriginRequestPolicyId": "'$dOriginRequestPolicyIdStandard'"}'
+
+    
     dCacheBehaviorItemsArray=()
     for PathPattern in ${!cacheBehaviors[@]}; do 
         dCacheBehaviorItemsArray+='{"PathPattern": "'$PathPattern'", "TargetOriginId": "'${cacheBehaviors[$PathPattern]['TargetOriginId']}'", "ViewerProtocolPolicy": "redirect-to-https", "AllowedMethods": '${cacheBehaviors[$PathPattern]['AllowedMethods']}', '\
