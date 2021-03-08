@@ -148,16 +148,3 @@ originRequestPolicyStandard='{
         "QueryStringBehavior": "all"
     }
 }'
-
-
-lambdaFunctionAssociations='{
-    "Quantity": 1, 
-    "Items": [
-        {
-            "LambdaFunctionARN": "arn:aws:lambda:'$edgeRegion':'$accountId':function:'$lambdaNamespace'-edge-accept", 
-            "EventType": "origin-request", 
-            "IncludeBody": true
-        }
-    ]
-}'
-

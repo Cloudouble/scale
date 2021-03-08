@@ -615,11 +615,43 @@ COMMENT
 
 
 echo "Ensuring CloudFront distribution is created and configured correctly..."
-    dCoreOrigin='{"Id": "'$coreBucket'", "DomainName": "'$coreBucket'.s3.amazonaws.com", "OriginPath": "", "OriginShield": false, "ConnectionAttempts": 3, "ConnectionTimeout": 10}'
-    dErrorOrigin='{"Id": "'$coreBucket'-403", "DomainName": "'$coreBucket'.s3.amazonaws.com", "OriginPath": "/'$envSystemRoot'/error/403.html", "OriginShield": false, "ConnectionAttempts": 3, "ConnectionTimeout": 10}'
-    dOrigins='{"Quantity": 2, "Items": ['$dCoreOrigin', '$dErrorOrigin']}'
+    dCoreOrigin='{
+        "Id": "'$coreBucket'",
+        "DomainName": "'$coreBucket'.s3.amazonaws.com",
+        "OriginPath": "",
+        "OriginShield": {
+            "Enabled": false
+        },
+        "ConnectionAttempts": 3,
+        "ConnectionTimeout": 10
+    }'
+    dErrorOrigin='{
+        "Id": "'$coreBucket'-403",
+        "DomainName": "'$coreBucket'.s3.amazonaws.com",
+        "OriginPath": "/'$envSystemRoot'/error/403.html",
+        "OriginShield": {
+            "Enabled": false
+        },
+        "ConnectionAttempts": 3,
+        "ConnectionTimeout": 10
+    }'
+    dOrigins='{
+        "Quantity": 2,
+        "Items": ['$dCoreOrigin', '$dErrorOrigin']
+    }'
+    lambdaFunctionAssociations='{
+        "Quantity": 1, 
+        "Items": [
+            {
+                "LambdaFunctionARN": "arn:aws:lambda:'$edgeRegion':'$accountId':function:'$lambdaNamespace'-edge-accept", 
+                "EventType": "origin-request", 
+                "IncludeBody": true
+            }
+        ]
+    }'
+    
     echo "... checking to see if cache policy ${systemProperName}Standard exists..."
-    dCachePolicyIdStandard=$(aws cloudfront list-cache-policies --type custom --query "CachePolicyList.Items[?CachePolicy.CachePolicyConfig.Name == '${systemProperName}Standard'] | [0].CachePolicy.Id")
+    dCachePolicyIdStandard=$(aws cloudfront list-cache-policies --type custom --query "CachePolicyList.Items[?CachePolicy.CachePolicyConfig.Name == '${systemProperName}Standard'] | [0].CachePolicy.Id" --output text)
     if [ ${#dCachePolicyIdStandard} -ge 10 ]; then
         echo "... ... already exists."
     else
@@ -661,61 +693,62 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
         fi
     fi
 
+    echo "... preparing distribution configuration..."
     defaultCacheBehaviour='{
-        "TargetOriginId": "'$coreBucket'", 
-        "ViewerProtocolPolicy": "redirect-to-https", 
+        "TargetOriginId": "'$coreBucket'",
+        "ViewerProtocolPolicy": "redirect-to-https",
         "AllowedMethods": {
-            "Quantity": 3, 
-            "Items": ["GET", "HEAD", "OPTIONS"], 
+            "Quantity": 3,
+            "Items": ["GET", "HEAD", "OPTIONS"],
             "CachedMethods": {
-                "Quantity": 3, 
+                "Quantity": 3,
                 "Items": ["GET", "HEAD", "OPTIONS"]
             }
-        }, 
-        "Compress": true, 
-        "LambdaFunctionAssociations": '$lambdaFunctionAssociations', 
-        "CachePolicyId": "'$dCachePolicyIdStandard'", 
+        },
+        "Compress": true,
+        "CachePolicyId": "'$dCachePolicyIdStandard'",
         "OriginRequestPolicyId": "'$dOriginRequestPolicyIdStandard'"
     }'
-    
-    writeCacheBehavior='{
-        "TargetOriginId": "'$coreBucket'", 
-        "ViewerProtocolPolicy": "redirect-to-https", 
-        "AllowedMethods": {
-            "Quantity": 3, 
-            "Items": ["GET", "HEAD", "OPTIONS"], 
-            "CachedMethods": {
-                "Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"]
-            }
-        }, 
-        "Compress": true, 
-        "LambdaFunctionAssociations": '$lambdaFunctionAssociations', 
-        "CachePolicyId": "'$dCachePolicyIdStandard'", 
-        "OriginRequestPolicyId": "'$dOriginRequestPolicyIdStandard'"
-    }'
-    
     
     declare -A readBehavior
     readBehavior["TargetOriginId"]=$coreBucket
-    readBehavior["AllowedMethods"]='{"Quantity": 3, "Items": ["GET", "HEAD", "OPTIONS"]}'
+    readBehavior["AllowedMethods"]='{
+        "Quantity": 3,
+        "Items": ["GET", "HEAD", "OPTIONS"],
+        "CachedMethods": {
+            "Quantity": 3,
+            "Items": ["GET", "HEAD", "OPTIONS"]
+        }
+    }'
     readBehavior["CachePolicyId"]=$dCachePolicyIdDisabled
     readBehavior["OriginRequestPolicyId"]=$dOriginRequestPolicyIdStandard
-    readBehavior["LambdaFunctionAssociations"]='{}'
-    
+
     declare -A writeBehavior
     writeBehavior["TargetOriginId"]=$coreBucket
-    writeBehavior["AllowedMethods"]='{"Quantity": 7, "Items": ["GET" "HEAD" "OPTIONS" "PUT" "POST" "PATCH" "DELETE"]}'
+    writeBehavior["AllowedMethods"]='{
+        "Quantity": 7,
+        "Items": ["GET" "HEAD" "OPTIONS" "PUT" "POST" "PATCH" "DELETE"],
+        "CachedMethods": {
+            "Quantity": 3,
+            "Items": ["GET", "HEAD", "OPTIONS"]
+        }
+    }'
     writeBehavior["CachePolicyId"]=$dCachePolicyIdDisabled
     writeBehavior["OriginRequestPolicyId"]=$dOriginRequestPolicyIdStandard
-    writeBehavior["LambdaFunctionAssociations"]=$lambdaFunctionAssociations
-    
+
     declare -A blockedBehaviour
     blockedBehaviour["TargetOriginId"]=$coreBucket'-403'
-    blockedBehaviour["AllowedMethods"]='{"Quantity": 7, "Items": ["GET" "HEAD" "OPTIONS" "PUT" "POST" "PATCH" "DELETE"]}'
+    blockedBehaviour["AllowedMethods"]='{
+        "Quantity": 7,
+        "Items": ["GET" "HEAD" "OPTIONS" "PUT" "POST" "PATCH" "DELETE"],
+        "CachedMethods": {
+            "Quantity": 3,
+            "Items": ["GET", "HEAD", "OPTIONS"]
+        }
+    }'
     blockedBehaviour["CachePolicyId"]=$dCachePolicyIdStandard
     blockedBehaviour["OriginRequestPolicyId"]=$dOriginRequestPolicyIdStandard
-    blockedBehaviour["LambdaFunctionAssociations"]='{}'
-    
+
     declare -A cacheBehaviors
     cacheBehaviors["$envSystemRoot/connection/????????-????-????-????-????????????/subscription/*/????????-????-????-????-????????????/*.*"]='readBehavior'
     cacheBehaviors["$envSystemRoot/connection/????????-????-????-????-????????????/subscription/*/????????-????-????-????-????????????.*"]='readBehavior'
@@ -774,34 +807,35 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
             CachePolicyId="${blockBehavior['CachePolicyId']}"
             OriginRequestPolicyId="${blockBehavior['OriginRequestPolicyId']}"
         fi
-        dCacheBehaviorItemsArray+='{
-            "PathPattern": "'$PathPattern'", 
-            "TargetOriginId": "'$TargetOriginId'", 
-            "ViewerProtocolPolicy": "redirect-to-https", 
-            "AllowedMethods": '$AllowedMethods', 
-            "CachedMethods": {
-                "Quantity": 3, 
-                "Items": ["GET", "HEAD", "OPTIONS"]
-            }, 
-            "Compress": true, 
-            "LambdaFunctionAssociations": '$LambdaFunctionAssociations', 
-            "CachePolicyId": "'$CachePolicyId'", 
-            "OriginRequestPolicyId": "'$OriginRequestPolicyId'"
-        }, '
+        if [ "writeBehavior" == "${cacheBehaviors[$PathPattern]}" ]; then
+            dCacheBehaviorItemsArray+='{
+                "PathPattern": "'$PathPattern'",
+                "TargetOriginId": "'$TargetOriginId'",
+                "ViewerProtocolPolicy": "redirect-to-https",
+                "AllowedMethods": '$AllowedMethods',
+                "Compress": true,
+                "LambdaFunctionAssociations": '$lambdaFunctionAssociations',
+                "CachePolicyId": "'$CachePolicyId'",
+                "OriginRequestPolicyId": "'$OriginRequestPolicyId'"
+            }, '
+        else 
+            dCacheBehaviorItemsArray+='{
+                "PathPattern": "'$PathPattern'",
+                "TargetOriginId": "'$TargetOriginId'",
+                "ViewerProtocolPolicy": "redirect-to-https",
+                "AllowedMethods": '$AllowedMethods',
+                "Compress": true,
+                "CachePolicyId": "'$CachePolicyId'",
+                "OriginRequestPolicyId": "'$OriginRequestPolicyId'"
+            }, '
+        fi
     done
     dCacheBehaviorItems="[${dCacheBehaviorItemsArray::-2}]"
     dCacheBehaviors='{
         "Quantity": 15, 
         "Items": '$dCacheBehaviorItems'
     }'
-    
-    
-    echo "$dCacheBehaviors"
-    
-    
-    exit 0
-    
-    
+
     dCustomErrorResponses='{
         "Quantity": 1, 
         "Items": [
@@ -825,7 +859,7 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
         "CallerReference": "'$systemProperName'", 
         "DefaultRootObject": "index.html", 
         "Origins": '$dOrigins', 
-        "DefaultCacheBehavior": '$dDefaultCacheBehaviour', 
+        "DefaultCacheBehavior": '$defaultCacheBehaviour', 
         "CacheBehaviors": '$dCacheBehaviors', 
         "CustomErrorResponses": '$dCustomErrorResponses',  
         "Comment": "'$systemProperName'", 
@@ -838,7 +872,27 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
         "IsIPV6Enabled": true
     }'
     
-    cloudfrontDistributionId=$(aws cloudfront create-distribution --query "Distribution.Id" --distribution-config $distributionConfig --output text)
+    echo "... checking if the distribution $systemProperName exists..."
+    cloudfrontDistributionId=$(aws cloudfront list-distributions --query "DistributionList.Items[?DistributionConfig.CallerReference == '$systemProperName'].Id | [0]")
+    if [ "${#cloudfrontDistributionId}" -ge 10 ]; then
+        echo "... already exists."
+    else 
+        echo "... not exists, creating now..."
+        cloudfrontDistributionId=$(aws cloudfront create-distribution --query "Distribution.Id" --distribution-config "$distributionConfig" --output text)
+        cloudfrontDistributionId=$(aws cloudfront list-distributions --query "DistributionList.Items[?DistributionConfig.CallerReference == '$systemProperName'].Id | [0]")
+        if [ "${#cloudfrontDistributionId}" -ge 10 ]; then
+            echo "... distribution created."
+        else 
+            echo "... error creating distribution $systemProperName, please retry or create manually:"
+            echo "... ... see detailed documentation for instructions on how to set up manually."
+            echo ".. exiting now."
+            exit 1
+        fi
+    fi
+
+    exit 0
+
+    
 
     #set core Bucket policy to allow Cloudfront access
     cloudfrontS3PolicyStatement='{
