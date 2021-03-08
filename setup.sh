@@ -1,5 +1,6 @@
 . ./vars
 
+
 echo "Starting...
 ---------
 "
@@ -875,7 +876,7 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
     }'
     
     distributionConfig='{
-        "CallerReference": "'$systemProperName'2", 
+        "CallerReference": "'$systemProperName'", 
         "DefaultRootObject": "index.html", 
         "Origins": '$dOrigins', 
         "DefaultCacheBehavior": '$defaultCacheBehaviour', 
@@ -891,8 +892,8 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
         "IsIPV6Enabled": true
     }'
     
-    echo "... checking if the distribution $systemProperName1 exists..."
-    cloudfrontDistributionId=$(aws cloudfront list-distributions --query "DistributionList.Items[?DistributionConfig.CallerReference == '${systemProperName}2'].Id | [0]")
+    echo "... checking if the distribution $systemProperName exists..."
+    cloudfrontDistributionId=$(aws cloudfront list-distributions --query "DistributionList.Items[?Comment == '${systemProperName}'].Id | [0]" --output text)
     if [ "${#cloudfrontDistributionId}" -ge 10 ]; then
         echo "... already exists."
     else 
@@ -901,7 +902,7 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
         if [ "${#cloudfrontDistributionId}" -ge 10 ]; then
             echo "... distribution created."
         else 
-            echo "... error creating distribution ${systemProperName}2, please retry or create manually:"
+            echo "... error creating distribution ${systemProperName}, please retry or create manually:"
             echo "Cloudfront distribution JSON set up configuration: "
             echo ".. exiting now."
             exit 1
@@ -910,7 +911,11 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
     
     echo "... confirming your Cloudfront distribution URL: "
     distributionURL=$(aws cloudfront get-distribution --id "$cloudfrontDistributionId" --query "Distribution.DomainName" --output text)
-    echo "$distributionURL"
+    echo "
+    
+    $distributionURL
+    
+    "
 echo "
 ---------
 "
