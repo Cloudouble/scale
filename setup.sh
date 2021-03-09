@@ -1,7 +1,7 @@
 . ./vars
 
 
-echo "Starting...
+echo "LiveElement Scale installation starting...
 ---------
 "
 
@@ -921,25 +921,50 @@ echo "
 "
 
 
-
-exit 0
-
-
-
-# run core/schema
-    aws lambda invoke --function-name "$lambdaNamespace-core-schema" --invocation-type "RequestResponse" --log-type "Tail" --payload '{}'
-
-# run core/initialise
+if [ "$envShared" == "0" ]; then
+    echo "Dedicated installation, running system configuration processes...."
+    echo "... installing datatypes from schema.org..."
+    schemaStatusCode=$(aws lambda invoke --region $coreRegion --function-name "arn:aws:lambda:$coreRegion:$accountId:function:$lambdaNamespace-core-schema" --invocation-type "Event" --log-type "Tail" --payload '{}' --query "StatusCode" --output text /tmp/schema.log)
+    if [ "202" == "$schemaStatusCode" ]; then
+        echo "... datatype installation underway, will continue in the background and may take up to 15 minutes to complete."
+    else
+        echo "... error with datatype installation. Please try again or complete manually by running the $lambdaNamespace-core-schema Lambda function (no payload required)."
+    fi
+    
+    echo "... initialisation the system, including adding the sudo user..."
     sudoKey=uuidgen
     initialisePayload='{"key": "'$sudoKey'", "name": "'$sudoName'", "_env": {"bucket": "'$coreBucket'", "lambda_namespace": "'$lambdaNamespace'", "data_root": "'$envSystemRoot'"}}'
-    aws lambda invoke --function-name "$lambdaNamespace-core-initialise" --invocation-type "RequestResponse" --log-type "Tail" --payload $initialisePayload
-    
+    initialiseStatus=$(aws lambda invoke --region $coreRegion --function-name "arn:aws:lambda:$coreRegion:$accountId:function:$lambdaNamespace-core-initialise" "$lambdaNamespace-core-initialise" --invocation-type "RequestResponse" --log-type "Tail" --payload $initialisePayload --query "StatusCode" --output text /temp/schema.log)
+    if [ "200" == "$initialiseStatus" ]; then
+        echo "system initialisation complete, sudo user added"
+        echo "Sudo user name: $sudoName"
+        echo "Your sudo key is: " 
+        echo ""
+        echo "$sudoKey"
+        echo ""
+        echo "Copy it now as it will not be displayed again"
+    else
+        echo "... error initialising the system and / or creating the sudo user, please retry or completely manually:"
+        echo "Lambda Function: $lambdaNamespace-core-schema"
+        echo "Payload: "
+        echo '{
+            "key": "'$sudoKey'", 
+            "name": "'$sudoName'", 
+            "_env": {
+                "bucket": "'$coreBucket'", 
+                "lambda_namespace": "'$lambdaNamespace'", 
+                "data_root": "'$envSystemRoot'"
+            }
+        }'
+        echo "... exiting now..."
+        exit 1
+    fi
+    echo "... configuration processes for dedicated installation complete (except for indicated continuing background processes)."
+fi
+echo "
+---------
+"
 
-#print sudoKey to console
-echo "Your sudo key is: " 
-echo ""
-echo "$sudoKey"
-echo ""
-echo "Copy it now as it will not be displayed again"
 
-
+echo "LiveElement Scale Installation Complete on $coreBucket."
+exit 0

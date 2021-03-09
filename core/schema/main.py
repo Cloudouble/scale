@@ -8,7 +8,7 @@ def main(event, context):
     - triggered on-demand by an administrator
     - updates schema data to all system paths under _/schema
     '''
-    release = '11.01'
+    release = '12.0'
     feed = 'https://schema.org/version/{}/schemaorg-all-https.jsonld'.format(release)
     feed_response = urllib.request.urlopen(feed)
     feed_text = feed_response.read().decode('utf-8')
