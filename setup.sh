@@ -234,6 +234,11 @@ echo "Ensuring lambdaRole ($lambdaRole) exists and is correctly configured..."
             echo "... ... ... now created."
         else 
             echo "... ... ... error creating role $lambdaRole, please try again or create this manually. Exiting now."
+            echo "Role Name: $lambdaRole"
+            echo "Role Use Case: Lambda"
+            echo "(optional) Role Policy to attach: $lambdaPolicyName"
+            echo "(optional) Assume Role Policy Document: "
+            echo "$assumeRolePolicy"
             exit 1
         fi
     fi
@@ -246,21 +251,7 @@ echo "Ensuring lambdaRole ($lambdaRole) exists and is correctly configured..."
     else
         echo "... ... assumeRolePolicy is NOT correct, correcting now..."
         aws iam update-assume-role-policy --role-name "$lambdaRole" --policy-document "$assumeRolePolicy" --region $coreRegion
-        lambdaRoleAssumeRolePolicyDocument=$(aws iam list-roles --query "Roles[?RoleName == '$lambdaRole'].AssumeRolePolicyDocument | [0]" --output json)
-        lambdaRoleAssumeRolePolicyDocument="${lambdaRoleAssumeRolePolicyDocument#"${lambdaRoleAssumeRolePolicyDocument%%[![:space:]]*}"}"
-        lambdaRoleAssumeRolePolicyDocument="${lambdaRoleAssumeRolePolicyDocument%"${lambdaRoleAssumeRolePolicyDocument##*[![:space:]]}"}" 
-        if [ "$lambdaRoleAssumeRolePolicyDocument" == "$assumeRolePolicy" ]; then
-            echo "... ... now corrected."
-        else
-            echo "... ... ... error correcting the Assume Role Policy for role $lambdaRole, please try again or correct this manually:"
-            echo ""
-            echo "Role Name: $lambdaRole"
-            echo "Assume Role Policy Document: "
-            echo "$assumeRolePolicy"
-            echo ""
-            echo "... ... ... Exiting now."
-            exit 1
-        fi
+        echo "... ... ... now corrected."
     fi
     echo "... check that the $lambdaPolicyName is attached to $lambdaRole..."
     attachPolicyArn="arn:aws:iam::$accountId:policy/$lambdaPolicyName"
@@ -656,6 +647,10 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
             "Comment": "'$systemProperName'"
         }'
         originAccessIdentityId=$(aws cloudfront create-cloud-front-origin-access-identity --cloud-front-origin-access-identity-config "$originAccessIdentityConfig" --query "CloudFrontOriginAccessIdentity.Id" --output text)
+        if [ ! "$originAccessIdentityId" ]; then
+            echo "... ... ... error creating origin access identity, please try again. Exiting now..."
+            exit 1
+        fi
     fi
     
     echo "... ensuring coreBucket policy to allow Cloudfront access via the origin access identity is correct..."
@@ -674,7 +669,7 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
         ]
     }'
     aws s3api put-bucket-policy --bucket $coreBucket --policy "$bucketPolicy"
-    echo "... Cloudfront access granted to $coreBucket."
+    echo "... ... Cloudfront access granted to $coreBucket."
 
     dCoreOrigin='{
         "Id": "'$coreBucket'",
