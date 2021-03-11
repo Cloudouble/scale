@@ -1,11 +1,11 @@
 accountId="771795544492"
-systemProperName="TestLiveElementScale"
-lambdaNamespace="testliveelement-scale"
-coreBucket="test.scale.live-element.net"
+systemProperName="ExampleLiveElementScale"
+lambdaNamespace="exampleliveelement-scale"
+coreBucket="example.scale.live-element.net"
 coreRegion="ap-southeast-1"
 edgeRegion="us-east-1"
-logBucket="log.test.scale.live-element.net"
-requestBucket="request.test.scale.live-element.net"
+logBucket="log.example.scale.live-element.net"
+requestBucket="request.example.scale.live-element.net"
 envSystemRoot="_"
 envShared="0"
 sudoName="system"
@@ -34,6 +34,25 @@ coreBucketCors='{
       "ExposeHeaders": ["ETag"]
     }
   ]
+}'
+
+requestBucketLifeCycleConfiguration='{
+    "Rules": [
+        {
+            "Expiration": {
+                "Days": 1
+            },
+            "ID": "'$systemProperName'",
+            "Filter": {},
+            "Status": "Enabled",
+            "NoncurrentVersionExpiration": {
+                "NoncurrentDays": 1
+            },
+            "AbortIncompleteMultipartUpload": {
+                "DaysAfterInitiation": 1
+            }
+        }
+    ]
 }'
 
 

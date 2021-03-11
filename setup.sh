@@ -140,6 +140,15 @@ echo "Checking requestBucket set up for $requestBucket..."
             exit 1
         fi
     fi
+    echo "...ensuring bucket lifecycle configuration is correct..."
+    requestBucketLifeCycleConfigurationCurrent=$(aws s3api get-bucket-lifecycle-configuration --bucket $requestBucket --output json)
+    if [ "$requestBucketLifeCycleConfiguration" == "$requestBucketLifeCycleConfigurationCurrent" ]; then
+        echo "... ... lifecycle configuration is correct"
+    else
+        echo "... ... lifecycle configuration is NOT correct, configuring now..."
+        requestBucketLifeCycleConfigurationCurrent=$(aws s3api put-bucket-lifecycle-configuration --bucket $requestBucket --lifecycle-configuration "$requestBucketLifeCycleConfiguration" --expected-bucket-owner "$accountId" --output json)
+        echo "... ... ... now correctly configured"
+    fi
     echo "... ensuring bucket logging is correctly configured..."
     requestBucketLoggingTargetPrefix=$(aws s3api get-bucket-logging --bucket $requestBucket --query "LoggingEnabled.TargetPrefix" --output text)
     requestBucketLoggingTargetBucket=$(aws s3api get-bucket-logging --bucket $requestBucket --query "LoggingEnabled.TargetBucket" --output text)
@@ -567,6 +576,16 @@ for key in ${!requestBuckets[@]}; do
                 echo "... ... ... error creating bucket ${requestBuckets[$key]} in $useRegion, please try again or create manually. Exiting now."
                 exit 1
             fi
+        fi
+        
+        echo "...ensuring bucket lifecycle configuration is correct for ${requestBuckets[$key]}..."
+        requestBucketLifeCycleConfigurationCurrent=$(aws s3api get-bucket-lifecycle-configuration --bucket ${requestBuckets[$key]} --region $useRegion --output json)
+        if [ "$requestBucketLifeCycleConfiguration" == "$requestBucketLifeCycleConfigurationCurrent" ]; then
+            echo "... ... lifecycle configuration is correct for ${requestBuckets[$key]}"
+        else
+            echo "... ... lifecycle configuration is NOT correct, configuring now..."
+            requestBucketLifeCycleConfigurationCurrent=$(aws s3api put-bucket-lifecycle-configuration --bucket ${requestBuckets[$key]} --region $useRegion --lifecycle-configuration "$requestBucketLifeCycleConfiguration" --expected-bucket-owner "$accountId" --output json)
+            echo "... ... ... now correctly configured"
         fi
         for functionName in *; do
             lambdaName="$lambdaNamespace-region-$functionName"
