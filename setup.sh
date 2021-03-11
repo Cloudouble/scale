@@ -92,6 +92,15 @@ echo "Checking coreBucket set up for $coreBucket..."
             exit 1
         fi
     fi
+    echo "... ensuring bucket CORS permissions is correctly configured..."
+    coreBucketCorsCurrent=$(aws s3api get-bucket-cors --bucket $coreBucket --output json)
+    if [ "$coreBucketCors" == "$coreBucketCorsCurrent" ]; then
+        echo "... ... bucket CORS permissions correctly configured."
+    else
+        echo "... ... bucket CORS permission NOT correctly configured, configuring now..."
+        coreBucketCors=$(aws s3api put-bucket-cors --bucket $coreBucket --cors-configuration "$coreBucketCors")
+        echo "... ... ... now correctly configured."
+    fi
     echo "... ensuring bucket logging is correctly configured..."
     coreBucketLoggingTargetPrefix=$(aws s3api get-bucket-logging --bucket $coreBucket --query "LoggingEnabled.TargetPrefix" --output text)
     coreBucketLoggingTargetBucket=$(aws s3api get-bucket-logging --bucket $coreBucket --query "LoggingEnabled.TargetBucket" --output text)

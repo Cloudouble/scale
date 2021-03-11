@@ -24,6 +24,19 @@ lambdaPolicyStatement='{
 }'
 lambdaPolicyName="$lambdaRole"
 
+coreBucketCors='{
+  "CORSRules": [
+    {
+      "AllowedOrigins": ["*"],
+      "AllowedHeaders": ["*"],
+      "AllowedMethods": ["GET", "POST", "PUT", "DELETE", "HEAD"],
+      "MaxAgeSeconds": 86400,
+      "ExposeHeaders": ["ETag"]
+    }
+  ]
+}'
+
+
 lambdaPolicy='{
     "Version": "2012-10-17",
     "Statement": [
