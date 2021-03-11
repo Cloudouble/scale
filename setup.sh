@@ -1,7 +1,11 @@
 . ./vars
 
 
-echo "LiveElement Scale installation starting...
+echo "
+---------
+---------
+
+LiveElement Scale installation starting...
 ---------
 "
 
@@ -199,7 +203,7 @@ echo "
 "
 
 
-echo "Ensuring lambdaRole ($lambdaRole) exists and if correctly configured..."
+echo "Ensuring lambdaRole ($lambdaRole) exists and is correctly configured..."
     assumeRolePolicy="${assumeRolePolicy#"${assumeRolePolicy%%[![:space:]]*}"}"
     assumeRolePolicy="${assumeRolePolicy%"${assumeRolePolicy##*[![:space:]]}"}" 
     lambdaRoleListGetName=$(aws iam list-roles --query "Roles[?RoleName == '$lambdaRole'].RoleName | [0]" --output text)
@@ -932,9 +936,9 @@ if [ "$envShared" == "0" ]; then
     fi
     
     echo "... initialisation the system, including adding the sudo user..."
-    sudoKey=uuidgen
+    sudoKey=$(uuidgen)
     initialisePayload='{"key": "'$sudoKey'", "name": "'$sudoName'", "_env": {"bucket": "'$coreBucket'", "lambda_namespace": "'$lambdaNamespace'", "data_root": "'$envSystemRoot'"}}'
-    initialiseStatus=$(aws lambda invoke --region $coreRegion --function-name "arn:aws:lambda:$coreRegion:$accountId:function:$lambdaNamespace-core-initialise" "$lambdaNamespace-core-initialise" --invocation-type "RequestResponse" --log-type "Tail" --payload $initialisePayload --query "StatusCode" --output text /temp/schema.log)
+    initialiseStatus=$(aws lambda invoke --region $coreRegion --function-name "arn:aws:lambda:$coreRegion:$accountId:function:$lambdaNamespace-core-initialise" --invocation-type "RequestResponse" --log-type "Tail" --payload "$initialisePayload" --query "StatusCode" --output text /tmp/initialise.log)
     if [ "200" == "$initialiseStatus" ]; then
         echo "system initialisation complete, sudo user added"
         echo "Sudo user name: $sudoName"
@@ -944,7 +948,8 @@ if [ "$envShared" == "0" ]; then
         echo ""
         echo "Copy it now as it will not be displayed again"
     else
-        echo "... error initialising the system and / or creating the sudo user, please retry or completely manually:"
+        echo "... error initialising the system and / or creating the sudo user, please retry or complete manually:"
+        echo ""
         echo "Lambda Function: $lambdaNamespace-core-schema"
         echo "Payload: "
         echo '{
@@ -956,15 +961,22 @@ if [ "$envShared" == "0" ]; then
                 "data_root": "'$envSystemRoot'"
             }
         }'
+        echo ""
         echo "... exiting now..."
         exit 1
     fi
-    echo "... configuration processes for dedicated installation complete (except for indicated continuing background processes)."
+    echo "... configuration processes for dedicated installation complete (except for continuing background processes if indicated)."
 fi
 echo "
 ---------
 "
 
 
-echo "LiveElement Scale Installation Complete on $coreBucket."
+echo "LiveElement Scale installation complete on $coreBucket"
+echo "
+
+---------
+---------
+
+"
 exit 0

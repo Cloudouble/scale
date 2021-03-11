@@ -112,8 +112,8 @@ cachePolicyDocumentStandard='{
         "HeadersConfig": {
             "HeaderBehavior": "whitelist",
             "Headers": {
-                "Quantity": 5,
-                "Items":["Accept","Access-Control-Request-Method","Access-Control-Request-Headers","Authorization","'$envAuthenticationNamespace'Connection"]
+                "Quantity": 6,
+                "Items":["Authorization","Origin","Accept","Access-Control-Request-Method","Access-Control-Request-Headers","'$envAuthenticationNamespace'Connection"]
             }
         }
     }
@@ -144,8 +144,8 @@ originRequestPolicyStandard='{
     "HeadersConfig": {
         "HeaderBehavior": "whitelist", 
         "Headers": {
-            "Quantity": 4,
-            "Items":["Accept","Access-Control-Request-Method","Access-Control-Request-Headers","'$envAuthenticationNamespace'Connection"]
+            "Quantity": 6, 
+            "Items": ["Origin","'$envAuthenticationNamespace'Connection","Access-Control-Request-Method","Accept","Access-Control-Request-Headers","Referer"]
         }
     }, 
     "CookiesConfig": {
@@ -155,3 +155,5 @@ originRequestPolicyStandard='{
         "QueryStringBehavior": "all"
     }
 }'
+
+
