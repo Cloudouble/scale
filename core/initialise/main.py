@@ -13,7 +13,7 @@ def main(event, context):
     bucket = s3.Bucket(env['bucket'])
     if event.get('key'):
         sudo_module_path = '{data_root}/system/authentication/sudo.json'.format(data_root=env['data_root'])
-        sudo_module_data = {'processor': '{}-extension-authentication-sudo'.format(env['lambda_namespace']), 'options': {
+        sudo_module_data = {'processor': 'sudo', 'options': {
             'name': event.get('name', 'system'), 
             'key': hashlib.sha512(bytes(event.get('key'), 'utf-8')).hexdigest()
         }}

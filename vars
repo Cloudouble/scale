@@ -1,4 +1,6 @@
-accountId="771795544492"
+# ---CUSTOMISE THESE---
+
+accountId="000000000000"
 systemProperName="ExampleLiveElementScale"
 lambdaNamespace="exampleliveelement-scale"
 coreBucket="example.scale.live-element.net"
@@ -10,7 +12,7 @@ envSystemRoot="_"
 envShared="0"
 sudoName="system"
 
-# ---GENERATED BUT CUSTOMIZABLE---
+# ---GENERATED BUT CUSTOMISABLE---
 envAuthenticationNamespace="$systemProperName"
 lambdaRole="$systemProperName"
 lambdaRoleArn='arn:aws:iam::'$accountId':role/'$lambdaRole
