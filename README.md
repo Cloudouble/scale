@@ -206,14 +206,49 @@ from that region.
 
 1: You write a record or other data to your Cloudfront endpoint with a PUT/POST/DELETE request. 
 
-2: Your request is cached in the closest regional bucket and returns a HTTP 202 Accepted status.
+2: Your request is cached in the closest regional bucket by the edge/accept Lambda and returns a HTTP 202 Accepted status, 
+normally within 100ms.
 
-3: The regional Lambda request processor picks up the request, validates it and writes the validated request to your 
-core `requestBucket`
+3: The regional copy of the region/request processor picks up the request asynchronously, validates it and writes the 
+validated request to your core `requestBucket`
 
-4: The core request Lambda 
+4: The core/request Lambda picks up the request asynchronously, checks permissions and writes the permissioned result 
+to the core bucket as a record or other object.
+
+
+### Update Processing
+
+Depending on the object type (a record, an asset, or a configuration for a view/query/subscription etc), one of the trigger 
+Lambdas picks up the object and responds to it. The main process is the response to a record update, which will be 
+detailed here.
   
+1: When a record is written to the bucket, a version object is created recording what record fields were changed in that 
+update. 
 
+2: The trigger/version Lambda responds to the new version object and finds any queries that query based on one of the 
+fields changed in this version.
+
+3: Each query is run (asynchronously in parallel) with the single record. The query index is updated if neccessary. It's
+important to note a query does not run over the entire record set, but only on each updated record as a relevant field
+is updated. This architectural feature is what keeps the system scalable.
+
+4: Also from step 2, any subscriptions interested in this record are checked and a permissioned version of this record 
+is written into the record cache for subscribed connections. 
+
+5: From step 3, any feeds interested in updates to this query are checked and a permissioned version of this query index 
+is written / updated in the query cache for interested connections.
+
+6: If changes are detected in the permissioned versions of the record or query result, results are rendered according 
+to the configured view and made available to the connection.
+
+The timeline from initial write to the updated view being made available is generally 5-10 seconds, and will NOT increase 
+according to the size of database or numbers of connections, in fact it should get slightly faster as the system gets 
+busier.
+
+Actual read and write HTTP requests are always via the CDN, so should always be less than 100ms.
+
+
+## API Endpoints
 
 
 
