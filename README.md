@@ -176,6 +176,46 @@ as they are received, if you want live updates simply poll this endpoint, it is 
 include an extension to allow for updates to websocket connections.
 
 
+## Bucket Structure
+
+All files and data live within one bucket (your `coreBucket`). Another bucket within the same region to cache write requests
+for processing. In each edge region that you want to support faster writes for, a request bucket is create to cache write
+requests from that region. All cached write requests are automatically deleted after 24 hours. 
+
+There is also a separate `logBucket` in the same region as the `coreBucket` to which all system activity logs are written. 
+
+
+## File Structure within the `coreBucket`
+
+All your files and data live within this bucket. You specify a `system_root` prefix to tell the system where to place the 
+structured data files and any permission protected blob assets. Any files outside of this prefix will be publically 
+accessible and aggressively cached by the CDN.
+
+
+## Lambda Structure
+
+All core lambda functions live in the same region as your core bucket. There is a one Lambda@Edge function which will be 
+deployed in the `us-east-1` region and handles write requests directed to the Cloudfront endpoint. In addition, if you
+enable regional write buckets, a lambda function will be deployed in each supported region to handle request processing 
+from that region.
+
+
+## Reguest Flow
+
+### Write Requests
+
+1: You write a record or other data to your Cloudfront endpoint with a PUT/POST/DELETE request. 
+
+2: Your request is cached in the closest regional bucket and returns a HTTP 202 Accepted status.
+
+3: The regional Lambda request processor picks up the request, validates it and writes the validated request to your 
+core `requestBucket`
+
+4: The core request Lambda 
+  
+
+
+
 
 
 
