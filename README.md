@@ -571,6 +571,9 @@ namespace `$lambdaNamespace-extension-authentication-{custom-authentication-name
 
 # Writing Extensions 
 
+Extensions are simply Lambda functions with a specified name, event structure and return value structure. They can be written in any language, 
+including custom runtimes and using container images. Anything is possible...
+
 
 ## Authentication
 
@@ -578,6 +581,103 @@ As mentioned above, to make a new authentication extension active, use the `_/co
 endpoint to PUT it's configuration to `_/system/authentication/{custom-authentication-name}.json` and write it's extension Lambda function as name it under the 
 namespace `$lambdaNamespace-extension-authentication-{custom-authentication-name}`. This section explains how to write the Lambda function, the 
 structure of the configuration file will be dependent on how your custom Lambda function processes its own configuration.
+
+* receives an event with the structure `{credentials: { ... }, options: {key: 'value', ... }}`
+
+`credentials`: a free dictionary or authentication credentials as supplied by the authenticating connection, can be anything.
+
+`options`: a free dictionary of options that will have been defined as the options parameter within the extensions configuration file 
+in `_/system/authentication/*`. Designed to allow one Lambda function to work as the processor for multiple authentication extensions.
+
+The client context object will contain a 'env' parameter, (or '_env' property of the event object will exist), this object will contain a 
+`connection_id` property, this can be used to get the connection record and any data it contains about the connection, to allow for 
+dynamic determination of the correct mask to assign.
+
+The return value must be connection record with both `name` (string) and `mask` (object) properties, and optionally any other metadata 
+you wish to assign to this connection.
+
+
+## Mask
+
+You can create a mask processor simply by publishing it within the namespace `$lambdaNamespace-extension-mask-*` and referencing it (via 
+the last part of it function name only) within a connection mask map as detailed above. 
+
+The function will be called with an event structure of 
+`{
+    "path": "{asset path}", 
+    "options": { ... }
+}` 
+for assets, OR 
+    
+`{
+    "entity": { ... }, 
+    "switches": {
+        "entity_type": "", 
+        "method": "", 
+        "class_name": "", 
+        "entity_id": ""
+    }, 
+    'options': { ... }
+}`
+for records and other non-asset entities like query configuration objects etc.
+
+`options`: a free dictionary of options, they are retrieved from the mask map itself, as the value assigned to the mask processor key
+`path` => the asset path (only present for asset masks)
+`entity` => a copy of the entity object data
+`switches` => various matadata about the entity
+
+Both types of masks will always have the `connection_id` available in the client context `env` object.
+
+For asset masks, the return value must be a Boolean `true` or `false` to indicate whether this asset is accessible to this connection.
+
+For entity masks, the return value must be a list of allowed fields, which can be acted upon according to the method in `switches->method` 
+of the event object.
+
+
+## Query 
+
+Create a query processor simply by publishing it within the namespace `$lambdaNamespace-extension-query-*` and referencing it (via 
+the last part of its function name only) within a query configuration as the `processor` parameter.
+
+The event structure is `{"record": {}, "options": {}}` .
+
+`record` => a copy of the record data
+`options` => a copy of the options parameter as defined in the query configuration
+
+The function should return `true` if the record is to be included in the query result, otherwise `false`
+
+
+## View
+
+Create a view processor by publishing it within the namespace `$lambdaNamespace-extension-view-*` and referencing it (via 
+the last part of its function name only) within a view configuration as the `processor` parameter.
+
+The event structure is 
+
+`{
+    "options": {}, 
+    "assets": {}, 
+    "entity_type": "", 
+    "class_name": "", 
+    "entity_id": "", 
+    "field_name": "", 
+    "sort_field": "", 
+    "sort_direction" "", 
+    "page_name": "", 
+    "suffix": "",
+    "entity": {}, 
+    "page": [], 
+    "total_result_count": 0, 
+    "view_result_count": 0
+}`
+
+Most of the parameters can be recognised as being passed from the view configuration (possibly down from the subscription or feed 
+configuration), with the addition of: 
+
+`entity`: a copy of the record itself, in the case of record views (via subscriptions)
+`page`: a list of record objects, in the case of query views (via feeds)
+`total_result_count`: for query views, the total number of results currently in the query result set that can be viewed by this connection
+`view_result_count`: for query views, the total number of results in the current page of the query result set
 
 
 
