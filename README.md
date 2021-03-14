@@ -440,6 +440,105 @@ and the suffix of `json`.
 `GET` only, get the specified record field, as rendered by the view with a subscription by this connection and the given suffix.
 
 
+## Entity Types
+
+### `connection`
+
+`{"mask": {}, "name": "", ... }`
+
+This entity lives at `_/connection/$uuid-connection/connect.json` and defined the permission and user name (and other fields 
+are defined and use by your authentication extensions) for the given connection. 
+
+
+### `view`
+
+`{"processor": "", "options": {}, "assets": {"alias": "", ... }, "field_name": "", "content_type": "", "suffix": "", "expires": 0, "sort_field": "", "sort_direction": "", "min_index": 0, "max_index": 0}`
+
+* `processor`: the name of a Lambda function that lives within the `$lambdaNamespace-extension-view-` namespace, without that prefix. 
+For example the value of `json` here will look for `$lambdaNamespace-extension-view-json` to process the view
+
+* `options`: a free dictionary of options which are passed to the view processor, this allows one processor to be used for 
+multiple views
+
+* `assets`: a dictionary of assets that should be present in the `_/asset/*` path which are passed to the processor, each passed 
+with the given alias which loads the asset from the path value of the alias key. Good for loading templates for view 
+rendering, or images to use within the rendering process
+
+* `field_name`: the name of a record field, if the view should only be processing the data from that field, instead of the whole record
+
+* `content_type`: the content_type to assign to the rendered object when accessed by a connection. e.g. 'application/json' or 'text/html'
+
+* `suffix`: the path suffix to use for matching to view paths, should be related to the content type, e.g. 'json' or 'html'
+
+* `expires`': a default timestamp for when feeds or subscriptions using this view should be discarded
+
+* `sort_field`: a default sort_field value to assign when this view is used in a feed configuration
+
+* `sort_direction`: a default sort_direction value to assign when this view is used in a feed configuration
+
+* `min_index`: a default min_index value to assign when this view is used in a feed configuration
+
+* `max_index`: a default max_index value to assign when this view is used in a feed configuration
+
+
+### `query`
+
+`{processor='', ?options={}, vector=[], ?count=0}`
+
+* `processor`: the name of a Lambda function that lives within the `$lambdaNamespace-extension-query-`namespace, without that prefix. This
+function will be used to process this query.
+
+* `options`: a free dictionary or options to pass to the processor, this allows one processor to be used for multiple queries.
+
+* `vector`: a list of record fields that this query is interested in, that is the query will only update when a member record changes the 
+value of one of these fields.
+
+
+### `feed`
+
+`{view='', processor='', ?options={}, ?assets={alias: assetpath}, ?field_name='', ?content_type='', ?suffix='', ?expires=0, ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}`
+
+* `view`: the $uuid of the view configuration to use for rendering this feed
+
+... the other parameters are optional and can be used to override the same parameters as defined in the view 
+
+
+### `subscription`
+
+`{view='', processor='', ?options={}, ?assets={alias: assetpath}, ?field_name='', ?content_type='', ?suffix='', ?expires=0}`
+
+* `view`: the $uuid of the view configuration to use for rendering this subscription
+
+... the other parameters are optional and can be used to override the same parameters as defined in the view 
+
+
+### `system`
+
+`{}`
+
+... the structure of these records is free and will vary depending on the target module itself. 
+
+
+### `record`
+
+`{@type, @id,  ...as per various schemas conforming to it's own @type... }`
+
+* `@type`: the record type as defined in the system schema, must be the same as the `{record type}` component of the path.
+ 
+* `@id`: a unique version UUID in the format '[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{}4-[a-z0-9]{4}-[a-z0-9]{12}', must be the 
+same as the `$uuid-record` component of the path.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
  

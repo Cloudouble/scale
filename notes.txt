@@ -216,7 +216,7 @@ EXTENSION FUNCTIONS
 
 ENTITY TYPES
 
-connection => {mask=[]}
+connection => {mask={}}
 
 view => {processor='', ?options={}, ?assets={alias: assetpath}, ?field_name='', ?content_type='', ?suffix='', ?expires=0, ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}
 
