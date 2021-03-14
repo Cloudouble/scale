@@ -529,7 +529,55 @@ value of one of these fields.
 same as the `$uuid-record` component of the path.
 
 
+## Permissions
 
+Scale uses a concept of "masks" to handle permissions. Any higher level abstractions such as groups, roles, privileges etc 
+can be constructed based on the "mask" foundation and installed into the system by creating the relevant Lambda function 
+within the namespace `$lambdaNamespace-extension-mask-`. This section will cover how a mask is defined for a connection.
+
+The current mask for a connection is stored as the value of the mask key within `_/connection/$uuid-connection/connect.json`.
+
+Here's some simple examples: 
+
+`{"*": "*"}` => all permissions, can read, write and delete anything entity within the system
+
+`{"record": "*"}` => can do anything with any record, can not do anything else
+
+`{"record": {"GET": "*"}}` => can GET (view) any record, can not write to them
+
+`{"record": {"GET": {"Book": "*"}}}` => can GET (view) any Book record, can not view other record types
+
+`{"record": {"GET": {"Book": {"mask-function-id-1": {"options1": 1}, "mask-function-2": {"option2": 234}}}}}`  => the allowfields of 
+mask-function-1 and mask-function-2 will be used to determine which fields of Book record the connection can GET (view). 
+The rendering records of type "Book" for this connection, the two Lambda functions (which must be present in `$lambdaNamespace-extension-mask-`)
+will be called with the connection's details and the given options and their output will be the allowfields for the records as made available 
+to this connection. This technique can be used for granular per-record-type-and-field level permissions based on the dynamic
+state of the connection itself. 
+
+`{"asset": {"GET": {"file.png": "*"} } }` => can view _/asset/file.png
+
+`{"asset": {"GET": {"profiles/": "*"} } }`   => can view any file under the _/profiles/ path
+
+`{"asset": {"GET": {"profiles/": {"testuser.png": "*"} } } }`  => cam view the file _/profiles/testuser.png
+
+`{"asset": {"GET": {"profiles/": {"testuser.png": {"mask-function-id": {"option1": 123}}}}}}`  => if the result of mask-function-id is true, 
+then can view _/profiles/testuser.png
+
+The mask itself is set by your active authentication extensions at the time of connection authentication. To change the mask on the fly, 
+re-run the authentication process for the connection. To make an authentication extension active, use the `_/connection/$uuid-connection/system/*`
+endpoint to PUT it's configuration to `_/system/authentication/{custom-authentication-name}.json` and write it's extension Lambda function as name it under the 
+namespace `$lambdaNamespace-extension-authentication-{custom-authentication-name}`
+
+
+# Writing Extensions 
+
+
+## Authentication
+
+As mentioned above, to make a new authentication extension active, use the `_/connection/$uuid-connection/system/*`
+endpoint to PUT it's configuration to `_/system/authentication/{custom-authentication-name}.json` and write it's extension Lambda function as name it under the 
+namespace `$lambdaNamespace-extension-authentication-{custom-authentication-name}`. This section explains how to write the Lambda function, the 
+structure of the configuration file will be dependent on how your custom Lambda function processes its own configuration.
 
 
 
