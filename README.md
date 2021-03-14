@@ -4,29 +4,31 @@ the [live-element](https://live-element.net) framework.
 
 
 ## What It Is 
-**LiveElement Scale is intended to be a complete backend stack for your PWA web app.** It can serve up your static assets, 
-application files and structured data from one AWS S3 bucket, all delivered via CDN over simple HTTPS connections that's as 
-easy as a Javascript `fetch` request. Together with the other LiveElement modules, it is all you need to create an 
-advanced, scalable, economical, high performance Progressive Web App. It is also extensible, with the ability to create new 
-authentication types, query functions, permission masks, and data presentation views in any backend language of your 
-choice (although Python is optimal for speed and cost)
+**LiveElement Scale is intended to be a complete backend stack for your PWA web app.** 
+
+It can serve up static assets, application files and structured data from one AWS S3 bucket, all delivered via CDN 
+over simple HTTPS connections that's as easy as a Javascript `fetch` request. Together with the other LiveElement 
+modules, it is all you need to create an advanced, scalable, economical, high performance Progressive Web App. 
+
+It is also extensible, with the ability to create new authentication types, query functions, permission masks, 
+and data presentation views in any backend language of your choice (although Python is optimal for speed and cost).
 
 
 ## What It Can Do
-* be an application server for one or more client apps, serving both static and dynamic assets and data
-* handle complex authentication, you can use any Lambda function you like to handle the process of accepting 
+* be an **application server** for one or more client apps, serving both static and dynamic assets and data
+* **handle complex authentication**, you can use any Lambda function you like to handle the process of accepting 
 authentication data and assigning attributes and permissions to a connection
-* handle complex authorisation, write any Lambda function to create an inheritable permissions structure to allow/deny 
+* **handle complex authorisation**, write any Lambda function to create an inheritable permissions structure to allow/deny 
 data and file access down to a per-record-field granularity
-* handle complex data queries, write and Lambda function to create complex pre-compiled queries over your data records
-* 850+ record types built-in (everything from [schema.org](https://schema.org/)), you can extend this with your own 
+* **handle complex data queries**, write and Lambda function to create complex pre-compiled queries over your data records
+* **850+ record types built-in** (everything from [schema.org](https://schema.org/)), you can extend this with your own 
 record types anytime
-* create data views which can present your record and query data in any format you like, served as static files over 
+* **create data views** which can present your record and query data in any format you like, served as static files over 
 a CDN
-* host multiple separate independent databases and file structures under subdomains of one domain
+* **host multiple separate independent databases** and file structures under subdomains of one domain
 
 
-## What It Should NOT Be Asked To Do
+### What It Should NOT Be Asked To Do
 * Act as the database / datastore for an application which requires guaranteed transaction integrity. This is an 
 **eventually-consistent** system with a delay between writes and updates being pushed out to all client connections. 
 * Try to serve multiple databases of different primary domains - there is a restriction in Cloudfront which will prevent
@@ -38,27 +40,26 @@ different systems on different subdomains under the same root domain.
 At this point (release 0.5) Scale is architected for AWS only. It installs as a set of Lambda functions, S3 buckets, 
 IAM policies and Cloudfront distributions on your AWS account.
 
-To install you basically just clone this repository, configure the `./vars` file, and then run `./setup.sh` on your 
-terminal (make sure you `chmod +x ./setup.sh` first so that it's executable). Your terminal has to have your AWS 
-credentials available in it's environment.
+To install clone this repository, configure the `./vars` file, and then run `./setup.sh` on your terminal (make sure 
+you `chmod +x ./setup.sh` first so that it's executable). Your terminal has to have your AWS credentials available 
+in it's environment.
 
-The way it has been developed and tested has been by created a Cloud9 IDE instance, cloning the repository onto that and 
-running from there. The Cloud9 instance has all the permissions and credential in it's environment that is needed for the 
-process to run smoothly.
+The way it has been developed and tested has been by creating a Cloud9 IDE instance, cloning the repository onto that and 
+running from there. The Cloud9 instance has all the permissions and credentials in its environment that is needed.
 
 The `./setup.sh` script is designed to be idempotent - if installation fails part way, just re-run it to try again without 
-any harmful sideeffects. It will take you if it encounters a fatal error and give you basic instructions to manually do 
-that step so you can re-run and have it pick up where you left off.
+any harmful sideeffects. It will let you know if it encounters a fatal error and give you basic instructions to manually 
+complete that step so you can re-run and have it pick up where you left off.
 
 At the end of a successful installation, you will be presented with the Cloudfront URL of your installation, plus the 
 sudo key. The sudo key is not stored anywhere so you must copy it and store it safely at the point.
 
 If you run `./setup.sh` on an already installed system it will change the sudo user key - otherwise it is a safe 
-operation. Doing this is a way to recover the sudo key if you have lost it. 
+operation. Doing this is a way to recover the sudo key if you have lost it or it has been compromised. 
 
 
-## Installation Configuration via `vars`
-You must personalise the values of line 3-13 in `vars` to your own requirements as follows before running `setup.sh`
+### Installation Configuration via `vars`
+You must personalise the values of line 3-17 in `vars` to your own requirements as follows before running `setup.sh`
 
 ```
 accountId="000000000000"
@@ -75,7 +76,7 @@ sudoName="system"
 ```
 
 * **accountId**: the 10 digit numeric id of your AWS account
-* **systemProperName**: the name for you installation, used for policy and role names and more through out
+* **systemProperName**: the name for your installation, used for policy and role names and more throughout
 * **lambdaNamespace**: the prefix to use when naming your Lambda functions, should be lowercase or - , and maximum 25 characters
 * **coreBucket**: the full name of the bucket that you want to use for serving your data and files from. Will be created 
 if not already existing. 
@@ -88,7 +89,12 @@ if not already existing.
 serve multiple databases from one bucket
 * **sudoName**: the user name of the system administrator user 
 
-Lines in `vars` after 13 can be adjusted if you wish, however you should not do this unless you know exactly why and 
+Lines 15-17 should be customised to add / remove regional write endpoints to the system. To not have regional write 
+endpoints, include only the `_` key in `$requestBuckets`, to add regions, add the region code as a key, with its 
+value being the bucket name in that region (see line 16 as an example for the AWS `ap-southeast-2` region). You may 
+define as many regional endpoints as you wish.
+
+Lines in `vars` after 17 can be adjusted if you wish, however you should not do this unless you know exactly why and 
 what you are doing!
 
 
@@ -150,7 +156,7 @@ fetch(
 
 ```
 The `processor` field of the view will refer to a Lambda function at extensions/view/json, this one is built-in and renders 
-records in JSON format. This view is now defined and ready for use by any records subscriptions in perpetuity.
+records in JSON format. This view is now defined and ready for use by any record subscriptions in perpetuity.
 
 
 ### PUT a subscription to the record (lets the system know that you want to keep track of this record, once per connection):
@@ -178,14 +184,14 @@ include an extension to allow for updates to websocket connections.
 
 ## Bucket Structure
 
-All files and data live within one bucket (your `coreBucket`). Another bucket within the same region to cache write requests
-for processing. In each edge region that you want to support faster writes for, a request bucket is create to cache write
-requests from that region. All cached write requests are automatically deleted after 24 hours. 
+All files and data live within one bucket (your `coreBucket`). Another bucket within the same region exists to cache 
+write requests for processing. In each edge region that you want to support faster writes for, a request bucket is 
+create to cache write requests from that region. All cached write requests are automatically deleted after 24 hours. 
 
 There is also a separate `logBucket` in the same region as the `coreBucket` to which all system activity logs are written. 
 
 
-## File Structure within the `coreBucket`
+### File Structure within the `coreBucket`
 
 All your files and data live within this bucket. You specify a `system_root` prefix to tell the system where to place the 
 structured data files and any permission protected blob assets. Any files outside of this prefix will be publically 
@@ -200,32 +206,32 @@ enable regional write buckets, a lambda function will be deployed in each suppor
 from that region.
 
 
-## Reguest Flow
+## Request Flow
 
 ### Write Requests
 
-1: You write a record or other data to your Cloudfront endpoint with a PUT/POST/DELETE request. 
+1: You write a record or other data to your Cloudfront endpoint with a `PUT`/`POST`/`DELETE` request. 
 
-2: Your request is cached in the closest regional bucket by the edge/accept Lambda and returns a HTTP 202 Accepted status, 
-normally within 100ms.
+2: Your request is cached in the closest regional bucket by the `edge/accept` Lambda and returns a HTTP `202 Accepted` 
+status, normally within 100ms.
 
-3: The regional copy of the region/request processor picks up the request asynchronously, validates it and writes the 
+3: The regional copy of the `region/request` processor picks up the request asynchronously, validates it and writes the 
 validated request to your core `requestBucket`
 
-4: The core/request Lambda picks up the request asynchronously, checks permissions and writes the permissioned result 
+4: The `core/request` Lambda picks up the request asynchronously, checks permissions and writes the permissioned result 
 to the core bucket as a record or other object.
 
 
 ### Update Processing
 
-Depending on the object type (a record, an asset, or a configuration for a view/query/subscription etc), one of the trigger 
-Lambdas picks up the object and responds to it. The main process is the response to a record update, which will be 
-detailed here.
+Depending on the object type (a record, an asset, or a configuration for a view/query/subscription etc), one of the 
+trigger Lambdas picks up the object and responds to it. The main process is the response to a record update, which 
+will be detailed here.
   
 1: When a record is written to the bucket, a version object is created recording what record fields were changed in that 
 update. 
 
-2: The trigger/version Lambda responds to the new version object and finds any queries that query based on one of the 
+2: The `trigger/version` Lambda responds to the new version object and finds any queries that query based on one of the 
 fields changed in this version.
 
 3: Each query is run (asynchronously in parallel) with the single record. The query index is updated if neccessary. It's
@@ -248,7 +254,7 @@ busier.
 Actual read and write HTTP requests are always via the CDN, so should always be less than 100ms.
 
 
-# Authentication
+## Authentication
 
 *In this and following sections the url is presented as the path within your Cloudfront URL endpoint. Your `system_root` as 
 configured during installation is shown as the its default value of "_". Any instance of `$uuid-***` represents a Version 4 UUID
@@ -266,8 +272,8 @@ Where `$uuid-sudo-key` is the "sudo key" passed back at the end of the install p
 super-user permissions.
 
 This super-user access can be completely disabled by deleting the file in at 
-`s3://$coreBucket/_/system/authentication/sudo.json` . To reenable sudo access, either put that exact file back, or re-run the
-setup process (which will re-instate the sudo authentication extension with a new sudo key).
+`s3://$coreBucket/_/system/authentication/sudo.json` . To reenable sudo access, either put that exact file back, or re-run 
+the setup process (which will re-instate the sudo authentication extension with a new sudo key).
 
 All paths under the `system_root` require a connection UUID (`$uuid-connection`), this can be supplied as: 
 
@@ -287,7 +293,8 @@ its permissions to a public / unauthenticated status.
 
 ## API Endpoints
 
-The `Content-Type` of the request body can be either `application/json`, or `application/x-www-form-urlencoded`. 
+The `Content-Type` of the request body can be either `application/json`, or `application/x-www-form-urlencoded` with 
+the textual content of the request being structured accordingly. 
 
 ### `connect`
 
@@ -316,7 +323,7 @@ Request body:
 }
 `
 
-The value of "scope" may be one of `authentication`, `query`, `mask`, or `view`.
+The value of `scope` may be one of `authentication`, `query`, `mask`, or `view`.
 
 `PUT`/`POST` to create or update, `DELETE` to remove.
 
@@ -488,7 +495,7 @@ rendering, or images to use within the rendering process
 * `processor`: the name of a Lambda function that lives within the `$lambdaNamespace-extension-query-`namespace, without that prefix. This
 function will be used to process this query.
 
-* `options`: a free dictionary or options to pass to the processor, this allows one processor to be used for multiple queries.
+* `options`: a free dictionary of options to pass to the processor, this allows one processor to be used for multiple queries.
 
 * `vector`: a list of record fields that this query is interested in, that is the query will only update when a member record changes the 
 value of one of these fields.
@@ -554,28 +561,28 @@ will be called with the connection's details and the given options and their out
 to this connection. This technique can be used for granular per-record-type-and-field level permissions based on the dynamic
 state of the connection itself. 
 
-`{"asset": {"GET": {"file.png": "*"} } }` => can view _/asset/file.png
+`{"asset": {"GET": {"file.png": "*"} } }` => can view `_/asset/file.png`
 
-`{"asset": {"GET": {"profiles/": "*"} } }`   => can view any file under the _/profiles/ path
+`{"asset": {"GET": {"profiles/": "*"} } }`   => can view any file under the `_/profiles/` path
 
-`{"asset": {"GET": {"profiles/": {"testuser.png": "*"} } } }`  => cam view the file _/profiles/testuser.png
+`{"asset": {"GET": {"profiles/": {"testuser.png": "*"} } } }`  => cam view the file `_/profiles/testuser.png`
 
-`{"asset": {"GET": {"profiles/": {"testuser.png": {"mask-function-id": {"option1": 123}}}}}}`  => if the result of mask-function-id is true, 
-then can view _/profiles/testuser.png
+`{"asset": {"GET": {"profiles/": {"testuser.png": {"mask-function-id": {"option1": 123}}}}}}`  => if the result of `mask-function-id` is `true`, 
+then can view `_/profiles/testuser.png`
 
 The mask itself is set by your active authentication extensions at the time of connection authentication. To change the mask on the fly, 
 re-run the authentication process for the connection. To make an authentication extension active, use the `_/connection/$uuid-connection/system/*`
-endpoint to PUT it's configuration to `_/system/authentication/{custom-authentication-name}.json` and write it's extension Lambda function as name it under the 
+endpoint to `PUT` its configuration to `_/system/authentication/{custom-authentication-name}.json` and write its extension Lambda function as name it under the 
 namespace `$lambdaNamespace-extension-authentication-{custom-authentication-name}`
 
 
-# Writing Extensions 
+## Writing Extensions 
 
 Extensions are simply Lambda functions with a specified name, event structure and return value structure. They can be written in any language, 
 including custom runtimes and using container images. Anything is possible...
 
 
-## Authentication
+### Authentication
 
 As mentioned above, to make a new authentication extension active, use the `_/connection/$uuid-connection/system/*`
 endpoint to PUT it's configuration to `_/system/authentication/{custom-authentication-name}.json` and write it's extension Lambda function as name it under the 
@@ -589,7 +596,7 @@ structure of the configuration file will be dependent on how your custom Lambda 
 `options`: a free dictionary of options that will have been defined as the options parameter within the extensions configuration file 
 in `_/system/authentication/*`. Designed to allow one Lambda function to work as the processor for multiple authentication extensions.
 
-The client context object will contain a 'env' parameter, (or '_env' property of the event object will exist), this object will contain a 
+The client context object will contain a `env` parameter, (or `_env` property of the event object will exist), this object will contain a 
 `connection_id` property, this can be used to get the connection record and any data it contains about the connection, to allow for 
 dynamic determination of the correct mask to assign.
 
@@ -597,7 +604,7 @@ The return value must be connection record with both `name` (string) and `mask` 
 you wish to assign to this connection.
 
 
-## Mask
+### Mask
 
 You can create a mask processor simply by publishing it within the namespace `$lambdaNamespace-extension-mask-*` and referencing it (via 
 the last part of it function name only) within a connection mask map as detailed above. 
@@ -634,7 +641,7 @@ For entity masks, the return value must be a list of allowed fields, which can b
 of the event object.
 
 
-## Query 
+### Query 
 
 Create a query processor simply by publishing it within the namespace `$lambdaNamespace-extension-query-*` and referencing it (via 
 the last part of its function name only) within a query configuration as the `processor` parameter.
@@ -642,12 +649,13 @@ the last part of its function name only) within a query configuration as the `pr
 The event structure is `{"record": {}, "options": {}}` .
 
 `record` => a copy of the record data
+
 `options` => a copy of the options parameter as defined in the query configuration
 
 The function should return `true` if the record is to be included in the query result, otherwise `false`
 
 
-## View
+### View
 
 Create a view processor by publishing it within the namespace `$lambdaNamespace-extension-view-*` and referencing it (via 
 the last part of its function name only) within a view configuration as the `processor` parameter.
@@ -668,28 +676,65 @@ The event structure is
     "entity": {}, 
     "page": [], 
     "total_result_count": 0, 
-    "view_result_count": 0
+``    "view_result_count": 0
 }`
 
 Most of the parameters can be recognised as being passed from the view configuration (possibly down from the subscription or feed 
 configuration), with the addition of: 
 
 `entity`: a copy of the record itself, in the case of record views (via subscriptions)
+
 `page`: a list of record objects, in the case of query views (via feeds)
+
 `total_result_count`: for query views, the total number of results currently in the query result set that can be viewed by this connection
+
 `view_result_count`: for query views, the total number of results in the current page of the query result set
 
 
+## Record Structure
+
+Records with complex fields are not saved with those object embeded into them, rather the object that is the value of the field will 
+be saved as a truncated object with only the `@type` and `@id` fields present. No checking is done to ascertain that the referenced 
+record exists or is valid. This is by design, and allows connections to iteratively write parent and child records in any order.
 
 
+## Schema and Record Types
+
+All records in the system must conform to a record type as described within the `_/schema/*` path. All record type definitions 
+can be viewed in `_/schema/classes/*.json`. To understand how this works, please see the documentation over at [Schema.org](https://schema.org)
+
+New datatypes can be added into the system at any time simply by including a definition file within this path.
 
 
+## Road Map
 
+Things that are currently intended to be developed before release 1.0 but not yet included in release 0.5: 
 
+### Release 0.6: 
+* **websocket support**: an extension to allow clients to connect via websocket protocol and remove the need to poll for updates
+* **WebRTC support**: to allow currently active connections to instantly share selected record updates without 
+waiting for the system to re-compile views
 
+### Release 0.7: 
+* **testing suite**: a suite of standardised tests that can be run against an install to verify that every feature is working correctly
 
+### Release 0.8: 
+* **custom record types**: an endpoint to more conveniently allow the addition of new record type definitions to the system
+* **more authentication extensions**: a set of standardised authentication extensions to allow for the most common authentication scenarios
+* **more mask extensions**: a set of standardised mask extensions to create one or more built-in opinionated authorisation
+structures
+* **more view extensions**: a more complete set of view extensions to allow rendering of data in the most common formats, including GraphQL support
+* **more query extensions**: a more complete set of query extensions to cover the most common querying and filtering 
+scenarios
 
- 
+### Release 0.9: 
+* **Live integration**: built-in integration for the LiveElement Live client-side module via an extension to that client
+library
+* **Palette integration**: built-in integration for the LiveElement Palette via options in the installation process
+
+### Release 1.0: 
+* **Documentation**: create a professional and comprehensive documentation 
+
 
 ## Further Reading 
 

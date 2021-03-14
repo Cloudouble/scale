@@ -12,6 +12,10 @@ envSystemRoot="_"
 envShared="0"
 sudoName="system"
 
+declare -A requestBuckets
+requestBuckets["_"]="$coreRegion.$requestBucket"
+requestBuckets["ap-southeast-2"]="ap-southeast-2.$requestBucket"
+
 # ---GENERATED BUT CUSTOMISABLE---
 envAuthenticationNamespace="$systemProperName"
 lambdaRole="$systemProperName"
@@ -124,10 +128,6 @@ lambdaEnvCoreRequest='env = {"bucket": "'$coreBucket'", "lambda_namespace": "'$l
 lambdaEnvCoreSchema='env = {"bucket": "'$coreBucket'", "lambda_namespace": "'$lambdaNamespace'", "system_root": "'$envSystemRoot'", "data_root": "'$envSystemRoot'"}'
 lambdaEnvTriggerProxy='env = {"bucket": "'$coreBucket'", "lambda_namespace": "'$lambdaNamespace'", "system_root": "'$envSystemRoot'", "shared": '$envShared', "authentication_namespace": "'$envAuthenticationNamespace'"}'
 lambdaEnvRegion='env = {"bucket": "'$coreBucket'", "core_request_bucket": "'$requestBucket'"}'
-
-declare -A requestBuckets
-requestBuckets["_"]="$coreRegion.$requestBucket"
-requestBuckets["ap-southeast-2"]="ap-southeast-2.$requestBucket"
 
 cachePolicyDocumentStandard='{
     "Name": "'$systemProperName'Standard",
