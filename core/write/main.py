@@ -75,7 +75,7 @@ def main(event, context):
                                 bucket.put_object(Body=bytes(json.dumps(version_id), 'utf-8'), Key=new_value_index_key, ContentType='application/json')
                     counter = counter + 1
             elif method == 'DELETE' and current_entity:
-                if entity_type in ['query', 'record', 'view', 'feed', 'subscription', 'system']:
+                if entity_type in ['query', 'record', 'view', 'feed', 'subscription', 'system', 'mask']:
                     s3_client.delete_object(Bucket=env['bucket'], Key=entity_key)
                     if entity_type == 'record' and entity.get('@type') and entity.get('@id'):
                         updated_fields = sorted([f for f in current_entity])

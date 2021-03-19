@@ -84,7 +84,7 @@ def main(event, context):
             valid = valid_view(entity)
         elif entity_type == 'subscription':
             valid = valid_view(entity)
-        elif entity_type == 'system':
+        elif entity_type in ['system', 'mask']:
             valid = type(entity) is dict
         elif entity_type == 'record':
             if entity.get('@type') and entity.get('@id'):

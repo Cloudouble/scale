@@ -1,4 +1,4 @@
-env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_", "shared": 0, "authentication_namespace": "liveelementscale"}
+env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_", "shared": 0, "authentication_namespace": "LiveElementScale"}
 
 import json, boto3, base64, uuid
 
@@ -18,6 +18,7 @@ def main(event, context):
     - triggered by request objects written to the core request bucket
     - writes/deletes a connection configuration to _/connection/{connection_id}/connect.json (tested) OR
     - writes/deletes a view configuration to _/view/{view_id}.json via _/connection/{connection_id}/view/{view_id}.json (tested) OR
+    - writes/deletes a mask to _/mask/{mask_id}.json via _/connection/{connection_id}/mask/{mask_id}.json (tested) OR
     - writes/deletes an private asset to _/asset/{assetpath} via _/connection/{connection_id}/asset/{path} (tested) OR
     - writes/deletes an static asset to {path} via _/connection/{connection_id}/static/{path} (tested) OR
     - writes/deletes a query configuration to _/query/{class_name}/{query_id}.json via _/connection/{connection_id}/query/{class_name}/{query_id}.json (tested) OR
@@ -169,12 +170,12 @@ def main(event, context):
                 if view_handle == 'json' and request['method'] in ['POST', 'PUT', 'PATCH'] and json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'validate'), Payload=bytes(json.dumps({
                     'entity': request['entity'], 
                     'entity_type': entity_type, 
-                    'class_name': None if entity_type == 'view' else class_name, 
+                    'class_name': None if entity_type in ['view', 'mask'] else class_name, 
                     'entity_id': entity_id}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8')):
                     masked_entity = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), Payload=bytes(json.dumps({
                         'entity_type': entity_type, 
                         'method': request['method'],
-                        'class_name': None if entity_type == 'view' else class_name, 
+                        'class_name': None if entity_type in ['view', 'mask'] else class_name, 
                         'entity_id': entity_id, 
                         'entity': request['entity']
                     }), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
