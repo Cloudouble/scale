@@ -90,14 +90,9 @@ def main(event, context):
                 if request['method'] in ['POST', 'PUT', 'PATCH']:
                     if request['entity'] and type(request['entity']) is dict and len(request['entity']) == 1 and type(list(request['entity'].values())[0]) is dict:
                         connection_record = {**connection_record, **json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'authentication'), Payload=bytes(json.dumps(request['entity']), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))}
-                    connection_object.put(Body=bytes(json.dumps(connection_record), 'utf-8'), ContentType='application/json')
+                if request['method'] in ['POST', 'PUT', 'PATCH', 'DELETE']:
+                    lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'connection', 'entity': connection_record, 'method': request['method']}), 'utf-8'), ClientContext=client_context)
                     counter = counter + 1
-                elif request['method'] == 'DELETE':
-                    try:
-                        connection_object.delete()
-                        counter = counter + 1
-                    except:
-                        pass
             elif len(env['path']) >= 2 and env['path'][0] in ['asset', 'static']:
                 usable_path = env['path'][1:]
                 allowed = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), Payload=bytes(json.dumps({
@@ -106,7 +101,8 @@ def main(event, context):
                     'path': usable_path
                 }), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
                 if allowed:
-                    the_object = bucket.Object('{data_root}/asset/{usable_path}'.format(data_root=env['data_root'], usable_path='/'.join(usable_path))) if env['path'][0] == 'asset' else bucket.Object('/'.join(usable_path))
+                    object_path = '/'.join(usable_path) if env['path'][0] == 'asset' else '/'.join(usable_path)
+                    the_object = bucket.Object('{data_root}/asset/{usable_path}'.format(data_root=env['data_root'], usable_path=object_path)) if env['path'][0] == 'asset' else bucket.Object(object_path)
                     canwrite = True
                     if request['method'] == 'PATCH':
                         try:
@@ -114,10 +110,13 @@ def main(event, context):
                         except:
                             canwrite = False
                     if canwrite:
-                        if request['method'] in ['PUT', 'POST', 'PATCH']:
-                            the_object.put(Body=base64.b64decode(request['body']), ContentType=request['content-type'])
-                        elif request['method'] == 'DELETE':
-                            the_object.delete()
+                        lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({
+                            'entity_type': env['path'][0], 
+                            'method': request['method'], 
+                            'body': request['body'], 
+                            'content-type': request['content-type'], 
+                            'path': object_path
+                        }), 'utf-8'), ClientContext=client_context)
                         counter = counter + 1
             elif len(env['path']) >= 2:
                 if len(env['path']) == 2:
@@ -189,20 +188,12 @@ def main(event, context):
                             else:
                                 entity_to_write = {**current_entity, **masked_entity}
                         if entity_to_write:
-                            if request['method'] in ['PUT', 'POST', 'PATCH']:
-                                if json.dumps(current_entity) != json.dumps(entity_to_write):
-                                    if entity_type == 'record':
-                                        updated_fields = [f for f in request['entity'] if request['entity'][f] != current_entity.get(f)]
-                                    put_response = bucket.put_object(Body=bytes(json.dumps(entity_to_write), 'utf-8'), Key=entity_key, ContentType='application/json')
-                                    if entity_type == 'record':
-                                        record_version_key = '{data_root}/version/{class_name}/{record_id}/{version_id}.json'.format(data_root=env['data_root'], class_name=request['entity']['@type'], record_id=request['entity']['@id'], version_id=put_response.version_id)
-                                        bucket.put_object(Body=bytes(json.dumps(updated_fields), 'utf-8'), Key=record_version_key, ContentType='application/json')
-                            elif request['method'] == 'DELETE' and current_entity:
-                                if entity_type in ['query', 'record', 'view', 'feed', 'subscription', 'system']:
-                                    s3_client.delete_object(Bucket=env['bucket'], Key=entity_key)
-                                    if entity_type == 'record':
-                                        updated_fields = [f for f in current_entity]
-                                        record_version_key = '{data_root}/version/{class_name}/{record_id}/{version_id}.json'.format(data_root=env['data_root'], class_name=request['entity']['@type'], record_id=request['entity']['@id'], version_id='-deleted-')
-                                        bucket.put_object(Body=bytes(json.dumps(updated_fields), 'utf-8'), Key=record_version_key, ContentType='application/json')
+                            lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({
+                                'entity_type': env['path'][0], 
+                                'method': request['method'], 
+                                'entity': entity_to_write, 
+                                'current_entity': current_entity, 
+                                'entity_key': entity_key
+                            }), 'utf-8'), ClientContext=client_context)
                             counter = counter + 1
     return counter

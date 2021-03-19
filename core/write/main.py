@@ -1,0 +1,68 @@
+import json, boto3, base64
+
+
+def main(event, context):
+    '''
+    - called by other functions, including extensions to ensure writing is always done consistently
+    - does the work of writing an object
+    '''
+    env = context.client_context.env if context.client_context and context.client_context.env else event.get('_env', {})
+    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')
+    counter = 0
+    entity_type =  event.get('entity_type')
+    method = event.get('method')
+    if entity_type and method:
+        s3 = boto3.resource('s3')
+        bucket = s3.Bucket(env['bucket'])
+        if entity_type == 'connection' and event.get('entity'):
+            entity = event['entity']
+            connection_object = bucket.Object('{data_root}/connection/{connection_id}/connect.json'.format(data_root=env['data_root'], connection_id=env['connection_id']))
+            if method in ['POST', 'PUT', 'PATCH']:
+                connection_object.put(Body=bytes(json.dumps(entity), 'utf-8'), ContentType='application/json')
+                counter = counter + 1
+            elif method == 'DELETE':
+                try:
+                    connection_object.delete()
+                    counter = counter + 1
+                except:
+                    pass
+        elif entity_type in ['asset', 'static'] and event.get('path') and event.get('body') and event.get('content-type'):
+            object_path = '{data_root}/asset/{path}'.format(data_root=env['data_root'], path=event['path']) if entity_type == 'asset' else event['path']
+            the_object = bucket.Object(object_path)
+            if method in ['PUT', 'POST', 'PATCH']:
+                the_object.put(Body=base64.b64decode(event['body']), ContentType=event['content-type'])
+                counter = counter + 1
+            elif method == 'DELETE':
+                try:
+                    the_object.delete()
+                    counter = counter + 1
+                except:
+                    pass
+        else:
+            entity = event.get('entity', {})
+            entity_key = event.get('entity_key', {})
+            current_entity = event.get('current_entity', None)
+            if not current_entity:
+                try:
+                    current_entity = json.loads(s3.Object(env['bucket'], entity_key).get()['Body'].read().decode('utf-8'))
+                except:
+                    current_entity = {}
+            if method in ['PUT', 'POST', 'PATCH']:
+                if json.dumps(current_entity) != json.dumps(entity):
+                    if entity_type == 'record':
+                        updated_fields = sorted(list(set([f for f in entity if entity[f] != current_entity.get(f)] + [f for f in current_entity if current_entity[f] != entity.get(f)])))
+                    put_response = bucket.put_object(Body=bytes(json.dumps(entity), 'utf-8'), Key=entity_key, ContentType='application/json')
+                    if entity_type == 'record' and entity.get('@type') and entity.get('@id'):
+                        record_version_key = '{data_root}/version/{class_name}/{record_id}/{version_id}.json'.format(data_root=env['data_root'], class_name=entity['@type'], record_id=entity['@id'], version_id=put_response.version_id)
+                        bucket.put_object(Body=bytes(json.dumps(updated_fields), 'utf-8'), Key=record_version_key, ContentType='application/json')
+                    counter = counter + 1
+            elif method == 'DELETE' and current_entity:
+                s3_client = boto3.client('s3')
+                if entity_type in ['query', 'record', 'view', 'feed', 'subscription', 'system']:
+                    s3_client.delete_object(Bucket=env['bucket'], Key=entity_key)
+                    if entity_type == 'record' and entity.get('@type') and entity.get('@id'):
+                        updated_fields = sorted([f for f in current_entity])
+                        record_version_key = '{data_root}/version/{class_name}/{record_id}/{version_id}.json'.format(data_root=env['data_root'], class_name=entity['@type'], record_id=entity['@id'], version_id='-deleted-')
+                        bucket.put_object(Body=bytes(json.dumps(updated_fields), 'utf-8'), Key=record_version_key, ContentType='application/json')
+                        counter = counter + 1
+    return counter

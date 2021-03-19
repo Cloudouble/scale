@@ -331,7 +331,7 @@ fetch(
     ) }
 ).then(r => console.log(r))
 
-PUT subscription:
+PUT subscription ***:
 fetch(
     'https://scale.live-element.net/_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/subscription/Book/87370050-971f-4cd9-9c32-1072c6ac3c52/46976fe6-599d-47e9-82a2-bb465da27307.json', 
     {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(
