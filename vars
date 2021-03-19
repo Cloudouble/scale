@@ -1,20 +1,21 @@
 # ---CUSTOMISE THESE---
 
-accountId="000000000000"
-systemProperName="ExampleLiveElementScale"
-lambdaNamespace="exampleliveelement-scale"
-coreBucket="example.scale.live-element.net"
-coreRegion="ap-southeast-1"
+accountId="771795544492"
+systemProperName="LiveElementScale"
+lambdaNamespace="liveelement-scale"
+coreBucket="scale.live-element.net"
+coreRegion="ap-southeast-2"
 edgeRegion="us-east-1"
-logBucket="log.example.scale.live-element.net"
-requestBucket="request.example.scale.live-element.net"
+logBucket="log.scale.live-element.net"
+requestBucket="request.scale.live-element.net"
 envSystemRoot="_"
 envShared="0"
 sudoName="system"
 
 declare -A requestBuckets
 requestBuckets["_"]="$coreRegion.$requestBucket"
-requestBuckets["ap-southeast-2"]="ap-southeast-2.$requestBucket"
+requestBuckets["ap-southeast-1"]="ap-southeast-1.$requestBucket"
+requestBuckets["us-east-1"]="us-east-1.$requestBucket"
 
 # ---GENERATED BUT CUSTOMISABLE---
 envAuthenticationNamespace="$systemProperName"

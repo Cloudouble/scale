@@ -14,16 +14,22 @@ echo "Checking logBucket set up for $logBucket..."
     bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
     if [[ " $bucketNames " =~ " $logBucket " ]]; then
         echo "... ... already exists."
+        aws s3api put-public-access-block --bucket $logBucket --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
     else
         echo "... ... NOT exists, creating now in coreRegion ($coreRegion)..."
-        aws s3api create-bucket --bucket $logBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
-            bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
-            if [[ " $bucketNames " =~ " $logBucket " ]]; then
-                echo "... ... ... now created."
-            else
-                echo "... ... ... error creating logBucket ($logBucket), please try again or create this bucket manually in the  $coreRegion region. Exiting now."
-                exit 1
-            fi
+        if [ "us-east-1" = "$coreRegion" ]; then
+            aws s3api create-bucket --bucket $logBucket --region $coreRegion 
+        else
+            aws s3api create-bucket --bucket $logBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
+        fi
+        aws s3api put-public-access-block --bucket $logBucket --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
+        bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
+        if [[ " $bucketNames " =~ " $logBucket " ]]; then
+            echo "... ... ... now created."
+        else
+            echo "... ... ... error creating logBucket ($logBucket), please try again or create this bucket manually in the  $coreRegion region. Exiting now."
+            exit 1
+        fi
     fi
     echo "... ensuring correct log delivery write permissions are in place..."
     ownerId=$(aws s3api get-bucket-acl --bucket $logBucket --query "Owner.ID" --output text)
@@ -66,9 +72,15 @@ echo "Checking coreBucket set up for $coreBucket..."
     bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
     if [[ " $bucketNames " =~ " $coreBucket " ]]; then
         echo "... ... already exists."
+        aws s3api put-public-access-block --bucket $coreBucket --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
     else
         echo "... ... NOT exists, creating now in coreRegion ($coreRegion)..."
-        aws s3api create-bucket --bucket $coreBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
+        if [ "us-east-1" = "$coreRegion" ]; then
+            aws s3api create-bucket --bucket $coreBucket --region $coreRegion 
+        else
+            aws s3api create-bucket --bucket $coreBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
+        fi
+        aws s3api put-public-access-block --bucket $coreBucket --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
         bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
         if [[ " $bucketNames " =~ " $coreBucket " ]]; then
             echo "... ... ... now created."
@@ -129,9 +141,15 @@ echo "Checking requestBucket set up for $requestBucket..."
     bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
     if [[ " $bucketNames " =~ " $requestBucket " ]]; then
         echo "... ... already exists."
+        aws s3api put-public-access-block --bucket $requestBucket --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
     else
         echo "... ... NOT exists, creating now in coreRegion ($coreRegion)..."
-        aws s3api create-bucket --bucket $requestBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
+        if [ "us-east-1" = "$coreRegion" ]; then
+            aws s3api create-bucket --bucket $requestBucket --region $coreRegion 
+        else
+            aws s3api create-bucket --bucket $requestBucket --region $coreRegion --create-bucket-configuration LocationConstraint=$coreRegion
+        fi
+        aws s3api put-public-access-block --bucket $requestBucket --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
         bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
         if [[ " $bucketNames " =~ " $requestBucket " ]]; then
             echo "... ... ... now created."
@@ -557,9 +575,15 @@ for key in ${!requestBuckets[@]}; do
         bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
         if [[ " $bucketNames " =~ " ${requestBuckets[$key]} " ]]; then
             echo "... ... ... already exists."
+            aws s3api put-public-access-block --bucket ${requestBuckets[$key]} --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
         else
             echo "... ... ... NOT exists, creating now in $useRegion..."
-            aws s3api create-bucket --bucket ${requestBuckets[$key]} --region $useRegion --create-bucket-configuration LocationConstraint=$useRegion
+            if [ "us-east-1" = "$useRegion" ]; then
+                aws s3api create-bucket --bucket ${requestBuckets[$key]} --region $useRegion 
+            else
+                aws s3api create-bucket --bucket ${requestBuckets[$key]} --region $useRegion --create-bucket-configuration LocationConstraint=$useRegion
+            fi
+            aws s3api put-public-access-block --bucket ${requestBuckets[$key]} --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
             bucketNames=' '$(aws s3api list-buckets --query "join(' ', Buckets[].Name)")' '
             if [[ " $bucketNames " =~ " ${requestBuckets[$key]} " ]]; then
                 echo "... ... ... now created."
@@ -646,20 +670,23 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
             "CallerReference": "'$systemProperName'",
             "Comment": "'$systemProperName'"
         }'
-        originAccessIdentityId=$(aws cloudfront create-cloud-front-origin-access-identity --cloud-front-origin-access-identity-config "$originAccessIdentityConfig" --query "CloudFrontOriginAccessIdentity.Id" --output text)
-        if [ ! "$originAccessIdentityId" ]; then
+        aws cloudfront create-cloud-front-origin-access-identity --cloud-front-origin-access-identity-config "$originAccessIdentityConfig"
+        originAccessIdentityId=$(aws cloudfront list-cloud-front-origin-access-identities --query "CloudFrontOriginAccessIdentityList.Items[?Comment == '$systemProperName'].Id | [0]" --output text)
+        if [ ${#originAccessIdentityId} -ge 10 ]; then
+            echo "... ... now created with Id $originAccessIdentityId."
+        else
             echo "... ... ... error creating origin access identity, please try again. Exiting now..."
             exit 1
         fi
     fi
     
-    echo "... ensuring coreBucket policy to allow Cloudfront access via the origin access identity is correct..."
+    echo "... ensuring coreBucket policy to allow Cloudfront access via the origin access identity ($originAccessIdentityId) is correct..."
     cloudfrontS3PolicyStatement='{
         "Effect": "Allow",
         "Principal": {
             "AWS": "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity '$originAccessIdentityId'"
         },
-        "Action": ["s3:GetObject","s3:PutObject"],
+        "Action": ["s3:GetObject","s3:PutObject","s3:DeleteObject"],
         "Resource": "arn:aws:s3:::'$coreBucket'/*"
     }'
     bucketPolicy='{
