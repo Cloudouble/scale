@@ -1,4 +1,4 @@
-import json, boto3, base64
+import json, boto3, base64, hashlib
 
 
 def main(event, context):
@@ -39,6 +39,7 @@ def main(event, context):
                 except:
                     pass
         else:
+            s3_client = boto3.client('s3')
             entity = event.get('entity', {})
             entity_key = event.get('entity_key', {})
             current_entity = event.get('current_entity', None)
@@ -52,12 +53,28 @@ def main(event, context):
                     if entity_type == 'record':
                         updated_fields = sorted(list(set([f for f in entity if entity[f] != current_entity.get(f)] + [f for f in current_entity if current_entity[f] != entity.get(f)])))
                     put_response = bucket.put_object(Body=bytes(json.dumps(entity), 'utf-8'), Key=entity_key, ContentType='application/json')
+                    version_id = put_response.version_id
                     if entity_type == 'record' and entity.get('@type') and entity.get('@id'):
-                        record_version_key = '{data_root}/version/{class_name}/{record_id}/{version_id}.json'.format(data_root=env['data_root'], class_name=entity['@type'], record_id=entity['@id'], version_id=put_response.version_id)
+                        record_version_key = '{data_root}/version/{class_name}/{record_id}/{version_id}.json'.format(data_root=env['data_root'], class_name=entity['@type'], record_id=entity['@id'], version_id=version_id)
                         bucket.put_object(Body=bytes(json.dumps(updated_fields), 'utf-8'), Key=record_version_key, ContentType='application/json')
+                        for updated_field in updated_fields:
+                            if current_entity.get(updated_field) is not None:
+                                old_field_value_hash = hashlib.sha512(bytes(json.dumps(current_entity[updated_field]), 'utf-8')).hexdigest()
+                                old_value_index_key = '{data_root}/index/{class_name}/{field_name}/{value_hash}/{record_id}.json'.format(
+                                    data_root=env['data_root'], class_name=current_entity['@type'], field_name=updated_field, value_hash=old_field_value_hash, record_id=current_entity['@id']
+                                )
+                                try: 
+                                    s3_client.delete_object(Bucket=env['bucket'], Key=old_value_index_key)
+                                except:
+                                    pass
+                            if entity.get(updated_field) is not None:
+                                new_field_value_hash = hashlib.sha512(bytes(json.dumps(entity[updated_field]), 'utf-8')).hexdigest()
+                                new_value_index_key = '{data_root}/index/{class_name}/{field_name}/{value_hash}/{record_id}.json'.format(
+                                    data_root=env['data_root'], class_name=entity['@type'], field_name=updated_field, value_hash=new_field_value_hash, record_id=entity['@id']
+                                )
+                                bucket.put_object(Body=bytes(json.dumps(version_id), 'utf-8'), Key=new_value_index_key, ContentType='application/json')
                     counter = counter + 1
             elif method == 'DELETE' and current_entity:
-                s3_client = boto3.client('s3')
                 if entity_type in ['query', 'record', 'view', 'feed', 'subscription', 'system']:
                     s3_client.delete_object(Bucket=env['bucket'], Key=entity_key)
                     if entity_type == 'record' and entity.get('@type') and entity.get('@id'):

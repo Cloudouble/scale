@@ -9,6 +9,7 @@ _/schema/datatypes/{datatype}.json
 
 _/record/{class_name}/{record_id}.json => canonical record
 _/version/{class_name}/{record_id}/{version_id}.json => list of record fields updated for each version
+_/index/{class_name}/{field_name}/{sha512 of JSON encoded value}/{record_id}.json
 
 _/vector/{class_name}/{field_name}.json => list of query_ids that have this field_name / class_name as a vector
 _/query/{class_name}/{query_id}.json => meta-data about the query {processor, vectors}
