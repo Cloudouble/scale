@@ -60,6 +60,34 @@ DAEMON PATHS
 
 exactly the same as connection paths with "connection" swapped for "daemon", and these are not open to the internet via the CDN behaviours.
 
+core-daemon funcionality:
+
+install (triggered by changes to _/system/daemon/{daemon_type}.json): 
+    1: create Lambda function with the daemon code in the core region
+    2: writes any start-up views and masks 
+    3: creates trigger from _/daemon/{daemon_type}/* to it's own Lambda 
+
+start (after install) (trigger by PUT to _/daemon/{daemon_type}/{daemon_id}/daemon.json): 
+    1: invoke core-authentication with daemon credentials and writes the result to _/daemon/{daemon_type}/{daemon_id}/daemon.json
+
+pause: 
+    1: remove trigger
+
+stop (after pause): 
+    1: remove any subscriptions and feeds
+    2: remove any stop records and queries
+    
+remove (after stop):
+    1: removes any remove views and masks
+    2: removes Lambda function
+    3: removes _/system/daemon/{daemon_type}.json
+
+
+daemon Lambda function functionality: 
+    1: invoked by changes in _/daemon/{daemon_type}/*
+    2: executes whatever it likes based on the content of the updated objects
+    3: writes to the system only via writing to the request bucket
+
 ---
 
 
