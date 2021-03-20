@@ -379,7 +379,7 @@ Defines a view which can be used by subscriptions and feeds to render records an
 Defines a query used to filter, group and analyse records.  `PUT`/`POST` to create or update, `DELETE` to remove.
 
 
-### `reccord`
+### `record`
 
 * **`_/connection/$uuid-connection/record/{record type}/{$uuid-recrd}.json`**: `{"@type": "{the same record type as in the path}", "@id": "{the same client generated UUID as in the path}", .... other fields valid for the record type...}`
 
@@ -716,6 +716,7 @@ Things that are currently intended to be developed before release 1.0 but not ye
 * **WebRTC support**: to allow currently active connections to instantly share selected record updates without 
 waiting for the system to re-compile views
 * **custom record types**: an endpoint to more conveniently allow the addition of new record type definitions to the system
+* **extension installer**: an endpoint to enable the installation / removal of system extensions, including the Lambda code itself
 
 ### Release 0.7: 
 * **testing suite**: a suite of standardised tests that can be run against an install to verify that every feature is working correctly
