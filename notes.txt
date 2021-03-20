@@ -60,7 +60,7 @@ DAEMON PATHS
 
 exactly the same as connection paths with "connection" swapped for "daemon", and these are not open to the internet via the CDN behaviours.
 
-core-daemon funcionality:
+trigger-daemon funcionality:
 
 install (triggered by changes to _/system/daemon/{daemon_type}.json): 
     1: create Lambda function with the daemon code in the core region
