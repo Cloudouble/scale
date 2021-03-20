@@ -711,15 +711,16 @@ New datatypes can be added into the system at any time simply by including a def
 Things that are currently intended to be developed before release 1.0 but not yet included in release 0.5: 
 
 ### Release 0.6: 
+* **daemon support**: support for automatic internal processes which otherwise act like external connections
 * **websocket support**: an extension to allow clients to connect via websocket protocol and remove the need to poll for updates
 * **WebRTC support**: to allow currently active connections to instantly share selected record updates without 
 waiting for the system to re-compile views
+* **custom record types**: an endpoint to more conveniently allow the addition of new record type definitions to the system
 
 ### Release 0.7: 
 * **testing suite**: a suite of standardised tests that can be run against an install to verify that every feature is working correctly
 
 ### Release 0.8: 
-* **custom record types**: an endpoint to more conveniently allow the addition of new record type definitions to the system
 * **more authentication extensions**: a set of standardised authentication extensions to allow for the most common authentication scenarios
 * **more mask extensions**: a set of standardised mask extensions to create one or more built-in opinionated authorisation
 structures

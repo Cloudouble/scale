@@ -20,6 +20,8 @@ _/subscription/{class_name}/{record_id}/{connection_id}/{subscription_id}.json =
 
 _/view/{view_id}.json
 
+_/mask/{mask_id}.json
+
 _/system/{scope}/{module}.json
 
 _/error/403.html ... etc for other HTTP error codes ...
@@ -44,12 +46,22 @@ _/connection/{connection_id}/subscription/{class_name}/{record_id}.{view_suffix}
 _/connection/{connection_id}/subscription/{class_name}/{record_id}/{record_field}.{view_suffix} => record field data as rendered by the given view, read only => GET
 
 _/connection/{connection_id}/view/{view_id}.json  => GET, POST, PUT, PATCH
+_/connection/{connection_id}/mask/{mask_id}.json  => GET, POST, PUT, PATCH
 
 _/connection/{connection_id}/system/{scope}/{module}.json  => GET, POST, PUT, PATCH
 
 _/connection/{connection_id}/error/{code}.html  => GET, POST, PUT, PATCH
 
+
 ---
+
+
+DAEMON PATHS
+
+exactly the same as connection paths with "connection" swapped for "daemon", and these are not open to the internet via the CDN behaviours.
+
+---
+
 
 BEHAVIOR PATHS
 
