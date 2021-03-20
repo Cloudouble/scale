@@ -45,18 +45,18 @@ def main(event, context):
                                 'purpose': 'mask', 'path': event['path'], 'options': options}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8')) 
                                 for mask_name, options in mask.items()])
                     return allowed
-                elif event['entity_type'] == 'view' or all([event.get(k) for k in ['class_name', 'entity_id']]):
+                elif event['entity_type'] in ['view', 'mask'] or all([event.get(k) for k in ['class_name', 'entity_id']]):
                     switches = {'entity_type': event['entity_type'], 'method': event['method'], 'class_name': event['class_name'], 'entity_id': event['entity_id']}
                     mask = connection_mask.get(switches['entity_type']) if switches['entity_type'] in connection_mask else connection_mask.get('*', {})
                     if type(mask) is dict:
                         mask = mask.get(switches['method']) if switches['method'] in mask else mask.get('*', {})
-                    if type(mask) is dict and event['entity_type'] != 'view':
+                    if type(mask) is dict and event['entity_type'] not in ['view', 'mask']:
                         mask = mask.get(switches['class_name']) if switches['class_name'] in mask else mask.get('*', {})
                     masked_entity = {}
                     if type(event.get('entity')) is dict:
                         entity = event['entity']
                     else:
-                        if event['entity_type'] == 'view':
+                        if event['entity_type'] in ['view', 'mask']:
                             entity_key = '{data_root}/{entity_type}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=event['entity_type'], entity_id=event['entity_id'])
                         else:
                             entity_key = '{data_root}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id'])
@@ -71,7 +71,7 @@ def main(event, context):
                     for mask_name, options in mask.items():
                         options = options if type(options) is dict else {}
                         if constrained:
-                            mask_payload = {'purpose': 'mask', 'entity': entity, 'connection_id': event['connection_id'], 'switches': switches, 'options': options}
+                            mask_payload = {'entity': entity, 'connection_id': event['connection_id'], 'switches': switches, 'options': options}
                             allowfields.extend(json.loads(lambda_client.invoke(FunctionName=getprocessor(env, mask_name, 'extension', 'mask'), Payload=bytes(json.dumps(mask_payload), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8')))
                             if '*' in allowfields:
                                 constrained = False
@@ -88,7 +88,7 @@ def main(event, context):
                     if masked_entity and event.get('write'):
                         writable_entity = {**masked_entity}
                         del writable_entity['__constrained']
-                        if event['entity_type'] == 'view':
+                        if event['entity_type'] in ['view', 'mask']:
                             write_key = '{data_root}/connection/{connection_id}/view/{entity_id}.json'.format(data_root=env['data_root'], connection_id=env['connection_id'], entity_id=event['entity_id'])
                         else:
                             write_key = '{data_root}/connection/{connection_id}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], connection_id=env['connection_id'], entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id'])

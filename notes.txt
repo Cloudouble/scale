@@ -304,6 +304,14 @@ fetch(
     ) }
 ).then(r => console.log(r))
 
+PUT mask:
+fetch(
+    'https://scale.live-element.net/_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/mask/8ab8a73e-cd35-4e67-a0be-b92f25beb7a7.json', 
+    {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(
+        {"*": "*"}
+    ) }
+).then(r => console.log(r))
+
 PUT asset:
 fetch(
     'https://scale.live-element.net/_/connection/74facaff-c792-4c70-b8a4-71b3ad78d3f6/asset/pixel.png', 

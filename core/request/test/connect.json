@@ -27,7 +27,7 @@
           "arn": "arn:aws:s3:::scale.live-element.net"
         },
         "object": {
-          "key": "ac7ac679-5bb9-400b-9948-a3412e096df7.json",
+          "key": "8921f009-ac21-424e-b888-2dc1ab8a1fb8.json",
           "size": 1024,
           "eTag": "0123456789abcdef0123456789abcdef",
           "sequencer": "0A1B2C3D4E5F678901"
