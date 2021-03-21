@@ -711,12 +711,12 @@ New datatypes can be added into the system at any time simply by including a def
 Things that are currently intended to be developed before release 1.0 but not yet included in release 0.5: 
 
 ### Release 0.6: 
-* **daemon support**: support for automatic internal processes which otherwise act like external connections
-* **websocket support**: an extension to allow clients to connect via websocket protocol and remove the need to poll for updates
-* **WebRTC support**: to allow currently active connections to instantly share selected record updates without 
-waiting for the system to re-compile views
-* **custom record types**: an endpoint to more conveniently allow the addition of new record type definitions to the system
 * **extension installer**: an endpoint to enable the installation / removal of system extensions, including the Lambda code itself
+* **daemon support**: support for automatic internal processes which otherwise act like external connections, or which can perform scheduled system tasks
+* **websocket support**: an extension to allow clients to connect via websocket protocol and remove the need to poll for updates
+* **socket support**: a feature to allow sub-100ms direct device-to-device (one-to-one) trusted transmission of structured data via the CDN Edge
+* **channel support**: a feature to allow sub 1000ms one-to-many trusted transmission of structured data bypassing the core query/view build processes 
+* **custom record types**: an endpoint to more conveniently allow the addition of new record type definitions to the system
 
 ### Release 0.7: 
 * **testing suite**: a suite of standardised tests that can be run against an install to verify that every feature is working correctly
