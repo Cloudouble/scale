@@ -10,8 +10,12 @@ triggers = {
     'connection/{uuid}/query/{class_name}/{uuid}/[a-z0-9].json': ['connection-index'], 
     'feed/{class_name}/{uuid}/{uuid}/{uuid}.json': ['feed'], 
     'subscription/{class_name}/{uuid}/{uuid}/{uuid}.json': ['subscription'], 
-    'version/{class_name}/{uuid}/[a-zA-Z0-9\._-]+.json': ['version']
+    'version/{class_name}/{uuid}/[a-zA-Z0-9\._-]+.json': ['version'], 
+    'system/[a-z0-9\-]+/[a-z0-9\-]+.json': ['system']
 }
+
+#_/system/{scope}/{module}.json
+
 
 def main(event_data, context):
     '''
