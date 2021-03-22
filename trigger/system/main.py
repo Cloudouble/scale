@@ -144,82 +144,75 @@ def main(event, context):
             module_configuration = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
             module_state = module_configuration.get('state')
             rewrite_module_configuration = False
-            if scope == 'authentication': 
-                pass
-            elif scope == 'daemon':
+            if scope == 'daemon':
                 module_configuration['connection'] = module_configuration['connection'] if module_configuration.get('connection') and uuid_valid(module_configuration['connection']) else str(uuid.uuid4())
-                processor_full_name = '-extension-'.join(context.function_name.rsplit('-trigger-', 1))
-                processor_full_name = '-daemon-{}'.format(module).join(processor_full_name.rsplit('-system', 1))
-                if module_state in ['install', 'update']:
-                    try:
-                        processor_state = lambda_client.get_function(FunctionName=processor_full_name)
-                    except:
-                        processor_state = {}
-                if module_state == 'install': 
-                    if not processor_state:
-                        module_configuration['processor']['code_checksum'] = deploy_processor(processor_full_name, module_configuration['processor'], lambda_client, env, 'install')
-                        if module_configuration['processor']['code_checksum']: 
-                            lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
-                            lambda_client.add_permission(
-                                FunctionName=processor_full_name, StatementId=module, Action='lambda:InvokeFunction', Principal='s3.amazonaws.com', 
-                                SourceArn=lambdaFunctionArn, SourceAccount=env['account_id']
-                            )
-                            module_configuration['state'] = 'installed'
-                        else: 
-                            module_configuration['state'] = 'error'
-                    else:
+            processor_full_name = '-extension-'.join(context.function_name.rsplit('-trigger-', 1))
+            processor_full_name = '-{scope}-{module}'.format(scope=scope, module=module).join(processor_full_name.rsplit('-system', 1))
+            if module_state in ['install', 'update']:
+                try:
+                    processor_state = lambda_client.get_function(FunctionName=processor_full_name)
+                except:
+                    processor_state = {}
+            if module_state == 'install': 
+                if not processor_state:
+                    module_configuration['processor']['code_checksum'] = deploy_processor(processor_full_name, module_configuration['processor'], lambda_client, env, 'install')
+                    if module_configuration['processor']['code_checksum']: 
+                        lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
+                        lambda_client.add_permission(
+                            FunctionName=processor_full_name, StatementId=module, Action='lambda:InvokeFunction', Principal='s3.amazonaws.com', 
+                            SourceArn=lambdaFunctionArn, SourceAccount=env['account_id']
+                        )
                         module_configuration['state'] = 'installed'
-                elif module_state == 'update': 
-                    if processor_state:
-                        module_configuration['processor']['code_checksum'] = deploy_processor(processor_full_name, module_configuration['processor'], lambda_client, env, 'update')
-                        if module_configuration['processor']['code_checksum']: 
-                            module_configuration['state'] = 'updated'
-                        else: 
-                            module_configuration['state'] = 'error'
-                    else:
+                    else: 
                         module_configuration['state'] = 'error'
-                elif module_state == 'run':
-                    notification_configuration_current = s3_client.get_bucket_notification_configuration(Bucket=env['bucket'])
-                    notification_configuration_current = [n.get('Events', []) for n in notification_configuration_current if n.get('Id') == processor_full_name]
-                    if not notification_configuration_current:
-                        lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
-                        s3_client.put_bucket_notification_configuration(Bucket=env['bucket'], NotificationConfiguration={
-                            'LambdaFunctionConfigurations': [
-                                {
-                                    'Id': processor_full_name, 
-                                    'LambdaFunctionArn': lambdaFunctionArn, 
-                                    'Events': ['s3:ObjectCreated:*'], 
-                                    'Filter': {'Key': {'FilterRules': [{'Name': 'prefix', 'Value': '{data_root}/daemon/{module}{connection}/'.format(data_root=env['data_root'], module=module, connection=module_configuration['connection'])}]}}
-                                }
-                            ]
-                        })
-                        module_configuration['state'] = 'running'
-                elif module_state == 'pause':
+                else:
+                    module_configuration['state'] = 'installed'
+            elif module_state == 'update': 
+                if processor_state:
+                    module_configuration['processor']['code_checksum'] = deploy_processor(processor_full_name, module_configuration['processor'], lambda_client, env, 'update')
+                    if module_configuration['processor']['code_checksum']: 
+                        module_configuration['state'] = 'updated'
+                    else: 
+                        module_configuration['state'] = 'error'
+                else:
+                    module_configuration['state'] = 'error'
+            elif scope == 'daemon' and module_state == 'run':
+                notification_configuration_current = s3_client.get_bucket_notification_configuration(Bucket=env['bucket'])
+                notification_configuration_current = [n.get('Events', []) for n in notification_configuration_current if n.get('Id') == processor_full_name]
+                if not notification_configuration_current:
+                    lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
+                    s3_client.put_bucket_notification_configuration(Bucket=env['bucket'], NotificationConfiguration={
+                        'LambdaFunctionConfigurations': [
+                            {
+                                'Id': processor_full_name, 
+                                'LambdaFunctionArn': lambdaFunctionArn, 
+                                'Events': ['s3:ObjectCreated:*'], 
+                                'Filter': {'Key': {'FilterRules': [{'Name': 'prefix', 'Value': '{data_root}/daemon/{module}{connection}/'.format(data_root=env['data_root'], module=module, connection=module_configuration['connection'])}]}}
+                            }
+                        ]
+                    })
+                    module_configuration['state'] = 'running'
+            elif scope == 'daemon' and  module_state == 'pause':
+                notification_configuration_current = s3_client.get_bucket_notification_configuration(Bucket=env['bucket'])
+                notification_configuration_current = [n.get('Events', []) for n in notification_configuration_current if n.get('Id') == processor_full_name]
+                if notification_configuration_current:
+                    lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
+                    s3_client.put_bucket_notification_configuration(Bucket=env['bucket'], NotificationConfiguration={})
+                    module_configuration['state'] = 'paused'
+            elif module_state == 'remove':
+                if scope == 'daemon':
                     notification_configuration_current = s3_client.get_bucket_notification_configuration(Bucket=env['bucket'])
                     notification_configuration_current = [n.get('Events', []) for n in notification_configuration_current if n.get('Id') == processor_full_name]
                     if notification_configuration_current:
                         lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
                         s3_client.put_bucket_notification_configuration(Bucket=env['bucket'], NotificationConfiguration={})
-                        module_configuration['state'] = 'paused'
-                elif module_state == 'remove':
-                    notification_configuration_current = s3_client.get_bucket_notification_configuration(Bucket=env['bucket'])
-                    notification_configuration_current = [n.get('Events', []) for n in notification_configuration_current if n.get('Id') == processor_full_name]
-                    if notification_configuration_current:
-                        lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
-                        s3_client.put_bucket_notification_configuration(Bucket=env['bucket'], NotificationConfiguration={})
-                    lambda_client.delete_function(FunctionName=processor_full_name)
-                    module_configuration['state'] = 'removed'
-                if module_state in ['install', 'update'] and module_configuration['state'] != 'error':
-                    if not deploy_entities(module_configuration, lambda_client, env, client_context): 
-                        module_configuration['state'] = 'error'
-                if module_configuration['state'] != module_state:
-                    rewrite_module_configuration = True
-            elif scope == 'mask': 
-                pass
-            elif scope == 'query':
-                pass
-            elif scope == 'view':
-                pass
+                lambda_client.delete_function(FunctionName=processor_full_name)
+                module_configuration['state'] = 'removed'
+            if module_state in ['install', 'update'] and module_configuration['state'] != 'error':
+                if not deploy_entities(module_configuration, lambda_client, env, client_context): 
+                    module_configuration['state'] = 'error'
+            if module_configuration['state'] != module_state:
+                rewrite_module_configuration = True
             if rewrite_module_configuration:
                 s3_client.put_object(Bucket=env['bucket'], Key=event['key'], Body=bytes(json.dumps(module_configuration), 'utf-8'))
             counter = counter + 1
