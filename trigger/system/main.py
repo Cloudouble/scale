@@ -147,9 +147,6 @@ def main(event, context):
             if scope == 'authentication': 
                 pass
             elif scope == 'daemon':
-                # state: install update run pause remove (installed updated running paused removed error)
-                # {state: '', processor: {package_source_code: '', package_source_url: '', package_image_uri: '', code_checksum: '', ?deployment_options: {}}
-                # ?entity_map: {}, ?connection: ''}
                 module_configuration['connection'] = module_configuration['connection'] if module_configuration.get('connection') and uuid_valid(module_configuration['connection']) else str(uuid.uuid4())
                 processor_full_name = '-extension-'.join(context.function_name.rsplit('-trigger-', 1))
                 processor_full_name = '-daemon-{}'.format(module).join(processor_full_name.rsplit('-system', 1))
@@ -192,7 +189,7 @@ def main(event, context):
                                     'Id': processor_full_name, 
                                     'LambdaFunctionArn': lambdaFunctionArn, 
                                     'Events': ['s3:ObjectCreated:*'], 
-                                    'Filter': {'Key': {'FilterRules': [{'Name': 'prefix', 'Value': '{data_root}/daemon/{module}/'.format(data_root=env['data_root'], module=module)}]}}
+                                    'Filter': {'Key': {'FilterRules': [{'Name': 'prefix', 'Value': '{data_root}/daemon/{module}{connection}/'.format(data_root=env['data_root'], module=module, connection=module_configuration['connection'])}]}}
                                 }
                             ]
                         })
