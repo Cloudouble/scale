@@ -88,15 +88,12 @@ def deploy_entities(module_configuration, lambda_client, env, client_context):
                 elif entity_type in ['view', 'mask']:
                     entity_key = '{data_root}/{entity_type}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=entity_type, entity_id=entity_id)
                 elif entity_type in ['system'] and entity.get('@scope') and entity.get('@module'):
-                    scope = entity['@scope']
+                    entity_key = '{data_root}/{entity_type}/{scope}/{module}.json'.format(data_root=env['data_root'], entity_type=entity_type, scope=entity['@scope'], module=entity['@module'])
                     del entity_to_write['@scope']
-                    module = entity['@module']
                     del entity_to_write['@module']
-                    entity_key = '{data_root}/{entity_type}/{scope}/{module}.json'.format(data_root=env['data_root'], entity_type=entity_type, scope=scope, module=module)
                 elif entity_type in ['error'] and entity.get('@code'):
-                    code = entity['@code']
+                    entity_key = '{data_root}/{entity_type}/{code}.json'.format(data_root=env['data_root'], entity_type=entity_type, code=entity['@code'])
                     del entity_to_write['@code']
-                    entity_key = '{data_root}/{entity_type}/{code}.json'.format(data_root=env['data_root'], entity_type=entity_type, code=code)
                 elif entity_type in ['asset', 'static'] and entity.get('@path') and entity.get('@content-type') and entity.get('@body'):
                     path = entity['@path']
                     del entity_to_write['@path']
