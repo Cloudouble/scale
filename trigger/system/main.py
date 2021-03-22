@@ -85,6 +85,7 @@ def deploy_entities(module_configuration, lambda_client, env, client_context):
                         data_root=env['data_root'], entity_type=entity_type, class_name=class_name, 
                         object_id=object_id, connection_id=module_configuration['connection'], entity_id=entity_id
                     )
+                    entity_to_write['connection_type'] = 'daemon'
                 elif entity_type in ['view', 'mask']:
                     entity_key = '{data_root}/{entity_type}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=entity_type, entity_id=entity_id)
                 elif entity_type in ['system'] and entity.get('@scope') and entity.get('@module'):
