@@ -125,10 +125,10 @@ assumeRolePolicy='{
 }'
 
 
-lambdaEnvCoreRequest='env = {"bucket": "'$coreBucket'", "account_id": "'$accountId'", "core_region": "'$coreRegion'", "lambda_role": "'$lambdaRole'", "lambda_namespace": "'$lambdaNamespace'", "system_root": "'$envSystemRoot'", "shared": '$envShared', "authentication_namespace": "'$envAuthenticationNamespace'"}'
-lambdaEnvCoreSchema='env = {"bucket": "'$coreBucket'", "account_id": "'$accountId'", "core_region": "'$coreRegion'", "lambda_role": "'$lambdaRole'", "lambda_namespace": "'$lambdaNamespace'", "system_root": "'$envSystemRoot'", "data_root": "'$envSystemRoot'"}'
-lambdaEnvTriggerProxy='env = {"bucket": "'$coreBucket'", "account_id": "'$accountId'", "core_region": "'$coreRegion'", "lambda_role": "'$lambdaRole'", "lambda_namespace": "'$lambdaNamespace'", "system_root": "'$envSystemRoot'", "shared": '$envShared', "authentication_namespace": "'$envAuthenticationNamespace'"}'
-lambdaEnvRegion='env = {"bucket": "'$coreBucket'", "account_id": "'$accountId'", "core_region": "'$coreRegion'", "lambda_role": "'$lambdaRole'", "core_request_bucket": "'$requestBucket'"}'
+lambdaEnvCoreRequest='env = {"bucket": "'$coreBucket'", "system_proper_name": "'$systemProperName'", "account_id": "'$accountId'", "core_region": "'$coreRegion'", "lambda_role": "'$lambdaRole'", "lambda_namespace": "'$lambdaNamespace'", "system_root": "'$envSystemRoot'", "shared": '$envShared', "authentication_namespace": "'$envAuthenticationNamespace'"}'
+lambdaEnvCoreSchema='env = {"bucket": "'$coreBucket'", "system_proper_name": "'$systemProperName'", "account_id": "'$accountId'", "core_region": "'$coreRegion'", "lambda_role": "'$lambdaRole'", "lambda_namespace": "'$lambdaNamespace'", "system_root": "'$envSystemRoot'", "data_root": "'$envSystemRoot'"}'
+lambdaEnvTriggerProxy='env = {"bucket": "'$coreBucket'", "system_proper_name": "'$systemProperName'", "account_id": "'$accountId'", "core_region": "'$coreRegion'", "lambda_role": "'$lambdaRole'", "lambda_namespace": "'$lambdaNamespace'", "system_root": "'$envSystemRoot'", "shared": '$envShared', "authentication_namespace": "'$envAuthenticationNamespace'"}'
+lambdaEnvRegion='env = {"bucket": "'$coreBucket'", "system_proper_name": "'$systemProperName'", "account_id": "'$accountId'", "core_region": "'$coreRegion'", "lambda_role": "'$lambdaRole'", "core_request_bucket": "'$requestBucket'"}'
 
 cachePolicyDocumentStandard='{
     "Name": "'$systemProperName'Standard",
