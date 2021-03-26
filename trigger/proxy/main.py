@@ -4,10 +4,13 @@ import json, boto3, base64, re
 
 triggers = {
     'connection/{uuid}/connect.json': ['connection'], 
+    'daemon/{uuid}/connect.json': ['connection'], 
     'query/{class_name}/{uuid}.json': ['query'], 
     'query/{class_name}/{uuid}/[a-z0-9].json': ['index'], 
     'connection/{uuid}/record/{class_name}/{uuid}.json': ['connection-record'], 
     'connection/{uuid}/query/{class_name}/{uuid}/[a-z0-9].json': ['connection-index'], 
+    'daemon/{uuid}/record/{class_name}/{uuid}.json': ['connection-record'], 
+    'daemon/{uuid}/query/{class_name}/{uuid}/[a-z0-9].json': ['connection-index'], 
     'feed/{class_name}/{uuid}/{uuid}/{uuid}.json': ['feed'], 
     'subscription/{class_name}/{uuid}/{uuid}/{uuid}.json': ['subscription'], 
     'version/{class_name}/{uuid}/[a-zA-Z0-9\._-]+.json': ['version'], 

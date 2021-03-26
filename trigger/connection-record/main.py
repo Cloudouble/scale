@@ -28,8 +28,8 @@ def process_query(key_obj, index, s3_client, env, record_id):
 
 def main(event, context):
     '''
-    - triggered by new/updated/deleted objects in _/connection/{connection_id}/record/{class_name}/{record_id}.json
-    - removes the relevant record_id from _/connection/{connection_id}/query/{class_name}/{query_id}/{index_initial}.json if the masked value is empty
+    - triggered by new/updated/deleted objects in _/{connection_type}/{connection_id}/record/{class_name}/{record_id}.json
+    - removes the relevant record_id from _/{connection_type}/{connection_id}/query/{class_name}/{query_id}/{index_initial}.json if the masked value is empty
     - uses _/subscription/{class_name}/{record_id}/{connection_id}/* to find affected views for this connection and record
     - trigger view for each affected subscription view 
     '''
@@ -40,14 +40,14 @@ def main(event, context):
         lambda_client = boto3.client('lambda')
         env, client_context = get_env_context(event, context)    
         if len(env['path']) == 5:
-            connection_id, entity_type, class_name, record_id = env['path'][1:]
+            connection_type, connection_id, entity_type, class_name, record_id = env['path']
             index = record_id[0]
             try:
                 masked_record_data = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
             except:
                 masked_record_data = {}
             if not masked_record_data:
-                connection_query_list_key = '{data_root}/connection/{connection_id}/query/{class_name}/'.format(data_root=env['data_root'], connection_id=connection_id, class_name=class_name)
+                connection_query_list_key = '{data_root}/{connection_type}/{connection_id}/query/{class_name}/'.format(data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id, class_name=class_name)
                 connection_query_list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix=connection_query_list_key)
                 for key_obj in connection_query_list_response.get('Contents', []):
                     process_query(key_obj, index, s3_client, env, record_id)
@@ -70,7 +70,7 @@ def main(event, context):
                         'entity_type': 'record', 
                         'entity_id': record_id, 
                         'view': subscription_data, 
-                        '_env': {**env, 'connection_id': connection_id}
+                        '_env': {**env, 'connection_type': connection_type, 'connection_id': connection_id}
                     }), 'utf-8'))
             counter = counter + 1
     return counter

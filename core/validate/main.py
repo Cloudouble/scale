@@ -46,6 +46,7 @@ validators = {
 def valid_view(view, direct=False):
     return all([
         type(view) is dict, 
+        view.get('connection_type', 'connection') in ['connection', 'daemon'], 
         type(view.get('processor', None if direct else '')) is str, 
         type(view.get('view', '' if direct else None)) is str, 
         type(view.get('options', {})) is dict, 

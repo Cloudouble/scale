@@ -17,12 +17,20 @@ def main(event, context):
         s3 = boto3.resource('s3')
         bucket = s3.Bucket(env['bucket'])
         s3_client = boto3.client('s3')
-        connection_object = bucket.Object('{data_root}/connection/{connection_id}/connect.json'.format(data_root=env['data_root'], connection_id=env['connection_id']))
+        connection_type = env.get('connection_type', 'connection')
+        connection_id = env['connection_id']
+        connection_object = bucket.Object('{data_root}/{connection_type}/{connection_id}/connect.json'.format(data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id))
         try:
             connection_record = json.loads(connection_object.get()['Body'].read().decode('utf-8'))
         except:
             connection_record = {'mask': {}}
-        connection_mask = connection_record.get('mask', {})
+        connection_mask_id = connection_record.get('mask')
+        if connection_mask_id:
+            connection_mask_object = bucket.Object('{data_root}/mask/{connection_mask_id}.json'.format(data_root=env['data_root'], connection_mask_id=connection_mask_id))
+            try:
+                connection_mask = json.loads(connection_mask_object.get()['Body'].read().decode('utf-8'))
+            except:
+                connection_mask = {}
         if connection_mask:
             if event.get('entity_type') and event.get('method'):
                 lambda_client = boto3.client('lambda')
@@ -71,7 +79,7 @@ def main(event, context):
                     for mask_name, options in mask.items():
                         options = options if type(options) is dict else {}
                         if constrained:
-                            mask_payload = {'entity': entity, 'connection_id': event['connection_id'], 'switches': switches, 'options': options}
+                            mask_payload = {'entity': entity, 'connection_type': connection_type, 'connection_id': connection_id, 'switches': switches, 'options': options}
                             allowfields.extend(json.loads(lambda_client.invoke(FunctionName=getprocessor(env, mask_name, 'extension', 'mask'), Payload=bytes(json.dumps(mask_payload), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8')))
                             if '*' in allowfields:
                                 constrained = False
@@ -89,17 +97,17 @@ def main(event, context):
                         writable_entity = {**masked_entity}
                         del writable_entity['__constrained']
                         if event['entity_type'] in ['view', 'mask']:
-                            write_key = '{data_root}/connection/{connection_id}/view/{entity_id}.json'.format(data_root=env['data_root'], connection_id=env['connection_id'], entity_id=event['entity_id'])
+                            write_key = '{data_root}/{connection_type}/{connection_id}/view/{entity_id}.json'.format(data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id, entity_id=event['entity_id'])
                         else:
-                            write_key = '{data_root}/connection/{connection_id}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], connection_id=env['connection_id'], entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id'])
+                            write_key = '{data_root}/{connection_type}/{connection_id}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id, entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id'])
                         current_writable_entity_json = s3_client.get_object(Bucket=env['bucket'], Key=write_key)['Body'].read().decode('utf-8')
                         new_writable_entity_json = json.dumps(writable_entity)
                         if current_writable_entity_json != new_writable_entity_json:
                             bucket.put_object(Body=bytes(json.dumps(writable_entity), 'utf-8'), Key=write_key, ContentType='application/json')
                             did_write = True
                     if event.get('query_id'):
-                        index_key = '{data_root}/connection/{connection_id}/query/{class_name}/{query_id}/{index}.json'.format(
-                            data_root=env['data_root'], connection_id=env['connection_id'], class_name=event['class_name'], query_id=event['query_id'], index=event['entity_id'][0])
+                        index_key = '{data_root}/{connection_type}/{connection_id}/query/{class_name}/{query_id}/{index}.json'.format(
+                            data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id, class_name=event['class_name'], query_id=event['query_id'], index=event['entity_id'][0])
                         try:
                             index_record_ids = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=index_key)['Body'].read().decode('utf-8'))
                         except:

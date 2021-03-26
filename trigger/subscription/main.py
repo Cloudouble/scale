@@ -35,7 +35,7 @@ def main(event, context):
             'entity_type': 'record', 
             'entity_id': record_id, 
             'view': view, 
-            '_env': {**env, 'connection_id': connection_id}
+            '_env': {**env, 'connection_type': view.get('connection_type', 'connection'), 'connection_id': connection_id}
         }), 'utf-8'))
         counter = counter + 1
     return counter    

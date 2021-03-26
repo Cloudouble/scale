@@ -1,6 +1,6 @@
 env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_", "shared": 0, "authentication_namespace": "LiveElementScale"}
 
-import json, boto3, base64, uuid
+import json, boto3, base64, uuid, hashlib
 
 def uuid_valid(s):
     try:
@@ -122,6 +122,9 @@ def main(event, context):
             elif len(env['path']) >= 2:
                 if len(env['path']) == 2:
                     entity_type, entity_id = env['path']
+                    if entity_type == 'mask':
+                        mask_hash = hashlib.sha512(bytes(json.dumps(entity), 'utf-8')).hexdigest()
+                        entity_id = mask_hash
                     entity_key = '{data_root}/{entity_type}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=entity_type, entity_id=entity_id)
                 else:
                     entity_type, class_name, entity_id, record_field = (env['path'][0:3] + [None])
@@ -172,7 +175,6 @@ def main(event, context):
                     'entity_type': entity_type, 
                     'class_name': None if entity_type in ['view', 'mask'] else class_name, 
                     'entity_id': entity_id}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8')):
-                    print('line 176')
                     masked_entity = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), Payload=bytes(json.dumps({
                         'entity_type': entity_type, 
                         'method': request['method'],

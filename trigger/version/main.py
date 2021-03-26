@@ -53,16 +53,18 @@ def main(event, context):
             else:
                 record_data = {}
             if record_data:
-                process_connections = set()
+                process_connections = {}
                 for key_obj in subscription_list_response.get('Contents', []):
-                    process_connections.add(getpath(key_obj['Key'], env)[3])
+                    subscription = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=key_obj['Key'])['Body'].read().decode('utf-8'))
+                    process_connections[getpath(key_obj['Key'], env)[3]] = subscription.get('connection_type', 'connection')
                 c = 1000000000
                 while c and subscription_list_response.get('IsTruncated') and subscription_list_response.get('NextContinuationToken'):
                     subscription_list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix=subscription_list_key, ContinuationToken=subscription_list_response.get('NextContinuationToken'))
                     for key_obj in subscription_list_response.get('Contents', []):
-                        process_connections.add(getpath(key_obj['Key'], env)[3])
+                        subscription = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=key_obj['Key'])['Body'].read().decode('utf-8'))
+                        process_connections[getpath(key_obj['Key'], env)[3]] = subscription.get('connection_type', 'connection')
                         c = c - 1
-                for connection_id in process_connections:
+                for connection_id, connection_type in process_connections.items():
                     mask_payload = {
                         'entity_type': 'record', 
                         'method': 'GET', 
@@ -70,7 +72,7 @@ def main(event, context):
                         'entity_id': record_id, 
                         'entity': record_data, 
                         'write': True, 
-                        '_env': {'connection_id': connection_id, **env}
+                        '_env': {**env, 'connection_type': connection_type, 'connection_id': connection_id}
                     }
                     lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), InvocationType='Event', Payload=bytes(json.dumps(mask_payload), 'utf-8'))
             counter = counter + 1

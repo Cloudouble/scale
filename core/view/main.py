@@ -50,19 +50,21 @@ def main(event, context):
         view['assets'] = assets
         view['options'] = options
         if view and type(view.get('processor')) is str:
+            connection_type = env.get('connection_type', 'connection')
+            connection_id = env['connection_id']
             suffix = view.get('suffix', 'json')
             field_name = view.get('field_name')
             if view.get('assets'):
                 for asset_path in view['assets'].values():
                     if lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), Payload=bytes(json.dumps({'entity_type': 'asset', 'path': asset_path, 'method': 'GET'}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'):
                         bucket.copy({'Bucket': env['bucket'], 'Key': '{data_root}/asset/{asset_path}'.format(data_root=env['data_root'], asset_path=asset_path)}, 
-                            '{data_root}/connection/{connection_id}/asset/{asset_path}'.format(connection_id=env['connection_id'], asset_path=asset_path))
+                            '{data_root}/{connection_type}/{connection_id}/asset/{asset_path}'.format(connection_type=connection_type, connection_id=connection_id, asset_path=asset_path))
             if entity_type == 'record':
-                masked_record_data = json.loads(bucket.Object('{data_root}/connection/{connection_id}/record/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], connection_id=env['connection_id'], class_name=class_name, entity_id=entity_id)).get()['Body'].read().decode('utf-8'))
+                masked_record_data = json.loads(bucket.Object('{data_root}/{connection_type}/{connection_id}/record/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id, class_name=class_name, entity_id=entity_id)).get()['Body'].read().decode('utf-8'))
                 if field_name:
-                    view_result_key = '{data_root}/connection/{connection_id}/subscription/{class_name}/{entity_id}/{field_name}.{suffix}'.format(data_root=env['data_root'], connection_id=env['connection_id'], class_name=class_name, entity_id=entity_id, field_name=field_name, suffix=suffix)
+                    view_result_key = '{data_root}/{connection_type}/{connection_id}/subscription/{class_name}/{entity_id}/{field_name}.{suffix}'.format(data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id, class_name=class_name, entity_id=entity_id, field_name=field_name, suffix=suffix)
                 else:
-                    view_result_key = '{data_root}/connection/{connection_id}/subscription/{class_name}/{entity_id}.{suffix}'.format(data_root=env['data_root'], connection_id=env['connection_id'], class_name=class_name, entity_id=entity_id, suffix=suffix)
+                    view_result_key = '{data_root}/{connection_type}/{connection_id}/subscription/{class_name}/{entity_id}.{suffix}'.format(data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id, class_name=class_name, entity_id=entity_id, suffix=suffix)
                 try:
                     view_result = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, view['processor'], 'extension', 'view'), Payload=bytes(json.dumps({
                         'options': view['options'], 
@@ -80,7 +82,7 @@ def main(event, context):
                 if write_view(view_result, view_result_key, bucket, s3_client, env):
                     counter = counter + 1
             elif entity_type == 'query':
-                query_base_key = '{data_root}/connection/{connection_id}/query/{class_name}/{entity_id}/'.format(data_root=env['data_root'], connection_id=env['connection_id'], class_name=class_name, entity_id=entity_id)
+                query_base_key = '{data_root}/{connection_type}/{connection_id}/query/{class_name}/{entity_id}/'.format(data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id, class_name=class_name, entity_id=entity_id)
                 query_index_list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix=query_base_key)
                 query_record_ids = []
                 for query_index_entry in query_index_list_response.get('Contents', []):
@@ -88,7 +90,7 @@ def main(event, context):
                 query_record_ids.sort()
                 query_record_data = []
                 for record_id in query_record_ids:
-                    query_record_data.append(json.loads(bucket.Object('{data_root}/connection/{connection_id}/record/{class_name}/{record_id}.json'.format(data_root=env['data_root'], connection_id=env['connection_id'], class_name=class_name, record_id=record_id)).get()['Body'].read().decode('utf-8')))
+                    query_record_data.append(json.loads(bucket.Object('{data_root}/{connection_type}/{connection_id}/record/{class_name}/{record_id}.json'.format(data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id, class_name=class_name, record_id=record_id)).get()['Body'].read().decode('utf-8')))
                 sort_field = view.get('sort_field', '@id')
                 sort_direction = view.get('sort_direction', 'ascending')
                 query_record_data.sort(key=lambda r: r[sort_field], reverse=(True if sort_direction == 'descending' else False))
@@ -96,8 +98,8 @@ def main(event, context):
                 query_record_data = query_record_data[view.get('min_index'):view.get('max_index')]
                 view_result_count = len(query_record_data) 
                 for page_name, page_results in {'{}-{}'.format(i*1000, i*1000+999): p for i, p in enumerate(list(chunks(query_record_data, 1000)))}.items():
-                    page_object_key = '{data_root}/connection/{connection_id}/feed/{class_name}/{entity_id}/{field_name}/{sort_field}/{sort_direction}/{page_name}.{suffix}'.format(
-                        data_root=env['data_root'], connection_id=env['connection_id'], class_name=class_name, entity_id=entity_id, field_name=(field_name if field_name else '-'), 
+                    page_object_key = '{data_root}/{connection_type}/{connection_id}/feed/{class_name}/{entity_id}/{field_name}/{sort_field}/{sort_direction}/{page_name}.{suffix}'.format(
+                        data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id, class_name=class_name, entity_id=entity_id, field_name=(field_name if field_name else '-'), 
                         sort_field=sort_field, sort_direction=sort_direction, page_name=page_name, suffix=suffix)
                     try:
                         view_result = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, view['processor'], 'extension', 'view'), Payload=bytes(json.dumps({

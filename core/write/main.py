@@ -12,12 +12,19 @@ def main(event, context):
     entity_type =  event.get('entity_type')
     method = event.get('method')
     if entity_type and method:
+        connection_type = env.get('connection_type', 'connection')
+        connection_id = env['connection_id']
         s3 = boto3.resource('s3')
         bucket = s3.Bucket(env['bucket'])
         if entity_type == 'connection' and event.get('entity'):
             entity = event['entity']
-            connection_object = bucket.Object('{data_root}/connection/{connection_id}/connect.json'.format(data_root=env['data_root'], connection_id=env['connection_id']))
+            connection_object = bucket.Object('{data_root}/{connection_type}/{connection_id}/connect.json'.format(data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id))
             if method in ['POST', 'PUT', 'PATCH']:
+                if entity.get('mask') and type(entity['mask']) is dict:
+                    mask_hash = hashlib.sha512(bytes(json.dumps(entity['mask']), 'utf-8')).hexdigest()
+                    mask_object = bucket.Object('{data_root}/mask/{mask_hash}.json'.format(data_root=env['data_root'], mask_hash=mask_hash))
+                    mask_object.put(Body=bytes(json.dumps(entity['mask']), 'utf-8'), ContentType='application/json')
+                    entity['mask'] = mask_hash
                 connection_object.put(Body=bytes(json.dumps(entity), 'utf-8'), ContentType='application/json')
                 counter = counter + 1
             elif method == 'DELETE':
