@@ -449,3 +449,17 @@ _/connection/????????-????-????-????-????????????/error/*.html - PUT **
 _/* - 403
 
 Default (*) - 200
+
+
+
+WEB SOCKET
+
+* read-only, solely there as an alternative to polling for changes
+* $connect to create a socket
+* $disconnect to remove a socket
+* $connect/$disconnect => adds/removes "socket" property to the connect.json object with the socket_id
+* from then on any changes to _/connection/{connection_id}/{feed|subscription} paths will be echoes to the websocket
+* websocket messages structure {meta: {path: '', content-type: '', ... }, body: '$base64 encoded bytes'}
+
+
+

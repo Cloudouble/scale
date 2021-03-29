@@ -315,6 +315,9 @@ for functionName in *; do
         if [ 'schema' = $functionName ]; then
             sed -i "1s/.*/$lambdaEnvCoreSchema/" main.py
         fi
+        if [ 'socket' = $functionName ]; then
+            sed -i "1s/.*/$lambdaEnvCoreRequest/" main.py
+        fi
         zip ../$functionName.zip main.py
         cd ../
         aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn --zip-file fileb://$functionName.zip --timeout 900 --publish --region $coreRegion

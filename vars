@@ -83,14 +83,17 @@ lambdaPolicy='{
                 "s3:DeleteObjectVersion",
                 "s3:ListBucketVersions",
                 "s3:ListBucket",
+                "execute-api:Invoke",
                 "s3:DeleteObject",
+                "execute-api:ManageConnections",
                 "s3:GetObjectVersion"
             ],
             "Resource": [
                 "arn:aws:iam::'$accountId':role/'$lambdaRole'",
                 "arn:aws:logs:*:'$accountId':log-group:*",
                 "arn:aws:s3:::'$coreBucket'",
-                "arn:aws:s3:::*/*"
+                "arn:aws:s3:::*/*", 
+                "arn:aws:execute-api:*:'$accountId':*/*/*/*"
             ]
         },
         {
