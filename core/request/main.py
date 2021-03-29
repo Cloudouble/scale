@@ -123,7 +123,7 @@ def main(event, context):
                 if len(env['path']) == 2:
                     entity_type, entity_id = env['path']
                     if entity_type == 'mask':
-                        mask_hash = hashlib.sha512(bytes(json.dumps(entity), 'utf-8')).hexdigest()
+                        mask_hash = hashlib.sha512(bytes(json.dumps(request['entity']), 'utf-8')).hexdigest()
                         entity_id = mask_hash
                     entity_key = '{data_root}/{entity_type}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=entity_type, entity_id=entity_id)
                 else:
