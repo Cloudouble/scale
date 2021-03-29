@@ -4,7 +4,7 @@ def chunks(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
         
-def write_view(view_result, result_key, bucket, s3_client, env):
+def write_view(view_result, result_key, bucket, s3_client, env, lambda_client, client_context, connection_scoped_key):
     if type(view_result) is dict and view_result.get('body'):
         content_type = view_result.get('content_type', 'application/json')
         encoding = view_result.get('encoding', 'text')
@@ -16,6 +16,30 @@ def write_view(view_result, result_key, bucket, s3_client, env):
             existing_view_bytes = bytes('', 'utf-8')
         if existing_view_bytes != body:
             bucket.put_object(Body=body, Key=result_key, ContentType=content_type)
+            # write to socket if active
+            connection_id = env.get('connection_id')
+            if connection_id:
+                connection_object = bucket.Object('{data_root}/connection/{connection_id}/connect.json'.format(data_root=env['data_root'], connection_id=connection_id))
+                try:
+                    connection_record = json.loads(connection_object.get()['Body'].read().decode('utf-8'))
+                except:
+                    connection_record = {}
+            if connection_record and connection_record.get('socket_url') and connection_record.get('socket_id'):
+                try: 
+                    socket_response = {
+                        'meta': {'path': connection_scoped_key}, 
+                        'content-type': content_type, 
+                        'encoding': encoding, 
+                        'body': body.decode('utf-8') if encoding == 'text' else base64.b64encode(body).decode('utf-8')
+                    }
+                    apigatewaymanagementapi = boto3.client('apigatewaymanagementapi', endpoint_url=connection_record['socket_url'])
+                    apigatewaymanagementapi.post_to_connection(ConnectionId=connection_record['socket_id'], Data=bytes(json.dumps(socket_response), 'utf-8'))            
+                except:
+                    if connection_record.get('socket_url'):
+                        del connection_record['socket_url']
+                    if connection_record.get('socket_id'):
+                        del connection_record['socket_id']
+                    lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'connection', 'entity': connection_record, 'method': 'PUT'}), 'utf-8'), ClientContext=client_context)                    
         return True
     else: 
         return False
@@ -63,8 +87,10 @@ def main(event, context):
                 masked_record_data = json.loads(bucket.Object('{data_root}/{connection_type}/{connection_id}/record/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id, class_name=class_name, entity_id=entity_id)).get()['Body'].read().decode('utf-8'))
                 if field_name:
                     view_result_key = '{data_root}/{connection_type}/{connection_id}/subscription/{class_name}/{entity_id}/{field_name}.{suffix}'.format(data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id, class_name=class_name, entity_id=entity_id, field_name=field_name, suffix=suffix)
+                    connection_scoped_result_key = 'subscription/{class_name}/{entity_id}/{field_name}.{suffix}'.format(class_name=class_name, entity_id=entity_id, field_name=field_name, suffix=suffix)
                 else:
                     view_result_key = '{data_root}/{connection_type}/{connection_id}/subscription/{class_name}/{entity_id}.{suffix}'.format(data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id, class_name=class_name, entity_id=entity_id, suffix=suffix)
+                    connection_scoped_result_key = 'subscription/{class_name}/{entity_id}.{suffix}'.format(class_name=class_name, entity_id=entity_id, suffix=suffix)
                 try:
                     view_result = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, view['processor'], 'extension', 'view'), Payload=bytes(json.dumps({
                         'options': view['options'], 
@@ -79,7 +105,7 @@ def main(event, context):
                     }), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
                 except:
                     view_result = {}
-                if write_view(view_result, view_result_key, bucket, s3_client, env):
+                if write_view(view_result, view_result_key, bucket, s3_client, env, lambda_client, client_context, connection_scoped_result_key):
                     counter = counter + 1
             elif entity_type == 'query':
                 query_base_key = '{data_root}/{connection_type}/{connection_id}/query/{class_name}/{entity_id}/'.format(data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id, class_name=class_name, entity_id=entity_id)
@@ -101,6 +127,8 @@ def main(event, context):
                     page_object_key = '{data_root}/{connection_type}/{connection_id}/feed/{class_name}/{entity_id}/{field_name}/{sort_field}/{sort_direction}/{page_name}.{suffix}'.format(
                         data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id, class_name=class_name, entity_id=entity_id, field_name=(field_name if field_name else '-'), 
                         sort_field=sort_field, sort_direction=sort_direction, page_name=page_name, suffix=suffix)
+                    connection_scoped_page_object_key = 'feed/{class_name}/{entity_id}/{field_name}/{sort_field}/{sort_direction}/{page_name}.{suffix}'.format(class_name=class_name, entity_id=entity_id, field_name=(field_name if field_name else '-'), 
+                        sort_field=sort_field, sort_direction=sort_direction, page_name=page_name, suffix=suffix)
                     try:
                         view_result = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, view['processor'], 'extension', 'view'), Payload=bytes(json.dumps({
                             'options': view['options'], 
@@ -119,6 +147,6 @@ def main(event, context):
                         }), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
                     except:
                         view_result = {}
-                    if write_view(view_result, page_object_key, bucket, s3_client, env):
+                    if write_view(view_result, page_object_key, bucket, s3_client, env, lambda_client, client_context, connection_scoped_page_object_key):
                         counter = counter + 1
     return counter
