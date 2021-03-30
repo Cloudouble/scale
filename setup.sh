@@ -1051,6 +1051,9 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
     
     $distributionURL
     
+    
+    Please check your API Gateway in the console for $websocketApiName websocket endpoints.
+    
     "
 echo "
 ---------
