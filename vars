@@ -19,6 +19,7 @@ requestBuckets["us-east-1"]="us-east-1.$requestBucket"
 
 # ---GENERATED BUT CUSTOMISABLE---
 envAuthenticationNamespace="$systemProperName"
+websocketApiName="$systemProperName-Websocket"
 lambdaRole="$systemProperName"
 lambdaRoleArn='arn:aws:iam::'$accountId':role/'$lambdaRole
 lambdaPolicyStatement='{
