@@ -184,7 +184,7 @@ originRequestPolicyStandard='{
         "HeaderBehavior": "whitelist", 
         "Headers": {
             "Quantity": 6, 
-            "Items": ["Origin","'$envAuthenticationNamespace'Connection","Access-Control-Request-Method","Accept","Access-Control-Request-Headers","Referer"]
+            "Items": ["Origin","'$envAuthenticationNamespace'Connection","Access-Control-Request-Method","Accept","Access-Control-Request-Headers","Referer","Sec-WebSocket-Key","Sec-WebSocket-Version","Sec-WebSocket-Protocol","Sec-WebSocket-Accept"]
         }
     }, 
     "CookiesConfig": {
@@ -194,5 +194,3 @@ originRequestPolicyStandard='{
         "QueryStringBehavior": "all"
     }
 }'
-
-

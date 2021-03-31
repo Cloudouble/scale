@@ -557,6 +557,22 @@ for functionName in *; do
             echo "... ... ... version $acceptFunctionVersion already exists."
         fi
     fi
+    if [ "socket" == "$functionName" ]; then
+        echo "... ... getting version number of latest version of socket function..."
+        socketFunctionVersion=$(aws lambda list-versions-by-function --region $edgeRegion --function-name "$lambdaName" --query "Versions[?Version != '\$LATEST'].Version | [0]" --output text)
+        if [ ! "$socketFunctionVersion" ]; then
+            echo "... ... ... no version created, creating one now..."
+            socketFunctionVersion=$(aws lambda publish-version --region $edgeRegion --function-name "$lambdaName" --query "Version" --output text)
+            if [ "$socketFunctionVersion" ]; then
+                echo "... ... ... ... version $socketFunctionVersion created."                
+            else
+                echo "... ... ... ... error creating version for $lambdaName, please try again or create it manually. Exiting now."
+                exit 1
+            fi
+        else
+            echo "... ... ... version $socketFunctionVersion already exists."
+        fi
+    fi
 done
 cd ../
 echo "
@@ -792,6 +808,27 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
         "ConnectionAttempts": 3,
         "ConnectionTimeout": 10
     }'
+    dSocketOrigin='{
+        "Id": "websocket",
+        "DomainName": "'$websocketApiId'.execute-api.'$coreRegion'.amazonaws.com",
+        "OriginPath": "",
+        "OriginShield": {
+            "Enabled": false
+        },
+        "CustomOriginConfig": {
+            "HTTPPort": 80, 
+            "HTTPSPort": 443, 
+            "OriginProtocolPolicy": "https-only", 
+            "OriginSslProtocols": {
+                "Quantity": 1, 
+                "Items": ["TLSv1"]
+            }, 
+            "OriginReadTimeout": 30, 
+            "OriginKeepaliveTimeout": 5
+        },
+        "ConnectionAttempts": 3,
+        "ConnectionTimeout": 10
+    }'
     dErrorOrigin='{
         "Id": "'$coreBucket'-403",
         "DomainName": "'$coreBucket'.s3.'$coreRegion'.amazonaws.com",
@@ -807,7 +844,7 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
     }'
     dOrigins='{
         "Quantity": 2,
-        "Items": ['$dCoreOrigin', '$dErrorOrigin']
+        "Items": ['$dSocketOrigin', '$dCoreOrigin', '$dErrorOrigin']
     }'
     lambdaFunctionAssociations='{
         "Quantity": 1, 
@@ -815,6 +852,16 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
             {
                 "LambdaFunctionARN": "arn:aws:lambda:'$edgeRegion':'$accountId':function:'$lambdaNamespace'-edge-accept:'$acceptFunctionVersion'", 
                 "EventType": "origin-request", 
+                "IncludeBody": true
+            }
+        ]
+    }'
+    lambdaFunctionAssociationsSocket='{
+        "Quantity": 1, 
+        "Items": [
+            {
+                "LambdaFunctionARN": "arn:aws:lambda:'$edgeRegion':'$accountId':function:'$lambdaNamespace'-edge-socket:'$socketFunctionVersion'", 
+                "EventType": "viewer-request", 
                 "IncludeBody": true
             }
         ]
@@ -893,6 +940,19 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
     readBehaviour["CachePolicyId"]=$dCachePolicyIdDisabled
     readBehaviour["OriginRequestPolicyId"]=$dOriginRequestPolicyIdStandard
 
+    declare -A socketBehaviour
+    socketBehaviour["TargetOriginId"]='websocket'
+    socketBehaviour["AllowedMethods"]='{
+        "Quantity": 3,
+        "Items": ["GET", "HEAD", "OPTIONS"],
+        "CachedMethods": {
+            "Quantity": 3,
+            "Items": ["GET", "HEAD", "OPTIONS"]
+        }
+    }'
+    socketBehaviour["CachePolicyId"]=$dCachePolicyIdDisabled
+    socketBehaviour["OriginRequestPolicyId"]=$dOriginRequestPolicyIdStandard
+
     declare -A writeBehaviour
     writeBehaviour["TargetOriginId"]=$coreBucket
     writeBehaviour["AllowedMethods"]='{
@@ -920,6 +980,7 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
     blockedBehaviour["OriginRequestPolicyId"]=$dOriginRequestPolicyIdStandard
 
     PathPatternOrder=(
+        "$envSystemRoot/connection/????????-????-????-????-????????????/websocket::s" 
         "$envSystemRoot/connection/????????-????-????-????-????????????/subscription/*/????????-????-????-????-????????????/*.*::r" 
         "$envSystemRoot/connection/????????-????-????-????-????????????/subscription/*/????????-????-????-????-????????????.*::r" 
         "$envSystemRoot/connection/????????-????-????-????-????????????/feed/*/????????-????-????-????-????????????/*/*/*/*-*.*::r" 
@@ -949,6 +1010,13 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
             CachePolicyId="${readBehaviour['CachePolicyId']}"
             OriginRequestPolicyId="${readBehaviour['OriginRequestPolicyId']}"
         fi
+        if [ "$behaviour" == "s" ]; then
+            TargetOriginId="${socketBehaviour['TargetOriginId']}"
+            AllowedMethods="${socketBehaviour['AllowedMethods']}"
+            LambdaFunctionAssociations="${socketBehaviour['LambdaFunctionAssociations']}"
+            CachePolicyId="${socketBehaviour['CachePolicyId']}"
+            OriginRequestPolicyId="${socketBehaviour['OriginRequestPolicyId']}"
+        fi
         if [ "$behaviour" == "w" ]; then
             TargetOriginId="${writeBehaviour['TargetOriginId']}"
             AllowedMethods="${writeBehaviour['AllowedMethods']}"
@@ -963,14 +1031,19 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
             CachePolicyId="${blockedBehaviour['CachePolicyId']}"
             OriginRequestPolicyId="${blockedBehaviour['OriginRequestPolicyId']}"
         fi
-        if [ "$behaviour" == "w" ]; then
+        if [ "$behaviour" == "s" -o "$behaviour" == "w" ]; then
+            if [ "$behaviour" == "s" ]; then
+                thisLambdaFunctionAssociations=$lambdaFunctionAssociationsSocket
+            else 
+                thisLambdaFunctionAssociations=$lambdaFunctionAssociations
+            fi
             dCacheBehaviourItemsArray+='{
                 "PathPattern": "'$PathPattern'",
                 "TargetOriginId": "'$TargetOriginId'",
                 "ViewerProtocolPolicy": "redirect-to-https",
                 "AllowedMethods": '$AllowedMethods',
                 "Compress": true,
-                "LambdaFunctionAssociations": '$lambdaFunctionAssociations',
+                "LambdaFunctionAssociations": '$thisLambdaFunctionAssociations',
                 "CachePolicyId": "'$CachePolicyId'",
                 "OriginRequestPolicyId": "'$OriginRequestPolicyId'"
             }, '
@@ -1051,8 +1124,6 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
     
     $distributionURL
     
-    
-    Please check your API Gateway in the console for $websocketApiName websocket endpoints.
     
     "
 echo "
