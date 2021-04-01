@@ -497,6 +497,84 @@ echo "
 "
 
 
+echo "Ensuring API Gateway for websocket support is created and configured correctly..."
+    echo "... checking if API Gateway ($websocketApiName) exists..."
+    websocketApiId=$(aws apigatewayv2 --region $coreRegion get-apis --query "Items[?Name == '$websocketApiName'].ApiId | [0]" --output text) 
+    if [ ${#websocketApiId} -le 6 ]; then
+        echo "... ... NOT exists, creating now in coreRegion ($coreRegion)..."
+        websocketApiId=$(aws apigatewayv2 create-api --region $coreRegion --name "$websocketApiName" --protocol-type 'WEBSOCKET' --route-selection-expression '$request.body.route' --query "ApiId" --output text)
+        echo "... ... ... now created."
+    fi
+    websocketApiEndpoint=$(aws apigatewayv2 get-api --region $coreRegion --api-id "$websocketApiId" --query "ApiEndpoint" --output text)
+    if [ ${#websocketApiEndpoint} -ge 10 ]; then
+        echo "... ... API Gateway ($websocketApiName) exists with endpoint $websocketApiEndpoint, checking now for a stage named $websocketApiStageName..."
+    else 
+        echo "... ... ... error creating web socket API Gateway ($websocketApiName), please try again or create this API manually in the  $coreRegion region as follows:"
+        echo "API Protocol: WEBSOCKET"
+        echo "API Name: $websocketApiName"
+        echo 'Route Selection Expression: $request.body.route'
+        echo "... ... ... exiting now."
+        exit 1
+    fi
+    echo "... checking if Lambda integration is configured..."
+    websocketIntegrationUri="arn:aws:lambda:$coreRegion:$accountId:function:$lambdaNamespace-core-socket"
+    websocketIntegrationPath="arn:aws:apigateway:$coreRegion:lambda:path/2015-03-31/functions/$websocketIntegrationUri/invocations"
+    checkWebsocketApiIntegrationPath=$(aws apigatewayv2 get-integrations --region $coreRegion --api-id "$websocketApiId" --query "Items[?IntegrationUri == '$websocketIntegrationPath'].IntegrationUri | [0]" --output text)
+    if [ "$checkWebsocketApiIntegrationUri" = "$websocketIntegrationPath" ]; then
+        echo "... ... already exists."
+    else
+        echo "... ... NOT exists, creating now..."
+        aws lambda add-permission --region $coreRegion --function-name "$websocketIntegrationUri" --action "lambda:InvokeFunction" --statement-id "websocket-connect" \
+            --principal "apigateway.amazonaws.com" --source-arn 'arn:aws:execute-api:'$coreRegion':'$accountId':'$websocketApiId'/*/$connect'
+        aws lambda add-permission --region $coreRegion --function-name "$websocketIntegrationUri" --action "lambda:InvokeFunction" --statement-id "websocket-disconnect" \
+            --principal "apigateway.amazonaws.com" --source-arn 'arn:aws:execute-api:'$coreRegion':'$accountId':'$websocketApiId'/*/$disconnect'
+        aws lambda add-permission --region $coreRegion --function-name "$websocketIntegrationUri" --action "lambda:InvokeFunction" --statement-id "websocket-default" \
+            --principal "apigateway.amazonaws.com" --source-arn 'arn:aws:execute-api:'$coreRegion':'$accountId':'$websocketApiId'/*/$default'
+        websocketApiIntegrationId=$(aws apigatewayv2 create-integration --region $coreRegion --api-id "$websocketApiId" --connection-type 'INTERNET' \
+            --content-handling-strategy 'CONVERT_TO_TEXT' --integration-method 'POST' --integration-type 'AWS_PROXY' \
+            --integration-uri "$websocketIntegrationPath" --passthrough-behavior 'WHEN_NO_MATCH' \
+            --query "IntegrationId" --output text)
+        aws apigatewayv2 create-route --region $coreRegion --api-id "$websocketApiId" --route-key '$connect' --target "integrations/$websocketApiIntegrationId"
+        aws apigatewayv2 create-route --region $coreRegion --api-id "$websocketApiId" --route-key '$disconnect' --target "integrations/$websocketApiIntegrationId"
+        aws apigatewayv2 create-route --region $coreRegion --api-id "$websocketApiId" --route-key '$default' --target "integrations/$websocketApiIntegrationId"
+        if [ ${#websocketApiIntegrationId} -ge 5 ]; then
+            echo "... ... now created."
+        else
+            echo "... ... error creating integration, please try again or create manually:"
+            echo "From API: $websocketApiName"
+            echo "To Lambda Function: $lambdaNamespace-core-socket"
+            exit 1
+        fi
+    fi
+    stageName=$(aws apigatewayv2 get-stage --region $coreRegion --api-id "$websocketApiId" --stage-name 'websocket' --query "StageName" --output text)
+    if [ 'websocket' = "$stageName" ]; then
+        echo "... ... ... already exists."
+    else
+        echo "... ... ... NOT exists, creating now..."
+        stageName=$(aws apigatewayv2 create-stage --region $coreRegion --api-id "$websocketApiId" --stage-name 'websocket' --query "StageName" --output text)
+        if [ 'websocket' = "$stageName" ]; then
+            echo "... ... ... now created."
+        else
+            echo "... ... ... error creating stage ('websocket'), please try again or create manually. Exiting now."
+            exit 1
+        fi
+    fi
+    echo "... checking API deployment status..."
+    deploymentStatus=$(aws apigatewayv2 get-deployments --region $coreRegion --api-id "$websocketApiId" --query "Items[?DeploymentStatus == 'DEPLOYED'].DeploymentStatus | [0]" --output text)
+    if [ "DEPLOYED" = "$deploymentStatus" ]; then
+        echo "... ...  already deployed."
+    else 
+        echo "... ...  NOT yet deployed, deploying now..."
+        deploymentStatus=$(aws apigatewayv2 create-deployment --region $coreRegion --api-id "$websocketApiId" --stage-name 'websocket' --query "DeploymentStatus" --output text)
+        if [ "DEPLOYED" = "$deploymentStatus" ]; then
+            echo "... ... now deployed."
+        else 
+            echo "... ... error deploying API Gateway ($websocketApiName) to stage 'websocket, please try again to do this manually. Exiting now."
+            exit 1
+        fi
+    fi
+
+
 echo "Ensuring edge Lambda functions are available in $edgeRegion..."
 cd edge
 bucketsArray=()
@@ -518,7 +596,12 @@ for functionName in *; do
         fi
         cp main.py ./temp
         cd temp
-        sed -i "1s/.*/$bucketsString/" main.py
+        if [ "tunnel" == "$functionName" ]; then
+            endpointString="endpoint_url_region = 'https://$websocketApiId.execute-api.$coreRegion.amazonaws.com/$stageName $coreRegion'"
+            sed -i "1s/.*/$endpointString/" main.py
+        else
+            sed -i "1s/.*/$bucketsString/" main.py
+        fi
         zip ../$functionName.zip main.py
         cd ../
         aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn --zip-file fileb://$functionName.zip --timeout 30 --publish --region $edgeRegion
@@ -571,6 +654,22 @@ for functionName in *; do
             fi
         else
             echo "... ... ... version $socketFunctionVersion already exists."
+        fi
+    fi
+    if [ "tunnel" == "$functionName" ]; then
+        echo "... ... getting version number of latest version of tunnel function..."
+        tunnelFunctionVersion=$(aws lambda list-versions-by-function --region $edgeRegion --function-name "$lambdaName" --query "Versions[?Version != '\$LATEST'].Version | [0]" --output text)
+        if [ ! "$tunnelFunctionVersion" ]; then
+            echo "... ... ... no version created, creating one now..."
+            tunnelFunctionVersion=$(aws lambda publish-version --region $edgeRegion --function-name "$lambdaName" --query "Version" --output text)
+            if [ "$tunnelFunctionVersion" ]; then
+                echo "... ... ... ... version $tunnelFunctionVersion created."                
+            else
+                echo "... ... ... ... error creating version for $lambdaName, please try again or create it manually. Exiting now."
+                exit 1
+            fi
+        else
+            echo "... ... ... version $tunnelFunctionVersion already exists."
         fi
     fi
 done
@@ -675,84 +774,6 @@ cd ../
 echo "
 ---------
 "
-
-
-echo "Ensuring API Gateway for websocket support is created and configured correctly..."
-    echo "... checking if API Gateway ($websocketApiName) exists..."
-    websocketApiId=$(aws apigatewayv2 --region $coreRegion get-apis --query "Items[?Name == '$websocketApiName'].ApiId | [0]" --output text) 
-    if [ ${#websocketApiId} -le 6 ]; then
-        echo "... ... NOT exists, creating now in coreRegion ($coreRegion)..."
-        websocketApiId=$(aws apigatewayv2 create-api --region $coreRegion --name "$websocketApiName" --protocol-type 'WEBSOCKET' --route-selection-expression '$request.body.route' --query "ApiId" --output text)
-        echo "... ... ... now created."
-    fi
-    websocketApiEndpoint=$(aws apigatewayv2 get-api --region $coreRegion --api-id "$websocketApiId" --query "ApiEndpoint" --output text)
-    if [ ${#websocketApiEndpoint} -ge 10 ]; then
-        echo "... ... API Gateway ($websocketApiName) exists with endpoint $websocketApiEndpoint, checking now for a stage named $websocketApiStageName..."
-    else 
-        echo "... ... ... error creating web socket API Gateway ($websocketApiName), please try again or create this API manually in the  $coreRegion region as follows:"
-        echo "API Protocol: WEBSOCKET"
-        echo "API Name: $websocketApiName"
-        echo 'Route Selection Expression: $request.body.route'
-        echo "... ... ... exiting now."
-        exit 1
-    fi
-    echo "... checking if Lambda integration is configured..."
-    websocketIntegrationUri="arn:aws:lambda:$coreRegion:$accountId:function:$lambdaNamespace-core-socket"
-    websocketIntegrationPath="arn:aws:apigateway:$coreRegion:lambda:path/2015-03-31/functions/$websocketIntegrationUri/invocations"
-    checkWebsocketApiIntegrationPath=$(aws apigatewayv2 get-integrations --region $coreRegion --api-id "$websocketApiId" --query "Items[?IntegrationUri == '$websocketIntegrationPath'].IntegrationUri | [0]" --output text)
-    if [ "$checkWebsocketApiIntegrationUri" = "$websocketIntegrationPath" ]; then
-        echo "... ... already exists."
-    else
-        echo "... ... NOT exists, creating now..."
-        aws lambda add-permission --region $coreRegion --function-name "$websocketIntegrationUri" --action "lambda:InvokeFunction" --statement-id "websocket-connect" \
-            --principal "apigateway.amazonaws.com" --source-arn 'arn:aws:execute-api:'$coreRegion':'$accountId':'$websocketApiId'/*/$connect'
-        aws lambda add-permission --region $coreRegion --function-name "$websocketIntegrationUri" --action "lambda:InvokeFunction" --statement-id "websocket-disconnect" \
-            --principal "apigateway.amazonaws.com" --source-arn 'arn:aws:execute-api:'$coreRegion':'$accountId':'$websocketApiId'/*/$disconnect'
-        aws lambda add-permission --region $coreRegion --function-name "$websocketIntegrationUri" --action "lambda:InvokeFunction" --statement-id "websocket-default" \
-            --principal "apigateway.amazonaws.com" --source-arn 'arn:aws:execute-api:'$coreRegion':'$accountId':'$websocketApiId'/*/$default'
-        websocketApiIntegrationId=$(aws apigatewayv2 create-integration --region $coreRegion --api-id "$websocketApiId" --connection-type 'INTERNET' \
-            --content-handling-strategy 'CONVERT_TO_TEXT' --integration-method 'POST' --integration-type 'AWS_PROXY' \
-            --integration-uri "$websocketIntegrationPath" --passthrough-behavior 'WHEN_NO_MATCH' \
-            --query "IntegrationId" --output text)
-        aws apigatewayv2 create-route --region $coreRegion --api-id "$websocketApiId" --route-key '$connect' --target "integrations/$websocketApiIntegrationId"
-        aws apigatewayv2 create-route --region $coreRegion --api-id "$websocketApiId" --route-key '$disconnect' --target "integrations/$websocketApiIntegrationId"
-        aws apigatewayv2 create-route --region $coreRegion --api-id "$websocketApiId" --route-key '$default' --target "integrations/$websocketApiIntegrationId"
-        if [ ${#websocketApiIntegrationId} -ge 5 ]; then
-            echo "... ... now created."
-        else
-            echo "... ... error creating integration, please try again or create manually:"
-            echo "From API: $websocketApiName"
-            echo "To Lambda Function: $lambdaNamespace-core-socket"
-            exit 1
-        fi
-    fi
-    stageName=$(aws apigatewayv2 get-stage --region $coreRegion --api-id "$websocketApiId" --stage-name 'websocket' --query "StageName" --output text)
-    if [ 'websocket' = "$stageName" ]; then
-        echo "... ... ... already exists."
-    else
-        echo "... ... ... NOT exists, creating now..."
-        stageName=$(aws apigatewayv2 create-stage --region $coreRegion --api-id "$websocketApiId" --stage-name 'websocket' --query "StageName" --output text)
-        if [ 'websocket' = "$stageName" ]; then
-            echo "... ... ... now created."
-        else
-            echo "... ... ... error creating stage ('websocket'), please try again or create manually. Exiting now."
-            exit 1
-        fi
-    fi
-    echo "... checking API deployment status..."
-    deploymentStatus=$(aws apigatewayv2 get-deployments --region $coreRegion --api-id "$websocketApiId" --query "Items[?DeploymentStatus == 'DEPLOYED'].DeploymentStatus | [0]" --output text)
-    if [ "DEPLOYED" = "$deploymentStatus" ]; then
-        echo "... ...  already deployed."
-    else 
-        echo "... ...  NOT yet deployed, deploying now..."
-        deploymentStatus=$(aws apigatewayv2 create-deployment --region $coreRegion --api-id "$websocketApiId" --stage-name 'websocket' --query "DeploymentStatus" --output text)
-        if [ "DEPLOYED" = "$deploymentStatus" ]; then
-            echo "... ... now deployed."
-        else 
-            echo "... ... error deploying API Gateway ($websocketApiName) to stage 'websocket, please try again to do this manually. Exiting now."
-            exit 1
-        fi
-    fi
 
 
 echo "Ensuring CloudFront distribution is created and configured correctly..."
@@ -862,6 +883,16 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
             {
                 "LambdaFunctionARN": "arn:aws:lambda:'$edgeRegion':'$accountId':function:'$lambdaNamespace'-edge-socket:'$socketFunctionVersion'", 
                 "EventType": "viewer-request", 
+                "IncludeBody": true
+            }
+        ]
+    }'
+    lambdaFunctionAssociationsTunnel='{
+        "Quantity": 1, 
+        "Items": [
+            {
+                "LambdaFunctionARN": "arn:aws:lambda:'$edgeRegion':'$accountId':function:'$lambdaNamespace'-edge-tunnel:'$tunnelFunctionVersion'", 
+                "EventType": "origin-request", 
                 "IncludeBody": true
             }
         ]
@@ -980,6 +1011,7 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
     blockedBehaviour["OriginRequestPolicyId"]=$dOriginRequestPolicyIdStandard
 
     PathPatternOrder=(
+        "$envSystemRoot/tunnel/*::t" 
         "$envSystemRoot/connection/????????-????-????-????-????????????/websocket::s" 
         "$envSystemRoot/connection/????????-????-????-????-????????????/tunnel/????????-????-????-????-????????????::s" 
         "$envSystemRoot/connection/????????-????-????-????-????????????/subscription/*/????????-????-????-????-????????????/*.*::r" 
@@ -1018,7 +1050,7 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
             CachePolicyId="${socketBehaviour['CachePolicyId']}"
             OriginRequestPolicyId="${socketBehaviour['OriginRequestPolicyId']}"
         fi
-        if [ "$behaviour" == "w" ]; then
+        if [ "$behaviour" == "w" -o "$behaviour" == "t" ]; then
             TargetOriginId="${writeBehaviour['TargetOriginId']}"
             AllowedMethods="${writeBehaviour['AllowedMethods']}"
             LambdaFunctionAssociations="${writeBehaviour['LambdaFunctionAssociations']}"
@@ -1032,10 +1064,14 @@ echo "Ensuring CloudFront distribution is created and configured correctly..."
             CachePolicyId="${blockedBehaviour['CachePolicyId']}"
             OriginRequestPolicyId="${blockedBehaviour['OriginRequestPolicyId']}"
         fi
-        if [ "$behaviour" == "s" -o "$behaviour" == "w" ]; then
+        if [ "$behaviour" == "s" -o "$behaviour" == "t" -o "$behaviour" == "w" ]; then
             if [ "$behaviour" == "s" ]; then
                 thisLambdaFunctionAssociations=$lambdaFunctionAssociationsSocket
-            else 
+            fi
+            if [ "$behaviour" == "t" ]; then
+                thisLambdaFunctionAssociations=$lambdaFunctionAssociationsTunnel
+            fi
+            if [ "$behaviour" == "w" ]; then
                 thisLambdaFunctionAssociations=$lambdaFunctionAssociations
             fi
             dCacheBehaviourItemsArray+='{
