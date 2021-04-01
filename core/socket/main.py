@@ -1,6 +1,6 @@
 env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_", "shared": 0, "authentication_namespace": "LiveElementScale"}
 
-import json, boto3, base64, uuid, hashlib
+import json, boto3, base64, uuid, hashlib, time
 
 def uuid_valid(s):
     try:
@@ -21,7 +21,7 @@ def main(event, context):
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(env['bucket'])
     lambda_client = boto3.client('lambda')
-    host = request.get('headers', {}).get('Host') if env['shared'] else ''
+    host = event.get('headers', {}).get('Origin', '').replace('https://', '').strip('/') if env['shared'] else ''
     env['data_root'] = '{host}/{system_root}'.format(host=host, system_root=env['system_root']).strip('/')
     if event.get('requestContext'):
         requestContext = event['requestContext']
@@ -30,8 +30,10 @@ def main(event, context):
             route_key = requestContext['routeKey']
             endpoint_url = 'https://{domainName}/{stage}'.format(domainName=requestContext['domainName'], stage=requestContext['stage'])
             connection_record = {}
+            connection_context = 'websocket'
             if route_key in ['$connect', '$disconnect'] and event.get('queryStringParameters') and event['queryStringParameters'].get('connection'):
                 connection_id = event['queryStringParameters']['connection']
+                connection_context = event['queryStringParameters'].get('context', 'websocket')
                 connection_object = bucket.Object('{data_root}/connection/{connection_id}/connect.json'.format(data_root=env['data_root'], connection_id=connection_id))
                 try:
                     connection_record = json.loads(connection_object.get()['Body'].read().decode('utf-8'))
@@ -42,10 +44,12 @@ def main(event, context):
                 client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')
                 connection_record['socket_url'] = endpoint_url
                 connection_record['socket_id'] = socket_id
-                lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'connection', 'entity': connection_record, 'method': 'PUT'}), 'utf-8'), ClientContext=client_context)
+                if connection_context == 'websocket':
+                    lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'connection', 'entity': connection_record, 'method': 'PUT'}), 'utf-8'), ClientContext=client_context)
+                elif connection_context == 'tunnel':
+                    lambda_client.invoke(FunctionName=getprocessor(env, 'tunnel'), InvocationType='Event', Payload=bytes(json.dumps({'socket_url': endpoint_url, 'socket_id': socket_id, '_env': {'connection_id': connection_id, 'connection_type': 'connection', **env}}), 'utf-8'))
                 statusCode = 200
             else:
                 statusCode = 405
     response = {'statusCode': statusCode}
     return response
-
