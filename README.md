@@ -715,7 +715,7 @@ Things that are currently intended to be developed before release 1.0 but not ye
 * **daemons**: a feature to allow for automatic internal processes which otherwise act like external connections, or which can perform scheduled system tasks
 * **websocket support**: a feature to allow clients to connect via websocket protocol and remove the need to poll for updates
 * **tunnels**: a feature to allow sub-1000ms one-to-one trusted transmission of ephemeral data via the CDN Edge
-* **channels**: a feature to allow sub 1000ms many-to-many trusted transmission of ephemeral data via the CDN Edge
+* **channels**: a feature to allow sub-1000ms many-to-many trusted transmission of ephemeral data via the CDN Edge
 * **custom record types**: an endpoint to more conveniently allow the addition of new record type definitions to the system
 
 ### Release 0.7: 
