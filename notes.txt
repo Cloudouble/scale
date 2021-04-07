@@ -465,7 +465,7 @@ WEB SOCKET
 
 CHANNEL
 
-* PUT => _/connection/{connection_id}/channel/{channel_id} => {receiveKey, sendKey, adminKey}
+* PUT => _/connection/{connection_id}/channel/{channel_id}/connect.json => {receiveKey, sendKey, adminKey}
 saves {receiveKey, sendKey, adminKey} to _/channel/{channel_id}/connect.json
 
 * $connect => _/channel/{channel_id}/{receiveKey}
@@ -475,7 +475,7 @@ saves $socket_id to _/channel/{channel_id}/sockets/{initial}.json => [$socket_id
 removes $socket_id from _/channel/{channel_id}/sockets/{initial}.json => [$socket_id]
 
 * POST => _/channel/{channel_id}/{sendKey} => message
-edge-channel invokes core-channel which retrieves channel sockets lists, for each invokes core-message to forward message to each socket, if send error removes socket_id from list
+edge-channel invokes core-channel which retrieves channel sockets lists, for each invokes core-message to forward message to each socket, if send error removes socket_id
 
 * DELETE => _/channel/{channel_id}/{adminKey}
 removes all contents of _/channel/{channel_id}/*

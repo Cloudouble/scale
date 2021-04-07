@@ -94,6 +94,30 @@ def main(event, context):
                 if request['method'] in ['POST', 'PUT', 'PATCH', 'DELETE']:
                     lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'connection', 'entity': connection_record, 'method': request['method']}), 'utf-8'), ClientContext=client_context)
                     counter = counter + 1
+            elif len(env['path']) == 3 and env['path'][0] == 'channel' and env['path'][2] == 'connect':
+                channel_id = env['path'][1] if uuid_valid[env['path'][1]] else None
+                channel_object = bucket.Object('{data_root}/channel/{channel_id}/connect.json'.format(data_root=env['data_root'], channel_id=channel_id))
+                try:
+                    channel_record = json.loads(channel_object.get()['Body'].read().decode('utf-8'))
+                except:
+                    channel_record = {}
+                if request['method'] in ['PUT', 'POST', 'DELETE']:
+                    if request['method'] == 'PUT' and type(request['entity']) is dict and not channel_record and all([uuid_valid(request['entity'].get('{}Key'.format(k))) for k in ['receive', 'send', 'admin']]):
+                        allowed = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), Payload=bytes(json.dumps({
+                            'entity_type': 'channel, 
+                            'method': 'PUT', 
+                            'path': env['path']
+                        }), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
+                        if allowed:
+                            lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'channel', 'entity': request['entity'], 'method': 'PUT'}), 'utf-8'), ClientContext=client_context)
+                            counter = counter + 1
+                    
+                            
+                        
+                    
+                
+                
+                
             elif len(env['path']) >= 2 and env['path'][0] in ['asset', 'static']:
                 usable_path = env['path'][1:]
                 allowed = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), Payload=bytes(json.dumps({
