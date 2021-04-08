@@ -479,3 +479,4 @@ edge-channel invokes core-channel which retrieves channel sockets lists, for eac
 
 * DELETE => _/channel/{channel_id}/{adminKey}
 removes all contents of _/channel/{channel_id}/*
+
