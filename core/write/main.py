@@ -1,4 +1,11 @@
-import json, boto3, base64, hashlib
+import json, boto3, base64, uuid, hashlib
+
+def uuid_valid(s):
+    try:
+        uuid.UUID(s).version == 4
+    except:
+        return False
+    return True
 
 
 def main(event, context):
@@ -40,6 +47,18 @@ def main(event, context):
                 the_object.put(Body=base64.b64decode(event['body']), ContentType=event['content-type'])
                 counter = counter + 1
             elif method == 'DELETE':
+                try:
+                    the_object.delete()
+                    counter = counter + 1
+                except:
+                    pass
+        elif entity_type == 'channel' and type(event.get('path')) is list and len(event['path']) == 3 and uuid_valid(event['path'][1]) and event.get('method') in ['PUT', 'DELETE']:
+            object_path = '{data_root}/channel/{channel_id}/connect.json'.format(data_root=env['data_root'], channel_id=event['path'][1])
+            the_object = bucket.Object(object_path)
+            if event['method'] == 'PUT' and type(event.get('entity')) is dict:
+                the_object.put(Body=bytes(json.dumps(event['entity']), 'utf-8'), ContentType='application/json')
+                counter = counter + 1
+            elif event['method'] == 'DELETE':
                 try:
                     the_object.delete()
                     counter = counter + 1

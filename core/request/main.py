@@ -101,23 +101,19 @@ def main(event, context):
                     channel_record = json.loads(channel_object.get()['Body'].read().decode('utf-8'))
                 except:
                     channel_record = {}
-                if request['method'] in ['PUT', 'POST', 'DELETE']:
+                if request['method'] in ['PUT', 'DELETE']:
                     if request['method'] == 'PUT' and type(request['entity']) is dict and not channel_record and all([uuid_valid(request['entity'].get('{}Key'.format(k))) for k in ['receive', 'send', 'admin']]):
                         allowed = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), Payload=bytes(json.dumps({
-                            'entity_type': 'channel, 
-                            'method': 'PUT', 
-                            'path': env['path']
-                        }), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
+                            'entity_type': 'channel', 'method': 'PUT', 'path': env['path']}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
                         if allowed:
-                            lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'channel', 'entity': request['entity'], 'method': 'PUT'}), 'utf-8'), ClientContext=client_context)
+                            lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'channel', 'entity': request['entity'], 'method': 'PUT', 'path': env['path']}), 'utf-8'), ClientContext=client_context)
                             counter = counter + 1
-                    
-                            
-                        
-                    
-                
-                
-                
+                    elif request['method'] === 'DELETE' and channel_record:
+                        allowed = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), Payload=bytes(json.dumps({
+                            'entity_type': 'channel', 'method': 'DELETE', 'path': env['path']}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
+                        if allowed:
+                            lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'channel', 'method': 'DELETE', 'path': env['path']}), 'utf-8'), ClientContext=client_context)
+                            counter = counter + 1
             elif len(env['path']) >= 2 and env['path'][0] in ['asset', 'static']:
                 usable_path = env['path'][1:]
                 allowed = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), Payload=bytes(json.dumps({

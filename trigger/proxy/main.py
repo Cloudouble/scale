@@ -3,6 +3,7 @@ env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scal
 import json, boto3, base64, re
 
 triggers = {
+    'channel/{uuid}/connect.json': ['connection'], 
     'connection/{uuid}/connect.json': ['connection'], 
     'daemon/{uuid}/connect.json': ['connection'], 
     'query/{class_name}/{uuid}.json': ['query'], 
