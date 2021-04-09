@@ -1,5 +1,3 @@
-endpoint_url_region_bucket = 'https://8pgxdglwp0.execute-api.ap-southeast-2.amazonaws.com/websocket ap-southeast-2 scale.liveelement.net'
-
 import json, boto3, base64, time
 
 def getprocessor(env, name, source='core', scope=None):

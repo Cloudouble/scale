@@ -318,6 +318,10 @@ for functionName in *; do
         if [ 'socket' = $functionName ]; then
             sed -i "1s/.*/$lambdaEnvCoreRequest/" main.py
         fi
+        if [ 'channel' = $functionName ]; then
+            "env = '$coreBucket $envShared $envSystemRoot $lambdaNamespace'"
+            sed -i "1s/.*/$lambdaEnvCoreRequest/" main.py
+        fi
         zip ../$functionName.zip main.py
         cd ../
         aws lambda create-function --function-name $lambdaName --runtime python3.8 --handler main.main --role $lambdaRoleArn --zip-file fileb://$functionName.zip --timeout 900 --publish --region $coreRegion
@@ -595,10 +599,13 @@ for functionName in *; do
             mkdir temp
         fi
         cp main.py ./temp
-        cd temp
+        cd temp # 
         if [ "tunnel" == "$functionName" ]; then
             endpointString="endpoint_url_region = 'https://$websocketApiId.execute-api.$coreRegion.amazonaws.com/$stageName $coreRegion'"
             sed -i "1s/.*/$endpointString/" main.py
+        elif [ "channel" == "$functionName" ]; then
+            envString="env = '$envShared $envSystemRoot $accountId $coreRegion $lambdaNamespace'"
+            sed -i "1s/.*/$envString/" main.py
         else
             sed -i "1s/.*/$bucketsString/" main.py
         fi
@@ -672,10 +679,26 @@ for functionName in *; do
             echo "... ... ... version $tunnelFunctionVersion already exists."
         fi
     fi
+    if [ "channel" == "$functionName" ]; then
+        echo "... ... getting version number of latest version of channel function..."
+        channelFunctionVersion=$(aws lambda list-versions-by-function --region $edgeRegion --function-name "$lambdaName" --query "Versions[?Version != '\$LATEST'].Version | [0]" --output text)
+        if [ ! "$channelFunctionVersion" ]; then
+            echo "... ... ... no version created, creating one now..."
+            channelFunctionVersion=$(aws lambda publish-version --region $edgeRegion --function-name "$lambdaName" --query "Version" --output text)
+            if [ "$channelFunctionVersion" ]; then
+                echo "... ... ... ... version $channelFunctionVersion created."                
+            else
+                echo "... ... ... ... error creating version for $lambdaName, please try again or create it manually. Exiting now."
+                exit 1
+            fi
+        else
+            echo "... ... ... version $channelFunctionVersion already exists."
+        fi
+    fi
 done
 cd ../
 echo "
----------
+--------- 
 "
 
 
