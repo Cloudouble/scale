@@ -49,14 +49,25 @@ def main(event, context):
                         connection_record = {}
             if route_key == '$connect' and connection_record:
                 if connection_context == 'channel':
-                    index_object = bucket.Object('{data_root}/channel/{connection_id}/{index}.json'.format(data_root=env['data_root'], connection_id=connection_id, index=connection_id[0]))
+                    channel_object = bucket.Object('{data_root}/channel/{connection_id}/connect.json'.format(data_root=env['data_root'], connection_id=connection_id))
                     try:
-                        socket_list = json.loads(index_object.get()['Body'].read().decode('utf-8'))
+                        channel_keys = json.loads(channel_object.get()['Body'].read().decode('utf-8'))
                     except:
-                        socket_list = []
-                    socket_list.append(socket_id)
-                    socket_list = sorted(list(set(socket_list)))
-                    index_object.put(Body=bytes(json.dumps(socket_list), 'utf-8'), ContentType='application/json')
+                        channel_keys = {}
+                    if channel_keys and uuid_valid(channel_keys.get('receiveKey')):
+                        receive_key = event['queryStringParameters'].get('key')
+                        if receive_key and receive_key == channel_keys['receiveKey']:
+                            index_object = bucket.Object('{data_root}/channel/{channel_id}/{index}.json'.format(data_root=env['data_root'], channel_id=connection_id, index=connection_id[0:2]))
+                            try:
+                                socket_map = json.loads(index_object.get()['Body'].read().decode('utf-8'))
+                            except:
+                                socket_map = {}
+                            socket_map[socket_id] = endpoint_url
+                            index_object.put(Body=bytes(json.dumps(socket_map), 'utf-8'), ContentType='application/json')
+                        else:
+                            statusCode = 401
+                    else:
+                        statusCode = 404
                 else:
                     env['connection_id'] = connection_id
                     client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')

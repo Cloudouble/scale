@@ -92,7 +92,7 @@ def main(event, context):
                     if request['entity'] and type(request['entity']) is dict and len(request['entity']) == 1 and type(list(request['entity'].values())[0]) is dict:
                         connection_record = {**connection_record, **json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'authentication'), Payload=bytes(json.dumps(request['entity']), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))}
                 if request['method'] in ['POST', 'PUT', 'PATCH', 'DELETE']:
-                    lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'connection', 'entity': connection_record, 'method': request['method']}), 'utf-8'), ClientContext=client_context)
+                    lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'connection', 'entity': connection_record, 'method': request['method'], '_env': env}), 'utf-8'), InvocationType='Event')
                     counter = counter + 1
             elif len(env['path']) == 3 and env['path'][0] == 'channel':
                 channel_id = env['path'][1] if uuid_valid[env['path'][1]] else None
@@ -112,7 +112,7 @@ def main(event, context):
                         allowed = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), Payload=bytes(json.dumps({
                             'entity_type': 'channel', 'method': 'DELETE', 'path': env['path']}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
                         if allowed channel_record.get('adminKey') == env['path'][2]:
-                            lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'channel', 'method': 'DELETE', 'path': env['path']}), 'utf-8'), ClientContext=client_context)
+                            lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'channel', 'method': 'DELETE', 'path': env['path'], '_env': env}), 'utf-8'), InvocationType='Event')
                             counter = counter + 1
             elif len(env['path']) >= 2 and env['path'][0] in ['asset', 'static']:
                 usable_path = env['path'][1:]
@@ -136,8 +136,9 @@ def main(event, context):
                             'method': request['method'], 
                             'body': request['body'], 
                             'content-type': request['content-type'], 
-                            'path': object_path
-                        }), 'utf-8'), ClientContext=client_context)
+                            'path': object_path, 
+                            '_env': env
+                        }), 'utf-8'), InvocationType='Event')
                         counter = counter + 1
             elif len(env['path']) >= 2:
                 if len(env['path']) == 2:
@@ -217,7 +218,8 @@ def main(event, context):
                                 'method': request['method'], 
                                 'entity': entity_to_write, 
                                 'current_entity': current_entity, 
-                                'entity_key': entity_key
-                            }), 'utf-8'), ClientContext=client_context)
+                                'entity_key': entity_key, 
+                                '_env': env
+                            }), 'utf-8'), InvocationType='Event')
                             counter = counter + 1
     return counter

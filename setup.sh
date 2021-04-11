@@ -603,8 +603,8 @@ for functionName in *; do
         if [ "tunnel" == "$functionName" ]; then
             endpointString="endpoint_url_region = 'https://$websocketApiId.execute-api.$coreRegion.amazonaws.com/$stageName $coreRegion'"
             sed -i "1s/.*/$endpointString/" main.py
-        elif [ "channel" == "$functionName" ]; then
-            envString="env = '$envShared $envSystemRoot $accountId $coreRegion $lambdaNamespace'"
+        elif [ "socket" == "$functionName" ]; then
+            envString="env = '$coreRegion $accountId $lambdaNamespace'"
             sed -i "1s/.*/$envString/" main.py
         else
             sed -i "1s/.*/$bucketsString/" main.py
@@ -677,22 +677,6 @@ for functionName in *; do
             fi
         else
             echo "... ... ... version $tunnelFunctionVersion already exists."
-        fi
-    fi
-    if [ "channel" == "$functionName" ]; then
-        echo "... ... getting version number of latest version of channel function..."
-        channelFunctionVersion=$(aws lambda list-versions-by-function --region $edgeRegion --function-name "$lambdaName" --query "Versions[?Version != '\$LATEST'].Version | [0]" --output text)
-        if [ ! "$channelFunctionVersion" ]; then
-            echo "... ... ... no version created, creating one now..."
-            channelFunctionVersion=$(aws lambda publish-version --region $edgeRegion --function-name "$lambdaName" --query "Version" --output text)
-            if [ "$channelFunctionVersion" ]; then
-                echo "... ... ... ... version $channelFunctionVersion created."                
-            else
-                echo "... ... ... ... error creating version for $lambdaName, please try again or create it manually. Exiting now."
-                exit 1
-            fi
-        else
-            echo "... ... ... version $channelFunctionVersion already exists."
         fi
     fi
 done
