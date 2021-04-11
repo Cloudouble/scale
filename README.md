@@ -719,7 +719,8 @@ Things that are currently intended to be developed before release 1.0 but not ye
 * **custom record types**: an endpoint to more conveniently allow the addition of new record type definitions to the system
 
 ### Release 0.7: 
-* **testing suite**: a suite of standardised tests that can be run against an install to verify that every feature is working correctly
+* **console**: a browser-based console including system configuration, tools, and a suite of standardised tests that can be run against an install to 
+verify that every feature is working correctly
 
 ### Release 0.8: 
 * **more authentication extensions**: a set of standardised authentication extensions to allow for the most common authentication scenarios

@@ -1,6 +1,6 @@
 {
-    "name": "LiveElement Scale Test Suite",
-    "short_name": "Scale",
+    "name": "LiveElement Scale Console",
+    "short_name": "Console",
     "orientation": "any", 
     "prefer_related_applications": false, 
     "related_applications": [], 
