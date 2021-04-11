@@ -1,4 +1,4 @@
-env = 'scale.liveelement.net 0 _ liveelement-scale'
+env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_", "shared": 0, "authentication_namespace": "LiveElementScale"}
 
 import json, boto3, base64, time
 
@@ -15,22 +15,21 @@ def uuid_valid(s):
 
 def main(event, context):
     '''
-    - triggered by edge/channel 
+    - triggered by edge/socket on a POST request
     - lists each channel index and triggers core/channel-send for each index
     '''
-    bucket_name, shared, system_root, lambda_namespace = env.split(' ')
     if uuid_valid(event.get('channel')) and event.get('message'):
-        host = event.get('host')
-        if shared == '1' and host:
-            data_root = '{host}/{system_root}'.format(host=host, system_root=system_root)
-        elif shared == '0':
-            data_root = system_root
+        origin = event.get('origin')
+        if env['shared'] == 1 and origin:
+            data_root = '{origin}/{system_root}'.format(origin=origin, system_root=env['system_root'])
+        elif env['shared'] == '0':
+            data_root = env['system_root']
         else:
             data_root = None
         if data_root:
             lambda_client = boto3.client('lambda')
             s3_client = boto3.client('s3')
-            channel_indexes = s3_client.list_objects_v2(Bucket=bucket_name, Prefix='{data_root}/channel/{channel_id}/'.format(data_root=data_root, channel_id=event['channel']))['Contents']
+            channel_indexes = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix='{data_root}/channel/{channel_id}/'.format(data_root=data_root, channel_id=event['channel']))['Contents']
             for channel_index in channel_indexes:
-                lambda_client.invoke(FunctionName=getprocessor({'lambda_namespace': lambda_namespace}, 'send', 'core', 'channel'), Payload=bytes(json.dumps({'index': channel_index['Key'], 'message': event['message']}), 'utf-8'), InvocationType='Event')
+                lambda_client.invoke(FunctionName=getprocessor({'lambda_namespace': env['lambda_namespace']}, 'send', 'core', 'channel'), Payload=bytes(json.dumps({'index': channel_index['Key'], 'message': event['message']}), 'utf-8'), InvocationType='Event')
                 

@@ -1,3 +1,5 @@
+env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_", "shared": 0, "authentication_namespace": "LiveElementScale"}
+
 import json, boto3, base64, time
 
 def getprocessor(env, name, source='core', scope=None):
@@ -8,30 +10,25 @@ def main(event, context):
     '''
     - triggered by core/channel to send the message to all sockets in the given index
     '''
-    env = context.client_context.env if context.client_context and context.client_context.env else event.get('_env', {})
-    client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')
-    if event.get('index') and event.get('message'):
-        endpoint_url, core_region, bucket_name = endpoint_url_region_bucket.split(' ')
+    if event.get('index') and event.get('index') and event.get('message'):
         s3 = boto3.resource('s3')
         bucket = s3.Bucket(env['bucket'])
         index_object = bucket.Object(event['index'])
         try:
-            socket_list = json.loads(index_object.get()['Body'].read().decode('utf-8'))
+            socket_map = json.loads(index_object.get()['Body'].read().decode('utf-8'))
         except:
-            socket_list = []
+            socket_map = {}
         sockets_to_remove = []
-        for socket_id in socket_list:
+        for socket_id, socket_url in socket_map.items():
             try:
-                apigatewaymanagementapi = boto3.client('apigatewaymanagementapi', endpoint_url=endpoint_url)
-                postConnectionResponse = apigatewaymanagementapi.post_to_connection(ConnectionId=socket_id, Data=bytes(event['message'], 'utf-8'))
+                apigatewaymanagementapi = boto3.client('apigatewaymanagementapi', endpoint_url=socket_url)
+                apigatewaymanagementapi.post_to_connection(ConnectionId=socket_id, Data=bytes(event['message'], 'utf-8'))
             except:
                 sockets_to_remove.append(socket_id)
         if sockets_to_remove:
-            socket_list = json.loads(index_object.get()['Body'].read().decode('utf-8'))
-            socket_list = sorted(list(set(socket_list) - set(sockets_to_remove)))
-            index_object.put(Body=bytes(json.dumps(socket_list), 'utf-8'), ContentType='application/json')
+            socket_map = json.loads(index_object.get()['Body'].read().decode('utf-8'))
+            for socket_id in sockets_to_remove:
+                if socket_id in socket_map:
+                    del socket_map[socket_id]
+            index_object.put(Body=bytes(json.dumps(socket_map), 'utf-8'), ContentType='application/json')
             
-
-        
-        
-        

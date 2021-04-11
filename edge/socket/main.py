@@ -59,7 +59,8 @@ def main(event, context):
                         core_region, account_id, lambda_namespace = env.split(' ')
                         processor = 'arn:aws:lambda:{core_region}:{account_id}:function:{lambda_namespace}-core-channel'.format(core_region=core_region, account_id=account_id, lambda_namespace=lambda_namespace)
                         try:
-                            lambda_client.invoke(FunctionName=processor, Payload=bytes(json.dumps({'channel': channel_id, 'message': base64.b64encode(message).decode('utf-8')}), 'utf-8'), InvocationType='Event')
+                            origin = request.get('headers', {}).get('origin', {}).get('value', '').split('://')[-1]
+                            lambda_client.invoke(FunctionName=processor, Payload=bytes(json.dumps({'origin': origin, 'channel': channel_id, 'message': base64.b64encode(message).decode('utf-8')}), 'utf-8'), InvocationType='Event')
                         except:
                             return {**retval, 'status': 500}
                     else:
