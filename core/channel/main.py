@@ -29,7 +29,7 @@ def main(event, context):
         if data_root:
             lambda_client = boto3.client('lambda')
             s3_client = boto3.client('s3')
-            channel_indexes = s3_client.list_objects_v2(Bucket=env['bucket'], MaxKeys=2000,  Prefix='{data_root}/channel/{channel_id}/'.format(data_root=data_root, channel_id=event['channel']))['Contents']
+            channel_indexes = s3_client.list_objects_v2(Bucket=env['bucket'], MaxKeys=5000,  Prefix='{data_root}/channel/{channel_id}/'.format(data_root=data_root, channel_id=event['channel']))['Contents']
             for channel_index in channel_indexes:
                 lambda_client.invoke(FunctionName=getprocessor({'lambda_namespace': env['lambda_namespace']}, 'send', 'core', 'channel'), Payload=bytes(json.dumps({'index': channel_index['Key'], 'message': event['message']}), 'utf-8'), InvocationType='Event')
                 
