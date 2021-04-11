@@ -89,7 +89,13 @@ def main(event, context):
             valid = type(entity) is dict
         elif entity_type == 'record':
             if entity.get('@type') and entity.get('@id'):
-                type_schema = json.loads(s3.Object(env['bucket'], '{data_root}/schema/classes/{entity_type}.json'.format(data_root=env['data_root'], entity_type=entity['@type'])).get()['Body'].read().decode('utf-8'))
+                try:
+                    type_schema = json.loads(s3.Object(env['bucket'], '{data_root}/schema/classes/{entity_type}.json'.format(data_root=env['data_root'], entity_type=entity['@type'])).get()['Body'].read().decode('utf-8'))
+                except:
+                    try:
+                        type_schema = json.loads(s3.Object(env['bucket'], '{data_root}/system/schema/{entity_type}.json'.format(data_root=env['data_root'], entity_type=entity['@type'])).get()['Body'].read().decode('utf-8'))
+                    except:
+                        type_schema = {}
                 if type_schema and type(type_schema) is dict and entity['@type'] == class_name and entity['@id'] == entity_id:
                     type_properties_map = type_schema.get('properties', {})
                     non_core_record_properties = [p for p in entity if p and type(p) is str and p[0] != '@']

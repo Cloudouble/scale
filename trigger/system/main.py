@@ -156,106 +156,94 @@ def main(event, context):
         lambda_client = boto3.client('lambda')
         if env['path'] and len(env['path']) == 3 and env['path'][0] == 'system':
             scope, module = env['path'][1:3]
-            module_configuration = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
-            module_state = module_configuration.get('state')
-            rewrite_module_configuration = False
-            if scope == 'daemon':
-                module_configuration['connection'] = module_configuration['connection'] if module_configuration.get('connection') and uuid_valid(module_configuration['connection']) else str(uuid.uuid4())
-            processor_full_name = '-extension-'.join(context.function_name.rsplit('-trigger-', 1))
-            processor_full_name = '-{scope}-{module}'.format(scope=scope, module=module).join(processor_full_name.rsplit('-system', 1))
-            if module_state in ['install', 'update']:
+            if scope == 'schema':
                 try:
-                    processor_state = lambda_client.get_function(FunctionName=processor_full_name)
+                    cd = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
                 except:
-                    processor_state = {}
-            if module_state == 'install': 
-                if not processor_state:
-                    module_configuration['processor']['code_checksum'] = deploy_processor(processor_full_name, module_configuration['processor'], lambda_client, env, 'install')
-                    if module_configuration['processor']['code_checksum']: 
-                        lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
-                        lambda_client.add_permission(
-                            FunctionName=processor_full_name, StatementId=module, Action='lambda:InvokeFunction', Principal='s3.amazonaws.com', 
-                            SourceArn=lambdaFunctionArn, SourceAccount=env['account_id']
-                        )
-                        module_configuration['state'] = 'installed'
-                    else: 
-                        module_configuration['state'] = 'error'
-                else:
-                    module_configuration['state'] = 'installed'
-                if scope == 'daemon' and module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
-                    deploy_rules(module_configuration, scope, module, env)                    
-            elif module_state == 'update': 
-                if processor_state:
-                    module_configuration['processor']['code_checksum'] = deploy_processor(processor_full_name, module_configuration['processor'], lambda_client, env, 'update')
-                    if module_configuration['processor']['code_checksum']: 
-                        module_configuration['state'] = 'updated'
-                    else: 
-                        module_configuration['state'] = 'error'
-                else:
-                    module_configuration['state'] = 'error'
-                if scope == 'daemon' and module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
-                    deploy_rules(module_configuration, scope, module, env)                    
-            elif scope == 'daemon' and module_state == 'run':
-                notification_configuration_current = s3_client.get_bucket_notification_configuration(Bucket=env['bucket'])
-                notification_configuration_current = [n.get('Events', []) for n in notification_configuration_current if n.get('Id') == processor_full_name]
-                if not notification_configuration_current:
-                    lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
-                    s3_client.put_bucket_notification_configuration(Bucket=env['bucket'], NotificationConfiguration={
-                        'LambdaFunctionConfigurations': [
-                            {
-                                'Id': processor_full_name, 
-                                'LambdaFunctionArn': lambdaFunctionArn, 
-                                'Events': ['s3:ObjectCreated:*'], 
-                                'Filter': {'Key': {'FilterRules': [{'Name': 'prefix', 'Value': '{data_root}/daemon/{module}{connection}/'.format(data_root=env['data_root'], module=module, connection=module_configuration['connection'])}]}}
-                            }
-                        ]
-                    })
-                    module_configuration['state'] = 'running'
-                if module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
-                    events = boto3.client('events')
-                    for rule_name, rule in module_configuration['schedule']:
-                        rule_full_name = '{lambda_namespace}-{scope}-{module}-{name}'.format(lambda_namespace=env['lambda_namespace'], scope=scope, module=module, name=rule_name)
-                        try:
-                            full_rule = events.describe_rule(Name=rule_full_name)
-                        except:
-                            full_rule = {}
-                        if full_rule:
-                            if full_rule.get('State') != 'ENABLED':
-                                event.enable_rule(Name=rule_full_name)
-                            processor_arn = 'arn:aws:lambda:{core_region}:{account_id}:function:{processor_full_name}'.format(core_region=env['core_region'], account_id=env['account_id'], processor_full_name=processor_full_name)
-                            try:
-                                rule_targets = events.list_rule_names_by_target(TargetArn=processor_arn)['RuleNames']
-                            except:
-                                rule_targets = []
-                            if rule_full_name not in rule_targets:
-                                events.put_targets(Rule=rule_full_name, Targets=[{'Id': processor_full_name, 'Arn': processor_arn}])
-            elif scope == 'daemon' and  module_state == 'pause':
-                notification_configuration_current = s3_client.get_bucket_notification_configuration(Bucket=env['bucket'])
-                notification_configuration_current = [n.get('Events', []) for n in notification_configuration_current if n.get('Id') == processor_full_name]
-                if notification_configuration_current:
-                    lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
-                    s3_client.put_bucket_notification_configuration(Bucket=env['bucket'], NotificationConfiguration={})
-                    module_configuration['state'] = 'paused'
-                if module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
-                    events = boto3.client('events')
-                    for rule_name, rule in module_configuration['schedule']:
-                        rule_full_name = '{lambda_namespace}-{scope}-{module}-{name}'.format(lambda_namespace=env['lambda_namespace'], scope=scope, module=module, name=rule_name)
-                        processor_arn = 'arn:aws:lambda:{core_region}:{account_id}:function:{processor_full_name}'.format(core_region=env['core_region'], account_id=env['account_id'], processor_full_name=processor_full_name)
-                        try:
-                            rule_targets = events.list_rule_names_by_target(TargetArn=processor_arn)['RuleNames']
-                        except:
-                            rule_targets = []
-                        if rule_full_name in rule_targets:
-                            events.remove_targets(Rule=rule_full_name, Targets=[processor_full_name], Force=True)
-                        if len(rule_targets) == 1:
-                            event.disable_rule(Name=rule_full_name)
-            elif module_state == 'remove':
+                    cd = {}
+                if not (cd and type(cd.get('label')) is str and type(cd.get('comment')) is str and type(cd.get('properties', [])) is dict and all([type(v) is list for v in cd['properties'].values()])):
+                    cd = s3_client.delete_object(Bucket=env['bucket'], Key=event['key'])
+            else:
+                module_configuration = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
+                module_state = module_configuration.get('state')
+                rewrite_module_configuration = False
                 if scope == 'daemon':
+                    module_configuration['connection'] = module_configuration['connection'] if module_configuration.get('connection') and uuid_valid(module_configuration['connection']) else str(uuid.uuid4())
+                processor_full_name = '-extension-'.join(context.function_name.rsplit('-trigger-', 1))
+                processor_full_name = '-{scope}-{module}'.format(scope=scope, module=module).join(processor_full_name.rsplit('-system', 1))
+                if module_state in ['install', 'update']:
+                    try:
+                        processor_state = lambda_client.get_function(FunctionName=processor_full_name)
+                    except:
+                        processor_state = {}
+                if module_state == 'install': 
+                    if not processor_state:
+                        module_configuration['processor']['code_checksum'] = deploy_processor(processor_full_name, module_configuration['processor'], lambda_client, env, 'install')
+                        if module_configuration['processor']['code_checksum']: 
+                            lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
+                            lambda_client.add_permission(
+                                FunctionName=processor_full_name, StatementId=module, Action='lambda:InvokeFunction', Principal='s3.amazonaws.com', 
+                                SourceArn=lambdaFunctionArn, SourceAccount=env['account_id']
+                            )
+                            module_configuration['state'] = 'installed'
+                        else: 
+                            module_configuration['state'] = 'error'
+                    else:
+                        module_configuration['state'] = 'installed'
+                    if scope == 'daemon' and module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
+                        deploy_rules(module_configuration, scope, module, env)                    
+                elif module_state == 'update': 
+                    if processor_state:
+                        module_configuration['processor']['code_checksum'] = deploy_processor(processor_full_name, module_configuration['processor'], lambda_client, env, 'update')
+                        if module_configuration['processor']['code_checksum']: 
+                            module_configuration['state'] = 'updated'
+                        else: 
+                            module_configuration['state'] = 'error'
+                    else:
+                        module_configuration['state'] = 'error'
+                    if scope == 'daemon' and module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
+                        deploy_rules(module_configuration, scope, module, env)                    
+                elif scope == 'daemon' and module_state == 'run':
+                    notification_configuration_current = s3_client.get_bucket_notification_configuration(Bucket=env['bucket'])
+                    notification_configuration_current = [n.get('Events', []) for n in notification_configuration_current if n.get('Id') == processor_full_name]
+                    if not notification_configuration_current:
+                        lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
+                        s3_client.put_bucket_notification_configuration(Bucket=env['bucket'], NotificationConfiguration={
+                            'LambdaFunctionConfigurations': [
+                                {
+                                    'Id': processor_full_name, 
+                                    'LambdaFunctionArn': lambdaFunctionArn, 
+                                    'Events': ['s3:ObjectCreated:*'], 
+                                    'Filter': {'Key': {'FilterRules': [{'Name': 'prefix', 'Value': '{data_root}/daemon/{module}{connection}/'.format(data_root=env['data_root'], module=module, connection=module_configuration['connection'])}]}}
+                                }
+                            ]
+                        })
+                        module_configuration['state'] = 'running'
+                    if module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
+                        events = boto3.client('events')
+                        for rule_name, rule in module_configuration['schedule']:
+                            rule_full_name = '{lambda_namespace}-{scope}-{module}-{name}'.format(lambda_namespace=env['lambda_namespace'], scope=scope, module=module, name=rule_name)
+                            try:
+                                full_rule = events.describe_rule(Name=rule_full_name)
+                            except:
+                                full_rule = {}
+                            if full_rule:
+                                if full_rule.get('State') != 'ENABLED':
+                                    event.enable_rule(Name=rule_full_name)
+                                processor_arn = 'arn:aws:lambda:{core_region}:{account_id}:function:{processor_full_name}'.format(core_region=env['core_region'], account_id=env['account_id'], processor_full_name=processor_full_name)
+                                try:
+                                    rule_targets = events.list_rule_names_by_target(TargetArn=processor_arn)['RuleNames']
+                                except:
+                                    rule_targets = []
+                                if rule_full_name not in rule_targets:
+                                    events.put_targets(Rule=rule_full_name, Targets=[{'Id': processor_full_name, 'Arn': processor_arn}])
+                elif scope == 'daemon' and  module_state == 'pause':
                     notification_configuration_current = s3_client.get_bucket_notification_configuration(Bucket=env['bucket'])
                     notification_configuration_current = [n.get('Events', []) for n in notification_configuration_current if n.get('Id') == processor_full_name]
                     if notification_configuration_current:
                         lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
                         s3_client.put_bucket_notification_configuration(Bucket=env['bucket'], NotificationConfiguration={})
+                        module_configuration['state'] = 'paused'
                     if module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
                         events = boto3.client('events')
                         for rule_name, rule in module_configuration['schedule']:
@@ -268,15 +256,35 @@ def main(event, context):
                             if rule_full_name in rule_targets:
                                 events.remove_targets(Rule=rule_full_name, Targets=[processor_full_name], Force=True)
                             if len(rule_targets) == 1:
-                                event.delete_rule(Name=rule_full_name, Force=True)
-                lambda_client.delete_function(FunctionName=processor_full_name)
-                module_configuration['state'] = 'removed'
-            if module_state in ['install', 'update'] and module_configuration['state'] != 'error':
-                if not deploy_entities(module_configuration, lambda_client, env, client_context): 
-                    module_configuration['state'] = 'error'
-            if module_configuration['state'] != module_state:
-                rewrite_module_configuration = True
-            if rewrite_module_configuration:
-                s3_client.put_object(Bucket=env['bucket'], Key=event['key'], Body=bytes(json.dumps(module_configuration), 'utf-8'))
+                                event.disable_rule(Name=rule_full_name)
+                elif module_state == 'remove':
+                    if scope == 'daemon':
+                        notification_configuration_current = s3_client.get_bucket_notification_configuration(Bucket=env['bucket'])
+                        notification_configuration_current = [n.get('Events', []) for n in notification_configuration_current if n.get('Id') == processor_full_name]
+                        if notification_configuration_current:
+                            lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
+                            s3_client.put_bucket_notification_configuration(Bucket=env['bucket'], NotificationConfiguration={})
+                        if module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
+                            events = boto3.client('events')
+                            for rule_name, rule in module_configuration['schedule']:
+                                rule_full_name = '{lambda_namespace}-{scope}-{module}-{name}'.format(lambda_namespace=env['lambda_namespace'], scope=scope, module=module, name=rule_name)
+                                processor_arn = 'arn:aws:lambda:{core_region}:{account_id}:function:{processor_full_name}'.format(core_region=env['core_region'], account_id=env['account_id'], processor_full_name=processor_full_name)
+                                try:
+                                    rule_targets = events.list_rule_names_by_target(TargetArn=processor_arn)['RuleNames']
+                                except:
+                                    rule_targets = []
+                                if rule_full_name in rule_targets:
+                                    events.remove_targets(Rule=rule_full_name, Targets=[processor_full_name], Force=True)
+                                if len(rule_targets) == 1:
+                                    event.delete_rule(Name=rule_full_name, Force=True)
+                    lambda_client.delete_function(FunctionName=processor_full_name)
+                    module_configuration['state'] = 'removed'
+                if module_state in ['install', 'update'] and module_configuration['state'] != 'error':
+                    if not deploy_entities(module_configuration, lambda_client, env, client_context): 
+                        module_configuration['state'] = 'error'
+                if module_configuration['state'] != module_state:
+                    rewrite_module_configuration = True
+                if rewrite_module_configuration:
+                    s3_client.put_object(Bucket=env['bucket'], Key=event['key'], Body=bytes(json.dumps(module_configuration), 'utf-8'))
             counter = counter + 1
     return counter
