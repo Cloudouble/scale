@@ -8,7 +8,7 @@
     --palette--pewter-blue: #87a7ad;
     
     /* other core theme settings */
-    --palette--font: font-family(Roboto, sans-serif);
+    --palette--font: Roboto, sans-serif;
     --palette--font-text: var(--palette--font);
     --palette--font-heading: var(--palette--font);
     --palette--font-accent: var(--palette--font);

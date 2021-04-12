@@ -29,7 +29,7 @@ header > a {
     color: transparent;
     display: inline-block;
     font-size: 0px;
-    width: 150px;
+    width: 0;
     height: 60px;
     position: absolute;
     top: 0;
@@ -37,17 +37,32 @@ header > a {
     outline: none;
 }
 
-header > menu {
+header > h1 {
     display: block;
     position: absolute;
     right: 150px;
     top: 0;
     min-width: 100px;
-    width: calc(100% - 300px);
-    height: 60px;
+    width: calc(100% - 150px);
+    height: 40px;
     margin: 0;
     padding: 0;
+    padding-top: 18px;
+    font-size: 20px;
+    text-align: center;
+    
 }
+
+@media screen and (min-width: 500px) {
+    header > a {
+        width: 150px;
+    }
+    header > h1 {
+        width: calc(100% - 300px);
+    }
+}
+
+
 
 header > nav {
     position: absolute;
@@ -120,10 +135,11 @@ footer a {
 main {
     position: absolute;
     top: 60px;
-    height: calc(100% - 100px);
+    height: calc(100% - 120px);
     overflow: auto;
     background-color: var(--palette--color-canvas);
-    width: 100%;
+    width: calc(100% - 20px);
+    padding: 10px;
     z-index: 0;
     font-family: var(--palette--font-text);
 }
@@ -140,15 +156,15 @@ section {
 main > section {
     height: 0;
     opacity: 0;
-    transition: height 0.25s, opacity 0.25s;
+    transition: height 0.1s, opacity 0.1s;
 }
-main:not([section]) > section[id=home], 
-main[section='home'] > section[id=home], 
-main[section='credentials'] > section[id=credentials], 
-main[section='system'] > section[id=system], 
-main[section='tests'] > section[id=tests], 
-main[section='ide'] > section[id=ide], 
-main[section='store'] > section[id=store] {
+body:not([page]) > main > section[id=home], 
+body[page='home'] > main > section[id=home], 
+body[page='credentials'] > main > section[id=credentials], 
+body[page='system'] > main > section[id=system], 
+body[page='tests'] > main > section[id=tests], 
+body[page='ide'] > main > section[id=ide], 
+body[page='store'] > main > section[id=store] {
     height: calc(100% - 100px);
     opacity: 1.0;
 }

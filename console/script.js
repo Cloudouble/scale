@@ -3,14 +3,24 @@ window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/elemen
 window.LiveElement.Element.load().then(() => {
   window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/schema@1.0.4/types/'
   window.LiveElement.Element.load(['Schema'].concat(window.LiveElement.Schema.CoreTypes).concat(window.LiveElement.Schema.DataTypes)).then(() => {
+    var setPage = function(page) {
+      var page = page || window.location.hash.slice(1)
+      var pageLink = document.querySelector(`header > nav > ul > li > a[href="#${page}"]`)
+      page = pageLink ? page : 'home'
+      document.body.setAttribute('page', page)
+      document.querySelector('header > h1').innerHTML = document.querySelector(`section[id="${page}"]`).getAttribute('title')
+    }
     document.querySelectorAll('header > nav > ul > li > a').forEach(a => {
-      var sectionId = a.getAttribute('href').slice(1)
+      var page = a.getAttribute('href').slice(1)
       a.addEventListener('click', event => {
-        document.querySelector('main').setAttribute('section', sectionId)
+        setPage(page)
       })
-      var section = document.querySelector(`section[id="${sectionId}"]`)
-      window.fetch(`pages/${sectionId}.html`).then(r => r.text()).then(t => section.innerHTML = t)
+      window.fetch(`pages/${page}.html`).then(r => r.text()).then(t => document.querySelector(`section[id="${page}"]`).innerHTML = t)
     })
+    window.addEventListener("hashchange", event => {
+      setPage()
+    }, false);
+    setPage()
 
     
   })    
