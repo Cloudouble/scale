@@ -1,10 +1,14 @@
 /* global */
-
-window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/schema@1.0.4/types/'
-window.LiveElement.Element.load(['Schema'].concat(window.LiveElement.Schema.CoreTypes).concat(window.LiveElement.Schema.DataTypes)).then(() => {
-    console.log('script.js: line 3: ', 'window.LiveElement.Element is loaded!')
-    //do stuff...
+window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/element@1.7.5/elements/'
+window.LiveElement.Element.load().then(() => {
+  window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/schema@1.0.4/types/'
+  window.LiveElement.Element.load(['Schema'].concat(window.LiveElement.Schema.CoreTypes).concat(window.LiveElement.Schema.DataTypes)).then(() => {
+      console.log('script.js: line 3: ', 'window.LiveElement.Element is loaded!')
+      //do stuff...
+  })    
 })    
+
+
 
 /*
 window.navigator.serviceWorker.ready.then(function(registration) {
