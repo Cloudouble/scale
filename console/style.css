@@ -95,7 +95,7 @@ header > nav > ul {
     background-color: var(--palette--color-chrome);
 }
 header > nav:hover > ul {
-    height: 200px;
+    height: 220px;
     opacity: 1.0;
 }
 
@@ -125,21 +125,30 @@ main {
     background-color: var(--palette--color-canvas);
     width: 100%;
     z-index: 0;
+    font-family: var(--palette--font-text);
 }
 
-/*h1 {
+h1 {
     font-family: var(--palette--font-heading);
     color: var(--palette--color-primary);
 }
 
-p {
-    font-family: var(--palette--font-text);
+section {
+    overflow: hidden;
 }
 
-a {
-    color: var(--palette--color-accent);
+main > section {
+    height: 0;
+    opacity: 0;
+    transition: height 0.25s, opacity 0.25s;
 }
-
-footer {
-    background-color: var(--palette--color-chrome);
-}*/
+main:not([section]) > section[id=home], 
+main[section='home'] > section[id=home], 
+main[section='credentials'] > section[id=credentials], 
+main[section='system'] > section[id=system], 
+main[section='tests'] > section[id=tests], 
+main[section='ide'] > section[id=ide], 
+main[section='store'] > section[id=store] {
+    height: calc(100% - 100px);
+    opacity: 1.0;
+}

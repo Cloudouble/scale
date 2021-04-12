@@ -3,8 +3,13 @@ window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/elemen
 window.LiveElement.Element.load().then(() => {
   window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/schema@1.0.4/types/'
   window.LiveElement.Element.load(['Schema'].concat(window.LiveElement.Schema.CoreTypes).concat(window.LiveElement.Schema.DataTypes)).then(() => {
-      console.log('script.js: line 3: ', 'window.LiveElement.Element is loaded!')
-      //do stuff...
+    document.querySelectorAll('header > nav > ul > li > a').forEach(a => {
+      a.addEventListener('click', event => {
+        document.querySelector('main').setAttribute('section', event.target.getAttribute('href').slice(1))
+      })
+    })
+    
+    
   })    
 })    
 
