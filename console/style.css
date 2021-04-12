@@ -7,7 +7,7 @@ body {
     border: 0;
 }
 
-header {
+header, footer {
     background-color: var(--palette--color-chrome);
     margin: 0;
     padding: 0;
@@ -17,6 +17,8 @@ header {
     position: absolute;
     top: 0;
     left: 0;
+    font-weight: bold;
+    z-index: 1;
 }
 
 header > a {
@@ -64,6 +66,7 @@ header > nav > element-icon {
     text-align: center;
     cursor: pointer;
     opacity: 0.8;
+    color: var(--palette--color-accent);
 }
 header > nav > element-icon:hover, header > nav > element-icon:focus {
     opacity: 1.0;
@@ -81,6 +84,7 @@ header > nav > ul > li {
 }
 header > nav > ul > li > a {
     text-decoration: none;
+    color: var(--palette--color-accent);
 }
 header > nav > ul {
     border-top: 1px solid var(--palette--color-accent);
@@ -95,7 +99,33 @@ header > nav:hover > ul {
     opacity: 1.0;
 }
 
+footer {
+    top: unset;
+    bottom: 0;
+    padding-top: 15px;
+    height: 25px;
+    text-align: center;
+    font-size: 80%;
+    color: var(--palette--color-info);
+}
+footer address {
+    display: inline;
+}
+footer a {
+    text-decoration: none;
+    font-style: normal;
+    color: var(--palette--color-accent);
+}
 
+main {
+    position: absolute;
+    top: 60px;
+    height: calc(100% - 100px);
+    overflow: auto;
+    background-color: var(--palette--color-canvas);
+    width: 100%;
+    z-index: 0;
+}
 
 /*h1 {
     font-family: var(--palette--font-heading);
