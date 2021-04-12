@@ -4,11 +4,14 @@ window.LiveElement.Element.load().then(() => {
   window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/schema@1.0.4/types/'
   window.LiveElement.Element.load(['Schema'].concat(window.LiveElement.Schema.CoreTypes).concat(window.LiveElement.Schema.DataTypes)).then(() => {
     document.querySelectorAll('header > nav > ul > li > a').forEach(a => {
+      var sectionId = a.getAttribute('href').slice(1)
       a.addEventListener('click', event => {
-        document.querySelector('main').setAttribute('section', event.target.getAttribute('href').slice(1))
+        document.querySelector('main').setAttribute('section', sectionId)
       })
+      var section = document.querySelector(`section[id="${sectionId}"]`)
+      window.fetch(`pages/${sectionId}.html`).then(r => r.text()).then(t => section.innerHTML = t)
     })
-    
+
     
   })    
 })    
