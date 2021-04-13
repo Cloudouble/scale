@@ -30,8 +30,6 @@ window.LiveElement.Element.load().then(() => {
       setPage()
     }, false);
     setPage()
-
-    
   })    
 })    
 

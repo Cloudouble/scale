@@ -1,0 +1,3 @@
+input[name='system_access_url'], input[name='sudo_key'] {
+    width: 300px;
+}
