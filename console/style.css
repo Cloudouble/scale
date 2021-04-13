@@ -110,7 +110,7 @@ header > nav > ul {
     background-color: var(--palette--color-chrome);
 }
 header > nav:hover > ul {
-    height: 220px;
+    height: 250px;
     opacity: 1.0;
 }
 
@@ -164,6 +164,7 @@ body[page='security'] > main > section[id=security],
 body[page='system'] > main > section[id=system], 
 body[page='tests'] > main > section[id=tests], 
 body[page='ide'] > main > section[id=ide], 
+body[page='cms'] > main > section[id=cms], 
 body[page='store'] > main > section[id=store] {
     height: calc(100%);
     opacity: 1.0;
