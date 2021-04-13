@@ -160,7 +160,7 @@ main > section {
 }
 body:not([page]) > main > section[id=home], 
 body[page='home'] > main > section[id=home], 
-body[page='credentials'] > main > section[id=credentials], 
+body[page='security'] > main > section[id=security], 
 body[page='system'] > main > section[id=system], 
 body[page='tests'] > main > section[id=tests], 
 body[page='ide'] > main > section[id=ide], 
@@ -176,16 +176,20 @@ section > h2:first-of-type {
     margin-top: 10px;
 }
 
-body[page='credentials'] label {
+body label {
     display: block;
     margin-bottom: 20px;
     font-size: 80%;
 }
-body[page='credentials'] label input {
+body label input {
+    margin-top: 3px;
     display: block;
     font-size: 125%;
 }
-body[page='credentials'] label small input {
+body label small input {
     display: inline-block;
     vertical-align: middle;
+}
+body input + small {
+    display: block;
 }

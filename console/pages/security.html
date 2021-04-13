@@ -1,0 +1,59 @@
+<h2>System Root</h2>
+<label>
+    Access URL (Cloudfront Distribution URL)
+    <input name="access_url" type="url" />
+    <small>Save locally in a cookie <input type="checkbox" checked="checked" /></small>
+</label>
+
+<h2>Administrator Access</h2>
+<label>
+    Sudo Key
+    <input name="sudo_key" type="password" />
+    <small>Save locally in a cookie <input type="checkbox" /></small>
+</label>
+
+<h2>Roles</h2>
+<p>Add non-administrator user roles.</p>
+<table>
+    <tr>
+        <th>Role Name</th>
+        <th>Mask</th>
+    </tr>
+    <tr>
+        <td><input type="text" placeholder="Role Name" /></td>
+        <td><select><option>Select Mask...</option></select></td>
+    </tr>
+</table>
+
+<h2>Groups</h2>
+<p>Add non-administrator user groups.</p>
+<table>
+    <tr>
+        <th>Group Name</th>
+        <th>Role(s)</th>
+    </tr>
+    <tr>
+        <td><input type="text" placeholder="Group Name" /></td>
+        <td><select multiple="multiple"><option>Select Role(s)...</option></select></td>
+    </tr>
+</table>
+
+<h2>Users</h2>
+<p>Add non-administrator users.</p>
+<table>
+    <tr>
+        <th>User Name</th>
+        <th>Group(s)</th>
+        <th>Authentication Module(s)</th>
+        <th>Authentication Credential(s)</th>
+    </tr>
+    <tr>
+        <td>
+            <input type="text" placeholder="User Name" />
+            <small>User UUID</small>
+        </td>
+        <td><select multiple="multiple"><option>Select Group(s)...</option></select></td>
+        <td><select multiple="multiple"><option>Select Authentication Module(s)...</option></select></td>
+        <td></td>
+    </tr>
+</table>
