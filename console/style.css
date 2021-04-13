@@ -185,3 +185,7 @@ body[page='credentials'] label input {
     display: block;
     font-size: 125%;
 }
+body[page='credentials'] label small input {
+    display: inline-block;
+    vertical-align: middle;
+}
