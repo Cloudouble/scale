@@ -15,7 +15,16 @@ window.LiveElement.Element.load().then(() => {
       a.addEventListener('click', event => {
         setPage(page)
       })
-      window.fetch(`pages/${page}.html`).then(r => r.text()).then(t => document.querySelector(`section[id="${page}"]`).innerHTML = t)
+      var styleTag = document.createElement('link')
+      styleTag.setAttribute('href', `pages/${page}/style.css`)
+      styleTag.setAttribute('rel', 'stylesheet')
+      document.head.appendChild(styleTag)
+      window.fetch(`pages/${page}/index.html`).then(r => r.text()).then(t => {
+        document.querySelector(`section[id="${page}"]`).innerHTML = t
+        var scriptTag = document.createElement('script')
+        scriptTag.setAttribute('src', `pages/${page}/script.js`)
+        document.body.appendChild(scriptTag)
+      })
     })
     window.addEventListener("hashchange", event => {
       setPage()

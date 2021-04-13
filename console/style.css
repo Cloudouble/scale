@@ -194,3 +194,7 @@ body label small input {
 body input + small {
     display: block;
 }
+
+details > summary > h2, details > summary > h3, details > summary > h4 {
+    display: inline-block;
+} 
