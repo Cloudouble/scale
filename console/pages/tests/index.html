@@ -1,5 +1,50 @@
-<h2>Installation Tests</h2>
-<p>Confirm that the system is correctly installed.</p>
+<h2>
+    Installation Tests
+    <div>
+        <button>Run All</button>
+    </div>
+</h2>
+<table name="installation">
+    <tr>
+        <th scope="col">Task</th>
+        <th scope="col">Description</th>
+        <th scope="col">Result</th>
+    </tr>
+    <tr name="installation-create-connection">
+        <th scope="row">
+            Create Sudo Connection
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            Creates a super-user grade connection to the system.
+        </td>
+        <td>
+            <label>
+                Connection ID
+                <code>ae1a3b6d-fcc2-417d-92b4-816266c50b73</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Create Record
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            Creates a record of type <i>Thing</i>.
+        </td>
+        <td>
+            <label>
+                Record Structure
+                <code>{"@type": "Thing"}</code>
+            </label>
+        </td>
+    </tr>
+</table>
 
 <h2>Diagnostic Tests</h2>
 <p>Diagnose system issues.</p>

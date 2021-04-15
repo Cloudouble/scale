@@ -36,11 +36,13 @@ window.LiveElement.Element.load().then(() => {
   window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/schema@1.0.4/types/'
   window.LiveElement.Element.load(['Schema'].concat(window.LiveElement.Schema.CoreTypes).concat(window.LiveElement.Schema.DataTypes)).then(() => {
     var setPage = function(page) {
-      var page = page || window.location.hash.slice(1)
+      page = page || window.location.hash.slice(1)
       var pageLink = document.querySelector(`header > nav > ul > li > a[href="#${page}"]`)
       page = pageLink ? page : 'home'
       document.body.setAttribute('page', page)
-      document.querySelector('header > h1').innerHTML = document.querySelector(`section[id="${page}"]`).getAttribute('title')
+      var sectionElement = document.querySelector(`section[id="${page}"]`)
+      document.querySelector('header > h1').innerHTML = sectionElement.getAttribute('title')
+      sectionElement.removeAttribute('title')
     }
     document.querySelectorAll('header > nav > ul > li > a').forEach(a => {
       var page = a.getAttribute('href').slice(1)
