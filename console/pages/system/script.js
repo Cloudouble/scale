@@ -47,19 +47,48 @@ Promise.resolve(function() {
         return document.querySelector(`[name="system:connection_id"]`).innerHTML = window.localStorage.getItem('system:connection_id')
     }
 }()).then(() => {
-    return window.fetch(`${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/subscription/-/00000000-0000-0000-0000-000000000000/env.json`).then(r => r.json()).then(r => {
-        var table_environment = document.getElementById('system:environment')
-        table_environment.innerHTML = ''
-        Object.entries(r).forEach(entry => {
-            let tr = document.createElement('tr')
-            let th = document.createElement('th')
-            let td = document.createElement('td')
-            th.innerHTML = entry[0]
-            td.innerHTML = entry[1]
-            tr.append(th)
-            tr.append(td)
-            table_environment.append(tr)
+    var system_access_url = window.localStorage.getItem('system:system_access_url')
+    var system_root = window.localStorage.getItem('system:system_root')
+    var connection_id = window.localStorage.getItem('system:connection_id')
+    return Promise.all(Object.entries({
+        'system:environment': 'subscription/-/00000000-0000-0000-0000-000000000000/env.json', 
+        'system:modules': 'subscription/-/00000000-0000-0000-0000-000000000000/modules.json'
+    }).map(entry => {
+        return window.fetch(`${system_access_url}${system_root}/connection/${connection_id}/${entry[1]}`).then(r => r.json()).then(r => {
+            var table = document.getElementById(entry[0])
+            table.innerHTML = ''
+            Object.entries(r).forEach(entry => {
+                var tr = document.createElement('tr')
+                if (typeof entry[1] == 'string') {
+                    var th = document.createElement('th')
+                    th.setAttribute('scope', 'row')
+                    var td = document.createElement('td')
+                    th.innerHTML = entry[0]
+                    td.innerHTML = entry[1]
+                    tr.append(th)
+                    tr.append(td)
+                    table.append(tr)
+                } else if (entry[1] && typeof entry[1] == 'object') {
+                    var th = document.createElement('th')
+                    th.setAttribute('scope', 'col')
+                    th.setAttribute('colspan', 2)
+                    th.innerHTML = `<h3>${entry[0]}</h3>`
+                    tr.append(th)
+                    table.append(tr)
+                    Object.entries(entry[1]).forEach(moduleentry => {
+                        var tr = document.createElement('tr')
+                        var th = document.createElement('th')
+                        th.setAttribute('scope', 'row')
+                        var td = document.createElement('td')
+                        th.innerHTML = moduleentry[0]
+                        td.innerHTML = `<code>${JSON.stringify(moduleentry[1])}</code>`
+                        tr.append(th)
+                        tr.append(td)
+                        table.append(tr)
+                    })
+                }
+            })
         })
-    })
+    }))
 })
 

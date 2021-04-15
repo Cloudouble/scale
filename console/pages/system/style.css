@@ -5,3 +5,17 @@ input[name='system_access_url'], input[name='sudo_key'] {
 table th {
     text-align: left;
 }
+
+table th h3 {
+    text-transform: capitalize;
+}
+
+table td code {
+    min-height: 80px;
+    max-width: 380px;
+    max-height: 180px;
+    padding: 10px;
+    overflow: auto;
+    display: block;
+    color: var(--palette--color-accent);
+}
