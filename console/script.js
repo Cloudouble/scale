@@ -1,4 +1,36 @@
 /* global */
+window.LiveElement.Scale = window.LiveElement.Scale || {}
+window.LiveElement.Scale.Core = window.LiveElement.Scale.Core || {}
+window.LiveElement.Scale.Console = window.LiveElement.Scale.Console || {}
+window.LiveElement.Scale.Core.generateUUID4 = function() {
+    var u = '********-****-4***-N***-************'
+    var v = ['8', '9', 'a', 'b']
+    var v_index = 0
+    while (!v_index) {
+        let va = new window.Uint8Array(1)
+        window.crypto.getRandomValues(va)
+        let va_v = parseInt(String(va[0]).slice(-1), 10)
+        v_index = va_v >=1 && va_v <= 4 ? va_v : 0 
+    }
+    u = u.replace('N', v[v_index-1])
+    while (u.includes('*')) {
+        let va = new window.Uint8Array(1)
+        window.crypto.getRandomValues(va)
+        if ((va[0] >= 48 && va[0] <= 57) || (va[0] >= 97 && va[0] <= 102)) {
+            u = u.replace('*', String.fromCharCode(va[0]))
+        }
+    }
+    return u
+}
+window.LiveElement.Scale.Core.syncWithLocalStorage = function(page, checkboxElement, inputElement) {
+    if (checkboxElement.checked) {
+        window.localStorage.setItem(`${page}:${inputElement.getAttribute('name')}`, inputElement.value)
+    } else {
+        window.localStorage.removeItem(`${page}:${inputElement.getAttribute('name')}`)
+    }
+}
+
+
 window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/element@1.7.5/elements/'
 window.LiveElement.Element.load().then(() => {
   window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/schema@1.0.4/types/'
