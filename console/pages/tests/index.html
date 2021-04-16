@@ -7,7 +7,6 @@
 <table name="installation">
     <tr>
         <th scope="col">Task</th>
-        <th scope="col">Description</th>
         <th scope="col">Result</th>
     </tr>
     <tr name="installation-create-connection">
@@ -18,9 +17,6 @@
             </div>
         </th>
         <td>
-            Creates a super-user grade connection to the system.
-        </td>
-        <td>
             <label>
                 Connection ID
                 <code>ae1a3b6d-fcc2-417d-92b4-816266c50b73</code>
@@ -29,25 +25,383 @@
     </tr>
     <tr name="installation-create-record">
         <th scope="row">
-            Create Record
+            Create Record of type "Book" using http PUT method and application/json content-type 
             <div>
                 <button>Run</button>
             </div>
         </th>
         <td>
-            Creates a record of type <i>Thing</i>.
+            <label>
+                Record ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
         </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Delete  Record of type "Book"
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
         <td>
             <label>
-                Record Structure
-                <code>{"@type": "Thing"}</code>
+                Record ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Create Record of type "Book" using http POST method and application/x-www-form-urlencoded content-type 
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                Record ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Update record field using http PATCH method 
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                Record ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Create "totalPages" query
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                Query ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Create "json" view
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                View ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Create "book" subscription
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                Subscription ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Create "totalPages" feed
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                Feed ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Update "numberOfPages" field using PUT
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                numberOfPages
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Create "404" error page
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                error page
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Create "reader" mask
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                mask ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Create "reader" authentication extension
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                extension code
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Create "reader" connection
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                Connection ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Subscribe "reader" connection to the "Book" record
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                Subscription ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Subscribe "reader" connection to the "Book" record
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                Subscription ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Delete "reader" connection
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                Connection ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Create a websocket
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                Socket ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Create a tunnel
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                Tunnel ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Create a channel
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                channel ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Create a daemon
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                channel ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Create a custom record type "Novel" based on the "Book" type
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                record structure
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Create a new "Novel" record
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                record ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-record">
+        <th scope="row">
+            Clean Up and Reset System
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                record ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    
+    
+</table>
+
+
+
+<h2>
+    Performance Tests
+    <div>
+        <button>Run</button> with <select><option>100</option><option>1000</option><option>10000</option></select> records
+    </div>
+</h2>
+<table name="performance">
+    <tr>
+        <th scope="col">Task</th>
+        <th scope="col">Result</th>
+    </tr>
+    <tr name="installation-create-connection">
+        <th scope="row">
+            Create a "totalPages" query that total the number of pages of all Book records
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                Timing
+                <code>ae1a3b6d-fcc2-417d-92b4-816266c50b73</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-connection">
+        <th scope="row">
+            Create Book Records
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                Timing
+                <code>ae1a3b6d-fcc2-417d-92b4-816266c50b73</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="installation-create-connection">
+        <th scope="row">
+            Increase the page count of one book
+            <div>
+                <button>Run</button>
+            </div>
+        </th>
+        <td>
+            <label>
+                Timing
+                <code>ae1a3b6d-fcc2-417d-92b4-816266c50b73</code>
             </label>
         </td>
     </tr>
 </table>
-
-<h2>Diagnostic Tests</h2>
-<p>Diagnose system issues.</p>
-
-<h2>Stress Tests</h2>
-<p>Measure key system performance metrics.</p>

@@ -723,12 +723,7 @@ Things that are currently intended to be developed before release 1.0 but not ye
 verify that every feature is working correctly
 
 ### Release 0.8: 
-* **more authentication extensions**: a set of standardised authentication extensions to allow for the most common authentication scenarios
-* **more mask extensions**: a set of standardised mask extensions to create one or more built-in opinionated authorisation
-structures
-* **more view extensions**: a more complete set of view extensions to allow rendering of data in the most common formats, including GraphQL support
-* **more query extensions**: a more complete set of query extensions to cover the most common querying and filtering 
-scenarios
+* **store**: a community store for various kinds of extensions from third-party developers
 
 ### Release 0.9: 
 * **Live integration**: built-in integration for the LiveElement Live client-side module via an extension to that client
