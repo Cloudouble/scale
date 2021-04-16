@@ -1,13 +1,31 @@
 <h2>
     Installation Tests
-    <div>
-        <button>Run All</button>
-    </div>
 </h2>
+<label>
+    AWS Credentials
+    <input name="access_key_id" placeholder="Access Key Id" /><input name="secret_access_key" placeholder="Secret Access Key" />
+    <small>These are not saved in any way.</small>
+    <button>Run All</button>
+</label>
 <table name="installation">
     <tr>
         <th scope="col">Task</th>
         <th scope="col">Result</th>
+    </tr>
+    <tr name="check-aws-credentials">
+        <th scope="row">
+            Check AWS Credentials
+            <div>
+                <button>Run</button>
+                <time>0ms</time>
+            </div>
+        </th>
+        <td>
+            <label>
+                Connection ID
+                <code>ae1a3b6d-fcc2-417d-92b4-816266c50b73</code>
+            </label>
+        </td>
     </tr>
     <tr name="create-sudo-connection">
         <th scope="row">
