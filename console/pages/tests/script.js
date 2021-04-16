@@ -20,6 +20,29 @@ window.LiveElement.Scale.Console.Tests.runTest = function(tr, test) {
 var tests = document.getElementById('tests')
 var installation = tests.querySelector('table[name="installation"]')
 
+;([tests.querySelector('[name="access_key_id"]'), tests.querySelector('[name="secret_access_key"]')]).forEach(input => {
+    var resetAWS = function() {
+        var accessKeyId = tests.querySelector('[name="access_key_id"]').value
+        var secretAccessKey = tests.querySelector('[name="secret_access_key"]').value
+        var aws_region = window.localStorage.getItem('aws_region')
+        if (accessKeyId && secretAccessKey) {
+            window.LiveElement.Scale.Console.Tests.credentials = new window.AWS.Credentials(accessKeyId, secretAccessKey)
+            if (aws_region) {
+                window.LiveElement.Scale.Console.Tests.S3 = new window.AWS.S3({credentials: window.LiveElement.Scale.Console.Tests.credentials, region: aws_region})
+            } else {
+                window.LiveElement.Scale.Console.Tests.S3 = new window.AWS.S3({credentials: window.LiveElement.Scale.Console.Tests.credentials, region: 'us-east-1'})
+                //window.LiveElement.Scale.Console.Tests.S3.getBucketLocation({Bucket: ''})
+            }
+        }
+    }
+    input.value = window.localStorage.getItem(input.getAttribute('name'))
+    input.addEventListener('change', event => {
+        resetAWS()
+    })
+    resetAWS()
+})
+
+
 var createSudoConnection = installation.querySelector('[name="create-sudo-connection"]')
 createSudoConnection.querySelector('button').addEventListener('click', event => {
     window.LiveElement.Scale.Console.Tests.runTest(createSudoConnection, () => {
