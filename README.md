@@ -733,6 +733,14 @@ library
 ### Release 1.0: 
 * **Documentation**: create a professional and comprehensive documentation 
 
+### Releases 1.x: 
+* **core refinements**: non-breaking changes to enhance usability, performance and intuitive integrations with the store and other parts of the 
+LiveElemment framework, including deep integrations with the sister LiveElement CMS project.
+
+### Release 2.0: 
+* **multi-cloud support**: re-factoring of the core code to allow for installation on a choice of (at least) AWS / MS Azure / Google Cloud 
+and "bare metal" platforms, ideally allowing for the multi-vendor integration within one system
+
 
 ## Further Reading 
 
