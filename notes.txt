@@ -490,3 +490,40 @@ SUDO SYSTEM CONFIGURATION SUBSCRIPTIONS
 _/connection/????????-????-????-????-????????????/subscription/-/00000000-0000-0000-0000-000000000000/env.json - GET
 _/connection/????????-????-????-????-????????????/subscription/-/00000000-0000-0000-0000-000000000000/modules.json - GET
 
+
+TESTS
+
+* Create Sudo Connection
+
+* Create "Book" record {name: test} (PUT + json)
+* Delete "Book" record
+* Create "Book" record {name: test} (POST + form fields)
+* Patch "Book" record (PATCH + json)
+* Create "Books" query
+* Create "json" view
+* Create "Book" subscription for connection
+* Create "Books" feed for connection
+* Update "Book" record numberOfPages field (PUT)
+* Create "reader" mask
+* create "404" error page
+* create "reader" authentication extension
+* create "reader" connection
+* subscribe "reader" connection to the "Book" record
+* Update "Book" record numberOfPages field (PUT)
+* Create a websocket
+* Create a Tunnel
+* Create a Channel
+* Create a Daemon and receive updates via the websocket
+* Create a custom record type "Novel" based on the "Book" type
+* Create a new "Novel" record
+* Delete everything one at a time to reset the system as it was
+
+
+STRESS TESTS
+
+* Create 100 / 1000 / 10000 Book records
+* Create a "Books" query that totals the number of pages
+* Increase the pageCount of 1 book
+* Monitor how long until Books query reflect new total
+
+
