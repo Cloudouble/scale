@@ -739,7 +739,7 @@ LiveElemment framework, including deep integrations with the sister LiveElement 
 
 ### Release 2.0: 
 * **multi-cloud support**: re-factoring of the core code to allow for installation on a choice of (at least) AWS / MS Azure / Google Cloud 
-and "bare metal" platforms, ideally allowing for the multi-vendor integration within one system
+and "bare metal" platforms via an extensible platform adapter mechanism, ideally allowing for the multi-vendor integration within one system.
 
 
 ## Further Reading 
