@@ -18,3 +18,10 @@
 #tests table td, #tests table th[scope="row"] {
     border-top: 1px solid var(--palette--color-chrome);
 }
+
+time {
+    font-size: 80%;
+    font-weight: normal;
+    display: block;
+    font-style: italic;
+}
