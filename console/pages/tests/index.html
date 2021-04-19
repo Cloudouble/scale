@@ -1,31 +1,13 @@
 <h2>
     Installation Tests
 </h2>
-<label>
-    AWS Credentials
-    <input name="access_key_id" placeholder="Access Key Id" /><input name="secret_access_key" type="password" placeholder="Secret Access Key" />
-    <small>These are not saved, required to cross-check the results.</small>
+<div>
     <button>Run All</button>
-</label>
+</div>
 <table name="installation">
     <tr>
         <th scope="col">Task</th>
         <th scope="col">Result</th>
-    </tr>
-    <tr name="check-aws-credentials">
-        <th scope="row">
-            Check AWS Credentials
-            <div>
-                <button>Run</button>
-                <time>0ms</time>
-            </div>
-        </th>
-        <td>
-            <label>
-                Connection ID
-                <code>ae1a3b6d-fcc2-417d-92b4-816266c50b73</code>
-            </label>
-        </td>
     </tr>
     <tr name="create-sudo-connection">
         <th scope="row">
@@ -42,72 +24,17 @@
             </label>
         </td>
     </tr>
-    <tr name="create-record-put">
+    <tr name="create-websocket">
         <th scope="row">
-            Create Record of type "Book" using PUT and json content-type
+            Create a websocket
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
             <label>
-                Record ID
-                <code>00000000-0000-0000-0000-000000000000</code>
-            </label>
-        </td>
-    </tr>
-    <tr name="delete-record">
-        <th scope="row">
-            Delete  Record of type "Book"
-            <div>
-                <button>Run</button>
-            </div>
-        </th>
-        <td>
-            <label>
-                Record ID
-                <code>00000000-0000-0000-0000-000000000000</code>
-            </label>
-        </td>
-    </tr>
-    <tr name="create-record-post">
-        <th scope="row">
-            Create Record of type "Book" using POST and x-www-form-urlencoded content-type 
-            <div>
-                <button>Run</button>
-            </div>
-        </th>
-        <td>
-            <label>
-                Record ID
-                <code>00000000-0000-0000-0000-000000000000</code>
-            </label>
-        </td>
-    </tr>
-    <tr name="update-record-patch">
-        <th scope="row">
-            Update record field using http PATCH method 
-            <div>
-                <button>Run</button>
-            </div>
-        </th>
-        <td>
-            <label>
-                Record ID
-                <code>00000000-0000-0000-0000-000000000000</code>
-            </label>
-        </td>
-    </tr>
-    <tr name="create-query">
-        <th scope="row">
-            Create "totalPages" query
-            <div>
-                <button>Run</button>
-            </div>
-        </th>
-        <td>
-            <label>
-                Query ID
+                Socket ID
                 <code>00000000-0000-0000-0000-000000000000</code>
             </label>
         </td>
@@ -117,6 +44,7 @@
             Create "json" view
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
@@ -126,11 +54,27 @@
             </label>
         </td>
     </tr>
+    <tr name="create-query">
+        <th scope="row">
+            Create "totalPages" query
+            <div>
+                <button>Run</button>
+                <time>0ms</time>
+            </div>
+        </th>
+        <td>
+            <label>
+                Query ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
     <tr name="create-subscription">
         <th scope="row">
             Create "book" subscription
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
@@ -145,6 +89,7 @@
             Create "totalPages" feed
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
@@ -154,11 +99,72 @@
             </label>
         </td>
     </tr>
+    <tr name="create-record-put">
+        <th scope="row">
+            Create Record of type "Book" using PUT and json content-type
+            <div>
+                <button>Run</button>
+                <time>0ms</time>
+            </div>
+        </th>
+        <td>
+            <label>
+                Record ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="delete-record">
+        <th scope="row">
+            Delete  Record of type "Book"
+            <div>
+                <button>Run</button>
+                <time>0ms</time>
+            </div>
+        </th>
+        <td>
+            <label>
+                Record ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="create-record-post">
+        <th scope="row">
+            Create Record of type "Book" using POST and x-www-form-urlencoded content-type 
+            <div>
+                <button>Run</button>
+                <time>0ms</time>
+            </div>
+        </th>
+        <td>
+            <label>
+                Record ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
+    <tr name="update-record-patch">
+        <th scope="row">
+            Update record field using http PATCH method 
+            <div>
+                <button>Run</button>
+                <time>0ms</time>
+            </div>
+        </th>
+        <td>
+            <label>
+                Record ID
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
     <tr name="update-record-field">
         <th scope="row">
             Update "numberOfPages" field using PUT
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
@@ -168,25 +174,12 @@
             </label>
         </td>
     </tr>
-    <tr name="create-404-error">
-        <th scope="row">
-            Create "404" error page
-            <div>
-                <button>Run</button>
-            </div>
-        </th>
-        <td>
-            <label>
-                error page
-                <code>00000000-0000-0000-0000-000000000000</code>
-            </label>
-        </td>
-    </tr>
     <tr name="create-limited-mask">
         <th scope="row">
             Create "reader" mask
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
@@ -198,9 +191,10 @@
     </tr>
     <tr name="create-limited-authentication">
         <th scope="row">
-            Create "reader" authentication extension
+            Create "test" authentication extension
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
@@ -212,9 +206,10 @@
     </tr>
     <tr name="created-limited-connection">
         <th scope="row">
-            Create "reader" connection
+            Create "test" connection with a "reader" mask
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
@@ -226,9 +221,10 @@
     </tr>
     <tr name="subscribe-limited-connection">
         <th scope="row">
-            Subscribe "reader" connection to the "Book" record
+            Subscribe "test" connection to the "Book" record
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
@@ -240,9 +236,10 @@
     </tr>
     <tr name="delete-limited-connection">
         <th scope="row">
-            Delete "reader" connection
+            Delete "test" connection
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
@@ -252,25 +249,12 @@
             </label>
         </td>
     </tr>
-    <tr name="create-websocket">
-        <th scope="row">
-            Create a websocket
-            <div>
-                <button>Run</button>
-            </div>
-        </th>
-        <td>
-            <label>
-                Socket ID
-                <code>00000000-0000-0000-0000-000000000000</code>
-            </label>
-        </td>
-    </tr>
     <tr name="create-tunnel">
         <th scope="row">
             Create a tunnel
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
@@ -285,6 +269,7 @@
             Create a channel
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
@@ -299,6 +284,7 @@
             Create a daemon
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
@@ -308,11 +294,27 @@
             </label>
         </td>
     </tr>
+    <tr name="create-404-error">
+        <th scope="row">
+            Create "404" error page
+            <div>
+                <button>Run</button>
+                <time>0ms</time>
+            </div>
+        </th>
+        <td>
+            <label>
+                error page
+                <code>00000000-0000-0000-0000-000000000000</code>
+            </label>
+        </td>
+    </tr>
     <tr name="create-custom-type">
         <th scope="row">
             Create a custom record type "Novel" based on the "Book" type
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
@@ -327,6 +329,7 @@
             Create a new "Novel" record
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
@@ -341,6 +344,7 @@
             Clean Up and Reset System
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
@@ -370,6 +374,7 @@
             Create a "totalPages" query that totals the number of pages of all Book records
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
@@ -384,6 +389,7 @@
             Create Book Records
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
@@ -398,6 +404,7 @@
             Increase the page count of one book
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
@@ -412,6 +419,7 @@
             Clean Up and Reset System
             <div>
                 <button>Run</button>
+                <time>0ms</time>
             </div>
         </th>
         <td>
