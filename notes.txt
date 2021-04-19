@@ -521,7 +521,7 @@ TESTS
 
 STRESS TESTS
 
-* Create 100 / 1000 / 10000 Book records
+;* Create 100 / 1000 / 10000 Book records
 * Create a "Books" query that totals the number of pages
 * Increase the pageCount of 1 book
 * Monitor how long until Books query reflect new total
