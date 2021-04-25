@@ -25,7 +25,7 @@ window.LiveElement.Scale.Console.Tests.runTest = function(tr, test) {
 window.setTimeout(() => {
     var installation = document.getElementById('tests').querySelector('table[name="installation"]')
     Object.entries(testMap).forEach(entry => {
-        var resultStorageKey = `test:${entry[0]}:result`
+        var resultStorageKey = `tests:${entry[0]}:result`
         var tr = installation.querySelector(`tr[name="${entry[0]}"]`)
         tr.querySelector('i').innerHTML = entry[0]
         if (window.localStorage.getItem(resultStorageKey)) {
@@ -66,6 +66,25 @@ var testMap = {
             }
         }
     }, 
+    'create-record-put': function(connection_url, system_access_url, system_root, connection_id) {
+        var record_id = window.LiveElement.Scale.Core.generateUUID4()
+        var bookNumber = Math.floor(Math.random()* 1000)
+        var record = {'@type': 'Book', '@id': record_id, name: `Test Book ${bookNumber}`, numberOfPages: 10}
+        return window.fetch(`${connection_url}/record/Book/${record_id}.json`, {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(record)}).then(r => {
+            return record_id
+        })
+    }, 
+    'delete-record': function(connection_url, system_access_url, system_root, connection_id) {
+        var record_id = window.localStorage.getItem('tests:create-record-put:result')
+        if (record_id) {
+            return window.fetch(`${connection_url}/record/Book/${record_id}.json`, {method: 'DELETE', headers: {"Content-Type": "application/json"}}).then(r => {
+                window.localStorage.removeItem('tests:create-record-put:result')
+                return record_id
+            })
+        } else {
+            return `Error: please first run "create-record-put"`
+        }
+    }, 
     'create-view': function(connection_url, system_access_url, system_root, connection_id) {
         var view_id = window.LiveElement.Scale.Core.generateUUID4()
         var view = {processor: 'json', content_type: 'application/json', suffix: 'json'}
@@ -79,24 +98,6 @@ var testMap = {
         return window.fetch(`${connection_url}/query/Book/${query_id}.json`, {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(query)}).then(r => {
             return query_id
         })
-    }, 
-    'create-record-put': function(connection_url, system_access_url, system_root, connection_id) {
-        var record_id = window.LiveElement.Scale.Core.generateUUID4()
-        var bookNumber = Math.floor(Math.random()* 1000)
-        var record = {'@type': 'Book', '@id': record_id, name: `Test Book ${bookNumber}`, numberOfPages: 10}
-        return window.fetch(`${connection_url}/record/Book/${record_id}.json`, {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(record)}).then(r => {
-            return record_id
-        })
-    }, 
-    'delete-record': function(connection_url, system_access_url, system_root, connection_id) {
-        var record_id = window.localStorage.getItem('tests:create-record-put:result')
-        if (record_id) {
-            return window.fetch(`${connection_url}/record/Book/${record_id}.json`, {method: 'DELETE', headers: {"Content-Type": "application/json"}}).then(r => {
-                return record_id
-            })
-        } else {
-            return `Error: please first run "create-record-put"`
-        }
     }, 
     'create-record-post': function(connection_url, system_access_url, system_root, connection_id) {
         var record_id = window.LiveElement.Scale.Core.generateUUID4()
@@ -121,6 +122,20 @@ var testMap = {
         var feed = {view: window.localStorage.getItem('tests:create-view:result')}
         return window.fetch(`${connection_url}/feed/Book/${query_id}/${feed_id}.json`, {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(feed)}).then(r => {
             return feed_id
+        })
+    }, 
+    'update-record-field-patch': function(connection_url, system_access_url, system_root, connection_id) {
+        var record_id = window.localStorage.getItem('tests:create-record-post:result')
+        var numberOfPages = Math.floor(Math.random()* 89) + 11
+        return window.fetch(`${connection_url}/record/Book/${record_id}/numberOfPages.json`, {method: 'PATCH', headers: {"Content-Type": "application/json"}, body: JSON.stringify(numberOfPages)}).then(r => {
+            return numberOfPages
+        })
+    }, 
+    'update-record-field-put': function(connection_url, system_access_url, system_root, connection_id) {
+        var record_id = window.localStorage.getItem('tests:create-record-post:result')
+        var numberOfPages = Math.floor(Math.random()* 88) + 12
+        return window.fetch(`${connection_url}/record/Book/${record_id}/numberOfPages.json`, {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(numberOfPages)}).then(r => {
+            return numberOfPages
         })
     }
 }
