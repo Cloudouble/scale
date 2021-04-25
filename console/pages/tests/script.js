@@ -101,6 +101,15 @@ var testMap = {
             return `Error: please first run "${installation.querySelector('[name="create-record-put"] th[scope="row"]').innerText.split('\n').shift()}"`
         }
     }, 
+    'create-record-post': function(connection_url, system_access_url, system_root, connection_id) {
+        var record_id = window.LiveElement.Scale.Core.generateUUID4()
+        var bookNumber = Math.floor(Math.random()* 1000)
+        var record = {'@type': 'Book', '@id': record_id, name: `Test Book ${bookNumber}`, numberOfPages: 10}
+        var recordAsQuerystring = new URLSearchParams(record).toString();
+        return window.fetch(`${connection_url}/record/Book/${record_id}.json`, {method: 'POST', headers: {"Content-Type": "application/x-www-form-urlencoded"}, body: recordAsQuerystring}).then(r => {
+            return record_id
+        })
+    }, 
     
     'create-subscription': function(connection_url, system_access_url, system_root, connection_id) {
         var subscription_id = window.LiveElement.Scale.Core.generateUUID4()
