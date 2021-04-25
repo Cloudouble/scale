@@ -38,7 +38,7 @@ _/connection/{connection_id}/record/{class_name}/{record_id}.json => the masked 
 _/connection/{connection_id}/query/{class_name}/{query_id}.json => metadata about this query as curated to this connection  => GET, POST, PUT, PATCH
 _/connection/{connection_id}/query/{class_name}/{query_id}/{index_initial}.json => a-z0-9 indexes, but only containing records that are non-empty when masked for this connection  => GET
 
-_/connection/{connection_id}/feed/{class_name}/{query_id}/{subscription_id}.json => use this path to write/delete feeds  => GET, POST, PUT, PATCH
+_/connection/{connection_id}/feed/{class_name}/{query_id}/{feed_id}.json => use this path to write/delete feeds  => GET, POST, PUT, PATCH
 _/connection/{connection_id}/feed/{class_name}/{query_id}/{render_field}/{sort_field}/{sort_direction}/{min-index}-{max-index}.{view_suffix} => query data as rendered by the given view, read only => GET
 
 _/connection/{connection_id}/subscription/{class_name}/{record_id}/{subscription_id}.json => use this path to write/delete subscriptions  => GET, POST, PUT, PATCH
