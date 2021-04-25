@@ -2,21 +2,27 @@
     font-size: 120%;
 }
 
-#tests table .success, #tests table .success code {
-    color: green;
-}
-#tests table .warning, #tests table .warning code {
-    color: orange;
-}
-#tests table .error, #tests table .error code {
-    color: red;
-}
-
 #test table {
     border-collapse: collapse;
 }
 #tests table td, #tests table th[scope="row"] {
     border-top: 1px solid var(--palette--color-chrome);
+}
+#tests table td label:not([status]) {
+    display: none;
+    color: var(--palette--color-info);
+}
+#tests table td label[status] {
+    display: block;
+}
+#tests table td label[status="success"] {
+    color: green;
+}
+#tests table td label[status="process"] {
+    color: orange;
+}
+#tests table td label[status="error"] {
+    color: red;
 }
 
 time {

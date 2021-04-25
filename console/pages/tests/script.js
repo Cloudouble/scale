@@ -1,29 +1,29 @@
 window.LiveElement.Scale.Console.Tests = window.LiveElement.Scale.Console.Tests || {}
 
 window.LiveElement.Scale.Console.Tests.runTest = function(tr, test) {
-    tr.classList.remove('success', 'warning', 'error')
-    tr.classList.add('warning')
+    var resultLabel = tr.querySelector(':scope > td > label')
+    resultLabel.setAttribute('status', 'pending')
+    tr.querySelector('code').innerHTML = '...'
     var start = window.performance.now()
     tr.querySelector('time').innerHTML = '...'
     return test().then(result => {
         tr.querySelector('time').innerHTML = `${Math.round(window.performance.now() - start)}ms`
-        tr.classList.remove('success', 'warning', 'error')
-        tr.classList.add('success')
+        resultLabel.setAttribute('status', 'success')
         return result
     }).catch(e => {
         tr.querySelector('time').innerHTML = `${Math.round(window.performance.now() - start)}ms`
-        tr.classList.remove('success', 'warning', 'error')
-        tr.classList.add('error')
-        tr.querySelector('code').innerHTML = e
+        resultLabel.setAttribute('status', 'error')
     })
 }
 
 window.setTimeout(() => {
     Object.entries(testMap).forEach(entry => {
         installation.querySelector(`[name="${entry[0]}"] button`).addEventListener('click', event => {
-            var tr = event.target.closest('[name')
+            var tr = event.target.closest('[name]')
             window.LiveElement.Scale.Console.Tests.runTest(tr, entry[1]).then(result => {
                 tr.querySelector('code').innerHTML = result
+            }).catch(e => {
+                tr.querySelector('code').innerHTML = e
             })
         })
     })
