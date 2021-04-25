@@ -82,6 +82,32 @@ var testMap = {
         return window.fetch(`${connection_url}/query/Book/${query_id}.json`, {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(query)}).then(r => {
             return query_id
         })
+    }, 
+    'create-record-put': function(connection_url, system_access_url, system_root, connection_id) {
+        var record_id = window.LiveElement.Scale.Core.generateUUID4()
+        var bookNumber = Math.floor(Math.random()* 1000)
+        var record = {'@type': 'Book', '@id': record_id, name: `Test Book ${bookNumber}`, numberOfPages: 10}
+        return window.fetch(`${connection_url}/record/Book/${record_id}.json`, {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(record)}).then(r => {
+            return record_id
+        })
+    }, 
+    'delete-record': function(connection_url, system_access_url, system_root, connection_id) {
+        var record_id = installation.querySelector('[name="create-record-put"] code').innerHTML
+        if (record_id) {
+            return window.fetch(`${connection_url}/record/Book/${record_id}.json`, {method: 'DELETE', headers: {"Content-Type": "application/json"}}).then(r => {
+                return record_id
+            })
+        } else {
+            return `Error: please first run "${installation.querySelector('[name="create-record-put"] th[scope="row"]').innerText.split('\n').shift()}"`
+        }
+    }, 
+    
+    'create-subscription': function(connection_url, system_access_url, system_root, connection_id) {
+        var subscription_id = window.LiveElement.Scale.Core.generateUUID4()
+        var subscription = {processor: 'books', vector: ['numberOfPages'], options: {pagesFilter: true}}
+        return window.fetch(`${connection_url}/subscription/Book/${subscription_id}.json`, {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(subscription)}).then(r => {
+            return subscription_id
+        })
     }
 }
 
