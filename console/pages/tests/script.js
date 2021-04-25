@@ -75,6 +75,13 @@ var testMap = {
         return window.fetch(`${connection_url}/view/${view_id}.json`, {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(view)}).then(r => {
             return view_id
         })
+    }, 
+    'create-query': function(connection_url, system_access_url, system_root, connection_id) {
+        var query_id = window.LiveElement.Scale.Core.generateUUID4()
+        var query = {processor: 'books', vector: ['numberOfPages'], options: {pagesFilter: true}}
+        return window.fetch(`${connection_url}/query/Book/${query_id}.json`, {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(query)}).then(r => {
+            return query_id
+        })
     }
 }
 
