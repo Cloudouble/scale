@@ -6,7 +6,11 @@ window.LiveElement.Scale.Console.Tests.runTest = function(tr, test) {
     tr.querySelector('code').innerHTML = '...'
     var start = window.performance.now()
     tr.querySelector('time').innerHTML = '...'
-    return Promise.resolve(test()).then(result => {
+    var system_access_url = window.localStorage.getItem('system:system_access_url')
+    var system_root = window.localStorage.getItem('system:system_root')
+    var connection_id = installation.getAttribute('connection-id')
+    var connection_url = `${system_access_url}${system_root}/connection/${connection_id}`
+    return Promise.resolve(test(connection_url, system_access_url, system_root, connection_id)).then(result => {
         tr.querySelector('time').innerHTML = `${Math.round(window.performance.now() - start)}ms`
         resultLabel.setAttribute('status', 'success')
         return result
@@ -39,10 +43,8 @@ if (window.localStorage.getItem('system:connection_id')) {
 }
 
 var testMap = {
-    'create-sudo-connection': function() {
+    'create-sudo-connection': function(connection_url, system_access_url, system_root, connection_id) {
         var connection_id = window.LiveElement.Scale.Core.generateUUID4()
-        var system_access_url = window.localStorage.getItem('system:system_access_url')
-        var system_root = window.localStorage.getItem('system:system_root')
         var sudo_key = window.localStorage.getItem('system:sudo_key')
         return window.fetch(`${system_access_url}${system_root}/connection/${connection_id}/connect.json`, 
             {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(
@@ -55,13 +57,10 @@ var testMap = {
             installation.removeAttribute('connection-id')
         })
     }, 
-    'create-websocket': function() {
-        var system_access_url = window.localStorage.getItem('system:system_access_url')
-        var system_root = window.localStorage.getItem('system:system_root')
-        var connection_id = installation.getAttribute('connection-id')
+    'create-websocket': function(connection_url, system_access_url, system_root, connection_id) {
         delete window.LiveElement.Scale.Console.Tests.websocket
         if (system_access_url && system_root && connection_id) {
-            var websocketUri = `${system_access_url.replace('https:', 'wss:')}${system_root}/connection/${connection_id}/websocket`
+            var websocketUri = `${connection_url.replace('https:', 'wss:')}/websocket`
             try {
                 window.LiveElement.Scale.Console.Tests.websocket = new WebSocket(websocketUri)
                 return websocketUri
@@ -69,7 +68,13 @@ var testMap = {
                 return e
             }
         }
-        
+    }, 
+    'create-view': function(connection_url, system_access_url, system_root, connection_id) {
+        var view_id = window.LiveElement.Scale.Core.generateUUID4()
+        var view = {processor: 'json', content_type: 'application/json', suffix: 'json'}
+        return window.fetch(`${connection_url}/view/${view_id}.json`, {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(view)}).then(r => {
+            return view_id
+        })
     }
 }
 
