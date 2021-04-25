@@ -6,7 +6,7 @@ window.LiveElement.Scale.Console.Tests.runTest = function(tr, test) {
     tr.querySelector('code').innerHTML = '...'
     var start = window.performance.now()
     tr.querySelector('time').innerHTML = '...'
-    return test().then(result => {
+    return Promise.resolve(test()).then(result => {
         tr.querySelector('time').innerHTML = `${Math.round(window.performance.now() - start)}ms`
         resultLabel.setAttribute('status', 'success')
         return result
@@ -32,6 +32,12 @@ window.setTimeout(() => {
 var tests = document.getElementById('tests')
 var installation = tests.querySelector('table[name="installation"]')
 
+if (window.localStorage.getItem('system:connection_id')) {
+    installation.setAttribute('connection-id', window.localStorage.getItem('system:connection_id'))
+    installation.querySelector('tr[name="create-sudo-connection"] label').setAttribute('status', 'success')
+    installation.querySelector('tr[name="create-sudo-connection"] code').innerHTML = window.localStorage.getItem('system:connection_id')
+}
+
 var testMap = {
     'create-sudo-connection': function() {
         var connection_id = window.LiveElement.Scale.Core.generateUUID4()
@@ -48,6 +54,22 @@ var testMap = {
         }).catch(e => {
             installation.removeAttribute('connection-id')
         })
+    }, 
+    'create-websocket': function() {
+        var system_access_url = window.localStorage.getItem('system:system_access_url')
+        var system_root = window.localStorage.getItem('system:system_root')
+        var connection_id = installation.getAttribute('connection-id')
+        delete window.LiveElement.Scale.Console.Tests.websocket
+        if (system_access_url && system_root && connection_id) {
+            var websocketUri = `${system_access_url.replace('https:', 'wss:')}${system_root}/connection/${connection_id}/websocket`
+            try {
+                window.LiveElement.Scale.Console.Tests.websocket = new WebSocket(websocketUri)
+                return websocketUri
+            } catch (e) {
+                return e
+            }
+        }
+        
     }
 }
 
