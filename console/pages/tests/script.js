@@ -110,11 +110,11 @@ var testMap = {
             return record_id
         })
     }, 
-    
     'create-subscription': function(connection_url, system_access_url, system_root, connection_id) {
         var subscription_id = window.LiveElement.Scale.Core.generateUUID4()
-        var subscription = {processor: 'books', vector: ['numberOfPages'], options: {pagesFilter: true}}
-        return window.fetch(`${connection_url}/subscription/Book/${subscription_id}.json`, {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(subscription)}).then(r => {
+        var record_id = installation.querySelector('[name="create-record-post"] code').innerHTML
+        var subscription = {view: '7b35c2bf-34fa-4a41-9fae-fb8465a55520'}
+        return window.fetch(`${connection_url}/subscription/Book/${record_id}/${subscription_id}.json`, {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(subscription)}).then(r => {
             return subscription_id
         })
     }
