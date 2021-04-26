@@ -6,13 +6,13 @@ window.LiveElement.Scale.Console.Tests.runTest = function(tr, test) {
     resultLabel.setAttribute('status', 'pending')
     tr.querySelector('code').innerHTML = '...'
     var start = window.performance.now()
-    tr.querySelector('time').innerHTML = '...'
+    tr.querySelectorAll('time').forEach(t => t.innerHTML = '...')
     var system_access_url = window.localStorage.getItem('system:system_access_url')
     var system_root = window.localStorage.getItem('system:system_root')
     var connection_id = window.localStorage.getItem(`tests:create-sudo-connection:result`)
     var connection_url = `${system_access_url}${system_root}/connection/${connection_id}`
     return Promise.resolve(test(connection_url, system_access_url, system_root, connection_id)).then(result => {
-        tr.querySelector('time').innerHTML = `${Math.round(window.performance.now() - start)}ms`
+        tr.querySelector('time[name="request"]').innerHTML = `${Math.round(window.performance.now() - start)}`
         resultLabel.setAttribute('status', 'success')
         window.localStorage.setItem(`tests:${tr.getAttribute('name')}:result`, result)
         return result
@@ -122,13 +122,6 @@ var testMap = {
         var feed = {view: window.localStorage.getItem('tests:create-view:result')}
         return window.fetch(`${connection_url}/feed/Book/${query_id}/${feed_id}.json`, {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(feed)}).then(r => {
             return feed_id
-        })
-    }, 
-    'update-record-field-patch': function(connection_url, system_access_url, system_root, connection_id) {
-        var record_id = window.localStorage.getItem('tests:create-record-post:result')
-        var numberOfPages = Math.floor(Math.random()* 89) + 11
-        return window.fetch(`${connection_url}/record/Book/${record_id}/numberOfPages.json`, {method: 'PATCH', headers: {"Content-Type": "application/json"}, body: JSON.stringify(numberOfPages)}).then(r => {
-            return numberOfPages
         })
     }, 
     'update-record-field-put': function(connection_url, system_access_url, system_root, connection_id) {

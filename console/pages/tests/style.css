@@ -31,3 +31,19 @@ time, i {
     display: block;
     font-style: italic;
 }
+time[name="request"] {
+    color: orange;
+} 
+time[name="request"]::before {
+    content: 'Request Timing: ';
+} 
+time[name="process"] {
+    color: green;
+}
+time[name="process"]::before {
+    content: 'Process Timing: ';
+} 
+time[name="request"]::after, time[name="process"]::after {
+    content: 'ms';
+}
+
