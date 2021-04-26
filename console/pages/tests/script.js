@@ -197,7 +197,7 @@ window.LiveElement.Scale.Console.Tests.testMap = {
     }, 
     'update-record-field-put': function(connection_url, system_access_url, system_root, connection_id) {
         var record_id = window.localStorage.getItem('tests:create-record-post:result')
-        var numberOfPages = Math.floor(Math.random()* 88) + 12
+        var numberOfPages = Math.floor(Math.random()* 89) + 11
         return window.fetch(
             `${connection_url}/record/Book/${record_id}/numberOfPages.json`, 
             {
