@@ -2,7 +2,7 @@
     font-size: 120%;
 }
 
-#test table {
+#tests table {
     border-collapse: collapse;
 }
 #tests table td, #tests table th[scope="row"] {
@@ -47,3 +47,24 @@ time[name="request"]::after, time[name="process"]::after {
     content: 'ms';
 }
 
+#tests tr.code-snippet {
+    font-size: 90%;
+    font-family: monospace;
+}
+#tests tr.code-snippet td {
+    border-top: none;
+}
+#tests tr.code-snippet details {
+    margin-bottom: 2em;
+}
+#tests tr.code-snippet details summary {
+    cursor: pointer;
+}
+#tests tr.code-snippet details code {
+    white-space: pre;
+    max-width: calc(100% - 20px);
+    max-height: unset;
+    overflow-x: auto;
+    background-color: darkgrey;
+    color: white;
+}
