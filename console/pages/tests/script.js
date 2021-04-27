@@ -1,7 +1,9 @@
 window.LiveElement.Scale.Console.Tests = window.LiveElement.Scale.Console.Tests || {}
 
 window.LiveElement.Scale.Console.Tests.runTest = function(tr, test) {
-    window.localStorage.removeItem(`tests:${tr.getAttribute('name')}:result`)
+    var testName = tr.getAttribute('name')
+    var previousResult = window.localStorage.getItem(`tests:${testName}:result`)
+    window.localStorage.removeItem(`tests:${testName}:result`)
     var resultLabel = tr.querySelector(':scope > td > label')
     resultLabel.setAttribute('status', 'pending')
     tr.querySelector('code').innerHTML = '...'
@@ -14,7 +16,22 @@ window.LiveElement.Scale.Console.Tests.runTest = function(tr, test) {
     return Promise.resolve(test(connection_url, system_access_url, system_root, connection_id)).then(result => {
         tr.querySelector('time[name="request"]').innerHTML = `${Math.round(window.performance.now() - start)}`
         resultLabel.setAttribute('status', 'success')
-        window.localStorage.setItem(`tests:${tr.getAttribute('name')}:result`, result)
+        var testContext = Object.assign(
+            {}, 
+            ...Object.keys(window.LiveElement.Scale.Console.Tests.testMap).map(k => ({[k]: window.localStorage.getItem(`tests:${k}:result`)})), 
+            {[testName]: previousResult}
+        )
+        window.localStorage.setItem(`tests:${testName}:result`, result)
+        window.LiveElement.Scale.Console.System.invokeLambda({
+            page: 'tests', 
+            test: testName, 
+            context: testContext, 
+            result: result, 
+            timing: 123
+        }).then(processResult => {
+            console.log('line 32', JSON.stringify(processResult))
+            tr.querySelector('time[name="process"]').innerHTML = processResult && typeof processResult == 'object' && typeof processResult.timing == 'number' ? processResult.timing : ' ---error--- '
+        })
         return result
     }).catch(e => {
         tr.querySelector('time').innerHTML = `${Math.round(window.performance.now() - start)}ms`
