@@ -309,7 +309,7 @@ for functionName in *; do
         fi
         cp main.py ./temp
         cd temp
-        if [ 'request' = $functionName -o 'socket' = $functionName -o 'channel' = $functionName -o 'channel-send' = $functionName ]; then
+        if [ 'request' = $functionName -o 'socket' = $functionName -o 'channel' = $functionName -o 'channel-send' = $functionName -o 'console' = $functionName ]; then
             sed -i "1s/.*/$lambdaEnvCoreRequest/" main.py
         fi
         if [ 'schema' = $functionName ]; then
