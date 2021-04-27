@@ -14,7 +14,7 @@ window.LiveElement.Scale.Console.System.createSudoConnection = function() {
     })
 }
 
-;(['system_access_url', 'system_root', 'sudo_key']).forEach(name => {
+;(['system_access_url', 'system_root', 'sudo_key', 'aws_region', 'aws_access_key_id', 'aws_secret_access_key']).forEach(name => {
     var input = document.querySelector(`section[id="system"] input[name="${name}"]`)
     input.value = window.localStorage.getItem(`system:${name}`)
     var checkbox = document.querySelector(`section[id="system"] input[name="${name}"] + small > input[type="checkbox"]`)
@@ -36,6 +36,18 @@ window.LiveElement.Scale.Console.System.createSudoConnection = function() {
         } else {
             input.value = window.location.origin
             window.LiveElement.Scale.Core.syncWithLocalStorage('system', checkbox, input)
+        }
+    }
+    if (name.slice(0, 4) == 'aws_') {
+        if (['aws_region', 'aws_access_key_id', 'aws_secret_access_key'].every(name => document.querySelector(`section[id="system"] input[name="${name}"]`).value)) {
+            var aws_config = new window.AWS.Config({
+                accessKeyId: document.querySelector(`section[id="system"] input[name="aws_access_key_id"]`).value, 
+                secretAccessKey: document.querySelector(`section[id="system"] input[name="aws_secret_access_key"]`).value, 
+                region: document.querySelector(`section[id="system"] input[name="aws_region"]`).value
+            })
+            window.LiveElement.Scale.Console.System.lambda = new window.AWS.Lambda(aws_config)
+        } else {
+            delete window.LiveElement.Scale.Console.System.lambda
         }
     }
 })
