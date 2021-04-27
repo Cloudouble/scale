@@ -233,7 +233,7 @@ window.LiveElement.Scale.Console.Tests.testMap = {
             return numberOfPages
         })
     }, 
-    'create-limited-mask': function(connection_url, system_access_url, system_root, connection_id) {
+    'create-bookreadonly-mask': function(connection_url, system_access_url, system_root, connection_id) {
         var mask_id = window.LiveElement.Scale.Core.generateUUID4()
         var mask = {record: {GET: {Book: "*"}}}
         return window.fetch(

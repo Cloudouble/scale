@@ -47,7 +47,13 @@ time[name="process"]::before {
 time[name="request"]::after, time[name="process"]::after {
     content: 'ms';
 }
-
+time[name="process"] + aside {
+    color: darkgrey;
+    font-weight: normal;
+    font-size: 80%;
+    font-style: italic;
+    margin-bottom: 1em;
+}
 #tests tr.code-snippet {
     font-size: 90%;
     font-family: monospace;
