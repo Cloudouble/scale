@@ -285,9 +285,25 @@ window.LiveElement.Scale.Console.Tests.testMap = {
         ).then(r => {
             return connection_id
         })
-    }
+    }, 
+    'delete-bookreadonly-connection': function(connection_url, system_access_url, system_root, connection_id) {
+        connection_id = window.localStorage.getItem('tests:create-bookreadonly-connection:result')
+        if (connection_id) {
+            return window.fetch(
+                `${system_access_url}${system_root}/connection/${connection_id}/connect.json`, 
+                {
+                    method: 'DELETE', 
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }
+            ).then(r => {
+                return connection_id
+            })
+        } else {
+            return `Error: please first run "create-bookreadonly-connection"`
+        }
+    }, 
+    
     
 }
-
-
-
