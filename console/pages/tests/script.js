@@ -249,6 +249,26 @@ window.LiveElement.Scale.Console.Tests.testMap = {
             return mask_id
         })
     }, 
+    'create-readonly-authentication-extension': function(connection_url, system_access_url, system_root, connection_id) {
+        var module = {
+          'processor': 'readonly',
+          'options': {
+            'type': 'Book',
+          }
+        }
+        return window.fetch(
+            `${connection_url}/system/authentication/readonly.json`, 
+            {
+                method: 'PUT', 
+                headers: {
+                    "Content-Type": "application/json"
+                }, 
+                body: JSON.stringify(module)
+            }
+        ).then(r => {
+            return 'readonly'
+        })
+    }, 
 }
 
 
