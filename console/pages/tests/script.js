@@ -253,7 +253,7 @@ window.LiveElement.Scale.Console.Tests.testMap = {
         var module = {
           'processor': 'readonly',
           'options': {
-            'type': 'Book',
+            'types': ['Book'],
           }
         }
         return window.fetch(
@@ -269,6 +269,24 @@ window.LiveElement.Scale.Console.Tests.testMap = {
             return 'readonly'
         })
     }, 
+    'create-bookreadonly-connection': function(connection_url, system_access_url, system_root, connection_id) {
+        connection_id = window.LiveElement.Scale.Core.generateUUID4()
+        return window.fetch(
+            `${system_access_url}${system_root}/connection/${connection_id}/connect.json`, 
+            {
+                method: 'PUT', 
+                headers: {
+                    "Content-Type": "application/json"
+                }, 
+                body: JSON.stringify({
+                    readonly: {}
+                }) 
+            }
+        ).then(r => {
+            return connection_id
+        })
+    }
+    
 }
 
 

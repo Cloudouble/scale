@@ -1,0 +1,18 @@
+{
+  "credentials": {
+    "key": "-----"
+  },
+  "options": {
+    "user_name": "system",
+    "key": "-----461133df7012bcb1f1b684fe57c-----12644181fc84fa39e-----39683c987e2a65c3a79c02203213249e4491abb-----da14e628c477f0dbd964-----"
+  },
+  "_env": {
+    "bucket": "scale.live-element.net",
+    "lambda_namespace": "liveelement-scale",
+    "system_root": "_",
+    "data_root": "_",
+    "shared": 0,
+    "authentication_namespace": "liveelementscale",
+    "connection_id": "74facaff-c792-4c70-b8a4-71b3ad78d3f6"
+  }
+}
