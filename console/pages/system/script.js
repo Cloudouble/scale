@@ -15,7 +15,9 @@ window.LiveElement.Scale.Console.System.createSudoConnection = function() {
 }
 window.LiveElement.Scale.Console.System.invokeLambda = function(payload) {
     return new Promise(function(resolve, reject) {
-        if (window.LiveElement.Scale.Console.System.environment && window.LiveElement.Scale.Console.System.environment.lambda_namespace) {
+        if (window.LiveElement.Scale.Console.System.environment && window.LiveElement.Scale.Console.System.environment.lambda_namespace && 
+            window.localStorage.getItem('system:sudo_key') && payload && typeof payload == 'object') {
+                payload._key = window.localStorage.getItem('system:sudo_key')
             window.LiveElement.Scale.Console.System.lambda.invoke({
                 FunctionName: `${window.LiveElement.Scale.Console.System.environment.lambda_namespace}-core-console`, 
                 Payload: JSON.stringify(payload)
