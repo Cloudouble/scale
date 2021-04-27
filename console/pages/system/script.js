@@ -13,6 +13,25 @@ window.LiveElement.Scale.Console.System.createSudoConnection = function() {
         window.localStorage.setItem(`system:connection_id`, connection_id)
     })
 }
+window.LiveElement.Scale.Console.System.invokeLambda = function(payload) {
+    return new Promise(function(resolve, reject) {
+        if (window.LiveElement.Scale.Console.System.environment && window.LiveElement.Scale.Console.System.environment.lambda_namespace) {
+            window.LiveElement.Scale.Console.System.lambda.invoke({
+                FunctionName: `${window.LiveElement.Scale.Console.System.environment.lambda_namespace}-core-console`, 
+                Payload: JSON.stringify(payload)
+            }, function(err, data) { 
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve(JSON.parse(data.Payload))
+                }
+            })
+        } else {
+            reject(undefined)
+        }
+    })
+}
+
 
 ;(['system_access_url', 'system_root', 'sudo_key', 'aws_region', 'aws_access_key_id', 'aws_secret_access_key']).forEach(name => {
     var input = document.querySelector(`section[id="system"] input[name="${name}"]`)
@@ -67,6 +86,7 @@ Promise.resolve(function() {
         'system:modules': 'subscription/-/00000000-0000-0000-0000-000000000000/modules.json'
     }).map(entry => {
         return window.fetch(`${system_access_url}${system_root}/connection/${connection_id}/${entry[1]}`).then(r => r.json()).then(r => {
+            window.LiveElement.Scale.Console.System[entry[0].split(':')[1]] = r
             var table = document.getElementById(entry[0])
             table.innerHTML = ''
             Object.entries(r).forEach(entry => {
