@@ -18,6 +18,7 @@ window.LiveElement.Scale.Console.System.invokeLambda = function(payload) {
         if (window.LiveElement.Scale.Console.System.environment && window.LiveElement.Scale.Console.System.environment.lambda_namespace && 
             window.localStorage.getItem('system:sudo_key') && payload && typeof payload == 'object') {
                 payload._key = window.localStorage.getItem('system:sudo_key')
+                payload._host = window.location.host
             window.LiveElement.Scale.Console.System.lambda.invoke({
                 FunctionName: `${window.LiveElement.Scale.Console.System.environment.lambda_namespace}-core-console`, 
                 Payload: JSON.stringify(payload)
