@@ -27,9 +27,7 @@ window.LiveElement.Scale.Console.Tests.runTest = function(tr, test) {
             test: testName, 
             context: testContext, 
             result: result, 
-            timing: 123
         }).then(processResult => {
-            console.log('line 32', JSON.stringify(processResult))
             tr.querySelector('time[name="process"]').innerHTML = processResult && typeof processResult == 'object' && typeof processResult.timing == 'number' ? processResult.timing : ' ---error--- '
         })
         return result
