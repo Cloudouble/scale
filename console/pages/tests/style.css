@@ -14,6 +14,7 @@
 }
 #tests table td label[status] {
     display: block;
+    margin-top: 1em;
 }
 #tests table td label[status="success"] {
     color: green;
@@ -60,11 +61,19 @@ time[name="request"]::after, time[name="process"]::after {
 #tests tr.code-snippet details summary {
     cursor: pointer;
 }
-#tests tr.code-snippet details code {
+#tests tr.code-snippet details code, code.confirmation {
     white-space: pre;
     max-width: calc(100% - 20px);
     max-height: unset;
     overflow-x: auto;
     background-color: darkgrey;
     color: white;
+}
+
+#tests table td code.result {
+    background-color: lightgrey;
+    min-height: 40px;
+}
+#tests table td code.confirmation {
+    min-height: 80px;
 }

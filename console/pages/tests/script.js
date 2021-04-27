@@ -6,7 +6,9 @@ window.LiveElement.Scale.Console.Tests.runTest = function(tr, test) {
     window.localStorage.removeItem(`tests:${testName}:result`)
     var resultLabel = tr.querySelector(':scope > td > label')
     resultLabel.setAttribute('status', 'pending')
-    tr.querySelector('code').innerHTML = '...'
+    tr.querySelector('code.result').innerHTML = '...'
+    tr.querySelector('code.confirmation').innerHTML = '...'
+    tr.querySelector('code.confirmation').closest('label').setAttribute('status', 'pending')            
     var start = window.performance.now()
     tr.querySelectorAll('time').forEach(t => t.innerHTML = '...')
     var system_access_url = window.localStorage.getItem('system:system_access_url')
@@ -29,11 +31,16 @@ window.LiveElement.Scale.Console.Tests.runTest = function(tr, test) {
             result: result, 
         }).then(processResult => {
             tr.querySelector('time[name="process"]').innerHTML = processResult && typeof processResult == 'object' && typeof processResult.timing == 'number' ? processResult.timing : ' ---error--- '
+            tr.querySelector('code.confirmation').innerHTML = processResult && typeof processResult == 'object' && processResult.confirmation && typeof processResult.confirmation == 'object' ? JSON.stringify(processResult.confirmation, null, 4) : ' ---error--- '
+            tr.querySelector('code.confirmation').closest('label').setAttribute('status', 'success')
         })
         return result
     }).catch(e => {
         tr.querySelector('time').innerHTML = `${Math.round(window.performance.now() - start)}ms`
         resultLabel.setAttribute('status', 'error')
+        tr.querySelector('time[name="process"]').innerHTML = ' ---error--- '
+        tr.querySelector('code.confirmation').innerHTML = ' ---error--- '
+        tr.querySelector('code.confirmation').closest('label').setAttribute('status', 'error')
     })
 }
 
