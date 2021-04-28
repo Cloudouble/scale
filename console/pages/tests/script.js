@@ -30,9 +30,11 @@ window.LiveElement.Scale.Console.Tests.runTest = function(tr, test) {
             context: testContext, 
             result: result, 
         }).then(processResult => {
-            tr.querySelector('time[name="process"]').innerHTML = processResult && typeof processResult == 'object' && typeof processResult.timing == 'number' ? processResult.timing : ' ---error--- '
-            tr.querySelector('code.confirmation').innerHTML = processResult && typeof processResult == 'object' && processResult.confirmation && typeof processResult.confirmation == 'object' ? JSON.stringify(processResult.confirmation, null, 4) : ' ---error--- '
-            tr.querySelector('code.confirmation').closest('label').setAttribute('status', 'success')
+            if (!(processResult && typeof processResult == 'object' && processResult.confirmation === false)) {
+                tr.querySelector('time[name="process"]').innerHTML = processResult && typeof processResult == 'object' && typeof processResult.timing == 'number' ? processResult.timing : ' ---error--- '
+                tr.querySelector('code.confirmation').innerHTML = processResult && typeof processResult == 'object' && processResult.confirmation && typeof processResult.confirmation == 'object' ? JSON.stringify(processResult.confirmation, null, 4) : ' ---error--- '
+                tr.querySelector('code.confirmation').closest('label').setAttribute('status', 'success')
+            }
         })
         return result
     }).catch(e => {
@@ -303,6 +305,61 @@ window.LiveElement.Scale.Console.Tests.testMap = {
         } else {
             return `Error: please first run "create-bookreadonly-connection"`
         }
+    }, 
+    'create-tunnel': function(connection_url, system_access_url, system_root, connection_id) {
+        var tunnel_handle = window.LiveElement.Scale.Core.generateUUID4()
+        if (system_access_url && system_root && connection_id) {
+            var tunnelUrl = `${connection_url.replace('https:', 'wss:')}/tunnel/${tunnel_handle}`
+            try {
+                window.LiveElement.Scale.Console.Tests.tunnel = new WebSocket(tunnelUrl)
+                var now = window.performance.now()
+                var tr = document.querySelector('#tests table tr[name="create-tunnel"]')
+                window.LiveElement.Scale.Console.Tests.tunnel.addEventListener('message', event => {
+                    var message = {}
+                    try {
+                        message = JSON.parse(event.data)
+                        if (tr.querySelector('time[name="process"]').innerHTML == '...') {
+                            tr.querySelector('time[name="process"]').innerHTML = Math.round(window.performance.now() - now)
+                        }
+                        if (tr.querySelector('code.confirmation').innerHTML == '...') {
+                            tr.querySelector('code.confirmation').innerHTML = message.tunnel_id
+                        }
+                        tr.querySelector('code.confirmation').closest('label').setAttribute('status', 'success')
+                    } catch(e) {
+                        tr.querySelector('time[name="process"]').innerHTML = ' ---error--- '
+                        tr.querySelector('code.confirmation').innerHTML = ' ---error--- '
+                        tr.querySelector('code.confirmation').closest('label').setAttribute('status', 'error')
+                    }
+                })
+                return tunnelUrl
+            } catch (e) {
+                return e
+            }
+        }
+    }, 
+    'send-tunnel': function(connection_url, system_access_url, system_root, connection_id) {
+        var data = window.LiveElement.Scale.Core.generateUUID4()
+        if (system_access_url && system_root && connection_id) {
+            var tr = document.querySelector('#tests table tr[name="send-tunnel"]')
+            tr.setAttribute('now', window.performance.now())
+            var receiveMessage = function(event) {
+                if (tr.querySelector('time[name="process"]').innerHTML == '...') {
+                    tr.querySelector('time[name="process"]').innerHTML = Math.round(window.performance.now() - tr.getAttribute('now'))
+                }
+                if (tr.querySelector('code.confirmation').innerHTML == '...') {
+                    tr.querySelector('code.confirmation').innerHTML = event.data
+                }
+                tr.querySelector('code.confirmation').closest('label').setAttribute('status', 'success')
+                window.LiveElement.Scale.Console.Tests.tunnel.removeEventListener('message', receiveMessage)
+            }
+            var tunnel_key = document.querySelector('#tests table tr[name="create-tunnel"] code.confirmation').innerHTML
+            window.fetch(`${system_access_url}${system_root}/tunnel/${tunnel_key}`, {
+                method: 'PUT', 
+                body: JSON.stringify(data)
+            })
+            window.LiveElement.Scale.Console.Tests.tunnel.addEventListener('message', receiveMessage)
+        }
+        return data
     }, 
     
     
