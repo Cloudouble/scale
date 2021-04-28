@@ -359,7 +359,7 @@ window.LiveElement.Scale.Console.Tests.testMap = {
             })
             window.LiveElement.Scale.Console.Tests.tunnel.addEventListener('message', receiveMessage)
         }
-        return data
+        return JSON.stringify(data)
     }, 
     
     
