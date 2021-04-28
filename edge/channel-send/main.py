@@ -8,7 +8,7 @@ def getprocessor(env, name, source='core', scope=None):
 
 def main(event, context):
     '''
-    - triggered by core/channel to send the message to all sockets in the given index
+    - triggered by edge/channel to send the message to all sockets in the given index
     '''
     if event.get('index') and event.get('index') and event.get('message'):
         s3 = boto3.resource('s3')
@@ -32,7 +32,3 @@ def main(event, context):
                     del socket_map[socket_id]
             index_object.put(Body=bytes(json.dumps(socket_map), 'utf-8'), ContentType='application/json')
             
-
-        
-        
-        
