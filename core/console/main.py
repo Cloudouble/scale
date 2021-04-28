@@ -37,7 +37,7 @@ def main(event, context):
     key = event.get('_key')
     env['data_root'] = '{host}/{system_root}'.format(host=event.get('host', ''), system_root=env['system_root']).strip('/')
     client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')    
-    retval = {'timing': None, 'record': {}}
+    retval = {'timing': None, 'confirmation': {}}
     if key:
         s3_client = boto3.client('s3')
         try:
@@ -80,6 +80,14 @@ def main(event, context):
                     pass
                 elif test == 'create-readonly-authentication-extension':
                     retval = run_test('system/authentication/{module_id}.json'.format(module_id=result), None, result, start_time, s3_client)
+                elif test == 'create-bookreadonly-connection':
+                    retval = run_test('connection/{connection_id}/connect.json'.format(connection_id=result), None, result, start_time, s3_client)
+                elif test == 'delete-bookreadonly-connection':
+                    retval = run_test('connection/{connection_id}/connect.json'.format(connection_id=result), False, result, start_time, s3_client)
+                elif test == 'create-tunnel':
+                    retval['confirmation'] = False
+                elif test == 'send-tunnel':
+                    retval['confirmation'] = False
                     
                     
                             

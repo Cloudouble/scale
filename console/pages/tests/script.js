@@ -34,6 +34,7 @@ window.LiveElement.Scale.Console.Tests.runTest = function(tr, test) {
                 tr.querySelector('time[name="process"]').innerHTML = processResult && typeof processResult == 'object' && typeof processResult.timing == 'number' ? processResult.timing : ' ---error--- '
                 tr.querySelector('code.confirmation').innerHTML = processResult && typeof processResult == 'object' && processResult.confirmation && typeof processResult.confirmation == 'object' ? JSON.stringify(processResult.confirmation, null, 4) : ' ---error--- '
                 tr.querySelector('code.confirmation').closest('label').setAttribute('status', 'success')
+                window.localStorage.setItem(`tests:${testName}:confirmation`, JSON.stringify(processResult.confirmation))
             }
         })
         return result
@@ -307,6 +308,7 @@ window.LiveElement.Scale.Console.Tests.testMap = {
         }
     }, 
     'create-tunnel': function(connection_url, system_access_url, system_root, connection_id) {
+        delete window.LiveElement.Scale.Console.Tests.tunnel
         var tunnel_handle = window.LiveElement.Scale.Core.generateUUID4()
         if (system_access_url && system_root && connection_id) {
             var tunnelUrl = `${connection_url.replace('https:', 'wss:')}/tunnel/${tunnel_handle}`
@@ -338,6 +340,65 @@ window.LiveElement.Scale.Console.Tests.testMap = {
         }
     }, 
     'send-tunnel': function(connection_url, system_access_url, system_root, connection_id) {
+        var data = window.LiveElement.Scale.Core.generateUUID4()
+        if (system_access_url && system_root && connection_id) {
+            var tr = document.querySelector('#tests table tr[name="send-tunnel"]')
+            tr.setAttribute('now', window.performance.now())
+            var receiveMessage = function(event) {
+                if (tr.querySelector('time[name="process"]').innerHTML == '...') {
+                    tr.querySelector('time[name="process"]').innerHTML = Math.round(window.performance.now() - tr.getAttribute('now'))
+                }
+                if (tr.querySelector('code.confirmation').innerHTML == '...') {
+                    tr.querySelector('code.confirmation').innerHTML = event.data
+                }
+                tr.querySelector('code.confirmation').closest('label').setAttribute('status', 'success')
+                window.LiveElement.Scale.Console.Tests.tunnel.removeEventListener('message', receiveMessage)
+            }
+            var tunnel_key = document.querySelector('#tests table tr[name="create-tunnel"] code.confirmation').innerHTML
+            window.fetch(`${system_access_url}${system_root}/tunnel/${tunnel_key}`, {
+                method: 'PUT', 
+                body: JSON.stringify(data)
+            })
+            window.LiveElement.Scale.Console.Tests.tunnel.addEventListener('message', receiveMessage)
+        }
+        return JSON.stringify(data)
+    }, 
+    'create-channel': function(connection_url, system_access_url, system_root, connection_id) {
+        var channel_id = window.LiveElement.Scale.Core.generateUUID4()
+        var channel_object = {
+            receiveKey: window.LiveElement.Scale.Core.generateUUID4(), 
+            sendKey: window.LiveElement.Scale.Core.generateUUID4(), 
+            adminKey: window.LiveElement.Scale.Core.generateUUID4()
+        }
+        return window.fetch(
+            `${connection_url}/channel/${channel_id}/connect.json`, 
+            {
+                method: 'PUT', 
+                headers: {
+                    "Content-Type": "application/json"
+                }, 
+                body: JSON.stringify(channel_object) 
+            }
+        ).then(r => {
+            return channel_id
+        })
+    }, 
+    'subscribe-channel': function(connection_url, system_access_url, system_root, connection_id) {
+        delete window.LiveElement.Scale.Console.Tests.channel
+        if (system_access_url && system_root && connection_id) {
+            var channel_id = window.localStorage.getItem('tests:create-channel:result')
+            var channel_object = JSON.parse(window.localStorage.getItem('tests:create-channel:confirmation'))
+            var receiveKey = channel_object.receiveKey
+            var channelReceiveUrl = `${system_access_url.replace('https:', 'wss:')}${system_root}/channel/${channel_id}/${receiveKey}`
+            try {
+                window.LiveElement.Scale.Console.Tests.channel = new WebSocket(channelReceiveUrl)
+                return channelReceiveUrl
+            } catch (e) {
+                return e
+            }
+        }
+    }, 
+    'send-channel': function(connection_url, system_access_url, system_root, connection_id) {
         var data = window.LiveElement.Scale.Core.generateUUID4()
         if (system_access_url && system_root && connection_id) {
             var tr = document.querySelector('#tests table tr[name="send-tunnel"]')
