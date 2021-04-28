@@ -424,6 +424,26 @@ window.LiveElement.Scale.Console.Tests.testMap = {
         }
         return JSON.stringify(data)
     }, 
+    'delete-channel': function(connection_url, system_access_url, system_root, connection_id) {
+        var channel_id = window.localStorage.getItem('tests:create-channel:result')
+        var channel_object = JSON.parse(window.localStorage.getItem('tests:create-channel:confirmation'))
+        var adminKey = channel_object.adminKey
+        if (channel_id && adminKey) {
+            return window.fetch(
+                `${system_access_url}${system_root}/channel/${channel_id}/${adminKey}`, 
+                {
+                    method: 'DELETE', 
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }
+            ).then(r => {
+                return channel_id
+            })
+        } else {
+            return `Error: please first run "create-bookreadonly-connection"`
+        }
+    }, 
     
     
 }
