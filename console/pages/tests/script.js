@@ -401,7 +401,10 @@ window.LiveElement.Scale.Console.Tests.testMap = {
     'send-channel': function(connection_url, system_access_url, system_root, connection_id) {
         var data = window.LiveElement.Scale.Core.generateUUID4()
         if (system_access_url && system_root && connection_id) {
-            var tr = document.querySelector('#tests table tr[name="send-tunnel"]')
+            var channel_id = window.localStorage.getItem('tests:create-channel:result')
+            var channel_object = JSON.parse(window.localStorage.getItem('tests:create-channel:confirmation'))
+            var sendKey = channel_object.sendKey
+            var tr = document.querySelector('#tests table tr[name="send-channel"]')
             tr.setAttribute('now', window.performance.now())
             var receiveMessage = function(event) {
                 if (tr.querySelector('time[name="process"]').innerHTML == '...') {
@@ -411,14 +414,13 @@ window.LiveElement.Scale.Console.Tests.testMap = {
                     tr.querySelector('code.confirmation').innerHTML = event.data
                 }
                 tr.querySelector('code.confirmation').closest('label').setAttribute('status', 'success')
-                window.LiveElement.Scale.Console.Tests.tunnel.removeEventListener('message', receiveMessage)
+                window.LiveElement.Scale.Console.Tests.channel.removeEventListener('message', receiveMessage)
             }
-            var tunnel_key = document.querySelector('#tests table tr[name="create-tunnel"] code.confirmation').innerHTML
-            window.fetch(`${system_access_url}${system_root}/tunnel/${tunnel_key}`, {
-                method: 'PUT', 
+            window.fetch(`${system_access_url}${system_root}/channel/${channel_id}/${sendKey}`, {
+                method: 'POST', 
                 body: JSON.stringify(data)
             })
-            window.LiveElement.Scale.Console.Tests.tunnel.addEventListener('message', receiveMessage)
+            window.LiveElement.Scale.Console.Tests.channel.addEventListener('message', receiveMessage)
         }
         return JSON.stringify(data)
     }, 

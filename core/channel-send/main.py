@@ -32,3 +32,7 @@ def main(event, context):
                     del socket_map[socket_id]
             index_object.put(Body=bytes(json.dumps(socket_map), 'utf-8'), ContentType='application/json')
             
+
+        
+        
+        
