@@ -597,7 +597,7 @@ for functionName in *; do
             endpointString="endpoint_url_region = 'https://$websocketApiId.execute-api.$coreRegion.amazonaws.com/$stageName $coreRegion'"
             sed -i "1s/.*/$endpointString/" main.py
         elif [ "socket" == "$functionName" ]; then
-            envString="env = '$coreRegion $accountId $lambdaNamespace'"
+            envString="env = '$coreRegion $accountId $lambdaNamespace $coreBucket $envSystemRoot $envShared'"
             sed -i "1s/.*/$envString/" main.py
         else
             sed -i "1s/.*/$bucketsString/" main.py

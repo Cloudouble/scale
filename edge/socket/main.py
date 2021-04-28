@@ -1,6 +1,6 @@
-env = 'ap-southeast-2 771795544492 liveelement-scale'
+env = 'ap-southeast-2 771795544492 liveelement-scale scale.live-element.net _ 0'
 
-import json, boto3, base64
+import json, boto3, base64, uuid
 
 
 def main(event, context):
@@ -56,13 +56,18 @@ def main(event, context):
                     else:
                         message = bytes(data, 'utf-8')
                     if message:
-                        core_region, account_id, lambda_namespace = env.split(' ')
-                        processor = 'arn:aws:lambda:{core_region}:{account_id}:function:{lambda_namespace}-core-channel'.format(core_region=core_region, account_id=account_id, lambda_namespace=lambda_namespace)
-                        try:
-                            origin = request.get('headers', {}).get('origin', {}).get('value', '').split('://')[-1]
-                            lambda_client.invoke(FunctionName=processor, Payload=bytes(json.dumps({'origin': origin, 'channel': channel_id, 'message': base64.b64encode(message).decode('utf-8')}), 'utf-8'), InvocationType='Event')
-                        except:
-                            return {**retval, 'status': 500}
+                        core_region, account_id, lambda_namespace, bucket_name, system_root, shared = env.split(' ')
+                        if shared == '1':
+                            host = request.get('headers', {}).get('origin', [])[0].split('://')[1]
+                            data_root = '{host}/{system_root}'.format(host=host, system_root=system_root)
+                        else:
+                            data_root = system_root
+                        s3 = boto3.resource('s3')
+                        bucket = s3.Bucket(bucket_name)
+                        message_id = uuid.uuid4()
+                        message_object = bucket.Object('{data_root}/channel/{channel_id}/message/{message_id}'.format(data_root=data_root, channel_id=channel_id, message_id=message_id))
+                        message_object.put(Body=message)
+                        return {**retval, 'status': 202}
                     else:
                         return {**retval, 'status': 400}
                 else:

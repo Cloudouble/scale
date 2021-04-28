@@ -4,6 +4,7 @@ import json, boto3, base64, re
 
 triggers = {
     'channel/{uuid}/connect.json': ['connection'], 
+    'channel/{uuid}/message/{uuid}': ['channel'], 
     'connection/{uuid}/connect.json': ['connection'], 
     'daemon/{uuid}/connect.json': ['connection'], 
     'query/{class_name}/{uuid}.json': ['query'], 
@@ -18,14 +19,13 @@ triggers = {
     'system/[a-z0-9\-]+/[a-z0-9\-]+.json': ['system']
 }
 
-#_/system/{scope}/{module}.json
-
 
 def main(event_data, context):
     '''
     - triggered by all write events in main bucket
     - invokes other trigger functions according to their capturing path
     '''
+    print(event_data)
     uuid_pattern = '[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}'
     class_pattern = '[a-zA-Z0-9]+'
     counter = 0
