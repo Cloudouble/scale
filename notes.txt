@@ -270,6 +270,7 @@ system => {}
 
 record => {@type, @id,  ...as per various schemas conforming to it's own @type... }
 
+package => {state: '', entity_map: {}}
 
 -----
 
