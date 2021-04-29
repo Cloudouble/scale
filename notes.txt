@@ -528,3 +528,52 @@ STRESS TESTS
 * Monitor how long until Books query reflect new total
 
 
+PACKAGE STRUCTURE
+
+{
+    record: {
+        @type: {
+            @id: {}
+        }
+    }, 
+    query: {
+        @type: {
+            @id: {}
+        }
+    }, 
+    feed: {
+        @type: {
+            @query: {
+                @id: {}
+            }
+        }
+    }, 
+    subscription: {
+        @type: {
+            @record: {
+                @id: {}
+            }
+        }
+    }, 
+    view: {
+        @id: {}
+    }, 
+    mask: {
+        @id: {}
+    }, 
+    system: {
+        @scope: {
+            @module: {}
+        }
+    }, 
+    error: {
+        @code: {@body, @content-type}
+    }, 
+    asset: {
+        @path: {@body, @content-type}
+    }, 
+    static: {
+        @path: {@body, @content-type}
+    }
+}
+    

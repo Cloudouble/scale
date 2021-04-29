@@ -61,118 +61,66 @@ def deploy_processor(processor_full_name, processor_configuration, lambda_client
             except:
                 return False
 
-def deploy_entities(module_configuration, lambda_client, env, client_context):
-    success = True
-    '''
-    {
-        record: {
-            @type: {
-                @id: {}
-            }
-        }, 
-        query: {
-            @type: {
-                @id: {}
-            }
-        }, 
-        feed: {
-            @type: {
-                @query: {
-                    @id: {}
-                }
-            }
-        }, 
-        subscription: {
-            @type: {
-                @record: {
-                    @id: {}
-                }
-            }
-        }, 
-        view: {
-            @id: {}
-        }, 
-        mask: {
-            @id: {}
-        }, 
-        system: {
-            @scope: {
-                @module: {}
-            }
-        }, 
-        error: {
-            @code: ''
-        }, 
-        asset: {
-            @path: {@body, @content-type}
-        }, 
-        static: {
-            @path: {@body, @content-type}
-        }
-    }
+def validate_and_write(entity_type, class_name, entity_id, connection_id, subentity_id, entity, env, client_context):
+    if entity_type in ['feed', 'subscription'] and connection_id and subentity_id:
+        entity_key = '{data_root}/{entity_type}/{class_name}/{entity_id}/{connection_id}/{subentity_id}.json'.format(data_root=env['data_root'], entity_type=entity_type, class_name=class_name, entity_id=entity_id, connection_id=connection_id, subentity_id=subentity_id)
+    elif entity_type in ['record', 'query', 'system']:
+        entity_key = '{data_root}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=entity_type, class_name=class_name, entity_id=entity_id)
+    elif entity_type in ['view']:
+        entity_key = '{data_root}/{entity_type}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=entity_type, entity_id=entity_id)
     
-    '''
+    if json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'validate'), Payload=bytes(json.dumps({'entity_type': entity_type, 'class_name': class_name, 'entity_id': entity_id, 'entity': entity}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8')):
+        lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': entity_type, 'method': 'PUT', 'entity': entity, 'entity_key': entity_key}), 'utf-8'), ClientContext=client_context)
+
+def deploy_entities(module_configuration, lambda_client, env, client_context):
+    count = 0
     for entity_type, entities in module_configuration.get('entity_map', {}).items():
-        if entity_type in ['record', 'query', 'feed', 'subscription', 'view', 'mask', 'system', 'error', 'asset', 'static']:
-            for entity_id, entity in entities.items():
-                class_name = entity.get('@type')
-                entity_to_write = {**entity}
-                entity_key = None
-                if entity_type in ['record', 'query'] and class_name:
-                    entity_key = '{data_root}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=entity_type, class_name=class_name, entity_id=entity_id)
-                elif entity_type in ['feed', 'subscription'] and class_name and module_configuration.get('connection'):
-                    object_id = entity.get('@query') if entity_type == 'feed' else entity.get('@record')
-                    if object_id:
-                        if entity_type == 'feed':
-                            del entity_to_write['@query']
-                        if entity_type == 'subscription':
-                            del entity_to_write['@record']
-                    entity_key = '{data_root}/{entity_type}/{class_name}/{object_id}/{connection_id}/{entity_id}.json'.format(
-                        data_root=env['data_root'], entity_type=entity_type, class_name=class_name, 
-                        object_id=object_id, connection_id=module_configuration['connection'], entity_id=entity_id
-                    )
-                elif entity_type in ['view', 'mask']:
-                    entity_key = '{data_root}/{entity_type}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=entity_type, entity_id=entity_id)
-                elif entity_type in ['system'] and entity.get('@scope') and entity.get('@module'):
-                    entity_key = '{data_root}/{entity_type}/{scope}/{module}.json'.format(data_root=env['data_root'], entity_type=entity_type, scope=entity['@scope'], module=entity['@module'])
-                    del entity_to_write['@scope']
-                    del entity_to_write['@module']
-                elif entity_type in ['error'] and entity.get('@code'):
-                    entity_key = '{data_root}/{entity_type}/{code}.json'.format(data_root=env['data_root'], entity_type=entity_type, code=entity['@code'])
-                    del entity_to_write['@code']
-                elif entity_type in ['asset', 'static'] and entity.get('@path') and entity.get('@content-type') and entity.get('@body'):
-                    path = entity['@path']
-                    del entity_to_write['@path']
-                    if entity_type == 'asset':
-                        entity_key = '{data_root}/{entity_type}/{path}'.format(data_root=env['data_root'], entity_type=entity_type, path=path)
-                    elif entity_type == 'static':
-                        entity_key = None if entity_key == env['data_root'] or path.startswith(env['data_root']) else path
-                if entity_type != 'record' and '@type' in entity_to_write: 
-                    del entity_to_write['@type']
-                if entity_key:
-                    if entity_type in ['asset', 'static']: 
-                        lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({
-                            'entity_type': entity_type, 
-                            'method': 'PUT', 
-                            'body': entity['@body'], 
-                            'content-type': entity['@content-type'], 
-                            'path': entity['@path']
-                        }), 'utf-8'), ClientContext=client_context)
-                    else:
-                        if json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'validate'), Payload=bytes(json.dumps({
-                            'entity': entity_to_write, 
-                            'entity_type': entity_type, 
-                            'class_name': None if entity_type in ['view', 'mask'] else class_name, 
-                            'entity_id': entity_id}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8')):
-                            lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({
-                                'entity_type': entity_type, 
-                                'method': 'PUT', 
-                                'entity': entity_to_write, 
-                                'entity_key': entity_key
-                            }), 'utf-8'), ClientContext=client_context)
-                else:
-                    success = False
-    return success
+        if entity_type == 'record':
+            for class_name, records in entities.items():
+                for record_id, record in records.items():
+                    validate_and_write(entity_type, class_name, record_id, None, None, record, env, client_context)
+                    count = count + 1
+        elif entity_type == 'query':
+            for class_name, queries in entities.items():
+                for query_id, query in queries.items():
+                    validate_and_write(entity_type, class_name, query_id, None, None, query, env, client_context)
+                    count = count + 1
+        elif entity_type == 'feed':
+            for class_name, queries in entities.items():
+                for query_id, feeds in queries.items():
+                    for feed_id, feed in feeds.items():
+                        validate_and_write(entity_type, class_name, query_id, module_configuration.get('connection'), feed_id, feed, env, client_context)
+                        count = count + 1
+        elif entity_type == 'subscription':
+            for class_name, records in entities.items():
+                for record_id, subscriptions in queries.items():
+                    for subscription_id, subscription in subscriptions.items():
+                        validate_and_write(entity_type, class_name, record_id, module_configuration.get('connection'), subscription_id, subscription, env, client_context)
+                        count = count + 1
+    elif entity_type == 'view':
+            for view_id, view in entities.items():
+                validate_and_write(entity_type, None, view_id, None, None, view, env, client_context)
+                count = count + 1
+        elif entity_type == 'mask':
+            for mask_id, mask in entities.items():
+                validate_and_write(entity_type, None, mask_id, None, None, mask, env, client_context)
+                count = count + 1
+        elif entity_type == 'system':
+            for scope, modules in entities.items():
+                for module_id, module in modules.items():
+                    validate_and_write(entity_type, scope, module_id, None, None, module, env, client_context)
+                    count = count + 1
+        elif entity_type in ['error', 'static', 'asset']:
+            for path, file in entities.items():
+                lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({
+                    'entity_type': entity_type, 
+                    'method': 'PUT', 
+                    'body': file['@body'], 
+                    'content-type': file['@content-type'], 
+                    'path': path
+                }), 'utf-8'), ClientContext=client_context)
+                count = count + 1
+    return True
     
 def deploy_rules(module_configuration, scope, module, env):
     name_prefix = '{lambda_namespace}-{scope}-{module}-'.format(lambda_namespace=env['lambda_namespace'], scope=scope, module=module)
@@ -207,14 +155,31 @@ def main(event, context):
             scope, module = env['path'][1:3]
             if scope == 'schema':
                 try:
-                    cd = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
+                    class_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
                 except:
-                    cd = {}
-                if not (cd and type(cd.get('label')) is str and type(cd.get('comment')) is str and type(cd.get('properties', [])) is dict and all([type(v) is list for v in cd['properties'].values()])):
-                    cd = s3_client.delete_object(Bucket=env['bucket'], Key=event['key'])
+                    class_definition = {}
+                if not (class_definition and type(class_definition.get('label')) is str and type(class_definition.get('comment')) is str and type(class_definition.get('properties', [])) is dict and all([type(v) is list for v in class_definition['properties'].values()])):
+                    class_definition = s3_client.delete_object(Bucket=env['bucket'], Key=event['key'])
                 else:
-                    # create logic to allow extending on existing types without including all properties
-                    pass
+                    if class_definition.get('subclassof', []) and type(class_definition['subclassof']) is list:
+                        class_definition_json = json.dumps(class_definition)
+                        properties = class_definition['properties']
+                        for parent_class in class_definition['subclassof']:
+                            try:
+                                parent_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/schema/classes/{parent_class}.json')['Body'].read().decode('utf-8'))
+                            except:
+                                try: 
+                                    parent_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/system/schema/{parent_class}.json')['Body'].read().decode('utf-8'))
+                                except:
+                                    parent_definition = {}
+                            if parent_definition and parent_definition.get('properties', {}):
+                                for property_name, valid_types in parent_definition['properties']:
+                                    for valid_type in reversed(valid_types):
+                                        if valid_type not in class_definition['properties'].get(property_name, []):
+                                            class_definition['properties'][property_name] = class_definition['properties'].get(property_name, [])
+                                            class_definition['properties'][property_name].insert(0, valid_type)
+                        if class_definition_json != json.dumps(class_definition):
+                            s3_client.put_object(Bucket=env['bucket'], Key=event['key'], Body=bytes(json.dumps(class_definition), 'utf-8'), ContentType='application/json')
             else:
                 module_configuration = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
                 module_state = module_configuration.get('state')
