@@ -259,8 +259,8 @@ view => {processor='', ?options={}, ?assets={alias: assetpath}, ?field_name='', 
 
 query => {processor='', ?options={}, vector=[], ?count=0}
 
-daemon => {state: '', processor: {package_source_code: '', package_source_url: '', package_image_uri: '', code_checksum: '', 
-    ?deployment_options: {}}, ?entity_map: {}, ?connection: ''}
+daemon => {state: '', ?connection: '', ?processor: {package_source_code|package_source_url|package_image_url, 
+            deployment_options: {}}, ?schedule: {$rule_name: '$rule'}, entity_map: {}}
 
 feed => {view='', processor='', ?options={}, ?assets={alias: assetpath}, ?field_name='', ?content_type='', ?suffix='', ?expires=0, ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}
 
@@ -274,12 +274,9 @@ package => {state: '', entity_map: {}}
 
 -----
 
-
 SYSTEM CONFIGURATION FORMAT
 
 /system/{scope}/{module}.json  => /{entity_type}/{class_name}/{entity_id}.json
-
-
 
 e.g. 
 

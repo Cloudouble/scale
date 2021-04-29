@@ -108,6 +108,22 @@ lambdaPolicy='{
             "Effect": "Allow",
             "Action": "logs:CreateLogGroup",
             "Resource": "arn:aws:logs:*:'$accountId':log-group:*"
+        },
+        {
+            "Sid": "LiveElement4",
+            "Effect": "Allow",
+            "Action": [
+                "events:PutRule",
+                "events:ListRules",
+                "events:DescribeRule",
+                "events:ListRuleNamesByTarget",
+                "events:PutTargets",
+                "events:RemoveTargets",
+                "events:DisableRule"
+            ],
+            "Resource": [
+                "arn:aws:events:*:771795544492:rule/*"
+            ]
         }
     ]
 }'

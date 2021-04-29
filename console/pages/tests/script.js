@@ -444,6 +444,27 @@ window.LiveElement.Scale.Console.Tests.testMap = {
             return `Error: please first run "create-bookreadonly-connection"`
         }
     }, 
+    'create-daemon': function(connection_url, system_access_url, system_root, connection_id) {
+        var num = Math.round(Math.random()*100) + 1
+        var daemon_object = {
+            state: 'install', 
+            schedule: {
+                [`Each ${num} Minutes`]: `rate(${num} minutes)`
+            }
+        }
+        return window.fetch(
+            `${connection_url}/system/daemon/clock.json`, 
+            {
+                method: 'PUT', 
+                headers: {
+                    "Content-Type": "application/json"
+                }, 
+                body: JSON.stringify(daemon_object) 
+            }
+        ).then(r => {
+            return 'clock'
+        })
+    }, 
     
     
 }
