@@ -87,14 +87,22 @@ lambdaPolicy='{
                 "execute-api:Invoke",
                 "s3:DeleteObject",
                 "execute-api:ManageConnections",
-                "s3:GetObjectVersion"
+                "s3:GetObjectVersion",
+                "s3:GetBucketNotification",
+                "s3:PutBucketNotification",
+                "lambda:GetFunction",
+                "lambda:CreateFunction",
+                "lambda:UpdateFunctionCode",
+                "lambda:UpdateFunctionConfiguration",
+                "lambda:AddPermission"
             ],
             "Resource": [
                 "arn:aws:iam::'$accountId':role/'$lambdaRole'",
                 "arn:aws:logs:*:'$accountId':log-group:*",
                 "arn:aws:s3:::'$coreBucket'",
                 "arn:aws:s3:::*/*", 
-                "arn:aws:execute-api:*:'$accountId':*/*/*/*"
+                "arn:aws:execute-api:*:'$accountId':*/*/*/*",
+                "arn:aws:lambda:*:'$accountId':function:'$lambdaNamespace'-extension-*"
             ]
         },
         {
@@ -122,7 +130,7 @@ lambdaPolicy='{
                 "events:DisableRule"
             ],
             "Resource": [
-                "arn:aws:events:*:771795544492:rule/*"
+                "arn:aws:events:*:'$accountId':rule/'$lambdaNamespace'-daemon-*"
             ]
         }
     ]
