@@ -465,6 +465,24 @@ window.LiveElement.Scale.Console.Tests.testMap = {
             return 'clock'
         })
     }, 
+    'run-daemon': function(connection_url, system_access_url, system_root, connection_id) {
+        var module_name = window.localStorage.getItem('tests:create-daemon:result')
+        var daemon_object = JSON.parse(window.localStorage.getItem('tests:create-daemon:confirmation'))
+        daemon_object.state = 'run'
+        daemon_object.connection = window.LiveElement.Scale.Core.generateUUID4()
+        return window.fetch(
+            `${connection_url}/system/daemon/${module_name}.json`, 
+            {
+                method: 'PUT', 
+                headers: {
+                    "Content-Type": "application/json"
+                }, 
+                body: JSON.stringify(daemon_object) 
+            }
+        ).then(r => {
+            return daemon_object.connection
+        })
+    }, 
     
     
 }
