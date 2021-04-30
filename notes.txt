@@ -260,7 +260,8 @@ view => {processor='', ?options={}, ?assets={alias: assetpath}, ?field_name='', 
 query => {processor='', ?options={}, vector=[], ?count=0}
 
 daemon => {state: '', ?connection: '', ?processor: {package_source_code|package_source_url|package_image_url, 
-            deployment_options: {}}, ?schedule: {$rule_name: '$rule'}, entity_map: {}}
+            deployment_options: {}}, ?schedule: {$rule_name: '$rule'}, entity_map: {}, ?ephemeral=true}
+            (ephemeral means the processor function will be deleted when the daemon is removed, by default it is kept)
 
 feed => {view='', processor='', ?options={}, ?assets={alias: assetpath}, ?field_name='', ?content_type='', ?suffix='', ?expires=0, ?sort_field='', ?sort_direction='', ?min_index=0, ?max_index=0}
 

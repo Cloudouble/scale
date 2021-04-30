@@ -483,6 +483,40 @@ window.LiveElement.Scale.Console.Tests.testMap = {
             return daemon_object.connection
         })
     }, 
+    'pause-daemon': function(connection_url, system_access_url, system_root, connection_id) {
+        var module_name = window.localStorage.getItem('tests:create-daemon:result')
+        var daemon_object = JSON.parse(window.localStorage.getItem('tests:run-daemon:confirmation'))
+        daemon_object.state = 'pause'
+        return window.fetch(
+            `${connection_url}/system/daemon/${module_name}.json`, 
+            {
+                method: 'PUT', 
+                headers: {
+                    "Content-Type": "application/json"
+                }, 
+                body: JSON.stringify(daemon_object) 
+            }
+        ).then(r => {
+            return daemon_object.connection
+        })
+    }, 
+    'remove-daemon': function(connection_url, system_access_url, system_root, connection_id) {
+        var module_name = window.localStorage.getItem('tests:create-daemon:result')
+        var daemon_object = JSON.parse(window.localStorage.getItem('tests:pause-daemon:confirmation'))
+        daemon_object.state = 'remove'
+        return window.fetch(
+            `${connection_url}/system/daemon/${module_name}.json`, 
+            {
+                method: 'PUT', 
+                headers: {
+                    "Content-Type": "application/json"
+                }, 
+                body: JSON.stringify(daemon_object) 
+            }
+        ).then(r => {
+            return module_name
+        })
+    }, 
     
     
 }
