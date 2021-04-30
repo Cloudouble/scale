@@ -19,14 +19,13 @@ def main(event, context):
     entity_type =  event.get('entity_type')
     method = event.get('method')
     if entity_type and method:
-        connection_type = env.get('connection_type', 'connection')
         connection_id = env['connection_id']
         s3 = boto3.resource('s3')
         bucket = s3.Bucket(env['bucket'])
-        if entity_type == 'connection' and event.get('entity'):
-            entity = event['entity']
-            connection_object = bucket.Object('{data_root}/{connection_type}/{connection_id}/connect.json'.format(data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id))
-            if method in ['POST', 'PUT', 'PATCH']:
+        if entity_type == 'connection':
+            connection_object = bucket.Object('{data_root}/connection/{connection_id}/connect.json'.format(data_root=env['data_root'], connection_id=connection_id))
+            if method in ['POST', 'PUT', 'PATCH'] and event.get('entity'):
+                entity = event['entity']
                 if entity.get('mask') and type(entity['mask']) is dict:
                     mask_hash = hashlib.sha512(bytes(json.dumps(entity['mask']), 'utf-8')).hexdigest()
                     mask_object = bucket.Object('{data_root}/mask/{mask_hash}.json'.format(data_root=env['data_root'], mask_hash=mask_hash))
@@ -40,8 +39,13 @@ def main(event, context):
                     counter = counter + 1
                 except:
                     pass
-        elif entity_type in ['asset', 'static'] and event.get('path') and event.get('body') and event.get('content-type'):
-            object_path = '{data_root}/asset/{path}'.format(data_root=env['data_root'], path=event['path']) if entity_type == 'asset' else event['path']
+        elif entity_type in ['asset', 'static', 'error'] and event.get('path') and event.get('body') and event.get('content-type'):
+            if entity_type == 'asset': 
+                object_path = '{data_root}/asset/{path}'.format(data_root=env['data_root'], path=event['path'])
+            elif entity_type == 'static':
+                object_path = event['path']
+            elif entity_type == 'error':
+                object_path = '{data_root}/error/{path}.html'.format(data_root=env['data_root'], path=event['path'])
             the_object = bucket.Object(object_path)
             if method in ['PUT', 'POST', 'PATCH']:
                 the_object.put(Body=base64.b64decode(event['body']), ContentType=event['content-type'])

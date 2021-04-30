@@ -126,13 +126,16 @@ lambdaPolicy='{
                 "events:ListRules",
                 "events:DescribeRule",
                 "events:ListRuleNamesByTarget",
+                "events:ListTargetsByRule,
                 "events:PutTargets",
                 "events:RemoveTargets",
                 "events:EnableRule",
-                "events:DisableRule"
+                "events:DisableRule",
+                "events:DeleteRule"
             ],
             "Resource": [
-                "arn:aws:events:*:'$accountId':rule/'$lambdaNamespace'-daemon-*"
+                "arn:aws:events:*:'$accountId':rule/'$lambdaNamespace'-daemon-*",
+                "arn:aws:events:*:'$accountId':rule/*
             ]
         }
     ]

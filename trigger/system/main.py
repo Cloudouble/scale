@@ -127,16 +127,15 @@ def deploy_entities(module_configuration, lambda_client, env, client_context):
     
 def deploy_rules(module_configuration, scope, module, env):
     name_prefix = '{lambda_namespace}-{scope}-{module}-'.format(lambda_namespace=env['lambda_namespace'], scope=scope, module=module)
+    events = boto3.client('events')
     try: 
         module_rules = events.list_rules(NamePrefix=name_prefix)['Rules']
     except:
         module_rules = []
-    this_rule = [r for r in module_rules if r['Name'] == rule_full_name]
-    this_rule = this_rule[0] if this_rule else {}
-    events = boto3.client('events')
-    print(env)
     for rule_name, rule in module_configuration.get('schedule', {}).items():
         rule_full_name = '{prefix}-{name}'.format(prefix=name_prefix, name=rule_name.lower().replace(' ', '-'))
+        this_rule = [r for r in module_rules if r['Name'] == rule_full_name]
+        this_rule = this_rule[0] if this_rule else {}
         events.put_rule(Name=rule_full_name, 
             Description='Rule created by {system_proper_name} in scope: {scope}, module: {module}'.format(system_proper_name=env['system_proper_name'], scope=scope, module=module), 
             ScheduleExpression=rule, State=this_rule.get('State', 'DISABLED'))
@@ -225,7 +224,7 @@ def main(event, context):
                 if scope == 'daemon' and module_state == 'install' and module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
                     deploy_rules(module_configuration, scope, module, env)                    
                 if scope == 'daemon' and module_state == 'run':
-                    module_configuration['connection'] = str(uuid.uuid4())
+                    module_configuration['connection'] = module_configuration.get('connection', str(uuid.uuid4()))
                     module_configuration['mask'] = module_configuration.get('mask', {'record': {'GET': {'*': '*'}}})
                     connection_record = {'name': module, 'daemon': module, 'mask': module_configuration['mask']}
                     write_env = {**env, 'connection_id': module_configuration['connection']}
@@ -243,10 +242,10 @@ def main(event, context):
                                     events.enable_rule(Name=rule_full_name)
                                 processor_arn = 'arn:aws:lambda:{core_region}:{account_id}:function:{processor_full_name}'.format(core_region=env['core_region'], account_id=env['account_id'], processor_full_name=processor_full_name)
                                 try:
-                                    rule_targets = events.list_rule_names_by_target(TargetArn=processor_arn)['RuleNames']
+                                    processor_rules = events.list_rule_names_by_target(TargetArn=processor_arn)['RuleNames']
                                 except:
-                                    rule_targets = []
-                                if rule_full_name not in rule_targets:
+                                    processor_rules = []
+                                if rule_full_name not in processor_rules:
                                     events.put_targets(Rule=rule_full_name, Targets=[{'Id': processor_full_name, 'Arn': processor_arn}])
                                     try:
                                         lambda_client.remove_permission(FunctionName=processor_full_name, StatementId=module)
@@ -260,44 +259,52 @@ def main(event, context):
                     module_configuration['state'] = 'running'
                 elif scope == 'daemon' and  module_state == 'pause':
                     if module_configuration.get('connection'):
-                        s3_client.delete_object(Bucket=env['bucket'], 
-                            Key='{data_root}/connection/{connection}/connect.json'.format(data_root=env['data_root'], connection=module_configuration['connection']))
+                        write_env = {**env, 'connection_id': module_configuration['connection']}
+                        lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'connection', 'method': 'DELETE', '_env': write_env}), 'utf-8'))
                         del module_configuration['connection']
                         module_configuration['state'] = 'paused'
                     if module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
                         events = boto3.client('events')
-                        for rule_name, rule in module_configuration['schedule']:
+                        for rule_name, rule in module_configuration['schedule'].items():
                             rule_full_name = '{lambda_namespace}-{scope}-{module}--{name}'.format(lambda_namespace=env['lambda_namespace'], scope=scope, module=module, name=rule_name.lower().replace(' ', '-'))
                             processor_arn = 'arn:aws:lambda:{core_region}:{account_id}:function:{processor_full_name}'.format(core_region=env['core_region'], account_id=env['account_id'], processor_full_name=processor_full_name)
                             try:
-                                rule_targets = events.list_rule_names_by_target(TargetArn=processor_arn)['RuleNames']
+                                lambda_client.remove_permission(FunctionName=processor_full_name, StatementId=module)
                             except:
-                                rule_targets = []
-                            if rule_full_name in rule_targets:
-                                events.remove_targets(Rule=rule_full_name, Targets=[processor_full_name], Force=True)
-                            if len(rule_targets) == 1:
+                                pass
+                            try:
+                                processor_rules = events.list_rule_names_by_target(TargetArn=processor_arn)['RuleNames']
+                            except:
+                                processor_rules = []
+                            if rule_full_name in processor_rules:
+                                events.remove_targets(Rule=rule_full_name, Ids=[processor_full_name], Force=True)
+                            if len(processor_rules) == 1:
                                 events.disable_rule(Name=rule_full_name)
                 if module_state == 'remove':
                     if scope == 'daemon':
-                        notification_configuration_current = s3_client.get_bucket_notification_configuration(Bucket=env['bucket'])
-                        notification_configuration_current = [n.get('Events', []) for n in notification_configuration_current if n.get('Id') == processor_full_name]
-                        if notification_configuration_current:
-                            lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
-                            s3_client.put_bucket_notification_configuration(Bucket=env['bucket'], NotificationConfiguration={})
                         if module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
                             events = boto3.client('events')
-                            for rule_name, rule in module_configuration['schedule']:
+                            for rule_name, rule in module_configuration['schedule'].items():
                                 rule_full_name = '{lambda_namespace}-{scope}-{module}--{name}'.format(lambda_namespace=env['lambda_namespace'], scope=scope, module=module, name=rule_name.lower().replace(' ', '-'))
                                 processor_arn = 'arn:aws:lambda:{core_region}:{account_id}:function:{processor_full_name}'.format(core_region=env['core_region'], account_id=env['account_id'], processor_full_name=processor_full_name)
                                 try:
-                                    rule_targets = events.list_rule_names_by_target(TargetArn=processor_arn)['RuleNames']
+                                    lambda_client.remove_permission(FunctionName=processor_full_name, StatementId=module)
+                                except:
+                                    pass
+                                try:
+                                    processor_rules = events.list_rule_names_by_target(TargetArn=processor_arn)['RuleNames']
+                                except:
+                                    processor_rules = []
+                                if rule_full_name in processor_rules:
+                                    events.remove_targets(Rule=rule_full_name, Ids=[processor_full_name], Force=True)
+                                try:
+                                    rule_targets = events.list_targets_by_rule(Rule=rule_full_name)['Targets']
                                 except:
                                     rule_targets = []
-                                if rule_full_name in rule_targets:
-                                    events.remove_targets(Rule=rule_full_name, Targets=[processor_full_name], Force=True)
-                                if len(rule_targets) == 1:
+                                if not rule_targets:
                                     events.delete_rule(Name=rule_full_name, Force=True)
-                    lambda_client.delete_function(FunctionName=processor_full_name)
+                    if module_configuration.get('ephemeral'):
+                        lambda_client.delete_function(FunctionName=processor_full_name)
                     module_configuration['state'] = 'removed'
                 if module_state in ['install', 'update'] and module_configuration['state'] != 'error':
                     if module_configuration.get('entity_map', {}):
