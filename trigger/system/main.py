@@ -189,10 +189,6 @@ def main(event, context):
                 module_configuration = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
                 starting_module_configuration_json = json.dumps(module_configuration)
                 module_state = module_configuration.get('state')
-                
-                ### REMOVE ###
-                module_state = 'run' 
-                
                 processor_full_name = '-extension-'.join(context.function_name.rsplit('-trigger-', 1))
                 processor_full_name = '-{scope}-{module}'.format(scope=scope, module=module).join(processor_full_name.rsplit('-system', 1))
                 if module_state in ['install', 'update']:
@@ -206,19 +202,11 @@ def main(event, context):
                                 module_configuration['processor']['code_checksum'] = deploy_processor(processor_full_name, module_configuration['processor'], lambda_client, env, 'install')
                                 if module_configuration['processor']['code_checksum']: 
                                     lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
-                                    lambda_client.add_permission(
-                                        FunctionName=processor_full_name, StatementId=module, Action='lambda:InvokeFunction', Principal='s3.amazonaws.com', 
-                                        SourceArn=lambdaFunctionArn, SourceAccount=env['account_id']
-                                    )
                                     module_configuration['state'] = 'installed'
                                 else: 
                                     module_configuration['state'] = 'error'
                             else:
                                 lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
-                                lambda_client.add_permission(
-                                    FunctionName=processor_full_name, StatementId=module, Action='lambda:InvokeFunction', Principal='s3.amazonaws.com', 
-                                    SourceArn=lambdaFunctionArn, SourceAccount=env['account_id']
-                                )
                                 module_configuration['state'] = 'installed'
                             if scope == 'daemon' and module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
                                 deploy_rules(module_configuration, scope, module, env)
@@ -239,23 +227,20 @@ def main(event, context):
                 if scope == 'daemon' and module_state == 'run':
                     module_configuration['connection'] = str(uuid.uuid4())
                     module_configuration['mask'] = module_configuration.get('mask', {'record': {'GET': {'*': '*'}}})
-                    connection_record = {'name': module, 'mask': module_configuration['mask']}
+                    connection_record = {'name': module, 'daemon': module, 'mask': module_configuration['mask']}
                     write_env = {**env, 'connection_id': module_configuration['connection']}
                     lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'connection', 'entity': connection_record, 'method': 'PUT', '_env': write_env}), 'utf-8'))
-                    print(module_configuration['connection'])
-                        #module_configuration['state'] = 'running'
-                    '''
                     if module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
                         events = boto3.client('events')
-                        for rule_name, rule in module_configuration['schedule']:
-                            rule_full_name = '{lambda_namespace}-{scope}-{module}-{name}'.format(lambda_namespace=env['lambda_namespace'], scope=scope, module=module, name=rule_name)
+                        for rule_name, rule in module_configuration['schedule'].items():
+                            rule_full_name = '{lambda_namespace}-{scope}-{module}--{name}'.format(lambda_namespace=env['lambda_namespace'], scope=scope, module=module, name=rule_name.lower().replace(' ', '-'))
                             try:
                                 full_rule = events.describe_rule(Name=rule_full_name)
                             except:
                                 full_rule = {}
                             if full_rule:
                                 if full_rule.get('State') != 'ENABLED':
-                                    event.enable_rule(Name=rule_full_name)
+                                    events.enable_rule(Name=rule_full_name)
                                 processor_arn = 'arn:aws:lambda:{core_region}:{account_id}:function:{processor_full_name}'.format(core_region=env['core_region'], account_id=env['account_id'], processor_full_name=processor_full_name)
                                 try:
                                     rule_targets = events.list_rule_names_by_target(TargetArn=processor_arn)['RuleNames']
@@ -263,7 +248,16 @@ def main(event, context):
                                     rule_targets = []
                                 if rule_full_name not in rule_targets:
                                     events.put_targets(Rule=rule_full_name, Targets=[{'Id': processor_full_name, 'Arn': processor_arn}])
-                    '''
+                                    try:
+                                        lambda_client.remove_permission(FunctionName=processor_full_name, StatementId=module)
+                                    except:
+                                        pass
+                                    lambda_client.add_permission(
+                                        FunctionName=processor_full_name, StatementId=module, Action='lambda:InvokeFunction', 
+                                        Principal='events.amazonaws.com', SourceAccount=env['account_id'], 
+                                        SourceArn='arn:aws:events:{core_region}:{account_id}:rule/{rule_full_name}'.format(core_region=env['core_region'], account_id=env['account_id'], rule_full_name=rule_full_name)
+                                    )
+                    module_configuration['state'] = 'running'
                 elif scope == 'daemon' and  module_state == 'pause':
                     if module_configuration.get('connection'):
                         s3_client.delete_object(Bucket=env['bucket'], 
@@ -273,7 +267,7 @@ def main(event, context):
                     if module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
                         events = boto3.client('events')
                         for rule_name, rule in module_configuration['schedule']:
-                            rule_full_name = '{lambda_namespace}-{scope}-{module}-{name}'.format(lambda_namespace=env['lambda_namespace'], scope=scope, module=module, name=rule_name.lower().replace(' ', '-'))
+                            rule_full_name = '{lambda_namespace}-{scope}-{module}--{name}'.format(lambda_namespace=env['lambda_namespace'], scope=scope, module=module, name=rule_name.lower().replace(' ', '-'))
                             processor_arn = 'arn:aws:lambda:{core_region}:{account_id}:function:{processor_full_name}'.format(core_region=env['core_region'], account_id=env['account_id'], processor_full_name=processor_full_name)
                             try:
                                 rule_targets = events.list_rule_names_by_target(TargetArn=processor_arn)['RuleNames']
@@ -293,7 +287,7 @@ def main(event, context):
                         if module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
                             events = boto3.client('events')
                             for rule_name, rule in module_configuration['schedule']:
-                                rule_full_name = '{lambda_namespace}-{scope}-{module}-{name}'.format(lambda_namespace=env['lambda_namespace'], scope=scope, module=module, name=rule_name.lower().replace(' ', '-'))
+                                rule_full_name = '{lambda_namespace}-{scope}-{module}--{name}'.format(lambda_namespace=env['lambda_namespace'], scope=scope, module=module, name=rule_name.lower().replace(' ', '-'))
                                 processor_arn = 'arn:aws:lambda:{core_region}:{account_id}:function:{processor_full_name}'.format(core_region=env['core_region'], account_id=env['account_id'], processor_full_name=processor_full_name)
                                 try:
                                     rule_targets = events.list_rule_names_by_target(TargetArn=processor_arn)['RuleNames']
@@ -315,6 +309,6 @@ def main(event, context):
                     elif module_state == 'update':
                         module_configuration['state'] = 'updated' 
                 if starting_module_configuration_json != json.dumps(module_configuration):
-                    '''s3_client.put_object(Bucket=env['bucket'], Key=event['key'], Body=bytes(json.dumps(module_configuration), 'utf-8'))'''
+                    s3_client.put_object(Bucket=env['bucket'], Key=event['key'], Body=bytes(json.dumps(module_configuration), 'utf-8'))
             counter = counter + 1
     return counter

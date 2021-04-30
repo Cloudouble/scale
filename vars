@@ -94,6 +94,7 @@ lambdaPolicy='{
                 "lambda:CreateFunction",
                 "lambda:UpdateFunctionCode",
                 "lambda:UpdateFunctionConfiguration",
+                "lambda:RemovePermission",
                 "lambda:AddPermission"
             ],
             "Resource": [
@@ -127,6 +128,7 @@ lambdaPolicy='{
                 "events:ListRuleNamesByTarget",
                 "events:PutTargets",
                 "events:RemoveTargets",
+                "events:EnableRule",
                 "events:DisableRule"
             ],
             "Resource": [
