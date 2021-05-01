@@ -82,20 +82,43 @@ def main(event, context):
                 env['path'] = p.strip('/').split('/')
         client_context = base64.b64encode(bytes(json.dumps({'env': env}), 'utf-8')).decode('utf-8')
         if env['path'] and uuid_valid(env['connection_id']):
-            if len(env['path']) == 1 and env['path'][0] == 'connect' and request['entity']:
+            if len(env['path']) == 1 and env['path'][0] == 'connect' and (request.get('entity') or request.get('method') == 'DELETE'):
                 connection_object = bucket.Object('{data_root}/connection/{connection_id}/connect.json'.format(data_root=env['data_root'], connection_id=env['connection_id']))
                 try:
                     connection_record = json.loads(connection_object.get()['Body'].read().decode('utf-8'))
                 except:
-                    connection_record = {'mask': {}}
+                    connection_record = {}
                 if request['method'] in ['POST', 'PUT', 'PATCH']:
-                    if request['entity'] and type(request['entity']) is dict and len(request['entity']) == 1 and type(list(request['entity'].values())[0]) is dict:
+                    if request.get('entity') and type(request['entity']) is dict and len(request['entity']) == 1 and type(list(request['entity'].values())[0]) is dict:
                         connection_record = {**connection_record, **json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'authentication'), Payload=bytes(json.dumps(request['entity']), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))}
                 if request['method'] in ['POST', 'PUT', 'PATCH', 'DELETE']:
                     lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'connection', 'entity': connection_record, 'method': request['method'], '_env': env}), 'utf-8'), InvocationType='Event')
+                    if connection_record and type(request.get('entity')) is dict and len(list(request['entity'].keys())) == 1 and 'sudo' in request['entity']:
+                        subscription_env = {**env}
+                        if 'connection_id' in subscription_env:
+                            del subscription_env['connection_id']
+                        if 'path' in subscription_env:
+                            del subscription_env['path']
+                        bucket.put_object(
+                            Body=bytes(json.dumps(subscription_env), 'utf-8'), 
+                            Key='{data_root}/connection/{connection_id}/subscription/-/00000000-0000-0000-0000-000000000000/env.json'.format(data_root=env['data_root'], connection_id=env['connection_id']), 
+                            ContentType='application/json'
+                        )
+                        modules = {}
+                        for key in [k_obj['Key'] for k_obj in s3_client.list_objects_v2(Bucket=env['bucket'], Prefix='{data_root}/system/'.format(data_root=env['data_root']))['Contents']]:
+                            key_split = key.split('/')
+                            scope = key_split[-2]
+                            module = key_split[-1].replace('.json', '')
+                            modules[scope] = modules.get(scope, {})
+                            modules[scope][module] = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=key)['Body'].read().decode('utf-8'))
+                        bucket.put_object(
+                            Body=bytes(json.dumps(modules), 'utf-8'), 
+                            Key='{data_root}/connection/{connection_id}/subscription/-/00000000-0000-0000-0000-000000000000/modules.json'.format(data_root=env['data_root'], connection_id=env['connection_id']), 
+                            ContentType='application/json'
+                        )
                     counter = counter + 1
             elif len(env['path']) == 3 and env['path'][0] == 'channel':
-                channel_id = env['path'][1] if uuid_valid[env['path'][1]] else None
+                channel_id = env['path'][1] if uuid_valid(env['path'][1]) else None
                 channel_object = bucket.Object('{data_root}/channel/{channel_id}/connect.json'.format(data_root=env['data_root'], channel_id=channel_id))
                 try:
                     channel_record = json.loads(channel_object.get()['Body'].read().decode('utf-8'))
@@ -108,10 +131,10 @@ def main(event, context):
                         if allowed:
                             lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'channel', 'entity': request['entity'], 'method': 'PUT', 'path': env['path']}), 'utf-8'), ClientContext=client_context)
                             counter = counter + 1
-                    elif request['method'] === 'DELETE' and channel_record and uuid_valid(env['path'][2]):
+                    elif request['method'] == 'DELETE' and channel_record and uuid_valid(env['path'][2]):
                         allowed = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), Payload=bytes(json.dumps({
                             'entity_type': 'channel', 'method': 'DELETE', 'path': env['path']}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
-                        if allowed channel_record.get('adminKey') == env['path'][2]:
+                        if allowed and channel_record.get('adminKey') == env['path'][2]:
                             lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'channel', 'method': 'DELETE', 'path': env['path'], '_env': env}), 'utf-8'), InvocationType='Event')
                             counter = counter + 1
             elif len(env['path']) >= 2 and env['path'][0] in ['asset', 'static']:
@@ -191,17 +214,25 @@ def main(event, context):
                                 request['method'] = 'PUT'
                         request['entity']['@type'] = request['entity'].get('@type', class_name)
                         request['entity']['@id'] = request['entity'].get('@id', entity_id)
-                if view_handle == 'json' and request['method'] in ['POST', 'PUT', 'PATCH'] and json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'validate'), Payload=bytes(json.dumps({
+                
+                if request['method'] == 'POST' and type(request.get('entity')) is dict and request.get('headers', {}).get('content-type') == 'application/x-www-form-urlencoded':
+                    for k, v in request['entity'].items():
+                        try:
+                            if type(v) is str and type(json.loads(v)) in [int, float, bool]:
+                                request['entity'][k] = json.loads(v)
+                        except:
+                            pass
+                if view_handle == 'json' and  (request['method'] == 'DELETE' or (request['method'] in ['POST', 'PUT', 'PATCH'] and json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'validate'), Payload=bytes(json.dumps({
                     'entity': request['entity'], 
                     'entity_type': entity_type, 
                     'class_name': None if entity_type in ['view', 'mask'] else class_name, 
-                    'entity_id': entity_id}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8')):
+                    'entity_id': entity_id}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8')))):
                     masked_entity = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), Payload=bytes(json.dumps({
                         'entity_type': entity_type, 
                         'method': request['method'],
                         'class_name': None if entity_type in ['view', 'mask'] else class_name, 
                         'entity_id': entity_id, 
-                        'entity': request['entity']
+                        'entity': request.get('entity')
                     }), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
                     constrained = masked_entity.get('__constrained', True)
                     del masked_entity['__constrained']

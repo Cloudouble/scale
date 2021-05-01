@@ -1,4 +1,4 @@
-env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_", "shared": 0, "authentication_namespace": "liveelementscale"}
+env = {"bucket": "scale.live-element.net", "system_proper_name": "LiveElementScale", "account_id": "771795544492", "core_region": "ap-southeast-2", "lambda_role": "LiveElementScale", "lambda_namespace": "liveelement-scale", "system_root": "_", "shared": "0", "authentication_namespace": "liveelementscale"}
 
 import json, boto3, base64, re
 
@@ -25,7 +25,6 @@ def main(event_data, context):
     - triggered by all write events in main bucket
     - invokes other trigger functions according to their capturing path
     '''
-    print(event_data)
     uuid_pattern = '[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}'
     class_pattern = '[a-zA-Z0-9]+'
     counter = 0
@@ -36,7 +35,7 @@ def main(event_data, context):
     if keys:
         lambda_client = boto3.client('lambda')
     for key in keys:
-        if env['shared']:
+        if env['shared'] == '1':
            key_split = key.split('/')
            if key_split[1] == env['system_root']:
                env['data_root'] = key_split[0]

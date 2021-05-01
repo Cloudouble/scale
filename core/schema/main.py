@@ -1,4 +1,4 @@
-env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "data_root": "_"}
+env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_", "data_root": "_"}
 
 import urllib.request, json, boto3
 

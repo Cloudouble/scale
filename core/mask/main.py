@@ -100,7 +100,10 @@ def main(event, context):
                             write_key = '{data_root}/{connection_type}/{connection_id}/view/{entity_id}.json'.format(data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id, entity_id=event['entity_id'])
                         else:
                             write_key = '{data_root}/{connection_type}/{connection_id}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id, entity_type=event['entity_type'], class_name=event['class_name'], entity_id=event['entity_id'])
-                        current_writable_entity_json = s3_client.get_object(Bucket=env['bucket'], Key=write_key)['Body'].read().decode('utf-8')
+                        try:
+                            current_writable_entity_json = s3_client.get_object(Bucket=env['bucket'], Key=write_key)['Body'].read().decode('utf-8')
+                        except:
+                            current_writable_entity_json = '{}'
                         new_writable_entity_json = json.dumps(writable_entity)
                         if current_writable_entity_json != new_writable_entity_json:
                             bucket.put_object(Body=bytes(json.dumps(writable_entity), 'utf-8'), Key=write_key, ContentType='application/json')

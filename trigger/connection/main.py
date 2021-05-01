@@ -26,11 +26,11 @@ def main(event, context):
         if env['path'] and len(env['path']) == 3 and env['path'][0] in ['channel', 'connection', 'daemon']:
             connection_type, connection_id = env['path'][0:2]
             list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix='{data_root}/{connection_type}/{connection_id}/'.format(data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id))
-            #delete_response = s3_client.delete_objects(Bucket=env['bucket'], Delete={'Objects': [{'Key': c['Key']} for c in list_response['Contents'] if c['Key'] != event['key']], 'Quiet': True})
+            delete_response = s3_client.delete_objects(Bucket=env['bucket'], Delete={'Objects': [{'Key': c['Key']} for c in list_response['Contents'] if c['Key'] != event['key']], 'Quiet': True})
             c = 1000
             while c and list_response.get('IsTruncated') and list_response.get('NextContinuationToken'):
                 list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix='{data_root}/{connection_type}/{connection_id}/'.format(data_root=env['data_root'], connection_type=connection_type, connection_id=connection_id), ContinuationToken=list_response.get('NextContinuationToken'))
-                #delete_response = s3_client.delete_objects(Bucket=env['bucket'], Delete={'Objects': [{'Key': c['Key']} for c in list_response['Contents'] if c['Key'] != event['key']], 'Quiet': True})
+                delete_response = s3_client.delete_objects(Bucket=env['bucket'], Delete={'Objects': [{'Key': c['Key']} for c in list_response['Contents'] if c['Key'] != event['key']], 'Quiet': True})
                 c = c - 1
             counter = counter + 1
     return counter

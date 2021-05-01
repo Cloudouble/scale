@@ -18,7 +18,7 @@ def main(event, context):
     elif 'channel' in uri:
         channel_id, key = uri.replace('channel', '').replace('_', '').strip('/').split('/')
         method = request['method']
-        if method in ['OPTIONS', 'POST'] and key:
+        if method in ['OPTIONS', 'POST', 'DELETE'] and key:
             retval = {
                 'status': 200, 
                 'headers': {
@@ -46,6 +46,22 @@ def main(event, context):
             }
             if method == 'OPTIONS':
                 return retval
+            elif method == 'DELETE':
+                core_region, account_id, lambda_namespace, bucket_name, system_root, shared = env.split(' ')
+                if shared == '1':
+                    host = request.get('headers', {}).get('origin', [])[0].split('://')[1]
+                    data_root = '{host}/{system_root}'.format(host=host, system_root=system_root)
+                else:
+                    data_root = system_root
+                s3_client = boto3.client('s3')
+                channel_object_key = '{data_root}/channel/{channel_id}/connect.json'.format(data_root=data_root, channel_id=channel_id)
+                try:
+                    channel_object = json.loads(s3_client.get_object(Bucket=bucket_name, Key=channel_object_key)['Body'].read().decode('utf-8'))
+                except:
+                    channel_object = {}
+                if channel_object and type(channel_object) is dict and channel_object.get('adminKey') and key == channel_object['adminKey']:
+                    s3_client.delete_object(Bucket=bucket_name, Key=channel_object_key)
+                    return {**retval, 'status': 202}
             elif method == 'POST' and request.get('body'):
                 body = request['body'] 
                 data = body.get('data') 

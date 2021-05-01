@@ -88,7 +88,27 @@ def main(event, context):
                     retval['confirmation'] = False
                 elif test == 'send-tunnel':
                     retval['confirmation'] = False
-                    
+                elif test == 'create-channel':
+                    retval = run_test('channel/{channel_id}/connect.json'.format(channel_id=result), None, result, start_time, s3_client)
+                elif test == 'subscribe-channel':
+                    retval['confirmation'] = ' ---error--- '
+                elif test == 'send-channel':
+                    retval['confirmation'] = False
+                elif test == 'delete-channel':
+                    retval = run_test('channel/{channel_id}/connect.json'.format(channel_id=result), False, result, start_time, s3_client)
+                elif test == 'create-daemon':
+                    time.sleep(10)
+                    retval = run_test('system/daemon/{module_id}.json'.format(module_id=result), 'state', 'installed', start_time, s3_client)
+                elif test == 'run-daemon':
+                    time.sleep(10)
+                    retval = run_test('system/daemon/{module_id}.json'.format(module_id=context['create-daemon']), 'state', 'running', start_time, s3_client)
+                elif test == 'pause-daemon':
+                    time.sleep(10)
+                    retval = run_test('system/daemon/{module_id}.json'.format(module_id=context['create-daemon']), 'state', 'paused', start_time, s3_client)
+                elif test == 'remove-daemon':
+                    time.sleep(10)
+                    retval = run_test('system/daemon/{module_id}.json'.format(module_id=context['create-daemon']), 'state', 'removed', start_time, s3_client)
+
                     
                             
                     

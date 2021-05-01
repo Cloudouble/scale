@@ -8,8 +8,9 @@ def getprocessor(env, name, source='core', scope=None):
 
 def main(event, context):
     '''
-    - triggered by edge/channel to send the message to all sockets in the given index
+    - triggered by trigger/channel to send the message to all sockets in the given index
     '''
+    print(event)
     if event.get('index') and event.get('index') and event.get('message'):
         s3 = boto3.resource('s3')
         bucket = s3.Bucket(env['bucket'])

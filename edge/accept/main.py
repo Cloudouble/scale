@@ -1,4 +1,4 @@
-buckets = {'_': 'us-east-1.request.scale.live-element.net', 'ap-southeast-2': 'ap-southeast-2.request.scale.live-element.net'}
+buckets = {'ap-southeast-1': 'ap-southeast-1.request.scale.live-element.net', '_': 'ap-southeast-2.request.scale.live-element.net', 'us-east-1': 'us-east-1.request.scale.live-element.net'}
 
 import json, boto3, base64, uuid
 from urllib.parse import parse_qs
@@ -11,6 +11,8 @@ def main(event, context):
     - request {method, uri, headers, content-type, body}
     - returns {status: '202'} on success or {status: '50x'} | {status: '40x'} on failure
     '''
+    print('line 14: test version')
+    print(event)
     status = 202
     try:
         bucket_name = buckets.get(context.invoked_function_arn.split(':')[3], buckets['_'])
@@ -32,8 +34,8 @@ def main(event, context):
                             body_bytes = bytes(request_object['body']['data'], 'utf-8') if request_object['body']['encoding'] == 'text' else base64.b64decode(request_object['body']['data'])
                             if request_entry['content-type'] == 'application/x-www-form-urlencoded':
                                 try: 
-                                    body_bytes = bytes(json.dumps({k: v[0] for k, v in parse_qs(body.decode('utf-8')).items()}), 'utf-8')
-                                except: 
+                                    body_bytes = bytes(json.dumps({k: v[0] for k, v in parse_qs(body_bytes.decode('utf-8')).items()}), 'utf-8')
+                                except Exception as e:
                                     body_bytes = bytes(json.dumps({}), 'utf-8')
                                     status = 400
                                 request_entry['content-type'] = 'application/json'

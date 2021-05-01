@@ -15,8 +15,8 @@ def main(event, context):
             request_data = json.loads(s3_client.get_object(Bucket=entry['name'], Key=entry['key'])['Body'].read().decode('utf-8'))
         except:
             request_data = {}
-        if type(request_data) is dict and all([k in request_data for k in ['body', 'content-type', 'headers', 'method', 'uri']]):
-            if request_data['content-type'] == 'application/json':
+        if type(request_data) is dict and all([k in request_data for k in ['content-type', 'headers', 'method', 'uri']]):
+            if request_data['content-type'] == 'application/json' and request_data.get('body'):
                 try:
                     request_data['entity'] = json.loads(base64.b64decode(request_data['body']).decode('utf-8'))
                     requests[entry['key']] = request_data

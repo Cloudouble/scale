@@ -40,6 +40,26 @@ def write_view(view_result, result_key, bucket, s3_client, env, lambda_client, c
                     if connection_record.get('socket_id'):
                         del connection_record['socket_id']
                     lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'connection', 'entity': connection_record, 'method': 'PUT'}), 'utf-8'), ClientContext=client_context)                    
+            if connection_record and connection_record.get('daemon'):
+                daemon_name = connection_record['daemon']
+                try:
+                    daemon_record = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/system/daemon/{daemon_name}.json'.format(data_root=env['data_root'], daemon_name=daemon_name))['Body'].read().decode('utf-8'))
+                except:
+                    daemon_record = {}
+                if daemon_record and daemon_record.get('connection') == connection_id:
+                    daemon_processor_name = '{lambda_namespace}-extension-daemon-{daemon_name}'.format(lambda_namespace=env['lambda_namespace'], daemon_name=daemon_name)
+                    try:
+                        processor_state = lambda_client.get_function(FunctionName=daemon_processor_name)
+                    except:
+                        processor_state = {}
+                    if processor_state:
+                        lambda_client.invoke(FunctionName=daemon_processor_name, Payload=bytes(json.dumps({
+                            'meta': {'path': connection_scoped_key}, 
+                            'content-type': content_type, 
+                            'encoding': encoding, 
+                            'body': body.decode('utf-8') if encoding == 'text' else base64.b64encode(body).decode('utf-8'), 
+                            '_env': env
+                        }), 'utf-8'), InvocationType='Event')
         return True
     else: 
         return False

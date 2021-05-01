@@ -57,7 +57,8 @@ def main(event, context):
                     if channel_keys and uuid_valid(channel_keys.get('receiveKey')):
                         receive_key = event['queryStringParameters'].get('key')
                         if receive_key and receive_key == channel_keys['receiveKey']:
-                            index_object = bucket.Object('{data_root}/channel/{channel_id}/{index}.json'.format(data_root=env['data_root'], channel_id=connection_id, index=connection_id[0:2]))
+                            index = hashlib.sha512(bytes(socket_id, 'utf-8')).hexdigest()[0:2]
+                            index_object = bucket.Object('{data_root}/channel/{channel_id}/index/{index}.json'.format(data_root=env['data_root'], channel_id=connection_id, index=index))
                             try:
                                 socket_map = json.loads(index_object.get()['Body'].read().decode('utf-8'))
                             except:
