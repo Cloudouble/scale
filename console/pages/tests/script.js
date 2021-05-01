@@ -533,6 +533,38 @@ window.LiveElement.Scale.Console.Tests.testMap = {
             return html_code
         })
     }, 
+    'create-custom-class': function(connection_url, system_access_url, system_root, connection_id) {
+        var novel_type_definition = {
+            "label": "Novel",
+            "comment": "A book containing a long fictional story.",
+            "subclassof": [
+                "Book"
+            ],
+            "release": "1.0",
+            "parents": [
+                "Book",
+                "CreativeWork",
+                "Thing"
+            ],
+            "properties": {
+                "synopsis": [
+                    "Text"
+                ]
+            }
+        }
+        return window.fetch(
+            `${connection_url}/system/class/Novel.json`, 
+            {
+                method: 'PUT', 
+                headers: {
+                    "Content-Type": "application/json"
+                }, 
+                body: JSON.stringify(novel_type_definition) 
+            }
+        ).then(r => {
+            return 'Novel'
+        })
+    }, 
     
     
 }

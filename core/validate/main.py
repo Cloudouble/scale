@@ -93,7 +93,7 @@ def main(event, context):
                     type_schema = json.loads(s3.Object(env['bucket'], '{data_root}/schema/classes/{entity_type}.json'.format(data_root=env['data_root'], entity_type=entity['@type'])).get()['Body'].read().decode('utf-8'))
                 except:
                     try:
-                        type_schema = json.loads(s3.Object(env['bucket'], '{data_root}/system/schema/{entity_type}.json'.format(data_root=env['data_root'], entity_type=entity['@type'])).get()['Body'].read().decode('utf-8'))
+                        type_schema = json.loads(s3.Object(env['bucket'], '{data_root}/system/class/{entity_type}.json'.format(data_root=env['data_root'], entity_type=entity['@type'])).get()['Body'].read().decode('utf-8'))
                     except:
                         type_schema = {}
                 if type_schema and type(type_schema) is dict and entity['@type'] == class_name and entity['@id'] == entity_id:

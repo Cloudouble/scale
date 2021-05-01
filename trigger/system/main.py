@@ -149,7 +149,7 @@ def main(event, context):
     - daemon entity_map can have keys of 'record', 'query', 'feed', 'subscription', 'view', 'mask', 'system', 'error', 'asset', 'static'
     - daemon processor can be implied by already having the function available at -extension-daemon-{module}
     '''
-    print(event)
+    print(json.dumps(event))
     counter = 0
     if event.get('key'):
         env, client_context = get_env_context(event, context)    
@@ -157,7 +157,7 @@ def main(event, context):
         lambda_client = boto3.client('lambda')
         if env['path'] and len(env['path']) == 3 and env['path'][0] == 'system':
             scope, module = env['path'][1:3]
-            if scope == 'schema':
+            if scope == 'class':
                 try:
                     class_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
                 except:
@@ -167,21 +167,19 @@ def main(event, context):
                 else:
                     if class_definition.get('subclassof', []) and type(class_definition['subclassof']) is list:
                         class_definition_json = json.dumps(class_definition)
-                        properties = class_definition['properties']
                         for parent_class in reversed(class_definition['subclassof']):
                             try:
-                                parent_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/schema/classes/{parent_class}.json')['Body'].read().decode('utf-8'))
+                                parent_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/schema/classes/{parent_class}.json'.format(data_root=env['data_root'], parent_class=parent_class))['Body'].read().decode('utf-8'))
                             except:
                                 try: 
-                                    parent_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/system/schema/{parent_class}.json')['Body'].read().decode('utf-8'))
+                                    parent_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/system/class/{parent_class}.json'.format(data_root=env['data_root'], parent_class=parent_class))['Body'].read().decode('utf-8'))
                                 except:
                                     parent_definition = {}
-                            if parent_definition and parent_definition.get('properties', {}):
-                                for property_name, valid_types in parent_definition['properties']:
-                                    for valid_type in reversed(valid_types):
-                                        if valid_type not in class_definition['properties'].get(property_name, []):
-                                            class_definition['properties'][property_name] = class_definition['properties'].get(property_name, [])
-                                            class_definition['properties'][property_name].insert(0, valid_type)
+                            for property_name, valid_types in parent_definition.get('properties', {}).items():
+                                for valid_type in reversed(valid_types):
+                                    if valid_type not in class_definition['properties'].get(property_name, []):
+                                        class_definition['properties'][property_name] = class_definition['properties'].get(property_name, [])
+                                        class_definition['properties'][property_name].insert(0, valid_type)
                         if class_definition_json != json.dumps(class_definition):
                             s3_client.put_object(Bucket=env['bucket'], Key=event['key'], Body=bytes(json.dumps(class_definition), 'utf-8'), ContentType='application/json')
             else:
