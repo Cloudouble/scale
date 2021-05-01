@@ -137,16 +137,23 @@ def main(event, context):
                         if allowed and channel_record.get('adminKey') == env['path'][2]:
                             lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'channel', 'method': 'DELETE', 'path': env['path'], '_env': env}), 'utf-8'), InvocationType='Event')
                             counter = counter + 1
-            elif len(env['path']) >= 2 and env['path'][0] in ['asset', 'static']:
+            elif len(env['path']) >= 2 and env['path'][0] in ['asset', 'static', 'error']:
                 usable_path = env['path'][1:]
+                entity_type = env['path'][0]
+                print(json.dumps({
+                    'entity_type': entity_type, 
+                    'method': request['method'], 
+                    'path': usable_path, 
+                    '_env': env
+                }))
                 allowed = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), Payload=bytes(json.dumps({
-                    'entity_type': env['path'][0], 
+                    'entity_type': entity_type, 
                     'method': request['method'], 
                     'path': usable_path
                 }), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
                 if allowed:
-                    object_path = '/'.join(usable_path) if env['path'][0] == 'asset' else '/'.join(usable_path)
-                    the_object = bucket.Object('{data_root}/asset/{usable_path}'.format(data_root=env['data_root'], usable_path=object_path)) if env['path'][0] == 'asset' else bucket.Object(object_path)
+                    object_path = '/'.join(usable_path)
+                    the_object = bucket.Object('{data_root}/{entity_type}/{usable_path}'.format(data_root=env['data_root'], entity_type=entity_type, usable_path=object_path)) if entity_type in ['asset', 'error'] else bucket.Object(object_path)
                     canwrite = True
                     if request['method'] == 'PATCH':
                         try:
@@ -155,7 +162,7 @@ def main(event, context):
                             canwrite = False
                     if canwrite:
                         lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({
-                            'entity_type': env['path'][0], 
+                            'entity_type': entity_type, 
                             'method': request['method'], 
                             'body': request['body'], 
                             'content-type': request['content-type'], 

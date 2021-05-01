@@ -34,7 +34,7 @@ def main(event, context):
         if connection_mask:
             if event.get('entity_type') and event.get('method'):
                 lambda_client = boto3.client('lambda')
-                if event['entity_type'] in ['asset', 'static', 'channel'] and event.get('path'):
+                if event['entity_type'] in ['asset', 'static', 'channel', 'error'] and event.get('path'):
                     mask = connection_mask[event['entity_type']] if event['entity_type'] in connection_mask else connection_mask.get('*', {})
                     if type(mask) is dict:
                         mask = mask.get(event['method']) if event['method'] in mask else mask.get('*', {})

@@ -32,7 +32,7 @@ window.LiveElement.Scale.Console.Tests.runTest = function(tr, test) {
         }).then(processResult => {
             if (!(processResult && typeof processResult == 'object' && processResult.confirmation === false)) {
                 tr.querySelector('time[name="process"]').innerHTML = processResult && typeof processResult == 'object' && typeof processResult.timing == 'number' ? processResult.timing : ' ---error--- '
-                tr.querySelector('code.confirmation').innerHTML = processResult && typeof processResult == 'object' && processResult.confirmation && typeof processResult.confirmation == 'object' ? JSON.stringify(processResult.confirmation, null, 4) : ' ---error--- '
+                tr.querySelector('code.confirmation').innerHTML = processResult && typeof processResult == 'object' && processResult.confirmation && typeof processResult.confirmation == 'object' ? JSON.stringify(processResult.confirmation, null, 4) : processResult.confirmation
                 tr.querySelector('code.confirmation').closest('label').setAttribute('status', 'success')
                 window.localStorage.setItem(`tests:${testName}:confirmation`, JSON.stringify(processResult.confirmation))
             }
@@ -515,6 +515,22 @@ window.LiveElement.Scale.Console.Tests.testMap = {
             }
         ).then(r => {
             return module_name
+        })
+    }, 
+    'create-418-error': function(connection_url, system_access_url, system_root, connection_id) {
+        var num = Math.round(Math.random()*100) + 1
+        var html_code = `<html><head><title>Error 418</title></head><body>I'm teapot number ${num}.</body></html>`
+        return window.fetch(
+            `${connection_url}/error/418.html`, 
+            {
+                method: 'PUT', 
+                headers: {
+                    "Content-Type": "text/html"
+                }, 
+                body: html_code 
+            }
+        ).then(r => {
+            return html_code
         })
     }, 
     

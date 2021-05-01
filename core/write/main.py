@@ -46,6 +46,8 @@ def main(event, context):
                 object_path = event['path']
             elif entity_type == 'error':
                 object_path = '{data_root}/error/{path}.html'.format(data_root=env['data_root'], path=event['path'])
+                if object_path.endswith('.html.html'):
+                    object_path = object_path.replace('.html.html', '.html')
             the_object = bucket.Object(object_path)
             if method in ['PUT', 'POST', 'PATCH']:
                 the_object.put(Body=base64.b64decode(event['body']), ContentType=event['content-type'])

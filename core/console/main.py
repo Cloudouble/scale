@@ -9,11 +9,17 @@ def run_test(test_path, test_field, test_value, start_time, s3_client):
     retval = {'timing': None, 'confirmation': {}}
     while count and not end_time:
         try:
-            test_record = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/{test_path}'.format(data_root=env['data_root'], test_path=test_path))['Body'].read().decode('utf-8'))
+            if test_path.endswith('.json'):
+                test_record = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/{test_path}'.format(data_root=env['data_root'], test_path=test_path))['Body'].read().decode('utf-8'))
+            elif not test_field:
+                test_record = s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/{test_path}'.format(data_root=env['data_root'], test_path=test_path))['Body'].read().decode('utf-8')
+            else:
+                test_record = {}
         except:
             test_record = {}
         if any([
-            test_record and (test_field is None), 
+            test_record and (test_field is None) and (not test_path.endswith('.json')) and test_value and (test_record == test_value), 
+            test_record and (test_field is None) and test_path.endswith('.json'), 
             (not test_record) and (test_field is False), 
             test_field and type(test_record) is dict and test_record and type(test_field) is str and test_record.get(test_field) == test_value, 
             test_field and type(test_record) is dict and test_record and type(test_field) is str and type(test_value) is type and type(test_record.get(test_field)) == test_value, 
@@ -33,6 +39,7 @@ def main(event, context):
     - triggered directly by the console client
     - event => {authentication_channel_name: {credentials}}
     '''
+    #print(json.dumps(event))
     start_time = time.time()
     key = event.get('_key')
     env['data_root'] = '{host}/{system_root}'.format(host=event.get('host', ''), system_root=env['system_root']).strip('/')
@@ -108,6 +115,8 @@ def main(event, context):
                 elif test == 'remove-daemon':
                     time.sleep(10)
                     retval = run_test('system/daemon/{module_id}.json'.format(module_id=context['create-daemon']), 'state', 'removed', start_time, s3_client)
+                elif test == 'create-418-error':
+                    retval = run_test('error/418.html', None, result, start_time, s3_client)
 
                     
                             
