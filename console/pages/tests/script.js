@@ -565,6 +565,21 @@ window.LiveElement.Scale.Console.Tests.testMap = {
             return 'Novel'
         })
     }, 
+    'create-custom-record': function(connection_url, system_access_url, system_root, connection_id) {
+        var record_id = window.LiveElement.Scale.Core.generateUUID4()
+        var novelNumber = Math.floor(Math.random()* 1000)
+        var record = {'@type': 'Novel', '@id': record_id, name: `Novel Named ${novelNumber}`, numberOfPages: 1000, synopsis: `${novelNumber} goes on an adventure...`}
+        return window.fetch(
+            `${connection_url}/record/Novel/${record_id}.json`, 
+            {
+                method: 'PUT', 
+                headers: {"Content-Type": "application/json"}, 
+                body: JSON.stringify(record)
+            }
+        ).then(r => {
+            return record_id
+        })
+    }, 
     
     
 }
