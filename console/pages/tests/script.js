@@ -580,6 +580,22 @@ window.LiveElement.Scale.Console.Tests.testMap = {
             return record_id
         })
     }, 
+    'install-schema': function(connection_url, system_access_url, system_root, connection_id) {
+        var schema_url = `https://schema.org/version/12.0/schemaorg-all-https.jsonld`
+        var schema_id = 'schemaorg-12.0'
+        return window.fetch(
+            `${connection_url}/system/schema/${schema_id}.json`, 
+            {
+                method: 'PUT', 
+                headers: {
+                    "Content-Type": "application/json"
+                }, 
+                body: JSON.stringify(schema_url)
+            }
+        ).then(r => {
+            return schema_id
+        })
+    }, 
     
     
 }

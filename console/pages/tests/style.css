@@ -82,4 +82,6 @@ time[name="process"] + aside {
 }
 #tests table td code.confirmation {
     min-height: 80px;
+    max-height: 300px;
+    overflow: auto;
 }

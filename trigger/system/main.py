@@ -157,7 +157,100 @@ def main(event, context):
         lambda_client = boto3.client('lambda')
         if env['path'] and len(env['path']) == 3 and env['path'][0] == 'system':
             scope, module = env['path'][1:3]
-            if scope == 'class':
+            print('line 160', scope, module)
+            if scope == 'schema':
+                print('lne 162', module)
+                try:
+                    schema_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
+                except:
+                    schema_definition = {}
+                if schema_definition:
+                    if type(schema_definition) is str:
+                        try:
+                            s3_client.put_object(Bucket=env['bucket'], Key=event['key'], Body=urllib.request.urlopen(feed).read(), ContentType='application/json')
+                        except:
+                            pass
+                    elif type(schema_definition) is dict and schema_definition.get('@graph'):
+                        graph = schema_definition['@graph']
+                        schema_id = module
+                        datatype_list = [p for p in graph if (p.get('@type') and ((type(p['@type']) is str and p['@type'] == 'schema:DataType') or (type(p['@type']) is list and 'schema:DataType' in p['@type'])))]
+                        boolean_list = [p for p in graph if (p.get('@type') and ((type(p['@type']) is str and p['@type'] == 'schema:Boolean') or (type(p['@type']) is list and 'schema:Boolean' in p['@type'])))]
+                        other_list = [p for p in graph if p['@id'] in ['schema:Float', 'schema:Integer', 'schema:CssSelectorType', 'schema:PronounceableText', 'schema:URL', 'schema:XPathType']]
+                        datatypes = {}
+                        for d in datatype_list + boolean_list + other_list:
+                            rdfslabel = d['rdfs:label'] if type(d['rdfs:label']) is str else (d['rdfs:label'].get('@value') if type(d['rdfs:label']) is dict else None)
+                            rdfscomment = d['rdfs:comment'] if type(d['rdfs:comment']) is str else (d['rdfs:comment'].get('@value') if type(d['rdfs:comment']) is dict else None)
+                            datatypes[rdfslabel] = {'label': rdfslabel, 'comment': rdfscomment, '@schema': schema_id}
+                        properties_list = [p for p in graph if (p.get('@type') and ((type(p['@type']) is str and p['@type'] == 'rdf:Property') or (type(p['@type']) is list and 'rdf:Property' in p['@type'])))]
+                        properties = {}
+                        for prop in properties_list:
+                            rdfslabel = prop['rdfs:label'] if type(prop['rdfs:label']) is str else (prop['rdfs:label'].get('@value') if type(prop['rdfs:label']) is dict else None)
+                            rdfscomment = prop['rdfs:comment'] if type(prop['rdfs:comment']) is str else (prop['rdfs:comment'].get('@value') if type(prop['rdfs:comment']) is dict else None)
+                            range_includes = prop.get('schema:rangeIncludes', [])
+                            range_includes = [range_includes] if range_includes and type(range_includes) is dict else range_includes
+                            domain_includes = prop.get('schema:domainIncludes', [])
+                            domain_includes = [domain_includes] if domain_includes and type(domain_includes) is dict else domain_includes
+                            properties[rdfslabel] = {'label': rdfslabel, 'comment': rdfscomment, 'types': [r.get('@id') for r in range_includes], 'classes': [r.get('@id') for r in domain_includes], '@schema': schema_id}
+                            properties[rdfslabel]['types'] = [r for r in properties[rdfslabel]['types'] if r]
+                            properties[rdfslabel]['types'] = [r.split(':')[-1] for r in properties[rdfslabel]['types']]
+                            properties[rdfslabel]['classes'] = [r for r in properties[rdfslabel]['classes'] if r]
+                            properties[rdfslabel]['classes'] = [r.split(':')[-1] for r in properties[rdfslabel]['classes']]
+                        def get_parent_classes(c, all_parent_classes=[]):
+                            all_parent_classes = all_parent_classes if all_parent_classes else [c]
+                            sc = classes[c].get('subclassof', [])
+                            for cc in sc:
+                                all_parent_classes.append(cc)
+                                get_parent_classes(cc, all_parent_classes)
+                            return all_parent_classes
+                        class_list = [p for p in graph if (p.get('@type') and ((type(p['@type']) is str and p['@type'] == 'rdfs:Class') or (type(p['@type']) is list and 'rdfs:Class' in p['@type'])))]
+                        classes = {}
+                        for c in class_list:
+                            rdfslabel = c['rdfs:label'] if type(c['rdfs:label']) is str else (c['rdfs:label'].get('@value') if type(c['rdfs:label']) is dict else None)
+                            rdfscomment = c['rdfs:comment'] if type(c['rdfs:comment']) is str else (c['rdfs:comment'].get('@value') if type(c['rdfs:comment']) is dict else None)
+                            subclassof = [s.get('@id') for s in c.get('rdfs:subClassOf', [])] if type(c.get('rdfs:subClassOf', [])) is list else [c.get('rdfs:subClassOf', {}).get('@id')]
+                            subclassof = [s.split(':')[-1] for s in subclassof]
+                            classes[rdfslabel] = {'label': rdfslabel, 'comment': rdfscomment, 'subclassof': subclassof, '@schema': schema_id}
+                        for n, d in classes.items():
+                            d['parents'] = sorted(list(set(get_parent_classes(n)))) ###
+                            d['parents'].remove(n)
+                        for n, d in classes.items():
+                            d['children'] = sorted(list(set([nn for nn, dd in classes.items() if n in dd.get('parents', [])])))
+                        for p, pd in properties.items():
+                            pd['classes'] = pd.get('classes', [])
+                            for pdc in pd['classes']:
+                                pd['classes'] = sorted(list(set(pd['classes'] + classes.get(pdc, {}).get('children', []))))
+                        for n, d in classes.items():
+                            d['properties'] = { p: properties.get(p, {}).get('types', []) for p in sorted(list(set([pn for pn, pd in properties.items() if n in pd.get('classes', [])]))) }
+                            d['@compiled'] = True
+                        for datatype_name, datatype_definition in datatypes.items():
+                            datatype_key = '{data_root}/system/datatype/{datatype_name}.json'.format(data_root=env['data_root'], datatype_name=datatype_name)
+                            new_datatype_body = bytes(json.dumps(datatype_definition, sort_keys=True), 'utf-8')
+                            try:
+                                old_datatype_body = s3_client.get_object(Bucket=env['bucket'], Key=datatype_key)['Body'].read()
+                            except:
+                                old_datatype_body = None
+                            if new_datatype_body != old_datatype_body:
+                                s3_client.put_object(Bucket=env['bucket'], ContentType='application/json', Body=new_datatype_body, Key=datatype_key)
+                            
+                        for property_name, property_definition in properties.items():
+                            property_key = '{data_root}/system/property/{property_name}.json'.format(data_root=env['data_root'], property_name=property_name)
+                            new_property_body = bytes(json.dumps(property_definition, sort_keys=True), 'utf-8')
+                            try:
+                                old_property_body = s3_client.get_object(Bucket=env['bucket'], Key=property_key)['Body'].read()
+                            except:
+                                old_property_body = None
+                            if new_property_body != old_property_body:
+                                s3_client.put_object(Bucket=env['bucket'], ContentType='application/json', Body=new_property_body, Key=property_key)
+                        for class_name, class_definition in classes.items():
+                            class_key = '{data_root}/system/class/{class_name}.json'.format(data_root=env['data_root'], class_name=class_name)
+                            new_class_body = bytes(json.dumps(class_definition, sort_keys=True), 'utf-8')
+                            try:
+                                old_class_body = s3_client.get_object(Bucket=env['bucket'], Key=class_key)['Body'].read()
+                            except:
+                                old_class_body = None
+                            if new_class_body != old_class_body:
+                                s3_client.put_object(Bucket=env['bucket'], Body=new_class_body, ContentType='application/json', Key=class_key)
+            elif scope == 'class':
                 try:
                     class_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
                 except:
@@ -181,105 +274,92 @@ def main(event, context):
                                         class_definition['properties'][property_name] = class_definition['properties'].get(property_name, [])
                                         class_definition['properties'][property_name].insert(0, valid_type)
                         if class_definition_json != json.dumps(class_definition):
+                            '''
                             s3_client.put_object(Bucket=env['bucket'], Key=event['key'], Body=bytes(json.dumps(class_definition), 'utf-8'), ContentType='application/json')
+                            '''
             else:
-                module_configuration = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
-                starting_module_configuration_json = json.dumps(module_configuration)
-                module_state = module_configuration.get('state')
-                processor_full_name = '-extension-'.join(context.function_name.rsplit('-trigger-', 1))
-                processor_full_name = '-{scope}-{module}'.format(scope=scope, module=module).join(processor_full_name.rsplit('-system', 1))
-                if module_state in ['install', 'update']:
-                    try:
-                        processor_state = lambda_client.get_function(FunctionName=processor_full_name)
-                    except:
-                        processor_state = {}
-                    if module_configuration.get('processor') and type(module_configuration['processor']) is dict:
-                        if module_state == 'install': 
-                            if not processor_state:
-                                module_configuration['processor']['code_checksum'] = deploy_processor(processor_full_name, module_configuration['processor'], lambda_client, env, 'install')
-                                if module_configuration['processor']['code_checksum']: 
+                try:
+                    module_configuration = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
+                except:
+                    module_configuration = {}
+                if module_configuration:
+                    starting_module_configuration_json = json.dumps(module_configuration)
+                    module_state = module_configuration.get('state')
+                    processor_full_name = '-extension-'.join(context.function_name.rsplit('-trigger-', 1))
+                    processor_full_name = '-{scope}-{module}'.format(scope=scope, module=module).join(processor_full_name.rsplit('-system', 1))
+                    if module_state in ['install', 'update']:
+                        try:
+                            processor_state = lambda_client.get_function(FunctionName=processor_full_name)
+                        except:
+                            processor_state = {}
+                        if module_configuration.get('processor') and type(module_configuration['processor']) is dict:
+                            if module_state == 'install': 
+                                if not processor_state:
+                                    module_configuration['processor']['code_checksum'] = deploy_processor(processor_full_name, module_configuration['processor'], lambda_client, env, 'install')
+                                    if module_configuration['processor']['code_checksum']: 
+                                        lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
+                                        module_configuration['state'] = 'installed'
+                                    else: 
+                                        module_configuration['state'] = 'error'
+                                else:
                                     lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
                                     module_configuration['state'] = 'installed'
-                                else: 
+                                if scope == 'daemon' and module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
+                                    deploy_rules(module_configuration, scope, module, env)
+                            elif module_state == 'update': 
+                                if processor_state:
+                                    module_configuration['processor']['code_checksum'] = deploy_processor(processor_full_name, module_configuration['processor'], lambda_client, env, 'update')
+                                    if module_configuration['processor']['code_checksum']: 
+                                        module_configuration['state'] = 'updated'
+                                    else: 
+                                        module_configuration['state'] = 'error'
+                                else:
                                     module_configuration['state'] = 'error'
-                            else:
-                                lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
-                                module_configuration['state'] = 'installed'
-                            if scope == 'daemon' and module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
-                                deploy_rules(module_configuration, scope, module, env)
-                        elif module_state == 'update': 
-                            if processor_state:
-                                module_configuration['processor']['code_checksum'] = deploy_processor(processor_full_name, module_configuration['processor'], lambda_client, env, 'update')
-                                if module_configuration['processor']['code_checksum']: 
-                                    module_configuration['state'] = 'updated'
-                                else: 
-                                    module_configuration['state'] = 'error'
-                            else:
+                        else:
+                            if not processor_state:
                                 module_configuration['state'] = 'error'
-                    else:
-                        if not processor_state:
-                            module_configuration['state'] = 'error'
-                if scope == 'daemon' and module_state == 'install' and module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
-                    deploy_rules(module_configuration, scope, module, env)                    
-                if scope == 'daemon' and module_state == 'run':
-                    module_configuration['connection'] = module_configuration.get('connection', str(uuid.uuid4()))
-                    module_configuration['mask'] = module_configuration.get('mask', {'record': {'GET': {'*': '*'}}})
-                    connection_record = {'name': module, 'daemon': module, 'mask': module_configuration['mask']}
-                    write_env = {**env, 'connection_id': module_configuration['connection']}
-                    lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'connection', 'entity': connection_record, 'method': 'PUT', '_env': write_env}), 'utf-8'))
-                    if module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
-                        events = boto3.client('events')
-                        for rule_name, rule in module_configuration['schedule'].items():
-                            rule_full_name = '{lambda_namespace}-{scope}-{module}--{name}'.format(lambda_namespace=env['lambda_namespace'], scope=scope, module=module, name=rule_name.lower().replace(' ', '-'))
-                            try:
-                                full_rule = events.describe_rule(Name=rule_full_name)
-                            except:
-                                full_rule = {}
-                            if full_rule:
-                                if full_rule.get('State') != 'ENABLED':
-                                    events.enable_rule(Name=rule_full_name)
-                                processor_arn = 'arn:aws:lambda:{core_region}:{account_id}:function:{processor_full_name}'.format(core_region=env['core_region'], account_id=env['account_id'], processor_full_name=processor_full_name)
-                                try:
-                                    processor_rules = events.list_rule_names_by_target(TargetArn=processor_arn)['RuleNames']
-                                except:
-                                    processor_rules = []
-                                if rule_full_name not in processor_rules:
-                                    events.put_targets(Rule=rule_full_name, Targets=[{'Id': processor_full_name, 'Arn': processor_arn}])
-                                    try:
-                                        lambda_client.remove_permission(FunctionName=processor_full_name, StatementId=module)
-                                    except:
-                                        pass
-                                    lambda_client.add_permission(
-                                        FunctionName=processor_full_name, StatementId=module, Action='lambda:InvokeFunction', 
-                                        Principal='events.amazonaws.com', SourceAccount=env['account_id'], 
-                                        SourceArn='arn:aws:events:{core_region}:{account_id}:rule/{rule_full_name}'.format(core_region=env['core_region'], account_id=env['account_id'], rule_full_name=rule_full_name)
-                                    )
-                    module_configuration['state'] = 'running'
-                elif scope == 'daemon' and  module_state == 'pause':
-                    if module_configuration.get('connection'):
+                    if scope == 'daemon' and module_state == 'install' and module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
+                        deploy_rules(module_configuration, scope, module, env)                    
+                    if scope == 'daemon' and module_state == 'run':
+                        module_configuration['connection'] = module_configuration.get('connection', str(uuid.uuid4()))
+                        module_configuration['mask'] = module_configuration.get('mask', {'record': {'GET': {'*': '*'}}})
+                        connection_record = {'name': module, 'daemon': module, 'mask': module_configuration['mask']}
                         write_env = {**env, 'connection_id': module_configuration['connection']}
-                        lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'connection', 'method': 'DELETE', '_env': write_env}), 'utf-8'))
-                        del module_configuration['connection']
-                        module_configuration['state'] = 'paused'
-                    if module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
-                        events = boto3.client('events')
-                        for rule_name, rule in module_configuration['schedule'].items():
-                            rule_full_name = '{lambda_namespace}-{scope}-{module}--{name}'.format(lambda_namespace=env['lambda_namespace'], scope=scope, module=module, name=rule_name.lower().replace(' ', '-'))
-                            processor_arn = 'arn:aws:lambda:{core_region}:{account_id}:function:{processor_full_name}'.format(core_region=env['core_region'], account_id=env['account_id'], processor_full_name=processor_full_name)
-                            try:
-                                lambda_client.remove_permission(FunctionName=processor_full_name, StatementId=module)
-                            except:
-                                pass
-                            try:
-                                processor_rules = events.list_rule_names_by_target(TargetArn=processor_arn)['RuleNames']
-                            except:
-                                processor_rules = []
-                            if rule_full_name in processor_rules:
-                                events.remove_targets(Rule=rule_full_name, Ids=[processor_full_name], Force=True)
-                            if len(processor_rules) == 1:
-                                events.disable_rule(Name=rule_full_name)
-                if module_state == 'remove':
-                    if scope == 'daemon':
+                        lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'connection', 'entity': connection_record, 'method': 'PUT', '_env': write_env}), 'utf-8'))
+                        if module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
+                            events = boto3.client('events')
+                            for rule_name, rule in module_configuration['schedule'].items():
+                                rule_full_name = '{lambda_namespace}-{scope}-{module}--{name}'.format(lambda_namespace=env['lambda_namespace'], scope=scope, module=module, name=rule_name.lower().replace(' ', '-'))
+                                try:
+                                    full_rule = events.describe_rule(Name=rule_full_name)
+                                except:
+                                    full_rule = {}
+                                if full_rule:
+                                    if full_rule.get('State') != 'ENABLED':
+                                        events.enable_rule(Name=rule_full_name)
+                                    processor_arn = 'arn:aws:lambda:{core_region}:{account_id}:function:{processor_full_name}'.format(core_region=env['core_region'], account_id=env['account_id'], processor_full_name=processor_full_name)
+                                    try:
+                                        processor_rules = events.list_rule_names_by_target(TargetArn=processor_arn)['RuleNames']
+                                    except:
+                                        processor_rules = []
+                                    if rule_full_name not in processor_rules:
+                                        events.put_targets(Rule=rule_full_name, Targets=[{'Id': processor_full_name, 'Arn': processor_arn}])
+                                        try:
+                                            lambda_client.remove_permission(FunctionName=processor_full_name, StatementId=module)
+                                        except:
+                                            pass
+                                        lambda_client.add_permission(
+                                            FunctionName=processor_full_name, StatementId=module, Action='lambda:InvokeFunction', 
+                                            Principal='events.amazonaws.com', SourceAccount=env['account_id'], 
+                                            SourceArn='arn:aws:events:{core_region}:{account_id}:rule/{rule_full_name}'.format(core_region=env['core_region'], account_id=env['account_id'], rule_full_name=rule_full_name)
+                                        )
+                        module_configuration['state'] = 'running'
+                    elif scope == 'daemon' and  module_state == 'pause':
+                        if module_configuration.get('connection'):
+                            write_env = {**env, 'connection_id': module_configuration['connection']}
+                            lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'connection', 'method': 'DELETE', '_env': write_env}), 'utf-8'))
+                            del module_configuration['connection']
+                            module_configuration['state'] = 'paused'
                         if module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
                             events = boto3.client('events')
                             for rule_name, rule in module_configuration['schedule'].items():
@@ -295,25 +375,44 @@ def main(event, context):
                                     processor_rules = []
                                 if rule_full_name in processor_rules:
                                     events.remove_targets(Rule=rule_full_name, Ids=[processor_full_name], Force=True)
-                                try:
-                                    rule_targets = events.list_targets_by_rule(Rule=rule_full_name)['Targets']
-                                except:
-                                    rule_targets = []
-                                if not rule_targets:
-                                    events.delete_rule(Name=rule_full_name, Force=True)
-                    if module_configuration.get('ephemeral'):
-                        lambda_client.delete_function(FunctionName=processor_full_name)
-                    module_configuration['state'] = 'removed'
-                if module_state in ['install', 'update'] and module_configuration['state'] != 'error':
-                    if module_configuration.get('entity_map', {}):
-                        deploy_entities_count = deploy_entities(module_configuration, lambda_client, env, client_context)
-                        if deploy_entities_count[0] != deploy_entities_count[1]:
-                            module_configuration['state'] = 'error'
-                    if module_state == 'install':
-                        module_configuration['state'] = 'installed' 
-                    elif module_state == 'update':
-                        module_configuration['state'] = 'updated' 
-                if starting_module_configuration_json != json.dumps(module_configuration):
-                    s3_client.put_object(Bucket=env['bucket'], Key=event['key'], Body=bytes(json.dumps(module_configuration), 'utf-8'))
+                                if len(processor_rules) == 1:
+                                    events.disable_rule(Name=rule_full_name)
+                    if module_state == 'remove':
+                        if scope == 'daemon':
+                            if module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
+                                events = boto3.client('events')
+                                for rule_name, rule in module_configuration['schedule'].items():
+                                    rule_full_name = '{lambda_namespace}-{scope}-{module}--{name}'.format(lambda_namespace=env['lambda_namespace'], scope=scope, module=module, name=rule_name.lower().replace(' ', '-'))
+                                    processor_arn = 'arn:aws:lambda:{core_region}:{account_id}:function:{processor_full_name}'.format(core_region=env['core_region'], account_id=env['account_id'], processor_full_name=processor_full_name)
+                                    try:
+                                        lambda_client.remove_permission(FunctionName=processor_full_name, StatementId=module)
+                                    except:
+                                        pass
+                                    try:
+                                        processor_rules = events.list_rule_names_by_target(TargetArn=processor_arn)['RuleNames']
+                                    except:
+                                        processor_rules = []
+                                    if rule_full_name in processor_rules:
+                                        events.remove_targets(Rule=rule_full_name, Ids=[processor_full_name], Force=True)
+                                    try:
+                                        rule_targets = events.list_targets_by_rule(Rule=rule_full_name)['Targets']
+                                    except:
+                                        rule_targets = []
+                                    if not rule_targets:
+                                        events.delete_rule(Name=rule_full_name, Force=True)
+                        if module_configuration.get('ephemeral'):
+                            lambda_client.delete_function(FunctionName=processor_full_name)
+                        module_configuration['state'] = 'removed'
+                    if module_state in ['install', 'update'] and module_configuration['state'] != 'error':
+                        if module_configuration.get('entity_map', {}):
+                            deploy_entities_count = deploy_entities(module_configuration, lambda_client, env, client_context)
+                            if deploy_entities_count[0] != deploy_entities_count[1]:
+                                module_configuration['state'] = 'error'
+                        if module_state == 'install':
+                            module_configuration['state'] = 'installed' 
+                        elif module_state == 'update':
+                            module_configuration['state'] = 'updated' 
+                    if starting_module_configuration_json != json.dumps(module_configuration):
+                        s3_client.put_object(Bucket=env['bucket'], Key=event['key'], Body=bytes(json.dumps(module_configuration), 'utf-8'))
             counter = counter + 1
     return counter

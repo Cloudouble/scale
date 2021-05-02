@@ -87,6 +87,8 @@ def main(event, context):
             valid = valid_view(entity)
         elif entity_type in ['system', 'mask']:
             valid = type(entity) is dict
+        elif entity_type == 'schema':
+            valid = type(entity) is dict and entity.get('@context') and type(entity.get('@context')) is dict and entity.get('@graph') and type(entity.get('@graph')) is list and all([type(n) is dict for n in entity['@graph']])
         elif entity_type == 'record':
             if entity.get('@type') and entity.get('@id'):
                 try:

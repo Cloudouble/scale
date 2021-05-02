@@ -1,6 +1,6 @@
 env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_", "shared": 0, "authentication_namespace": "LiveElementScale"}
 
-import json, boto3, base64, uuid, hashlib
+import json, boto3, base64, uuid, hashlib, urllib
 
 def uuid_valid(s):
     try:
@@ -117,6 +117,38 @@ def main(event, context):
                             ContentType='application/json'
                         )
                     counter = counter + 1
+            elif len(env['path']) == 3 and env['path'][0] == 'system' and env['path'][1] == 'schema':
+                try:
+                    schema_definition = json.loads( base64.b64decode(request['body']).decode('utf-8'))
+                except:
+                    schema_definition = {}
+                if schema_definition:
+                    allowed = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), Payload=bytes(json.dumps({
+                        'entity_type': 'schema', 'method': 'PUT', 'path': env['path']}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
+                    if allowed:
+                        if type(schema_definition) is str:
+                            try:
+                                schema_definition = json.loads(urllib.request.urlopen(schema_definition).read().decode('utf-8'))
+                            except:
+                                pass
+                        elif type(schema_definition) is dict:
+                            pass
+                        else:
+                            schema_definition = None
+                        if schema_definition and type(schema_definition) is dict:
+                            is_valid =json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'validate'), Payload=bytes(json.dumps({
+                            'entity': schema_definition, 
+                            'entity_type': 'schema', 
+                            'class_name': None, 
+                            'entity_id': env['path'][2]}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
+                            if is_valid:
+                                s3_client.put_object(
+                                    Bucket=env['bucket'], 
+                                    Body=bytes(json.dumps(schema_definition), 'utf-8'), 
+                                    Key='{data_root}/system/schema/{schema_id}.json'.format(data_root=env['data_root'], schema_id=env['path'][2]), 
+                                    ContentType='application/json'
+                                )
+                                counter = counter + 1
             elif len(env['path']) == 3 and env['path'][0] == 'channel':
                 channel_id = env['path'][1] if uuid_valid(env['path'][1]) else None
                 channel_object = bucket.Object('{data_root}/channel/{channel_id}/connect.json'.format(data_root=env['data_root'], channel_id=channel_id))
@@ -140,12 +172,6 @@ def main(event, context):
             elif len(env['path']) >= 2 and env['path'][0] in ['asset', 'static', 'error']:
                 usable_path = env['path'][1:]
                 entity_type = env['path'][0]
-                print(json.dumps({
-                    'entity_type': entity_type, 
-                    'method': request['method'], 
-                    'path': usable_path, 
-                    '_env': env
-                }))
                 allowed = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'mask'), Payload=bytes(json.dumps({
                     'entity_type': entity_type, 
                     'method': request['method'], 
