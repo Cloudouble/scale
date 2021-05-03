@@ -1,4 +1,4 @@
-import json, boto3, base64, datetime, uuid
+import json, boto3, base64, datetime, uuid, re
 from datetime import datetime
 from datetime import date
 from datetime import time
@@ -25,6 +25,9 @@ def uuid_valid(s):
         return False
     return True
         
+def getprocessor(env, name, source='core', scope=None):
+    return name if ':' in name else '{lambda_namespace}-{source}-{name}'.format(lambda_namespace=env['lambda_namespace'], source=source, name='{}-{}'.format(scope, name) if scope else name)
+    
 
 validators = {
     'True': lambda i: type(i) is bool and i, 
@@ -100,4 +103,32 @@ def main(event, context):
                     non_core_record_properties = [p for p in entity if p and type(p) is str and p[0] != '@']
                     if type_properties_map and all([type_properties_map.get(p) for p in non_core_record_properties]):
                         valid = all([ any([validators.get(t, validators['Record'])(entity[p]) for t in type_properties_map[p]]) for p in non_core_record_properties ])
+                        if not valid:
+                            invalid_properties = []
+                            datatypes_index = {}
+                            for property_name in non_core_record_properties:
+                                property_valid = False
+                                for t in type_schema.get(property_name, []):
+                                    if t in validators:
+                                        property_valid = validators[t](entity[property_name])
+                                    else:
+                                        if not datatypes_index:
+                                            datatypes_index_path = '{data_root}/system/datatype/index.json'.format(data_root=env['data_root'])
+                                            datatypes_index = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=datatypes_index_path)['Body'].read().decode('utf-8'))
+                                        if datatypes_index:
+                                            datatype_definition = datatypes_index.get(t)
+                                            if datatype_definition:
+                                                if datatype_definition.get('@regex'):
+                                                    property_valid = re.fullmatch(datatype_definition['@regex'], entity[property_name])
+                                                if not property_valid and datatype_definition.get('@lambda'):
+                                                    property_valid = eval(datatype_definition['@lambda'], {}, {'class': entity.get('@type'), 'property': property_name, 'datatype': t, 'value': entity[property_name], 'record': entity})
+                                                if not property_valid and datatype_definition.get('@processor'):
+                                                    try:
+                                                        property_valid = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, datatype_definition['@processor'], 'extension', 'validator'), 
+                                                        Payload=bytes(json.dumps({'class': entity.get('@type'), 'property': property_name, 'datatype': t, 'value': entity[property_name], 'record': entity}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8')):
+                                                    except:
+                                                        property_valid = False
+                                if not property_valid:
+                                    valid = False
+                                    break
     return valid

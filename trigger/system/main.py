@@ -157,9 +157,7 @@ def main(event, context):
         lambda_client = boto3.client('lambda')
         if env['path'] and len(env['path']) == 3 and env['path'][0] == 'system':
             scope, module = env['path'][1:3]
-            print('line 160', scope, module)
             if scope == 'schema':
-                print('lne 162', module)
                 try:
                     schema_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
                 except:
@@ -231,7 +229,6 @@ def main(event, context):
                                 old_datatype_body = None
                             if new_datatype_body != old_datatype_body:
                                 s3_client.put_object(Bucket=env['bucket'], ContentType='application/json', Body=new_datatype_body, Key=datatype_key)
-                            
                         for property_name, property_definition in properties.items():
                             property_key = '{data_root}/system/property/{property_name}.json'.format(data_root=env['data_root'], property_name=property_name)
                             new_property_body = bytes(json.dumps(property_definition, sort_keys=True), 'utf-8')
@@ -258,25 +255,35 @@ def main(event, context):
                 if not (class_definition and type(class_definition.get('label')) is str and type(class_definition.get('comment')) is str and type(class_definition.get('properties', [])) is dict and all([type(v) is list for v in class_definition['properties'].values()])):
                     class_definition = s3_client.delete_object(Bucket=env['bucket'], Key=event['key'])
                 else:
-                    if class_definition.get('subclassof', []) and type(class_definition['subclassof']) is list:
-                        class_definition_json = json.dumps(class_definition)
-                        for parent_class in reversed(class_definition['subclassof']):
-                            try:
-                                parent_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/schema/classes/{parent_class}.json'.format(data_root=env['data_root'], parent_class=parent_class))['Body'].read().decode('utf-8'))
-                            except:
-                                try: 
-                                    parent_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/system/class/{parent_class}.json'.format(data_root=env['data_root'], parent_class=parent_class))['Body'].read().decode('utf-8'))
+                    if not class_definition.get('@compiled'):
+                        if class_definition.get('subclassof', []) and type(class_definition['subclassof']) is list:
+                            class_definition_json = json.dumps(class_definition)
+                            for parent_class in reversed(class_definition['subclassof']):
+                                try:
+                                    parent_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/schema/classes/{parent_class}.json'.format(data_root=env['data_root'], parent_class=parent_class))['Body'].read().decode('utf-8'))
                                 except:
-                                    parent_definition = {}
-                            for property_name, valid_types in parent_definition.get('properties', {}).items():
-                                for valid_type in reversed(valid_types):
-                                    if valid_type not in class_definition['properties'].get(property_name, []):
-                                        class_definition['properties'][property_name] = class_definition['properties'].get(property_name, [])
-                                        class_definition['properties'][property_name].insert(0, valid_type)
-                        if class_definition_json != json.dumps(class_definition):
-                            '''
-                            s3_client.put_object(Bucket=env['bucket'], Key=event['key'], Body=bytes(json.dumps(class_definition), 'utf-8'), ContentType='application/json')
-                            '''
+                                    try: 
+                                        parent_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/system/class/{parent_class}.json'.format(data_root=env['data_root'], parent_class=parent_class))['Body'].read().decode('utf-8'))
+                                    except:
+                                        parent_definition = {}
+                                for property_name, valid_types in parent_definition.get('properties', {}).items():
+                                    for valid_type in reversed(valid_types):
+                                        if valid_type not in class_definition['properties'].get(property_name, []):
+                                            class_definition['properties'][property_name] = class_definition['properties'].get(property_name, [])
+                                            class_definition['properties'][property_name].insert(0, valid_type)
+                            if class_definition_json != json.dumps(class_definition):
+                                s3_client.put_object(Bucket=env['bucket'], Key=event['key'], Body=bytes(json.dumps(class_definition), 'utf-8'), ContentType='application/json')
+            elif scope == 'datatype':
+                print('line 277')
+                datatypes_list = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix='{data_root}/system/datatype/'.format(data_root=env['data_root']))['Contents']
+                datatypes_index = {}
+                datatypes_index_path = '{data_root}/system/datatype/index.json'.format(data_root=env['data_root'])
+                for datatype_definition_entry in datatypes_list:
+                    if datatype_definition_entry['Key'] != datatypes_index_path:
+                        datatype_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=datatype_definition_entry['Key'])['Body'].read().decode('utf-8'))
+                        datatypes_index[datatype_definition_entry['Key'].split('/')[-1].replace('.json', '')] = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=datatype_definition_entry['Key'])['Body'].read().decode('utf-8'))
+                        counter = counter + 1
+                s3_client.put_object(Bucket=env['bucket'], Key=datatypes_index_path, Body=bytes(json.dumps(datatypes_index), 'utf-8'), ContentType='application/json')
             else:
                 try:
                     module_configuration = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
