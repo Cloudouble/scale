@@ -1,1 +1,41 @@
 <p>An integrated coding interface to configure and develop PWAs and web sites.</p>
+<div name="toolbar">
+    <label>
+        Entity Type
+        <select name="entity-type">
+            <option value="channel">Channel</option>
+            <option value="connection">Connection</option>
+            <option value="error">Error</option>
+            <option value="feed">Feed</option>
+            <option value="mask">Mask</option>
+            <option value="query">Query</option>
+            <option value="record">Record</option>
+            <option value="subscription">Subscription</option>
+            <option value="system">System</option>
+            <option value="view">View</option>
+            <option value="asset">Asset</option>
+            <option value="static">Static</option>
+        </select>
+        
+    </label>
+    
+</div>
+<form name="channel">
+    <label>
+        Channel ID
+        <input name="channel_id" type="uuid" />
+    </label>
+    <label>
+        Receive Key
+        <input name="receiveKey" type="uuid" />
+    </label>
+    <label>
+        Send Key
+        <input name="sendKey" type="uuid" />
+    </label>
+    <label>
+        Admin Key
+        <input name="adminKey" type="uuid" />
+    </label>
+    <button type="submit">Submit</button>
+</form>
