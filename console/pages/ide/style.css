@@ -19,6 +19,12 @@
     position: absolute;
     left: 180px;
     top: 60px;
-    padding-top: 30px;
     width: calc(100% - 200px);
+    display: none;
+}
+#ide form > h2 {
+    margin-top: 0;
+}
+#ide[entity-type="channel"] form[name="channel"] {
+    display: block;
 }

@@ -6,9 +6,15 @@ ide.querySelectorAll('input[type="uuid"]').forEach(uuidInput => {
     uuidInput.setAttribute('type', 'text')
     var generateButton = document.createElement('button')
     generateButton.innerHTML = '+'
+    generateButton.setAttribute('title', 'Click to fill with a new UUID v4')
     generateButton.addEventListener('click', event => {
         event.preventDefault()
         uuidInput.value = window.LiveElement.Scale.Core.generateUUID4()
     })
     uuidInput.after(generateButton)
+})
+ide.querySelectorAll('div[name="sidebar"] button').forEach(button => {
+    button.addEventListener('click', event => {
+        ide.setAttribute('entity-type', button.innerHTML.toLowerCase())
+    })
 })
