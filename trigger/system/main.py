@@ -314,6 +314,50 @@ def main(event, context):
                         counter = counter + 1
                 if current_datatypes_index_json != json.dumps(datatypes_index, sort_keys=True):
                     s3_client.put_object(Bucket=env['bucket'], Key=datatypes_index_path, Body=bytes(json.dumps(datatypes_index), 'utf-8'), ContentType='application/json')
+            elif scope == 'snapshot':
+                try:
+                    snapshot_configuration = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
+                except:
+                    snapshot_configuration = {}
+                current_snapshot_configuration = json.dumps(snapshot_configuration, sort_keys=True)    
+                if snapshot_configuration and snapshot_configuration.get('directives', {}) and not snapshot_configuration.get('entity_map', {}):
+                    def process_directive(key, directive, context):
+                        def process_entry(entry, directive, context):
+                            name_key = entry['Key'].strip('/').split('/')[-1].replace('.json', '')
+                            if directive is True or (type(directive) is list and name_key in directive) or (type(directive) is str and '=' in directive):
+                                obj = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=entry['Key'])['Body'].read().decode('utf-8'))
+                                if directive is True or (type(directive) is list and name_key in directive):
+                                    context[name_key] = obj
+                                else:
+                                    field, value = directive.split('=')[0:2]
+                                    if obj.get(field) == value:
+                                        context[name_key] = obj
+                        list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix=key)
+                        for entry in list_response.get('Contents', []):
+                            process_entry(entry, directive, context)
+                        c = 1000000000
+                        while c and list_response.get('IsTruncated') and list_response.get('NextContinuationToken'):
+                            list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix=key, ContinuationToken=list_response.get('NextContinuationToken'))
+                            for entry in list_response.get('Contents', []):
+                                process_entry(entry, directive, context)
+                            c = c - 1
+                    directives = snapshot_configuration['directives']
+                    entity_map = {}
+                    for entity_type, entity_directives in directives.items():
+                        if entity_type == 'system':
+                            entity_map['system'] = {}
+                            for scope, scope_directive in entity_directives.items():
+                                entity_map['system'][scope] = {}
+                                scope_key = '{data_root}/system/{scope}/'.format(data_root=env['data_root'], scope=scope)
+                                process_directive(scope_key, scope_directive, entity_map['system'][scope])
+                        elif entity_type == 'view':
+                            entity_map['view'] = {}
+                            scope_key = '{data_root}/view/'.format(data_root=env['data_root'])
+                            process_directive(scope_key, entity_directives, entity_map['view'])
+                    snapshot_configuration = {'directives': directives, 'entity_map': entity_map}
+                    if current_snapshot_configuration != json.dumps(snapshot_configuration, sort_keys=True):
+                        s3_client.put_object(Bucket=env['bucket'], Key=event['key'], Body=bytes(json.dumps(snapshot_configuration), 'utf-8'), ContentType='application/json')
+                        counter = counter + 1
             else:
                 try:
                     module_configuration = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))

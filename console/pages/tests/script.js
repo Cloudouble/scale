@@ -667,6 +667,28 @@ window.LiveElement.Scale.Console.Tests.testMap = {
             return module_name
         })
     }, 
-    
-    
+    'build-snapshot': function(connection_url, system_access_url, system_root, connection_id) {
+        var snapshot_id = window.LiveElement.Scale.Core.generateUUID4()
+        var snapshot_definition = {
+            'directives': {
+                'system': {
+                    'class': ['Novel', 'Novella'],
+                    'authentication': true
+                }, 
+                'view': 'processor=json'
+            }
+        }
+        return window.fetch(
+            `${connection_url}/system/snapshot/${snapshot_id}.json`, 
+            {
+                method: 'PUT', 
+                headers: {
+                    "Content-Type": "application/json"
+                }, 
+                body: JSON.stringify(snapshot_definition) 
+            }
+        ).then(r => {
+            return snapshot_id
+        })
+    }
 }
