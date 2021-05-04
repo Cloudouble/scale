@@ -13,23 +13,39 @@
     <button>System</button>
     <button>View</button>
 </div>
-<form name="channel">
+<section name="channel">
     <h2>Channel</h2>
-    <label>
-        Channel ID
-        <input name="channel_id" type="uuid" />
-    </label>
-    <label>
-        Receive Key
-        <input name="receiveKey" type="uuid" />
-    </label>
-    <label>
-        Send Key
-        <input name="sendKey" type="uuid" />
-    </label>
-    <label>
-        Admin Key
-        <input name="adminKey" type="uuid" />
-    </label>
-    <button type="submit">Submit</button>
-</form>
+    <nav>
+        <input type="search" placeholder="uuid or @name prefix" />
+        <button>Browse</button>
+        <button>Create</button>
+        <ul>
+            <li>abc</li>
+            <li>def</li>
+            <li>ghi</li>
+        </ul>
+    </nav>
+    <div>
+        <label>
+            Channel @name
+            <input name="channel_name" type="text" />
+        </label>
+        <label>
+            Channel ID
+            <input name="channel_id" type="uuid" />
+        </label>
+        <label>
+            Receive Key
+            <input name="receiveKey" type="uuid" />
+        </label>
+        <label>
+            Send Key
+            <input name="sendKey" type="uuid" />
+        </label>
+        <label>
+            Admin Key
+            <input name="adminKey" type="uuid" />
+        </label>
+        <button type="submit">Save</button>
+    </div>
+</section>
