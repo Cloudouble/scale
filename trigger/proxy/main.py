@@ -16,7 +16,7 @@ triggers = {
     'feed/{class_name}/{uuid}/{uuid}/{uuid}.json': ['feed'], 
     'subscription/{class_name}/{uuid}/{uuid}/{uuid}.json': ['subscription'], 
     'version/{class_name}/{uuid}/[a-zA-Z0-9\._-]+.json': ['version'], 
-    'system/[a-z0-9\-]+/[a-z0-9\-]+.json': ['system']
+    'system/[a-z0-9\-]+/[a-zA-Z0-9\._\-]+.json': ['system']
 }
 
 

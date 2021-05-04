@@ -61,62 +61,69 @@ def deploy_processor(processor_full_name, processor_configuration, lambda_client
             except:
                 return False
 
-def validate_and_write(entity_type, class_name, entity_id, connection_id, subentity_id, entity, env, client_context):
+def validate_and_write(entity_type, class_name, entity_id, connection_id, subentity_id, entity, env, client_context, lambda_client, remove=False):
     if entity_type in ['feed', 'subscription'] and connection_id and subentity_id:
         entity_key = '{data_root}/{entity_type}/{class_name}/{entity_id}/{connection_id}/{subentity_id}.json'.format(data_root=env['data_root'], entity_type=entity_type, class_name=class_name, entity_id=entity_id, connection_id=connection_id, subentity_id=subentity_id)
     elif entity_type in ['record', 'query', 'system']:
         entity_key = '{data_root}/{entity_type}/{class_name}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=entity_type, class_name=class_name, entity_id=entity_id)
     elif entity_type in ['view']:
         entity_key = '{data_root}/{entity_type}/{entity_id}.json'.format(data_root=env['data_root'], entity_type=entity_type, entity_id=entity_id)
-    if json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'validate'), Payload=bytes(json.dumps({'entity_type': entity_type, 'class_name': class_name, 'entity_id': entity_id, 'entity': entity}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8')):
-        lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': entity_type, 'method': 'PUT', 'entity': entity, 'entity_key': entity_key}), 'utf-8'), ClientContext=client_context)
+    if remove:
+        write_env = {**env, 'connection_id': env.get('connection_id', '00000000-0000-0000-0000-000000000000')}
+        lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': entity_type, 'method': 'DELETE', 'entity': entity, 'entity_key': entity_key, '_env': write_env}), 'utf-8'), InvocationType='Event')
         return 1
     else:
-        return 0
+        if json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'validate'), Payload=bytes(json.dumps({'entity_type': entity_type, 'class_name': class_name, 'entity_id': entity_id, 'entity': entity}), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8')):
+            write_env = {**env, 'connection_id': env.get('connection_id', '00000000-0000-0000-0000-000000000000')}
+            lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': entity_type, 'method': 'PUT', 'entity': entity, 'entity_key': entity_key, '_env': write_env}), 'utf-8'), InvocationType='Event')
+            return 1
+        else:
+            return 0
 
-def deploy_entities(module_configuration, lambda_client, env, client_context):
+def deploy_entities(module_configuration, lambda_client, env, client_context, remove=False):
     count = [0, 0]
     for entity_type, entities in module_configuration.get('entity_map', {}).items():
         if entity_type == 'record':
             for class_name, records in entities.items():
                 for record_id, record in records.items():
                     count[0] = count[0] + 1
-                    count[1] = count[1] + validate_and_write(entity_type, class_name, record_id, None, None, record, env, client_context)
+                    count[1] = count[1] + validate_and_write(entity_type, class_name, record_id, None, None, record, env, client_context, lambda_client, remove=remove)
         elif entity_type == 'query':
             for class_name, queries in entities.items():
                 for query_id, query in queries.items():
                     count[0] = count[0] + 1
-                    count[1] = count[1] + validate_and_write(entity_type, class_name, query_id, None, None, query, env, client_context)
+                    count[1] = count[1] + validate_and_write(entity_type, class_name, query_id, None, None, query, env, client_context, lambda_client, remove=remove)
         elif entity_type == 'feed':
             for class_name, queries in entities.items():
                 for query_id, feeds in queries.items():
                     for feed_id, feed in feeds.items():
                         count[0] = count[0] + 1
-                        count[1] = count[1] + validate_and_write(entity_type, class_name, query_id, module_configuration.get('connection'), feed_id, feed, env, client_context)
+                        count[1] = count[1] + validate_and_write(entity_type, class_name, query_id, module_configuration.get('connection'), feed_id, feed, env, client_context, lambda_client, remove=remove)
         elif entity_type == 'subscription':
             for class_name, records in entities.items():
                 for record_id, subscriptions in queries.items():
                     for subscription_id, subscription in subscriptions.items():
                         count[0] = count[0] + 1
-                        count[1] = count[1] + validate_and_write(entity_type, class_name, record_id, module_configuration.get('connection'), subscription_id, subscription, env, client_context)
+                        count[1] = count[1] + validate_and_write(entity_type, class_name, record_id, module_configuration.get('connection'), subscription_id, subscription, env, client_context, lambda_client, remove=remove)
         elif entity_type == 'view':
             for view_id, view in entities.items():
                 count[0] = count[0] + 1
-                count[1] = count[1] + validate_and_write(entity_type, None, view_id, None, None, view, env, client_context)
+                count[1] = count[1] + validate_and_write(entity_type, None, view_id, None, None, view, env, client_context, lambda_client, remove=remove)
         elif entity_type == 'mask':
             for mask_id, mask in entities.items():
                 count[0] = count[0] + 1
-                count[1] = count[1] + validate_and_write(entity_type, None, mask_id, None, None, mask, env, client_context)
+                count[1] = count[1] + validate_and_write(entity_type, None, mask_id, None, None, mask, env, client_context, lambda_client, remove=remove)
         elif entity_type == 'system':
             for scope, modules in entities.items():
                 for module_id, module in modules.items():
                     count[0] = count[0] + 1
-                    count[1] = count[1] + validate_and_write(entity_type, scope, module_id, None, None, module, env, client_context)
+                    count[1] = count[1] + validate_and_write(entity_type, scope, module_id, None, None, module, env, client_context, lambda_client, remove=remove)
         elif entity_type in ['error', 'static', 'asset']:
             for path, file in entities.items():
+                write_method = 'DELETE' if remove else 'PUT' 
                 lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({
                     'entity_type': entity_type, 
-                    'method': 'PUT', 
+                    'method': write_method, 
                     'body': file['@body'], 
                     'content-type': file['@content-type'], 
                     'path': path
@@ -247,6 +254,23 @@ def main(event, context):
                                 old_class_body = None
                             if new_class_body != old_class_body:
                                 s3_client.put_object(Bucket=env['bucket'], Body=new_class_body, ContentType='application/json', Key=class_key)
+                else:
+                    schema_id = module
+                    for entity_type in ['class', 'property', 'datatype']:
+                        base_key = '{data_root}/system/{entity_type}/'.format(data_root=env['data_root'], entity_type=entity_type)
+                        list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix=base_key)
+                        for entry in list_response.get('Contents', []):
+                            obj = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=entry['Key'])['Body'].read().decode('utf-8'))
+                            if obj.get('@schema') == schema_id:
+                                s3_client.delete_object(Bucket=env['bucket'], Key=entry['Key'])
+                        c = 1000000000
+                        while c and list_response.get('IsTruncated') and list_response.get('NextContinuationToken'):
+                            list_response = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix=base_key, ContinuationToken=list_response.get('NextContinuationToken'))
+                            for entry in list_response.get('Contents', []):
+                                obj = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=entry['Key'])['Body'].read().decode('utf-8'))
+                                if obj.get('@schema') == schema_id:
+                                    s3_client.delete_object(Bucket=env['bucket'], Key=entry['Key'])
+                                c = c - 1
             elif scope == 'class':
                 try:
                     class_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
@@ -257,7 +281,7 @@ def main(event, context):
                 else:
                     if not class_definition.get('@compiled'):
                         if class_definition.get('subclassof', []) and type(class_definition['subclassof']) is list:
-                            class_definition_json = json.dumps(class_definition)
+                            class_definition_json = json.dumps(class_definition, sort_keys=True)
                             for parent_class in reversed(class_definition['subclassof']):
                                 try:
                                     parent_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/schema/classes/{parent_class}.json'.format(data_root=env['data_root'], parent_class=parent_class))['Body'].read().decode('utf-8'))
@@ -271,60 +295,67 @@ def main(event, context):
                                         if valid_type not in class_definition['properties'].get(property_name, []):
                                             class_definition['properties'][property_name] = class_definition['properties'].get(property_name, [])
                                             class_definition['properties'][property_name].insert(0, valid_type)
-                            if class_definition_json != json.dumps(class_definition):
-                                s3_client.put_object(Bucket=env['bucket'], Key=event['key'], Body=bytes(json.dumps(class_definition), 'utf-8'), ContentType='application/json')
+                            class_definition['@compiled'] = True
+                            if class_definition_json != json.dumps(class_definition, sort_keys=True):
+                                s3_client.put_object(Bucket=env['bucket'], Key=event['key'], Body=bytes(json.dumps(class_definition, sort_keys=True), 'utf-8'), ContentType='application/json')
             elif scope == 'datatype':
-                print('line 277')
+                datatypes_index_path = '{data_root}/system/datatype/index.json'.format(data_root=env['data_root'])
+                try:
+                    current_datatypes_index = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=datatypes_index_path)['Body'].read().decode('utf-8'))
+                except:
+                    current_datatypes_index = {}
+                current_datatypes_index_json = json.dumps(current_datatypes_index, sort_keys=True)
                 datatypes_list = s3_client.list_objects_v2(Bucket=env['bucket'], Prefix='{data_root}/system/datatype/'.format(data_root=env['data_root']))['Contents']
                 datatypes_index = {}
-                datatypes_index_path = '{data_root}/system/datatype/index.json'.format(data_root=env['data_root'])
                 for datatype_definition_entry in datatypes_list:
                     if datatype_definition_entry['Key'] != datatypes_index_path:
                         datatype_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=datatype_definition_entry['Key'])['Body'].read().decode('utf-8'))
                         datatypes_index[datatype_definition_entry['Key'].split('/')[-1].replace('.json', '')] = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=datatype_definition_entry['Key'])['Body'].read().decode('utf-8'))
                         counter = counter + 1
-                s3_client.put_object(Bucket=env['bucket'], Key=datatypes_index_path, Body=bytes(json.dumps(datatypes_index), 'utf-8'), ContentType='application/json')
+                if current_datatypes_index_json != json.dumps(datatypes_index, sort_keys=True):
+                    s3_client.put_object(Bucket=env['bucket'], Key=datatypes_index_path, Body=bytes(json.dumps(datatypes_index), 'utf-8'), ContentType='application/json')
             else:
                 try:
                     module_configuration = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=event['key'])['Body'].read().decode('utf-8'))
                 except:
                     module_configuration = {}
                 if module_configuration:
-                    starting_module_configuration_json = json.dumps(module_configuration)
+                    starting_module_configuration_json = json.dumps(module_configuration, sort_keys=True)
                     module_state = module_configuration.get('state')
                     processor_full_name = '-extension-'.join(context.function_name.rsplit('-trigger-', 1))
                     processor_full_name = '-{scope}-{module}'.format(scope=scope, module=module).join(processor_full_name.rsplit('-system', 1))
                     if module_state in ['install', 'update']:
-                        try:
-                            processor_state = lambda_client.get_function(FunctionName=processor_full_name)
-                        except:
-                            processor_state = {}
-                        if module_configuration.get('processor') and type(module_configuration['processor']) is dict:
-                            if module_state == 'install': 
-                                if not processor_state:
-                                    module_configuration['processor']['code_checksum'] = deploy_processor(processor_full_name, module_configuration['processor'], lambda_client, env, 'install')
-                                    if module_configuration['processor']['code_checksum']: 
+                        if scope not in ['package']:
+                            try:
+                                processor_state = lambda_client.get_function(FunctionName=processor_full_name)
+                            except:
+                                processor_state = {}
+                            if module_configuration.get('processor') and type(module_configuration['processor']) is dict:
+                                if module_state == 'install': 
+                                    if not processor_state:
+                                        module_configuration['processor']['code_checksum'] = deploy_processor(processor_full_name, module_configuration['processor'], lambda_client, env, 'install')
+                                        if module_configuration['processor']['code_checksum']: 
+                                            lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
+                                            module_configuration['state'] = 'installed'
+                                        else: 
+                                            module_configuration['state'] = 'error'
+                                    else:
                                         lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
                                         module_configuration['state'] = 'installed'
-                                    else: 
+                                    if scope == 'daemon' and module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
+                                        deploy_rules(module_configuration, scope, module, env)
+                                elif module_state == 'update': 
+                                    if processor_state:
+                                        module_configuration['processor']['code_checksum'] = deploy_processor(processor_full_name, module_configuration['processor'], lambda_client, env, 'update')
+                                        if module_configuration['processor']['code_checksum']: 
+                                            module_configuration['state'] = 'updated'
+                                        else: 
+                                            module_configuration['state'] = 'error'
+                                    else:
                                         module_configuration['state'] = 'error'
-                                else:
-                                    lambdaFunctionArn = 'arn:aws:lambda:{core_region}:{account_id}:function:{name}'.format(core_region=env['core_region'], account_id=env['account_id'], name=processor_full_name)
-                                    module_configuration['state'] = 'installed'
-                                if scope == 'daemon' and module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
-                                    deploy_rules(module_configuration, scope, module, env)
-                            elif module_state == 'update': 
-                                if processor_state:
-                                    module_configuration['processor']['code_checksum'] = deploy_processor(processor_full_name, module_configuration['processor'], lambda_client, env, 'update')
-                                    if module_configuration['processor']['code_checksum']: 
-                                        module_configuration['state'] = 'updated'
-                                    else: 
-                                        module_configuration['state'] = 'error'
-                                else:
+                            else:
+                                if scope == 'daemon' and not processor_state:
                                     module_configuration['state'] = 'error'
-                        else:
-                            if not processor_state:
-                                module_configuration['state'] = 'error'
                     if scope == 'daemon' and module_state == 'install' and module_configuration.get('schedule') and type(module_configuration['schedule'] is dict):
                         deploy_rules(module_configuration, scope, module, env)                    
                     if scope == 'daemon' and module_state == 'run':
@@ -407,12 +438,40 @@ def main(event, context):
                                         rule_targets = []
                                     if not rule_targets:
                                         events.delete_rule(Name=rule_full_name, Force=True)
-                        if module_configuration.get('ephemeral'):
-                            lambda_client.delete_function(FunctionName=processor_full_name)
-                        module_configuration['state'] = 'removed'
+                        if scope not in ['package'] and module_configuration.get('ephemeral'):
+                            try:
+                                lambda_client.delete_function(FunctionName=processor_full_name)
+                            except:
+                                pass
+                        entity_map = module_configuration['entity_map']
+                        if type(entity_map) is str:
+                            try:
+                                entity_map = json.loads(urllib.request.urlopen(entity_map).read().decode('utf-8'))
+                            except:
+                                entity_map = None
+                        elif type(entity_map) is dict:
+                            pass
+                        else:
+                            entity_map = None
+                        deploy_entities_count = deploy_entities({**module_configuration, 'entity_map': entity_map}, lambda_client, env, client_context, remove=True)
+                        if deploy_entities_count[0] != deploy_entities_count[1]:
+                            module_configuration['state'] = 'error'
+                        else:
+                            module_configuration['state'] = 'removed'
                     if module_state in ['install', 'update'] and module_configuration['state'] != 'error':
+                        print('line 461')
                         if module_configuration.get('entity_map', {}):
-                            deploy_entities_count = deploy_entities(module_configuration, lambda_client, env, client_context)
+                            entity_map = module_configuration['entity_map']
+                            if type(entity_map) is str:
+                                try:
+                                    entity_map = json.loads(urllib.request.urlopen(entity_map).read().decode('utf-8'))
+                                except:
+                                    entity_map = None
+                            elif type(entity_map) is dict:
+                                pass
+                            else:
+                                entity_map = None
+                            deploy_entities_count = deploy_entities({**module_configuration, 'entity_map': entity_map}, lambda_client, env, client_context)
                             if deploy_entities_count[0] != deploy_entities_count[1]:
                                 module_configuration['state'] = 'error'
                         if module_state == 'install':

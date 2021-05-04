@@ -596,6 +596,77 @@ window.LiveElement.Scale.Console.Tests.testMap = {
             return schema_id
         })
     }, 
+    'uninstall-schema': function(connection_url, system_access_url, system_root, connection_id) {
+        var schema_id = 'schemaorg-12.0'
+        return window.fetch(
+            `${connection_url}/system/schema/${schema_id}.json`, 
+            {
+                method: 'DELETE'
+            }
+        ).then(r => {
+            return schema_id
+        })
+    }, 
+    'install-package': function(connection_url, system_access_url, system_root, connection_id) {
+        var package_definition = {
+            id: 'novella', 
+            state: 'install', 
+            entity_map: {
+                'system': {
+                    'class': {
+                        'Novella': {
+                            "label": "Novella",
+                            "comment": "A short novel.",
+                            "subclassof": [
+                                "Novel"
+                            ],
+                            "release": "1.0",
+                            "parents": [
+                                "Novel", 
+                                "Book",
+                                "CreativeWork",
+                                "Thing"
+                            ],
+                            "properties": {
+                                "universe": [
+                                    "Text"
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return window.fetch(
+            `${connection_url}/system/package/novella.json`, 
+            {
+                method: 'PUT', 
+                headers: {
+                    "Content-Type": "application/json"
+                }, 
+                body: JSON.stringify(package_definition) 
+            }
+        ).then(r => {
+            return 'novella'
+        })
+    }, 
+    'uninstall-package': function(connection_url, system_access_url, system_root, connection_id) {
+        var module_name = window.localStorage.getItem('tests:install-package:result')
+        var package_object = JSON.parse(window.localStorage.getItem('tests:install-package:confirmation'))
+        package_object.state = 'remove'
+        return window.fetch(
+            `${connection_url}/system/package/${module_name}.json`, 
+            {
+                method: 'PUT', 
+                headers: {
+                    "Content-Type": "application/json"
+                }, 
+                body: JSON.stringify(package_object) 
+            }
+        ).then(r => {
+            return module_name
+        })
+    }, 
     
     
 }
