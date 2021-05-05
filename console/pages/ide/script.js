@@ -1,5 +1,9 @@
 window.LiveElement.Scale.Console.IDE = window.LiveElement.Scale.Console.IDE || {}
 
+window.LiveElement.Live.processors.ideChannelConfigureSnippet = function() {
+    
+}
+
 var ide = document.getElementById('ide')
 ide.querySelectorAll('input[type="uuid"]').forEach(uuidInput => {
     uuidInput.setAttribute('pattern', '^[0-9a-z]{8}-[0-9a-z]{4}-4[0-9a-z]{3}-[89ab][0-9a-z]{3}-[0-9a-z]{12}$')
@@ -45,6 +49,9 @@ window.fetch(
         }
     }, {once: true})
     nameInput.addEventListener('change', event => {
+        if (nameInput.value) {
+            channelObject['@name'] = nameInput.value
+        }
         buildSnippet()
     })
     buildSnippet()
