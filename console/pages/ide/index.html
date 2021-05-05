@@ -46,7 +46,22 @@
         <button name="create">Create</button>
         <details>
             <summary>Snippet</summary>
-            <pre><code></code></pre>
+            <pre>
+                <code live-subscription="IdeChannelConfigure:IdeChannelConfigure">
+        window.fetch(
+            '${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/connect.json', 
+            {
+                method: 'PUT', 
+                headers: {
+                    "Content-Type": "application/json"
+                }, 
+                body: JSON.stringify({
+                    ${JSON.stringify(window.LiveElement.Scale.Console.IDE.Channel.Configure.channel, null, 14).slice(1, -1)}
+                }) 
+            }
+        )
+                </code>
+            </pre>
         </details>
     </fieldset>
     <fieldset name="code">
