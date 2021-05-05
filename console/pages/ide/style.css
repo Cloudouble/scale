@@ -69,6 +69,14 @@
     cursor: pointer;
     font-style: italic;
 }
+#ide > section details pre {
+    padding: 1em;
+    max-width: 90%;
+    overflow-x: auto;
+    background-color: darkgrey;
+    color: white;
+    font-family: monospace;
+}
 
 
 #ide > section[name="channel"] {
