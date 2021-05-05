@@ -1,4 +1,4 @@
-<p>An integrated coding interface to configure and develop PWAs and web sites.</p>
+<p>An integrated low-code environment to configure and develop Progressive Web Apps (PWAs).</p>
 <div name="sidebar">
     <button>Asset</button>
     <button>Channel</button>
@@ -15,37 +15,84 @@
 </div>
 <section name="channel">
     <h2>Channel</h2>
-    <nav>
-        <input type="search" placeholder="uuid or @name prefix" />
-        <button>Browse</button>
-        <button>Create</button>
-        <ul>
-            <li>abc</li>
-            <li>def</li>
-            <li>ghi</li>
-        </ul>
-    </nav>
-    <div>
+    <fieldset name="search">
+        <input name="search" type="search" placeholder="uuid or name search..." autocomplete="off" list="channel_list" />
+        <button name="load">Load</button>
+        <button name="new">New</button>
+        <datalist id="list"></datalist>
+    </fieldset>
+    <fieldset name="configure">
+        <h3>Configure</h3>
         <label>
-            Channel @name
-            <input name="channel_name" type="text" />
+            Channel @name (optional)
+            <input name="name" type="text" autocomplete="off" />
         </label>
         <label>
             Channel ID
-            <input name="channel_id" type="uuid" />
+            <input name="id" type="uuid" readonly="readonly" />
         </label>
         <label>
             Receive Key
-            <input name="receiveKey" type="uuid" />
+            <input name="receiveKey" type="uuid" readonly="readonly" />
         </label>
         <label>
             Send Key
-            <input name="sendKey" type="uuid" />
+            <input name="sendKey" type="uuid" readonly="readonly" />
         </label>
         <label>
             Admin Key
-            <input name="adminKey" type="uuid" />
+            <input name="adminKey" type="uuid" readonly="readonly" />
         </label>
-        <button type="submit">Save</button>
-    </div>
+        <button name="create">Create</button>
+        <details>
+            <summary>Snippet</summary>
+            <pre><code></code></pre>
+        </details>
+    </fieldset>
+    <fieldset name="code">
+        <h3>Code</h3>
+        <label>
+            Receive URL
+            <input name="receive_url" type="url" readonly="readonly" />
+            <details>
+                <summary>Snippet</summary>
+                <pre><code></code></pre>
+            </details>
+        </label>
+        <label>
+            Send URL
+            <input name="send_url" type="url" readonly="readonly" />
+            <details>
+                <summary>Snippet</summary>
+                <pre><code></code></pre>
+            </details>
+        </label>
+        <label>
+            Admin URL
+            <input name="admin_url" type="url" readonly="readonly" />
+            <details>
+                <summary>Snippet</summary>
+                <pre><code></code></pre>
+            </details>
+        </label>
+    </fieldset>
+    <fieldset name="test">
+        <h3>Test</h3>
+        <label>
+            Send Data
+            <input type="text" name="send" />
+            <details>
+                <summary>Snippet</summary>
+                <pre><code></code></pre>
+            </details>
+        </label>
+        <label>
+            Receive Data
+            <textarea name="receive" readonly="readonly"></textarea>
+            <details>
+                <summary>Snippet</summary>
+                <pre><code></code></pre>
+            </details>
+        </label>
+    </fieldset>
 </section>

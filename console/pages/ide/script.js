@@ -4,17 +4,28 @@ var ide = document.getElementById('ide')
 ide.querySelectorAll('input[type="uuid"]').forEach(uuidInput => {
     uuidInput.setAttribute('pattern', '^[0-9a-z]{8}-[0-9a-z]{4}-4[0-9a-z]{3}-[89ab][0-9a-z]{3}-[0-9a-z]{12}$')
     uuidInput.setAttribute('type', 'text')
-    var generateButton = document.createElement('button')
-    generateButton.innerHTML = '+'
-    generateButton.setAttribute('title', 'Click to fill with a new UUID v4')
-    generateButton.addEventListener('click', event => {
-        event.preventDefault()
-        uuidInput.value = window.LiveElement.Scale.Core.generateUUID4()
-    })
-    uuidInput.after(generateButton)
 })
 ide.querySelectorAll('div[name="sidebar"] button').forEach(button => {
     button.addEventListener('click', event => {
         ide.setAttribute('entity-type', button.innerHTML.toLowerCase())
     })
+})
+
+ide.querySelector('fieldset[name="search"] button[name="new"]').addEventListener('click', event => {
+    var channel_configure = ide.querySelector('fieldset[name="configure"]')
+    var elements = {}
+    ;(['id', 'receiveKey', 'sendKey', 'adminKey']).forEach(n => {
+        elements[n] = channel_configure.querySelector(`input[name="${n}"]`)
+        elements[n].value = window.LiveElement.Scale.Core.generateUUID4()
+    })
+    var nameInput = channel_configure.querySelector('input[name="name"]')
+    nameInput.focus()
+    channel_configure.querySelector('button[name="create"]').addEventListener('click', event => {
+        var channelId = elements['id'].value
+        var channelObject = {receiveKey: elements.receiveKey.value, sendKey: elements.sendKey.value, adminKey: elements.adminKey.value}
+        if (nameInput.value) {
+            channelObject['@name'] = nameInput.value
+        }
+        console.log(channelId, channelObject)
+    }, {once: true})
 })
