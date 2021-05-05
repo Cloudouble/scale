@@ -17,31 +17,31 @@
     <h2>Channel</h2>
     <fieldset name="search">
         <input name="search" type="search" placeholder="uuid or name search..." autocomplete="off" list="channel_list" />
-        <button name="load">Load</button>
-        <button name="new">New</button>
+        <button name="load" live-trigger="click:IdeChannelConfigure">Load</button>
+        <button name="new" live-trigger="click:IdeChannelConfigure">New</button>
         <datalist id="list"></datalist>
     </fieldset>
     <fieldset name="configure">
         <h3>Configure</h3>
         <label>
             Channel @name (optional)
-            <input name="name" type="text" autocomplete="off" />
+            <input name="name" type="text" autocomplete="off" live-trigger="change:IdeChannelConfigure" />
         </label>
         <label>
             Channel ID
-            <input name="id" type="uuid" readonly="readonly" />
+            <input name="id" type="uuid" readonly="readonly" live-trigger="change:IdeChannelConfigure" />
         </label>
         <label>
             Receive Key
-            <input name="receiveKey" type="uuid" readonly="readonly" />
+            <input name="receiveKey" type="uuid" readonly="readonly" live-trigger="change:IdeChannelConfigure" />
         </label>
         <label>
             Send Key
-            <input name="sendKey" type="uuid" readonly="readonly" />
+            <input name="sendKey" type="uuid" readonly="readonly" live-trigger="change:IdeChannelConfigure" />
         </label>
         <label>
             Admin Key
-            <input name="adminKey" type="uuid" readonly="readonly" />
+            <input name="adminKey" type="uuid" readonly="readonly" live-trigger="change:IdeChannelConfigure" />
         </label>
         <button name="create">Create</button>
         <details>
