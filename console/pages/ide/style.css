@@ -121,3 +121,7 @@
 #ide > section[name="channel"] > fieldset[name="code"] input {
     font-size: 98%;
 }
+
+#ide > section[name="channel"] > fieldset[name="test"] textarea {
+    height: 5em;
+}

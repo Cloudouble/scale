@@ -110,12 +110,45 @@ window.LiveElement.Live.processors.IdeChannelCode = function(input) {
 window.LiveElement.Live.processors.IdeChannelTest = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
     if (handlerType == 'trigger') {
-        console.log('line 113', input)
+        var event = input.vector.split(':').shift()
+        if (event == 'change') {
+            if (!window.LiveElement.Scale.Console.IDE.Channel.Test.socket 
+                || (window.LiveElement.Scale.Console.IDE.Channel.Test.socket && (window.LiveElement.Scale.Console.IDE.Channel.Test.socket.url != window.LiveElement.Scale.Console.IDE.Channel.Code.receive_url))) {
+                try {
+                    window.LiveElement.Scale.Console.IDE.Channel.Test.socket = new WebSocket(window.LiveElement.Scale.Console.IDE.Channel.Code.receive_url)
+                    window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.Channel.Test.socket, 'IdeChannelTest', 'message', false, true)
+                } catch(e) {
+                    delete window.LiveElement.Scale.Console.IDE.Channel.Test.socket
+                }
+            }
+            window.fetch(
+                window.LiveElement.Scale.Console.IDE.Channel.Code.send_url, 
+                {
+                    method: 'POST', 
+                    body: JSON.stringify(input.properties.value)
+                }
+            ).then(() => {
+                window.setTimeout(function() {
+                    input.triggersource.value = ''
+                }, 250)
+            })
+        }
+    } else if (handlerType == 'subscription') {
+        return {'#value': `${input.payload.message}\n${input.subscriber.value}`}
+    } else if (handlerType == 'listener') {
+        var message = input.event.data
+        try {
+            message = JSON.parse(message)
+        } catch(e) {
+            message = message
+        }
+        return {message: message}
     }
 }
 
 window.LiveElement.Live.listeners.IdeChannelConfigure = {processor: 'IdeChannelConfigure', expired: true}
 window.LiveElement.Live.listeners.IdeChannelCode = {processor: 'IdeChannelCode', expired: true}
+window.LiveElement.Live.listeners.IdeChannelTest = {processor: 'IdeChannelTest', expired: true}
 
 window.LiveElement.Live.listen(ide.querySelector('fieldset[name="configure"]'), 'IdeChannelCode', 'setup', false, true)
 
