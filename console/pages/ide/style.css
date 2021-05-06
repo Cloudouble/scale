@@ -65,17 +65,38 @@
     top: 40px;
     width: calc(100% - 300px);
 }
+
+#ide > section > fieldset {
+    width: calc(100% - 31px);
+    max-width: calc(100vw - 231px);
+    overflow-x: auto;
+}
+
+
+#ide > section details {
+    padding: 1px;
+    width: calc(100% - 2px);
+    overflow-x: auto;
+}
 #ide > section details > summary {
     cursor: pointer;
     font-style: italic;
+    max-width: 100%;
+    overflow-x: auto;
+    outline: none;
 }
-#ide > section details pre {
+
+#ide > section details > pre {
     padding: 1em;
-    max-width: 90%;
+    max-width: calc(100vw - 300px);
     overflow-x: auto;
     background-color: darkgrey;
     color: white;
     font-family: monospace;
+}
+#ide > section details > pre > code {
+    max-width: 100%;
+    overflow-x: auto;
 }
 
 
@@ -103,7 +124,7 @@
 #ide > section[name="channel"] > fieldset[name="code"] > label > input, 
     #ide > section[name="channel"] > fieldset[name="test"] > label > input, 
     #ide > section[name="channel"] > fieldset[name="test"] > label > textarea {
-    width: 100%;
+    width: calc(100% - 4px);
     
 }
 
