@@ -92,15 +92,19 @@ window.LiveElement.Live.processors.IdeChannelCode = function(input) {
     if (handlerType == 'listener') {
         return window.LiveElement.Scale.Console.IDE.Channel.Configure
     } else if (handlerType == 'subscription') {
-        if (input.subscriber.name == 'receive_url') {
-            return {'#value': `${window.localStorage.getItem('system:system_access_url').replace('https:', 'wss:')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.receiveKey}`}
-        } else if (input.subscriber.name == 'send_url') {
-            return {'#value': `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.sendKey}`}
-        } else if (input.subscriber.name == 'admin_url') {
-            return {'#value': `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.adminKey}`}
+        window.LiveElement.Scale.Console.IDE.Channel.Code = {
+            receive_url: `${window.localStorage.getItem('system:system_access_url').replace('https:', 'wss:')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.receiveKey}`, 
+            send_url: `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.sendKey}`, 
+            admin_url: `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.adminKey}`
         }
-    } else if (handlerType == 'trigger') {
-        
+        window.LiveElement.Scale.Core.buildSnippet(input.subscriber.parentElement.querySelector('code'))
+        if (input.subscriber.name == 'receive_url') {
+            return {'#value': window.LiveElement.Scale.Console.IDE.Channel.Code.receive_url}
+        } else if (input.subscriber.name == 'send_url') {
+            return {'#value': window.LiveElement.Scale.Console.IDE.Channel.Code.send_url}
+        } else if (input.subscriber.name == 'admin_url') {
+            return {'#value': window.LiveElement.Scale.Console.IDE.Channel.Code.admin_url}
+        }
     }
 }
 

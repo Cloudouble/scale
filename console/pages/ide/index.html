@@ -49,18 +49,18 @@
             <summary>Snippet</summary>
             <pre>
                 <code live-subscription="IdeChannelConfigure:IdeChannelConfigure">
-        window.fetch(
-            '${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/connect.json', 
-            {
-                method: 'PUT', 
-                headers: {
-                    "Content-Type": "application/json"
-                }, 
-                body: JSON.stringify({
-                    ${JSON.stringify(window.LiveElement.Scale.Console.IDE.Channel.Configure.channel, null, 20).slice(1, -1)}
-                }) 
-            }
-        )
+window.fetch(
+    '${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/connect.json', 
+    {
+        method: 'PUT', 
+        headers: {
+            "Content-Type": "application/json"
+        }, 
+        body: JSON.stringify({
+            ${JSON.stringify(window.LiveElement.Scale.Console.IDE.Channel.Configure.channel, null, 20).slice(1, -1)}
+        }) 
+    }
+)
                 </code>
             </pre>
         </details>
@@ -69,10 +69,12 @@
         <h3>Code</h3>
         <label>
             Receive URL
-            <input name="receive_url" type="url" readonly="readonly" live-subscription="IdeChannelCode:IdeChannelCode" />
+            <input name="receive_url" type="url" readonly="readonly" live-subscription="IdeChannelCode:IdeChannelCode" live-trigger="input:IdeChannelCode" />
             <details>
                 <summary>Snippet</summary>
-                <pre><code></code></pre>
+                <pre><code>
+var socket = new WebSocket('${window.LiveElement.Scale.Console.IDE.Channel.Code.receive_url}')
+                </code></pre>
             </details>
         </label>
         <label>
@@ -80,7 +82,15 @@
             <input name="send_url" type="url" readonly="readonly" live-subscription="IdeChannelCode:IdeChannelCode" />
             <details>
                 <summary>Snippet</summary>
-                <pre><code></code></pre>
+                <pre><code>
+window.fetch(
+    '${window.LiveElement.Scale.Console.IDE.Channel.Code.send_url}`, 
+    {
+        method: 'POST', 
+        body: JSON.stringify(data)
+    }
+)
+                </code></pre>
             </details>
         </label>
         <label>
@@ -88,7 +98,14 @@
             <input name="admin_url" type="url" readonly="readonly" live-subscription="IdeChannelCode:IdeChannelCode" />
             <details>
                 <summary>Snippet</summary>
-                <pre><code></code></pre>
+                <pre><code>
+window.fetch(
+    '${window.LiveElement.Scale.Console.IDE.Channel.Code.admin_url}', 
+    { 
+        method: 'DELETE'
+    }
+)
+                </code></pre>
             </details>
         </label>
     </fieldset>
