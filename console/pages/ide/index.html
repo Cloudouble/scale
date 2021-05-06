@@ -17,10 +17,10 @@
     <h2>Channel</h2>
     <fieldset name="search">
         <h3>Search</h3>
-        <input name="search" type="search" placeholder="uuid or name search..." autocomplete="off" list="channel_list" />
+        <input name="search" type="search" placeholder="uuid or name search..." autocomplete="off" list="ide-channel-search-list" live-trigger="keyup:IdeChannelSearch" />
         <button name="load" live-trigger="click:IdeChannelConfigure">Load</button>
         <button name="new" live-trigger="click:IdeChannelConfigure">New</button>
-        <datalist id="list"></datalist>
+        <datalist id="ide-channel-search-list"></datalist>
     </fieldset>
     <fieldset name="configure">
         <h3>Configure</h3>
