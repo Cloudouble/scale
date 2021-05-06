@@ -1,9 +1,6 @@
 #ide[entity-type="channel"] > section[name="channel"] {
     display: block;
 }
-#ide > section[name="channel"] {
-    display: block;
-}
 #ide > section[name="channel"] > fieldset > label, #ide > section[name="channel"] > fieldset > button {
     display: inline-block;
     position: relative;
