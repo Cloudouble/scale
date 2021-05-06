@@ -76,18 +76,24 @@ window.LiveElement.Element.load().then(() => {
     return Promise.all(p)
   })    
 }).then(() => {
-  document.querySelectorAll('input[readonly]').forEach(i => {
-    i.addEventListener('click', event => {
-      i.select()
-      document.execCommand('copy')
+  var observer = new window.MutationObserver(function() {
+    document.querySelectorAll('input[readonly]:not([_selectready])').forEach(i => {
+      i.addEventListener('click', event => {
+        i.select()
+        document.execCommand('copy')
+      })
+      i.setAttribute('_selectready', true)
+    })
+    document.querySelectorAll('pre code:not([_selectready])').forEach(c => {
+      c.addEventListener('click', event => {
+        var selection = window.getSelection()
+        selection.selectAllChildren(c.closest('pre'))
+      })
+      c.setAttribute('_selectready', true)
     })
   })
-  document.querySelectorAll('pre code').forEach(c => {
-    c.addEventListener('click', event => {
-      var selection = window.getSelection()
-      selection.selectAllChildren(c.closest('pre'))
-    })
-  })
+  observer.observe(document.querySelector('main'), {subtree: true, childList: true});
+  
 })    
 
 

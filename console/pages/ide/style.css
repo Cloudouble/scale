@@ -28,10 +28,6 @@
 #ide section > h2 {
     margin-top: 0;
 }
-#ide[entity-type="channel"] > section[name="channel"] {
-    display: block;
-}
-
 
 #ide > section > nav {
     display: block;
@@ -72,7 +68,6 @@
     overflow-x: auto;
 }
 
-
 #ide > section details {
     padding: 1px;
     width: calc(100% - 2px);
@@ -97,52 +92,4 @@
 #ide > section details > pre > code {
     max-width: 100%;
     overflow-x: auto;
-}
-
-
-#ide > section[name="channel"] {
-    display: block;
-}
-#ide > section[name="channel"] > fieldset > label, #ide > section[name="channel"] > fieldset > button {
-    display: inline-block;
-    position: relative;
-    
-}
-#ide > section[name="channel"] > fieldset[name="search"] > input[type="search"] {
-    width: 40em;
-}
-
-#ide > section[name="channel"] > fieldset[name="configure"] > label {
-    margin-right: 2em;
-}
-#ide > section[name="channel"] > fieldset[name="configure"] > label > input {
-    width: 20em;
-}
-#ide > section[name="channel"] > fieldset[name="code"] > label, #ide > section[name="channel"] > fieldset[name="test"] > label {
-    display: block;
-}
-#ide > section[name="channel"] > fieldset[name="code"] > label > input, 
-    #ide > section[name="channel"] > fieldset[name="test"] > label > input, 
-    #ide > section[name="channel"] > fieldset[name="test"] > label > textarea {
-    width: calc(100% - 4px);
-    
-}
-
-#ide > section[name="channel"] > fieldset[name="configure"] > button[name="create"], 
-    #ide > section[name="channel"] > fieldset[name="configure"] > details {
-    display: none;
-}
-#ide > section[name="channel"] > fieldset[name="configure"][mode="new"] > button[name="create"] {
-    display: inline-block;
-}
-#ide > section[name="channel"] > fieldset[name="configure"][mode="new"] > details {
-    display: block;
-}
-
-#ide > section[name="channel"] > fieldset[name="code"] input {
-    font-size: 98%;
-}
-
-#ide > section[name="channel"] > fieldset[name="test"] textarea {
-    height: 5em;
 }
