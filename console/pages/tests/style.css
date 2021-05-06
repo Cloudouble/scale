@@ -26,28 +26,28 @@
     color: red;
 }
 
-time, i {
+#tests time, #tests i {
     font-size: 80%;
     font-weight: normal;
     display: block;
     font-style: italic;
 }
-time[name="request"] {
+#tests time[name="request"] {
     color: orange;
 } 
-time[name="request"]::before {
+#tests time[name="request"]::before {
     content: 'Request Timing: ';
 } 
-time[name="process"] {
+#tests time[name="process"] {
     color: green;
 }
-time[name="process"]::before {
+#tests time[name="process"]::before {
     content: 'Process Timing: ';
 } 
-time[name="request"]::after, time[name="process"]::after {
+#tests time[name="request"]::after, #tests time[name="process"]::after {
     content: 'ms';
 }
-time[name="process"] + aside {
+#tests time[name="process"] + aside {
     color: darkgrey;
     font-weight: normal;
     font-size: 80%;

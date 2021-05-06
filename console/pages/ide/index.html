@@ -16,6 +16,7 @@
 <section name="channel">
     <h2>Channel</h2>
     <fieldset name="search">
+        <h3>Search</h3>
         <input name="search" type="search" placeholder="uuid or name search..." autocomplete="off" list="channel_list" />
         <button name="load" live-trigger="click:IdeChannelConfigure">Load</button>
         <button name="new" live-trigger="click:IdeChannelConfigure">New</button>
@@ -25,7 +26,7 @@
         <h3>Configure</h3>
         <label>
             Channel @name (optional)
-            <input name="name" type="text" autocomplete="off" live-trigger="change:IdeChannelConfigure" />
+            <input name="@name" type="text" autocomplete="off" live-trigger="change:IdeChannelConfigure" />
         </label>
         <label>
             Channel ID
@@ -56,7 +57,7 @@
                     "Content-Type": "application/json"
                 }, 
                 body: JSON.stringify({
-                    ${JSON.stringify(window.LiveElement.Scale.Console.IDE.Channel.Configure.channel, null, 14).slice(1, -1)}
+                    ${JSON.stringify(window.LiveElement.Scale.Console.IDE.Channel.Configure.channel, null, 20).slice(1, -1)}
                 }) 
             }
         )

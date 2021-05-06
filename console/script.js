@@ -29,6 +29,15 @@ window.LiveElement.Scale.Core.syncWithLocalStorage = function(page, checkboxElem
         window.localStorage.removeItem(`${page}:${inputElement.getAttribute('name')}`)
     }
 }
+window.LiveElement.Scale.Core.buildSnippet = function(codeElement) {
+    if (!codeElement.getAttribute('regex')) {
+      codeElement.setAttribute('regex', codeElement.innerHTML)
+    }
+    codeElement.innerHTML = codeElement.getAttribute('regex').replace(/\$\{(?<code>[^\}]+)\}/g, function(...args) { 
+        var code = args.pop().code 
+        return code ? Function(`"use strict";return (${code})`)() : ''
+    })
+}
 
 
 window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/element@1.7.5/elements/'
