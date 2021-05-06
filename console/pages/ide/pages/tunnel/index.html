@@ -1,10 +1,44 @@
 <h2>Tunnel</h2>
 <fieldset name="create">
     <h3>Create</h3>
+    <button name="create" live-trigger="click:IdeTunnelCreate">Create</button>
     <label>
         Tunnel ID
         <input name="id" type="uuid" readonly="readonly" live-trigger="change:IdeTunnelCreate" />
     </label>
+    <details>
+        <summary>Snippet</summary>
+        <pre>
+            <code live-subscription="IdeTunnelCreate:IdeTunnelCreate">
+var tunnelUrl = `${connection_url.replace('https:', 'wss:')}/tunnel/${tunnel_handle}`
+try {
+    window.LiveElement.Scale.Console.Tests.tunnel = new WebSocket(tunnelUrl)
+    var now = window.performance.now()
+    var tr = document.querySelector('#tests table tr[name="create-tunnel"]')
+    window.LiveElement.Scale.Console.Tests.tunnel.addEventListener('message', event => {
+        var message = {}
+        try {
+            message = JSON.parse(event.data)
+            if (tr.querySelector('time[name="process"]').innerHTML == '...') {
+                tr.querySelector('time[name="process"]').innerHTML = Math.round(window.performance.now() - now)
+            }
+            if (tr.querySelector('code.confirmation').innerHTML == '...') {
+                tr.querySelector('code.confirmation').innerHTML = message.tunnel_id
+            }
+            tr.querySelector('code.confirmation').closest('label').setAttribute('status', 'success')
+        } catch(e) {
+            tr.querySelector('time[name="process"]').innerHTML = ' ---error--- '
+            tr.querySelector('code.confirmation').innerHTML = ' ---error--- '
+            tr.querySelector('code.confirmation').closest('label').setAttribute('status', 'error')
+        }
+    })
+    return tunnelUrl
+} catch (e) {
+    return e
+}
+            </code>
+        </pre>
+    </details>
 </fieldset>
 <fieldset name="test">
     <h3>Test</h3>
@@ -16,4 +50,37 @@
         Receive Data
         <textarea name="receive" readonly="readonly" live-subscription="IdeTunnelTest:IdeTunnelTest"></textarea>
     </label>
+    <details>
+        <summary>Snippet</summary>
+        <pre>
+            <code live-subscription="IdeTunnelCreate:IdeTunnelCreate">
+var tunnelUrl = `${connection_url.replace('https:', 'wss:')}/tunnel/${tunnel_handle}`
+try {
+    window.LiveElement.Scale.Console.Tests.tunnel = new WebSocket(tunnelUrl)
+    var now = window.performance.now()
+    var tr = document.querySelector('#tests table tr[name="create-tunnel"]')
+    window.LiveElement.Scale.Console.Tests.tunnel.addEventListener('message', event => {
+        var message = {}
+        try {
+            message = JSON.parse(event.data)
+            if (tr.querySelector('time[name="process"]').innerHTML == '...') {
+                tr.querySelector('time[name="process"]').innerHTML = Math.round(window.performance.now() - now)
+            }
+            if (tr.querySelector('code.confirmation').innerHTML == '...') {
+                tr.querySelector('code.confirmation').innerHTML = message.tunnel_id
+            }
+            tr.querySelector('code.confirmation').closest('label').setAttribute('status', 'success')
+        } catch(e) {
+            tr.querySelector('time[name="process"]').innerHTML = ' ---error--- '
+            tr.querySelector('code.confirmation').innerHTML = ' ---error--- '
+            tr.querySelector('code.confirmation').closest('label').setAttribute('status', 'error')
+        }
+    })
+    return tunnelUrl
+} catch (e) {
+    return e
+}
+            </code>
+        </pre>
+    </details>
 </fieldset>

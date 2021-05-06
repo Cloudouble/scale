@@ -1,18 +1,11 @@
 #ide[entity-type="channel"] > section[name="channel"] {
     display: block;
 }
-#ide > section[name="channel"] > fieldset > label, #ide > section[name="channel"] > fieldset > button {
-    display: inline-block;
-    position: relative;
-}
 #ide > section[name="channel"] > fieldset[name="search"] > input[type="search"] {
     width: 40em;
 }
 #ide > section[name="channel"] > fieldset[name="configure"] > label {
     margin-right: 2em;
-}
-#ide > section[name="channel"] > fieldset[name="configure"] > label > input {
-    width: 20em;
 }
 #ide > section[name="channel"] > fieldset[name="code"] > label, #ide > section[name="channel"] > fieldset[name="test"] > label {
     display: block;
@@ -31,10 +24,4 @@
 }
 #ide > section[name="channel"] > fieldset[name="configure"][mode="new"] > details {
     display: block;
-}
-#ide > section[name="channel"] > fieldset[name="code"] input {
-    font-size: 98%;
-}
-#ide > section[name="channel"] > fieldset[name="test"] textarea {
-    height: 5em;
 }

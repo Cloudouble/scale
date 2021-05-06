@@ -93,3 +93,20 @@
     max-width: 100%;
     overflow-x: auto;
 }
+#ide > section > fieldset > label, #ide > section > fieldset > button {
+    display: inline-block;
+    position: relative;
+}
+#ide > section > fieldset > label > input {
+    width: 20em;
+}
+#ide > section > fieldset > details {
+    display: block;
+}
+#ide > section > fieldset input {
+    font-size: 98%;
+}
+#ide > section > fieldset textarea {
+    height: 5em;
+}
+

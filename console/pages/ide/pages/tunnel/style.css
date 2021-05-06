@@ -1,3 +1,11 @@
-#ide[entity-type="tunnel"] > section[name="tunnel"] {
+#ide > section[name="tunnel"] {
     display: block;
+}
+#ide > section[name="tunnel"] > fieldset[name="test"] > label {
+    display: block;
+}
+#ide > section[name="tunnel"] > fieldset[name="test"] > label > input, 
+    #ide > section[name="tunnel"] > fieldset[name="test"] > label > textarea {
+    display: block;
+    width: calc(100% - 4px);
 }
