@@ -1,0 +1,19 @@
+<h2>Tunnel</h2>
+<fieldset name="create">
+    <h3>Create</h3>
+    <label>
+        Tunnel ID
+        <input name="id" type="uuid" readonly="readonly" live-trigger="change:IdeTunnelCreate" />
+    </label>
+</fieldset>
+<fieldset name="test">
+    <h3>Test</h3>
+    <label>
+        Send Data
+        <input type="text" name="send" placeholder="Type and then press 'Enter' to send..." live-trigger="change:IdeTunnelTest" />
+    </label>
+    <label>
+        Receive Data
+        <textarea name="receive" readonly="readonly" live-subscription="IdeTunnelTest:IdeTunnelTest"></textarea>
+    </label>
+</fieldset>
