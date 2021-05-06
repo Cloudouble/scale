@@ -83,9 +83,21 @@ window.LiveElement.Live.processors.IdeChannelConfigure = function(input) {
                     setupConfigure(configureElement)
                 }
             }
+        } else if (input.attributes.name == 'create') {
+            console.log('line 87', window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id)
+            console.log('line 88', window.LiveElement.Scale.Console.IDE.Channel.Configure.channel)
+            window.fetch(
+                `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/connect.json`, 
+                {
+                    method: 'PUT', 
+                    headers: {
+                        "Content-Type": "application/json"
+                    }, 
+                    body: JSON.stringify(window.LiveElement.Scale.Console.IDE.Channel.Configure.channel) 
+                }
+            )
         }
     }
-
 }
 window.LiveElement.Live.processors.IdeChannelCode = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)

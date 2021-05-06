@@ -44,13 +44,13 @@
             Admin Key
             <input name="adminKey" type="uuid" readonly="readonly" live-trigger="change:IdeChannelConfigure" />
         </label>
-        <button name="create">Create</button>
+        <button name="create" live-trigger="click:IdeChannelConfigure">Create</button>
         <details>
             <summary>Snippet</summary>
             <pre>
                 <code live-subscription="IdeChannelConfigure:IdeChannelConfigure">
 window.fetch(
-    '${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/${window.localStorage.getItem('system:connection_id')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/connect.json', 
+    '${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/connect.json', 
     {
         method: 'PUT', 
         headers: {
@@ -114,18 +114,10 @@ window.fetch(
         <label>
             Send Data
             <input type="text" name="send" placeholder="Type and then press 'Enter' to send..." live-trigger="change:IdeChannelTest" />
-            <details>
-                <summary>Snippet</summary>
-                <pre><code></code></pre>
-            </details>
         </label>
         <label>
             Receive Data
             <textarea name="receive" readonly="readonly" live-subscription="IdeChannelTest:IdeChannelTest"></textarea>
-            <details>
-                <summary>Snippet</summary>
-                <pre><code></code></pre>
-            </details>
         </label>
     </fieldset>
 </section>

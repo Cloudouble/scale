@@ -366,6 +366,7 @@ window.LiveElement.Scale.Console.Tests.testMap = {
     'create-channel': function(connection_url, system_access_url, system_root, connection_id) {
         var channel_id = window.LiveElement.Scale.Core.generateUUID4()
         var channel_object = {
+            '@name': 'test', 
             receiveKey: window.LiveElement.Scale.Core.generateUUID4(), 
             sendKey: window.LiveElement.Scale.Core.generateUUID4(), 
             adminKey: window.LiveElement.Scale.Core.generateUUID4()
