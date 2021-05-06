@@ -117,3 +117,7 @@
 #ide > section[name="channel"] > fieldset[name="configure"][mode="new"] > details {
     display: block;
 }
+
+#ide > section[name="channel"] > fieldset[name="code"] input {
+    font-size: 98%;
+}

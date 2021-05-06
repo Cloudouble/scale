@@ -43,7 +43,7 @@ window.LiveElement.Scale.Core.buildSnippet = function(codeElement) {
 window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/element@1.7.5/elements/'
 window.LiveElement.Element.load().then(() => {
   window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/schema@1.0.4/types/'
-  window.LiveElement.Element.load(['Schema'].concat(window.LiveElement.Schema.CoreTypes).concat(window.LiveElement.Schema.DataTypes)).then(() => {
+  return window.LiveElement.Element.load(['Schema'].concat(window.LiveElement.Schema.CoreTypes).concat(window.LiveElement.Schema.DataTypes)).then(() => {
     var setPage = function(page) {
       page = page || window.location.hash.slice(1)
       var pageLink = document.querySelector(`header > nav > ul > li > a[href="#${page}"]`)
@@ -52,6 +52,7 @@ window.LiveElement.Element.load().then(() => {
       var sectionElement = document.querySelector(`section[id="${page}"]`)
       document.querySelector('header > h1').innerHTML = sectionElement.getAttribute('heading')
     }
+    var p = []
     document.querySelectorAll('header > nav > ul > li > a').forEach(a => {
       var page = a.getAttribute('href').slice(1)
       a.addEventListener('click', event => {
@@ -61,16 +62,32 @@ window.LiveElement.Element.load().then(() => {
       styleTag.setAttribute('href', `pages/${page}/style.css`)
       styleTag.setAttribute('rel', 'stylesheet')
       document.head.appendChild(styleTag)
-      window.fetch(`pages/${page}/index.html`).then(r => r.text()).then(t => {
+      p.push(window.fetch(`pages/${page}/index.html`).then(r => r.text()).then(t => {
         document.querySelector(`section[id="${page}"]`).innerHTML = t
         var scriptTag = document.createElement('script')
         scriptTag.setAttribute('src', `pages/${page}/script.js`)
         document.body.appendChild(scriptTag)
-      })
+      }))
     })
     window.addEventListener("hashchange", event => {
       setPage()
     }, false);
     setPage()
+    return Promise.all(p)
   })    
+}).then(() => {
+  document.querySelectorAll('input[readonly]').forEach(i => {
+    i.addEventListener('click', event => {
+      i.select()
+      document.execCommand('copy')
+    })
+  })
+  document.querySelectorAll('pre code').forEach(c => {
+    c.addEventListener('click', event => {
+      var selection = window.getSelection()
+      selection.selectAllChildren(c.closest('pre'))
+    })
+  })
 })    
+
+

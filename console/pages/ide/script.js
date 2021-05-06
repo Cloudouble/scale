@@ -39,7 +39,6 @@ window.LiveElement.Live.processors.IdeChannelSearch = function(input) {
         }
     }
 }
-
 window.LiveElement.Live.processors.IdeChannelConfigure = function(input) {
     var setupConfigure = function(configureElement) {
         var elements = {}
@@ -52,6 +51,7 @@ window.LiveElement.Live.processors.IdeChannelConfigure = function(input) {
             }
         })
         window.LiveElement.Scale.Core.buildSnippet(configureElement.querySelector('code'))
+        configureElement.dispatchEvent(new window.CustomEvent('setup'))
     }
     if (window.LiveElement.Live.getHandlerType(input) == 'trigger') {
         var configureElement = ide.querySelector('fieldset[name="configure"]')
@@ -87,10 +87,27 @@ window.LiveElement.Live.processors.IdeChannelConfigure = function(input) {
     }
 
 }
+window.LiveElement.Live.processors.IdeChannelCode = function(input) {
+    var handlerType = window.LiveElement.Live.getHandlerType(input)
+    if (handlerType == 'listener') {
+        return window.LiveElement.Scale.Console.IDE.Channel.Configure
+    } else if (handlerType == 'subscription') {
+        if (input.subscriber.name == 'receive_url') {
+            return {'#value': `${window.localStorage.getItem('system:system_access_url').replace('https:', 'wss:')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.receiveKey}`}
+        } else if (input.subscriber.name == 'send_url') {
+            return {'#value': `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.sendKey}`}
+        } else if (input.subscriber.name == 'admin_url') {
+            return {'#value': `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.adminKey}`}
+        }
+    } else if (handlerType == 'trigger') {
+        
+    }
+}
 
+window.LiveElement.Live.listeners.IdeChannelConfigure = {processor: 'IdeChannelConfigure', expired: true}
+window.LiveElement.Live.listeners.IdeChannelCode = {processor: 'IdeChannelCode', expired: true}
 
-window.LiveElement.Live.listeners.IdeChannelConfigure = {processor: 'IdeChannelConfigure'}
-
+window.LiveElement.Live.listen(ide.querySelector('fieldset[name="configure"]'), 'IdeChannelCode', 'setup', false, true)
 
 ide.querySelectorAll('input[type="uuid"]').forEach(uuidInput => {
     uuidInput.setAttribute('pattern', '^[0-9a-z]{8}-[0-9a-z]{4}-4[0-9a-z]{3}-[89ab][0-9a-z]{3}-[0-9a-z]{12}$')
