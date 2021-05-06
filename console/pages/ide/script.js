@@ -107,6 +107,12 @@ window.LiveElement.Live.processors.IdeChannelCode = function(input) {
         }
     }
 }
+window.LiveElement.Live.processors.IdeChannelTest = function(input) {
+    var handlerType = window.LiveElement.Live.getHandlerType(input)
+    if (handlerType == 'trigger') {
+        console.log('line 113', input)
+    }
+}
 
 window.LiveElement.Live.listeners.IdeChannelConfigure = {processor: 'IdeChannelConfigure', expired: true}
 window.LiveElement.Live.listeners.IdeChannelCode = {processor: 'IdeChannelCode', expired: true}
