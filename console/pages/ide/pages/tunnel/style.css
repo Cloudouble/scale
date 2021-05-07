@@ -9,9 +9,3 @@
     display: block;
     width: calc(100% - 4px);
 }
-
-
-
-#ide > section[name="tunnel"] {
-    display: block;
-}
