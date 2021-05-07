@@ -14,7 +14,88 @@
     </label>
     <label>
         Content-Type
-        <input name="content_type" type="text" autocomplete="off" live-trigger="change:IdeAssetEdit" />
+        <input name="content_type" type="text" autocomplete="off" list="ide-asset-edit-contenttype" live-trigger="change:IdeAssetEdit" />
+        <datalist id="ide-asset-edit-contenttype">
+            <option value="application/epub+zip">Electronic publication (EPUB) (.epub)</option>
+            <option value="application/gzip">GZip Compressed Archive (.gz)</option>
+            <option value="application/json">JSON format (.json)</option>
+            <option value="application/ld+json">JSON-LD format (.jsonld)</option>
+            <option value="application/java-archive">Java Archive (JAR) (.jar)</option>
+            <option value="application/msword">Microsoft Word (.doc)</option>
+            <option value="application/octet-stream">Any kind of binary data (.bin)</option>
+            <option value="application/ogg">OGG (.ogx)</option>
+            <option value="application/pdf">Adobe Portable Document Format (PDF) (.pdf)</option>
+            <option value="application/rtf">Rich Text Format (RTF) (.rtf)</option>
+            <option value="application/vnd.amazon.ebook">Amazon Kindle eBook format (.azw)</option>
+            <option value="application/vnd.openxmlformats-officedocument.wordprocessingml.document">Microsoft Word (OpenXML) (.docx)</option>
+            <option value="application/vnd.ms-fontobject">MS Embedded OpenType fonts (.eot)</option>
+            <option value="application/vnd.apple.installer+xml">Apple Installer Package (.mpkg)</option>
+            <option value="application/vnd.oasis.opendocument.presentation">OpenDocument presentation document (.odp)</option>
+            <option value="application/vnd.oasis.opendocument.spreadsheet">OpenDocument spreadsheet document (.ods)</option>
+            <option value="application/vnd.oasis.opendocument.text">OpenDocument text document (.odt)</option>
+            <option value="application/vnd.ms-powerpoint">Microsoft PowerPoint (.ppt)</option>
+            <option value="application/vnd.openxmlformats-officedocument.presentationml.presentation">Microsoft PowerPoint (OpenXML) (.pptx)</option>
+            <option value="application/vnd.rar">RAR archive (.rar)</option>
+            <option value="application/vnd.visio">Microsoft Visio (.vsd)</option>
+            <option value="application/vnd.ms-excel">Microsoft Excel (.xls)</option>
+            <option value="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">Microsoft Excel (OpenXML) (.xlsx)</option>
+            <option value="application/vnd.mozilla.xul+xml">XUL (.xul)</option>
+            <option value="application/xhtml+xml">XHTML (.xhtml)</option>
+            <option value="application/xml">XML (.xml)</option>
+            <option value="application/x-cdf">CD audio (.cda)</option>
+            <option value="application/x-abiword">AbiWord document (.abw)</option>
+            <option value="application/x-freearc">Archive document (multiple files embedded) (.arc)</option>
+            <option value="application/x-bzip">BZip archive (.bz)</option>
+            <option value="application/x-bzip2">BZip2 archive (.bz2)</option>
+            <option value="application/x-csh">C-Shell script (.csh)</option>
+            <option value="application/x-httpd-php">Hypertext Preprocessor (Personal Home Page) (.php)</option>
+            <option value="application/x-sh">Bourne shell script (.sh)</option>
+            <option value="application/x-shockwave-flash">Small web format (SWF) or Adobe Flash document (.swf)</option>
+            <option value="application/x-tar">Tape Archive (TAR) (.tar)</option>
+            <option value="application/x-7z-compressed">7-zip archive (.7z)</option>
+            <option value="application/zip">ZIP archive (.zip)</option>
+            
+            <option value="audio/3gpp">3GPP audio/video container (.3gp)</option>
+            <option value="audio/3gpp2">3GPP2 audio/video container (.3g2)</option>
+            <option value="audio/aac">AAC audio (.aac)</option>
+            <option value="audio/midi audio/x-midi">Musical Instrument Digital Interface (MIDI) (.mid, .midi)</option>
+            <option value="audio/mpeg">MP3 audio (.mp3)</option>
+            <option value="audio/ogg">OGG audio (.oga)</option>
+            <option value="audio/opus">Opus audio (.opus)</option>
+            <option value="audio/wav">Waveform Audio Format (.wav)</option>
+            <option value="audio/webm">WEBM audio (.weba)</option>
+            
+            <option value="font/otf">OpenType font (.otf)</option>
+            <option value="font/ttf">TrueType Font (.ttf)</option>
+            <option value="font/woff">Web Open Font Format (WOFF) (.woff)</option>
+            <option value="font/woff2">Web Open Font Format (WOFF) (.woff2)</option>
+            
+            <option value="image/bmp">Windows OS/2 Bitmap Graphics (.bmp)</option>
+            <option value="image/gif">Graphics Interchange Format (GIF) (.gif)</option>
+            <option value="image/jpeg">JPEG images (.jpeg, .jpg)</option>
+            <option value="image/png">Portable Network Graphics (.png)</option>
+            <option value="image/svg+xml">Scalable Vector Graphics (SVG) (.svg)</option>
+            <option value="image/tiff">Tagged Image File Format (TIFF) (.tif, .tiff)</option>
+            <option value="image/vnd.microsoft.icon">Icon format (.ico)</option>
+            <option value="image/webp">WEBP image (.webp)</option>
+            
+            <option value="text/calendar">iCalendar format (.ics)</option>
+            <option value="text/css">Cascading Style Sheets (CSS) (.css)</option>
+            <option value="text/csv">Comma-separated values (CSV) (.csv)</option>
+            <option value="text/html">HyperText Markup Language (HTML) (.htm, .html)</option>
+            <option value="text/javascript">JavaScript (.js, .mjs)</option>
+            <option value="text/plain">Text, (generally ASCII or ISO 8859-n) (.txt)</option>
+            <option value="text/xml">XML (.xml)</option>
+            
+            <option value="video/3gpp">3GPP audio/video container (.3gp)</option>
+            <option value="video/3gpp2">3GPP2 audio/video container (.3g2)</option>
+            <option value="video/mp2t">MPEG transport stream (.ts)</option>
+            <option value="video/mpeg">MPEG Video (.mpeg)</option>
+            <option value="video/mp4">MP4 audio (.mp4)</option>
+            <option value="video/ogg">OGG video (.ogv)</option>
+            <option value="video/webm">WEBM video (.webm)</option>
+            <option value="video/x-msvideo">AVI: Audio Video Interleave (.avi)</option>
+        </datalist>
     </label>
     <button name="save" live-trigger="click:IdeAssetEdit">Save</button>
     <label>
