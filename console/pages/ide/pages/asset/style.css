@@ -1,6 +1,31 @@
 #ide[entity-type="asset"] > section[name="asset"] {
     display: block;
 }
+#ide > section[name="asset"] > fieldset[name="search"] > input[type="search"] {
+    width: 40em;
+}
+#ide > section[name="asset"] > fieldset[name="edit"] > label {
+    width: 24em;
+    margin-right: 2em;
+}
+#ide > section[name="asset"] > fieldset[name="edit"] > label > input {
+    width: calc(100% - 4px);
+    margin-right: 2em;
+}
+#ide > section[name="asset"] > fieldset[name="edit"] > label:last-of-type {
+    display: block;
+}
+#ide > section[name="asset"] > fieldset[name="edit"] > label:last-of-type textarea {
+    display: block;
+    width: 54em;
+    height: 10em;
+}
+#ide > section[name="asset"] > fieldset[name="code"] > label {
+    display: block;
+}
+#ide > section[name="asset"] > fieldset[name="code"] > label > input {
+    width: calc(100% - 4px);
+}
 
 
 
