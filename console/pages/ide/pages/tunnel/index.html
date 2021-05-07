@@ -4,12 +4,12 @@
     <button name="create" live-trigger="click:IdeTunnelCreate">Create</button>
     <label>
         Tunnel ID
-        <input name="id" type="uuid" readonly="readonly" live-trigger="change:IdeTunnelCreate" />
+        <input name="id" type="uuid" readonly="readonly" live-subscription="IdeTunnelCreate:IdeTunnelCreate" />
     </label>
     <details>
         <summary>Snippet</summary>
         <pre>
-            <code live-subscription="IdeTunnelCreate:IdeTunnelCreate">
+            <code>
 var tunnelUrl = `${connection_url.replace('https:', 'wss:')}/tunnel/${tunnel_handle}`
 try {
     window.LiveElement.Scale.Console.Tests.tunnel = new WebSocket(tunnelUrl)
@@ -47,13 +47,13 @@ try {
         <input type="text" name="send" placeholder="Type and then press 'Enter' to send..." live-trigger="change:IdeTunnelTest" />
     </label>
     <label>
-        Receive Data
+        Received Data
         <textarea name="receive" readonly="readonly" live-subscription="IdeTunnelTest:IdeTunnelTest"></textarea>
     </label>
     <details>
         <summary>Snippet</summary>
         <pre>
-            <code live-subscription="IdeTunnelCreate:IdeTunnelCreate">
+            <code>
 var tunnelUrl = `${connection_url.replace('https:', 'wss:')}/tunnel/${tunnel_handle}`
 try {
     window.LiveElement.Scale.Console.Tests.tunnel = new WebSocket(tunnelUrl)

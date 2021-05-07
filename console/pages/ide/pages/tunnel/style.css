@@ -1,4 +1,4 @@
-#ide > section[name="tunnel"] {
+#ide[entity-type="tunnel"] > section[name="tunnel"] {
     display: block;
 }
 #ide > section[name="tunnel"] > fieldset[name="test"] > label {
@@ -8,4 +8,10 @@
     #ide > section[name="tunnel"] > fieldset[name="test"] > label > textarea {
     display: block;
     width: calc(100% - 4px);
+}
+
+
+
+#ide > section[name="tunnel"] {
+    display: block;
 }
