@@ -12,19 +12,28 @@
     width: calc(100% - 4px);
     margin-right: 2em;
 }
+#ide > section[name="asset"] > fieldset[name="edit"] > label:first-of-type {
+    position: relative;
+}
 #ide > section[name="asset"] > fieldset[name="edit"] > label:first-of-type span:first-of-type {
     display: block;
-    width: 3em;
 }
 #ide > section[name="asset"] > fieldset[name="edit"] > label:first-of-type span:nth-of-type(2) {
     display: inline-block;
     width: 3em;
     font-size: 90%;
+    position: absolute;
+    left: 3px;
+    top: 2em;
+    z-index: 1;
+    color: grey;
 }
 #ide > section[name="asset"] > fieldset[name="edit"] > label:first-of-type input {
     display: inline-block;
     width: calc(100% - 3.5em);
-    padding-left: 2px;
+    padding-left: 3em;
+    position: relative;
+    left: 0;
     margin-right: 0;
 }
 
