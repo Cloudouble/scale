@@ -35,7 +35,13 @@ window.LiveElement.Scale.Core.buildSnippet = function(codeElement) {
     }
     codeElement.innerHTML = codeElement.getAttribute('regex').replace(/\$\{(?<code>[^\}]+)\}/g, function(...args) { 
         var code = args.pop().code 
-        return code ? Function(`"use strict";return (${code})`)() : ''
+        var retval 
+        try {
+          retval = code ? Function(`"use strict";return (${code})`)() : ''
+        } catch(e) {
+          retval = '${'+code+'}'
+        }
+        return retval
     })
 }
 
