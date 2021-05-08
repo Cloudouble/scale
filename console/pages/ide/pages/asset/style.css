@@ -40,9 +40,9 @@
 #ide > section[name="asset"] > fieldset[name="edit"] > label:last-of-type {
     display: block;
 }
-#ide > section[name="asset"] > fieldset[name="edit"] > label:last-of-type textarea {
+#ide > section[name="asset"] > fieldset[name="edit"] > label:last-of-type div.editor {
     display: block;
-    width: 54em;
+    width: 60em;
     height: 10em;
 }
 #ide > section[name="asset"] > fieldset[name="code"] > label {

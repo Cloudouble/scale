@@ -52,3 +52,24 @@ window.LiveElement.Live.listeners.IdeAssetView = {processor: 'IdeAssetView', exp
 window.LiveElement.Live.listeners.IdeAssetCode = {processor: 'IdeAssetCode', expired: true}
 
 //window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('fieldset[name="configure"]'), 'IdeChannelCode', 'setup', false, true)
+
+
+window.LiveElement.Scale.Console.IDE.Asset.div = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="asset"] div.editor')
+window.LiveElement.Scale.Console.IDE.Asset.editor = window.ace.edit(window.LiveElement.Scale.Console.IDE.Asset.div)
+window.LiveElement.Scale.Console.IDE.Asset.editor.setTheme("ace/theme/monokai")
+window.LiveElement.Scale.Console.IDE.Asset.editor.setOptions({
+    autoScrollEditorIntoView: true, 
+    useSoftTabs: false, 
+    navigateWithinSoftTabs: false, 
+    highlightGutterLine: false, 
+    displayIndentGuides: true, 
+    maxLines: 30,
+    minLines: 10, 
+    scrollPastEnd: 0.5, 
+    enableBasicAutocompletion: false, // ext-language_tools.js
+    enableLiveAutocompletion: false, // ext-language_tools.js
+    enableSnippets: false // ext-language_tools.js
+})
+window.LiveElement.Scale.Console.IDE.Asset.editor.renderer.setScrollMargin(10, 10)
+
+//editor.session.setMode("ace/mode/javascript");

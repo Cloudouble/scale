@@ -102,4 +102,13 @@ window.LiveElement.Element.load().then(() => {
   
 })    
 
+window.ace.config.set("basePath", "https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/")
+window.ace.config.setModuleUrl("ace/theme/merbivore", "theme-merbivore.min.js")
+
+// editor.setMode("ace/mode/javascript");
+// editor.setReadOnly(true)
+// editor.setValue("the new text here")
+// editor.setValue("the new text here")
+// editor.getValue()
+
 

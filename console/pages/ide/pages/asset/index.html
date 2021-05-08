@@ -54,7 +54,6 @@
             <option value="application/x-tar">Tape Archive (TAR) (.tar)</option>
             <option value="application/x-7z-compressed">7-zip archive (.7z)</option>
             <option value="application/zip">ZIP archive (.zip)</option>
-            
             <option value="audio/3gpp">3GPP audio/video container (.3gp)</option>
             <option value="audio/3gpp2">3GPP2 audio/video container (.3g2)</option>
             <option value="audio/aac">AAC audio (.aac)</option>
@@ -64,12 +63,10 @@
             <option value="audio/opus">Opus audio (.opus)</option>
             <option value="audio/wav">Waveform Audio Format (.wav)</option>
             <option value="audio/webm">WEBM audio (.weba)</option>
-            
             <option value="font/otf">OpenType font (.otf)</option>
             <option value="font/ttf">TrueType Font (.ttf)</option>
             <option value="font/woff">Web Open Font Format (WOFF) (.woff)</option>
             <option value="font/woff2">Web Open Font Format (WOFF) (.woff2)</option>
-            
             <option value="image/bmp">Windows OS/2 Bitmap Graphics (.bmp)</option>
             <option value="image/gif">Graphics Interchange Format (GIF) (.gif)</option>
             <option value="image/jpeg">JPEG images (.jpeg, .jpg)</option>
@@ -78,7 +75,6 @@
             <option value="image/tiff">Tagged Image File Format (TIFF) (.tif, .tiff)</option>
             <option value="image/vnd.microsoft.icon">Icon format (.ico)</option>
             <option value="image/webp">WEBP image (.webp)</option>
-            
             <option value="text/calendar">iCalendar format (.ics)</option>
             <option value="text/css">Cascading Style Sheets (CSS) (.css)</option>
             <option value="text/csv">Comma-separated values (CSV) (.csv)</option>
@@ -86,7 +82,6 @@
             <option value="text/javascript">JavaScript (.js, .mjs)</option>
             <option value="text/plain">Text, (generally ASCII or ISO 8859-n) (.txt)</option>
             <option value="text/xml">XML (.xml)</option>
-            
             <option value="video/3gpp">3GPP audio/video container (.3gp)</option>
             <option value="video/3gpp2">3GPP2 audio/video container (.3g2)</option>
             <option value="video/mp2t">MPEG transport stream (.ts)</option>
@@ -100,12 +95,12 @@
     <button name="save" live-trigger="click:IdeAssetEdit">Save</button>
     <label>
         Body
-        <textarea name="body" live-trigger="change:IdeAssetEdit"></textarea>
+        <div class="editor"></div>
     </label>
-    <details>
+    <details open="true">
         <summary>Snippet</summary>
         <pre>
-            <code live-subscription="IdeChannelConfigure:IdeChannelConfigure">
+            <code>
 window.fetch(
     '${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/connect.json', 
     {
