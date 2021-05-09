@@ -31,8 +31,7 @@
     <button name="create" live-trigger="click:IdeChannelConfigure">Create</button>
     <details>
         <summary>Snippet</summary>
-        <pre>
-            <code live-subscription="IdeChannelConfigure:IdeChannelConfigure">
+        <div class="snippet">
 window.fetch(
     '${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/connect.json', 
     {
@@ -45,8 +44,7 @@ window.fetch(
         }) 
     }
 )
-            </code>
-        </pre>
+        </div>
     </details>
 </fieldset>
 <fieldset name="code">
@@ -56,9 +54,9 @@ window.fetch(
         <input name="receive_url" type="url" readonly="readonly" live-subscription="IdeChannelCode:IdeChannelCode" live-trigger="input:IdeChannelCode" />
         <details>
             <summary>Snippet</summary>
-            <pre><code>
+            <div class="snippet">
 var socket = new WebSocket('${window.LiveElement.Scale.Console.IDE.Channel.Code.receive_url}')
-            </code></pre>
+            </div>
         </details>
     </label>
     <label>
@@ -66,15 +64,15 @@ var socket = new WebSocket('${window.LiveElement.Scale.Console.IDE.Channel.Code.
         <input name="send_url" type="url" readonly="readonly" live-subscription="IdeChannelCode:IdeChannelCode" />
         <details>
             <summary>Snippet</summary>
-            <pre><code>
+            <div class="snippet">
 window.fetch(
-    '${window.LiveElement.Scale.Console.IDE.Channel.Code.send_url}`, 
+    '${window.LiveElement.Scale.Console.IDE.Channel.Code.send_url}', 
     {
         method: 'POST', 
         body: JSON.stringify(data)
     }
 )
-            </code></pre>
+            </div>
         </details>
     </label>
     <label>
@@ -82,14 +80,14 @@ window.fetch(
         <input name="admin_url" type="url" readonly="readonly" live-subscription="IdeChannelCode:IdeChannelCode" />
         <details>
             <summary>Snippet</summary>
-            <pre><code>
+            <div class="snippet">
 window.fetch(
     '${window.LiveElement.Scale.Console.IDE.Channel.Code.admin_url}', 
     { 
         method: 'DELETE'
     }
 )
-            </code></pre>
+            </div>
         </details>
     </label>
 </fieldset>

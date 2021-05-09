@@ -1,3 +1,6 @@
+#ide:not([entity-type]) > section[name="channel"] {
+    display: block;
+}
 #ide div[name="sidebar"] {
     position: absolute;
     left: 0;

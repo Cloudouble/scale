@@ -38,11 +38,11 @@ window.LiveElement.Live.processors.IdeChannelConfigure = function(input) {
                 elements[n].value = window.LiveElement.Scale.Console.IDE.Channel.Configure.channel[n] || ''
             }
         })
-        window.LiveElement.Scale.Core.buildSnippet(configureElement.querySelector('code'))
+        window.LiveElement.Scale.Core.buildSnippet(configureElement.querySelector('div.snippet'))
         configureElement.dispatchEvent(new window.CustomEvent('setup'))
     }
     if (window.LiveElement.Live.getHandlerType(input) == 'trigger') {
-        var configureElement = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('fieldset[name="configure"]')
+        var configureElement = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="channel"] fieldset[name="configure"]')
         if (input.attributes.name == 'new') {
             configureElement.setAttribute('mode', 'new')
             window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id = window.LiveElement.Scale.Core.generateUUID4()
@@ -63,7 +63,7 @@ window.LiveElement.Live.processors.IdeChannelConfigure = function(input) {
             setupConfigure(configureElement)
         } else if (input.attributes.name == 'load') {
             configureElement.setAttribute('mode', 'load')
-            var searchElement = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('fieldset[name="search"] input[name="search"]')
+            var searchElement = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="channel"] fieldset[name="search"] input[name="search"]')
             if (searchElement) {
                 if (window.LiveElement.Scale.Console.IDE.Channel.Search && window.LiveElement.Scale.Console.IDE.Channel.Search[searchElement.value]) {
                     window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id = searchElement.value
@@ -95,7 +95,7 @@ window.LiveElement.Live.processors.IdeChannelCode = function(input) {
             send_url: `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.sendKey}`, 
             admin_url: `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.adminKey}`
         }
-        window.LiveElement.Scale.Core.buildSnippet(input.subscriber.parentElement.querySelector('code'))
+        window.LiveElement.Scale.Core.buildSnippet(input.subscriber.parentElement.querySelector('div.snippet'))
         if (input.subscriber.name == 'receive_url') {
             return {'#value': window.LiveElement.Scale.Console.IDE.Channel.Code.receive_url}
         } else if (input.subscriber.name == 'send_url') {
@@ -148,4 +148,4 @@ window.LiveElement.Live.listeners.IdeChannelConfigure = {processor: 'IdeChannelC
 window.LiveElement.Live.listeners.IdeChannelCode = {processor: 'IdeChannelCode', expired: true}
 window.LiveElement.Live.listeners.IdeChannelTest = {processor: 'IdeChannelTest', expired: true}
 
-window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('fieldset[name="configure"]'), 'IdeChannelCode', 'setup', false, true)
+window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="channel"] fieldset[name="configure"]'), 'IdeChannelCode', 'setup', false, true)

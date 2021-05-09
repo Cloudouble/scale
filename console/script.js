@@ -31,9 +31,9 @@ window.LiveElement.Scale.Core.syncWithLocalStorage = function(page, checkboxElem
 }
 window.LiveElement.Scale.Core.buildSnippet = function(codeElement) {
     if (!codeElement.getAttribute('regex')) {
-      codeElement.setAttribute('regex', codeElement.innerHTML)
+      codeElement.setAttribute('regex', codeElement.innerText)
     }
-    codeElement.innerHTML = codeElement.getAttribute('regex').replace(/\$\{(?<code>[^\}]+)\}/g, function(...args) { 
+    var newValue = codeElement.getAttribute('regex').replace(/\$\{(?<code>[^\}]+)\}/g, function(...args) { 
         var code = args.pop().code 
         var retval 
         try {
@@ -43,9 +43,12 @@ window.LiveElement.Scale.Core.buildSnippet = function(codeElement) {
         }
         return retval
     })
+    var editor = window.ace.edit(codeElement)
+    editor.setOptions({...window.LiveElement.Scale.Console.aceOptions, ...{readOnly: true}})
+    editor.renderer.setScrollMargin(10, 10)
+    editor.session.setMode(`ace/mode/${codeElement.getAttribute('mode') || 'javascript'}`)
+    editor.setValue(newValue)
 }
-
-
 window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/element@1.7.5/elements/'
 window.LiveElement.Element.load().then(() => {
   window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/schema@1.0.4/types/'
@@ -103,12 +106,27 @@ window.LiveElement.Element.load().then(() => {
 })    
 
 window.ace.config.set("basePath", "https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/")
-window.ace.config.setModuleUrl("ace/theme/merbivore", "theme-merbivore.min.js")
 
 // editor.setMode("ace/mode/javascript");
 // editor.setReadOnly(true)
 // editor.setValue("the new text here")
 // editor.setValue("the new text here")
 // editor.getValue()
+
+window.LiveElement.Scale.Console.aceOptions = {
+    autoScrollEditorIntoView: true, 
+    useSoftTabs: true, 
+    navigateWithinSoftTabs: true, 
+    highlightGutterLine: true, 
+    displayIndentGuides: true, 
+    maxLines: 30,
+    minLines: 3, 
+    scrollPastEnd: 0.5, 
+    enableBasicAutocompletion: true,
+    enableLiveAutocompletion: true, 
+    enableSnippets: true, 
+    theme: 'ace/theme/merbivore'
+}
+
 
 
