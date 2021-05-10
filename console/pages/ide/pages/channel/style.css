@@ -15,11 +15,15 @@
     #ide > section[name="channel"] > fieldset[name="test"] > label > textarea {
     width: calc(100% - 4px);
 }
-#ide > section[name="channel"] > fieldset[name="configure"] > button[name="create"], 
+#ide > section[name="channel"] > fieldset[name="configure"] > button[name="create"],
+    #ide > section[name="channel"] > fieldset[name="configure"] > button[name="delete"], 
     #ide > section[name="channel"] > fieldset[name="configure"] > details {
     display: none;
 }
 #ide > section[name="channel"] > fieldset[name="configure"][mode="new"] > button[name="create"] {
+    display: inline-block;
+}
+#ide > section[name="channel"] > fieldset[name="configure"][mode="load"] > button[name="delete"] {
     display: inline-block;
 }
 #ide > section[name="channel"] > fieldset[name="configure"][mode="new"] > details {

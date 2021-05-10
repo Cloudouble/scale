@@ -6,7 +6,7 @@
     <button name="new" live-trigger="click:IdeChannelSearch">New</button>
     <datalist id="ide-channel-search-list"></datalist>
 </fieldset>
-<fieldset name="configure">
+<fieldset name="configure" live-subscription="IdeChannelSearch:IdeChannelConfigure">
     <h3>Configure</h3>
     <label>
         Channel @name (optional)
@@ -29,7 +29,8 @@
         <input name="adminKey" type="uuid" readonly="readonly" />
     </label>
     <button name="create" live-trigger="click:IdeChannelConfigure">Create</button>
-    <details>
+    <button name="delete" live-trigger="click:IdeChannelConfigure">Delete</button>
+    <details class="snippet-container">
         <summary>Snippet</summary>
         <div class="snippet">
 window.fetch(
@@ -47,12 +48,12 @@ window.fetch(
         </div>
     </details>
 </fieldset>
-<fieldset name="code">
+<fieldset name="code" live-subscription="IdeChannelSearch:IdeChannelCode">
     <h3>Code</h3>
     <label>
         Receive URL
         <input name="receive_url" type="url" readonly="readonly" />
-        <details>
+        <details class="snippet-container">
             <summary>Snippet</summary>
             <div class="snippet">
 var socket = new WebSocket('${window.LiveElement.Scale.Console.IDE.Channel.Code.receive_url}')
@@ -62,7 +63,7 @@ var socket = new WebSocket('${window.LiveElement.Scale.Console.IDE.Channel.Code.
     <label>
         Send URL
         <input name="send_url" type="url" readonly="readonly" />
-        <details>
+        <details class="snippet-container">
             <summary>Snippet</summary>
             <div class="snippet">
 window.fetch(
@@ -78,7 +79,7 @@ window.fetch(
     <label>
         Admin URL
         <input name="admin_url" type="url" readonly="readonly" />
-        <details>
+        <details class="snippet-container">
             <summary>Snippet</summary>
             <div class="snippet">
 window.fetch(

@@ -48,6 +48,10 @@ window.LiveElement.Scale.Core.buildSnippet = function(codeElement) {
     editor.renderer.setScrollMargin(10, 10)
     editor.session.setMode(`ace/mode/${codeElement.getAttribute('mode') || 'javascript'}`)
     editor.setValue(newValue)
+    var snippetContainer = codeElement.parentElement
+    if (snippetContainer.classList.contains('snippet-container')) {
+      snippetContainer.setAttribute('built', true)
+    }
 }
 window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/element@1.7.5/elements/'
 window.LiveElement.Element.load().then(() => {

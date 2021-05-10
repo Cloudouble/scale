@@ -204,3 +204,11 @@ input[readonly], pre code {
     cursor: cell;
     background-color: whitesmoke;
 }
+
+
+.snippet-container {
+    display: none;
+}
+.snippet-container[built] {
+    display: block;
+}
