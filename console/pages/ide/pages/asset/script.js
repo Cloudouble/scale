@@ -46,7 +46,16 @@ window.LiveElement.Live.processors.IdeAssetSearch = function(input) {
 window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
     if (handlerType == 'trigger') {
-        console.log('line 42: trigger', input)
+        var fieldset = input.triggersource.closest('fieldset')
+        var contentTypeInput = fieldset.querySelector('input[name="content-type"]')
+        var datalist = fieldset.querySelector('datalist')
+        var suffix = `.${input.properties.value.split('.').pop()}`
+        var matchedOptions = Array.from(datalist.querySelectorAll('option')).filter(opt => {
+            return opt.innerText.indexOf(`(${suffix})`) > 0
+        })
+        if (matchedOptions.length) {
+            contentTypeInput.value = matchedOptions[0].getAttribute('value')
+        }
     } else if (handlerType == 'subscription') {
         var pathInput = input.subscriber.querySelector(`input[name="path"]`)
         pathInput.value = input.payload.path || ''
