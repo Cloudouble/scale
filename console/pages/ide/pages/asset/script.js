@@ -47,19 +47,52 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
     if (handlerType == 'trigger') {
         var fieldset = input.triggersource.closest('fieldset')
-        var contentTypeInput = fieldset.querySelector('input[name="content-type"]')
         var datalist = fieldset.querySelector('datalist')
-        var suffix = `.${input.properties.value.split('.').pop()}`
-        var matchedOptions = Array.from(datalist.querySelectorAll('option')).filter(opt => {
-            return opt.innerText.indexOf(`(${suffix})`) > 0
-        })
-        if (matchedOptions.length) {
-            contentTypeInput.value = matchedOptions[0].getAttribute('value')
+        if (input.triggersource.name == 'path') {
+            var contentTypeInput = fieldset.querySelector('input[name="content-type"]')
+            var suffix = `.${input.properties.value.split('.').pop()}`
+            var matchedOptions = Array.from(datalist.querySelectorAll('option')).filter(opt => opt.innerText.indexOf(`(${suffix})`) > 0 )
+            contentTypeInput.value = matchedOptions.length ? matchedOptions[0].getAttribute('value') : 'application/octet-stream'
+            contentTypeInput.dispatchEvent(new window.Event('change'))
+            window.LiveElement.Scale.Console.IDE.Asset.Edit.modelist = window.LiveElement.Scale.Console.IDE.Asset.Edit.modelist || window.ace.require("ace/ext/modelist")
+            var editorMode = window.LiveElement.Scale.Console.IDE.Asset.Edit.modelist.getModeForPath(input.properties.value).mode
+            var editorDiv = fieldset.querySelector('div.editor')
+            var contentTypeBase = contentTypeInput.value.split('/')[0]
+            if (window.LiveElement.Scale.Console.IDE.Asset.editor) {
+                if (typeof window.LiveElement.Scale.Console.IDE.Asset.editor.unmount == 'function') {
+                    window.LiveElement.Scale.Console.IDE.Asset.editor.unmount()
+                } else if (typeof window.LiveElement.Scale.Console.IDE.Asset.editor.destroy == 'function') {
+                    window.LiveElement.Scale.Console.IDE.Asset.editor.destroy()
+                }
+            }
+            if (editorMode != 'ace/mode/text' || contentTypeBase == 'text') {
+                window.LiveElement.Scale.Console.IDE.Asset.editor = window.ace.edit(editorDiv)
+                window.LiveElement.Scale.Console.IDE.Asset.editor.setOptions({...window.LiveElement.Scale.Console.aceOptions, ...{minLines: 47, maxLines: 47}})
+                window.LiveElement.Scale.Console.IDE.Asset.editor.renderer.setScrollMargin(10, 10)
+                window.LiveElement.Scale.Console.IDE.Asset.editor.session.setMode(editorMode)
+            } else {
+                if (contentTypeBase == 'image') {
+                    window.LiveElement.Scale.Console.IDE.Asset.editor = new window.FilerobotImageEditor({
+                        showInModal: false, 
+                        elementId: 'ide-asset-editor', 
+                        replaceCloseWithBackButton: true, 
+                        finishButtonLabel: 'Save'
+                    })
+                    window.LiveElement.Scale.Console.IDE.Asset.editor.open('https://live-element.net/images/logo/logo-1000x400.png')
+                } else {
+                    console.log('line 83', contentTypeBase)
+                }
+
+            }
+        } else if (input.triggersource.name == 'content-type') {
+            
+            //console.log('line 64', input)
         }
     } else if (handlerType == 'subscription') {
         var pathInput = input.subscriber.querySelector(`input[name="path"]`)
         pathInput.value = input.payload.path || ''
         input.subscriber.querySelector(`input[name="content-type"]`).value = input.payload.ContentType || ''
+        pathInput.dispatchEvent(new window.Event('change'))
         if (!pathInput.value) {
             pathInput.focus()
         }
@@ -113,7 +146,7 @@ window.LiveElement.Live.listeners.IdeAssetCode = {processor: 'IdeAssetCode', exp
 
 //window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('fieldset[name="configure"]'), 'IdeChannelCode', 'setup', false, true)
 
-
+/*
 window.LiveElement.Scale.Console.IDE.Asset.div = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="asset"] div.editor')
 window.LiveElement.Scale.Console.IDE.Asset.editor = window.ace.edit(window.LiveElement.Scale.Console.IDE.Asset.div)
 window.LiveElement.Scale.Console.IDE.Asset.editor.setOptions({
@@ -130,11 +163,10 @@ window.LiveElement.Scale.Console.IDE.Asset.editor.setOptions({
     enableSnippets: true, 
     theme: 'ace/theme/merbivore'
 })
-
+window.LiveElement.Scale.Console.aceOptions
 window.LiveElement.Scale.Console.IDE.Asset.editor.renderer.setScrollMargin(10, 10)
-
 window.LiveElement.Scale.Console.IDE.Asset.editor.session.setMode("ace/mode/javascript")
-
+*/
 /* 
 
 var modelist = ace.require("ace/ext/modelist")

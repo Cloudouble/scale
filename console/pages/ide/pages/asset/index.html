@@ -98,26 +98,11 @@
     <button name="save" live-trigger="click:IdeAssetEdit">Save</button>
     <label>
         Body
-        <div class="editor"></div>
+        <div class="editor" id="ide-asset-editor"></div>
     </label>
-    <details open="true">
+    <details class="snippet-container">
         <summary>Snippet</summary>
-        <pre>
-            <code>
-window.fetch(
-    '${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/connect.json', 
-    {
-        method: 'PUT', 
-        headers: {
-            "Content-Type": "application/json"
-        }, 
-        body: JSON.stringify({
-            ${JSON.stringify(window.LiveElement.Scale.Console.IDE.Channel.Configure.channel, null, 20).slice(1, -1)}
-        }) 
-    }
-)
-            </code>
-        </pre>
+        <div class="snippet"></div>
     </details>
 </fieldset>
 <fieldset name="code">

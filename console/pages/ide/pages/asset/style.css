@@ -42,8 +42,8 @@
 }
 #ide > section[name="asset"] > fieldset[name="edit"] > label:last-of-type div.editor {
     display: block;
-    width: 60em;
-    height: 10em;
+    width: 80em;
+    height: 47em;
 }
 #ide > section[name="asset"] > fieldset[name="code"] > label {
     display: block;
