@@ -51,13 +51,23 @@ window.LiveElement.Live.processors.IdeChannelConfigure = function(input) {
     if (handlerType == 'listener') {
         return {...window.LiveElement.Scale.Console.IDE.Channel.Configure.channel, ...{id : window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}}
     } else if (handlerType == 'subscription') {
+        var complete = true
         input.subscriber.querySelectorAll('input[name]').forEach(i => {
             if (i.name in input.payload) {
                 i.value = input.payload[i.name] || ''
+            } else {
+                i.value = ''
+                if (i.name != '@name') {
+                    complete = false
+                }
             }
         })
         window.LiveElement.Scale.Core.buildSnippet(input.subscriber.querySelector('div.snippet'))
-        input.subscriber.setAttribute('mode', window.LiveElement.Scale.Console.IDE.Channel.Search && window.LiveElement.Scale.Console.IDE.Channel.Search[input.payload.id] ? 'load' : 'new')
+        if (complete) {
+            input.subscriber.setAttribute('mode', window.LiveElement.Scale.Console.IDE.Channel.Search && window.LiveElement.Scale.Console.IDE.Channel.Search[input.payload.id] ? 'load' : 'new')
+        } else {
+            input.subscriber.removeAttribute('mode')
+        }
         if (input.subscriber.getAttribute('mode') == 'new') {
             input.subscriber.querySelector('input[name="@name"]').value = ''
         }
@@ -82,7 +92,16 @@ window.LiveElement.Live.processors.IdeChannelConfigure = function(input) {
                 {
                     method: 'DELETE', 
                 }
-            )
+            ).then(() => {
+                delete window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id
+                window.LiveElement.Scale.Console.IDE.Channel.Configure.channel = {}
+                var searchFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="channel"] fieldset[name="search"]')
+                input.triggersource.closest('fieldset').removeAttribute('mode')                
+                var searchInput = searchFieldset.querySelector('input')
+                searchInput.value = ''
+                searchInput.focus()
+                searchFieldset.dispatchEvent(new window.CustomEvent('loaded'))
+            })
         }
     }
 }
@@ -92,16 +111,19 @@ window.LiveElement.Live.processors.IdeChannelCode = function(input) {
         return window.LiveElement.Scale.Console.IDE.Channel.Configure
     } else if (handlerType == 'subscription') {
         window.LiveElement.Scale.Console.IDE.Channel.Code = {
-            receive_url: `${window.localStorage.getItem('system:system_access_url').replace('https:', 'wss:')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.receiveKey}`, 
-            send_url: `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.sendKey}`, 
-            admin_url: `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.adminKey}`
+            receive_url: window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.receiveKey ? `${window.localStorage.getItem('system:system_access_url').replace('https:', 'wss:')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.receiveKey}` : undefined, 
+            send_url: window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.sendKey ? `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.sendKey}` : undefined, 
+            admin_url: window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.adminKey ? `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.adminKey}` : undefined
         }
-        window.LiveElement.Scale.Core.buildSnippet(input.subscriber.parentElement.querySelector('div.snippet'))
         input.subscriber.querySelectorAll('input[name]').forEach(i => {
-            if (i.name in window.LiveElement.Scale.Console.IDE.Channel.Code) {
-                i.value = window.LiveElement.Scale.Console.IDE.Channel.Code[i.name] || ''
+            var snippetElement = i.nextElementSibling.querySelector('div.snippet')
+            if (window.LiveElement.Scale.Console.IDE.Channel.Code[i.name]) {
+                i.value = window.LiveElement.Scale.Console.IDE.Channel.Code[i.name]
+                window.LiveElement.Scale.Core.buildSnippet(snippetElement)
+            } else {
+                i.value = ''
+                i.nextElementSibling.removeAttribute('built')
             }
-            window.LiveElement.Scale.Core.buildSnippet(i.nextElementSibling.querySelector('div.snippet'))
         })
     }
 }
