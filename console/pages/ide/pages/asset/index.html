@@ -6,7 +6,7 @@
     <button name="new" live-trigger="click:IdeAssetSearch">New</button>
     <datalist id="ide-asset-search-list"></datalist>
 </fieldset>
-<fieldset name="edit">
+<fieldset name="edit" live-subscription="IdeAssetSearch:IdeAssetEdit">
     <h3>Edit</h3>
     <label>
         <span>Path</span>
@@ -14,8 +14,8 @@
     </label>
     <label>
         Content-Type
-        <input name="content_type" type="text" autocomplete="off" list="ide-asset-edit-contenttype" live-trigger="change:IdeAssetEdit" />
-        <datalist id="ide-asset-edit-contenttype">
+        <input name="content-type" type="text" autocomplete="off" list="ide-asset-edit-content-type" live-trigger="change:IdeAssetEdit" />
+        <datalist id="ide-asset-edit-content-type">
             <option value="application/epub+zip">Electronic publication (EPUB) (.epub)</option>
             <option value="application/gzip">GZip Compressed Archive (.gz)</option>
             <option value="application/json">JSON format (.json)</option>

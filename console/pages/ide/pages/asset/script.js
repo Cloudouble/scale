@@ -1,28 +1,79 @@
 window.LiveElement.Live.processors.IdeAssetSearch = function(input) {
-    if (input.attributes.name == 'search') {
-        var event = input.vector.split(':').shift()
-        if (event == 'keyup') {
-            window.LiveElement.Scale.Console.System.invokeLambda({
-                page: 'ide', 
-                entity_type: 'asset', 
-                heading: 'search',
-                search: input.properties.value
-            }).then(searchResult => {
-                if (searchResult && typeof searchResult == 'object' && searchResult.result && typeof searchResult.result == 'object') {
-                    window.LiveElement.Scale.Console.IDE.Asset.Search = searchResult.result
-                    var datalist = document.getElementById('ide-asset-search-list')
-                    datalist.innerHTML = ''
-                    Object.keys(window.LiveElement.Scale.Console.IDE.Asset.Search).sort().forEach(asset_path => {
-                        var optionElement = document.createElement('option')
-                        optionElement.setAttribute('value', asset_path)
-                        optionElement.innerHTML = asset_path
-                        datalist.appendChild(optionElement)
-                    })
-                }
-            })
+    var handlerType = window.LiveElement.Live.getHandlerType(input)
+    if (handlerType == 'listener') {
+        return {...window.LiveElement.Scale.Console.IDE.Asset.Edit.asset, ...{path : window.LiveElement.Scale.Console.IDE.Asset.Edit.path}}
+    } else if (window.LiveElement.Live.getHandlerType(input) == 'trigger') {
+        var searchFieldset = input.triggersource.closest('fieldset')
+        var searchInput = searchFieldset.querySelector('input[name="search"]')
+        if (input.attributes.name == 'search') {
+            var event = input.vector.split(':').shift()
+            if (event == 'keyup') {
+                window.LiveElement.Scale.Console.System.invokeLambda({
+                    page: 'ide', 
+                    entity_type: 'asset', 
+                    heading: 'search',
+                    search: input.properties.value
+                }).then(searchResult => {
+                    if (searchResult && typeof searchResult == 'object' && searchResult.result && typeof searchResult.result == 'object') {
+                        window.LiveElement.Scale.Console.IDE.Asset.Search = searchResult.result
+                        var datalist = document.getElementById('ide-asset-search-list')
+                        datalist.innerHTML = ''
+                        Object.keys(window.LiveElement.Scale.Console.IDE.Asset.Search).sort().forEach(asset_path => {
+                            var optionElement = document.createElement('option')
+                            optionElement.setAttribute('value', asset_path)
+                            optionElement.innerHTML = asset_path
+                            datalist.appendChild(optionElement)
+                        })
+                    }
+                })
+            }
+        } else if (input.attributes.name == 'load') {
+            window.LiveElement.Scale.Console.IDE.Asset.Edit.path = searchInput.value
+            window.LiveElement.Scale.Console.IDE.Asset.Edit.asset = window.LiveElement.Scale.Console.IDE.Asset.Search[searchInput.value]
+            if (window.LiveElement.Scale.Console.IDE.Asset.Edit.asset) {
+                searchFieldset.dispatchEvent(new window.CustomEvent('loaded'))
+            }
+        } else if (input.attributes.name == 'new') {
+            searchInput.value = ''
+            window.LiveElement.Scale.Console.IDE.Asset.Edit.path = ''
+            window.LiveElement.Scale.Console.IDE.Asset.Edit.asset = {}
+            if (window.LiveElement.Scale.Console.IDE.Asset.Edit.asset) {
+                searchFieldset.dispatchEvent(new window.CustomEvent('loaded'))
+            }
         }
     }
 }
+window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
+    var handlerType = window.LiveElement.Live.getHandlerType(input)
+    if (handlerType == 'trigger') {
+        console.log('line 42: trigger', input)
+    } else if (handlerType == 'subscription') {
+        var pathInput = input.subscriber.querySelector(`input[name="path"]`)
+        pathInput.value = input.payload.path || ''
+        input.subscriber.querySelector(`input[name="content-type"]`).value = input.payload.ContentType || ''
+        if (!pathInput.value) {
+            pathInput.focus()
+        }
+    } else if (handlerType == 'listener') {
+        console.log('line 46: listener', input)
+    }
+}
+
+
+
+window.LiveElement.Live.listeners.IdeAssetSearch = {processor: 'IdeAssetSearch', expired: true}
+
+window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="asset"] fieldset[name="search"]'), 'IdeAssetSearch', 'loaded', false, true)
+
+
+
+
+
+
+
+
+
+
 window.LiveElement.Live.processors.IdeAssetView = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
     if (handlerType == 'trigger') {
