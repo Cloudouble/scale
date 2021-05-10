@@ -2,10 +2,7 @@ window.LiveElement.Live.processors.IdeChannelSearch = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
     if (handlerType == 'listener') {
         return {...window.LiveElement.Scale.Console.IDE.Channel.Configure.channel, ...{id : window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}}
-    } else if (handlerType == 'subscription') {
-        // nothing
     } else if (window.LiveElement.Live.getHandlerType(input) == 'trigger') {
-    
         if (input.attributes.name == 'search') {
             window.LiveElement.Scale.Console.System.invokeLambda({
                 page: 'ide', 
