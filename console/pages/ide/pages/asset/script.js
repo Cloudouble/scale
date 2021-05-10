@@ -77,8 +77,9 @@ window.LiveElement.Scale.Console.IDE.Asset.editor.session.setMode("ace/mode/java
 
 /* 
 
-window.LiveElement.Scale.Console.IDE.Asset.editor.setReadOnly(true)
 var modelist = ace.require("ace/ext/modelist")
-modelist.getModeForPath('abc.html').mode
+window.LiveElement.Scale.Console.IDE.Asset.editor.setReadOnly(true)
+window.LiveElement.Scale.Console.IDE.Asset.editor.setMode(modelist.getModeForPath('abc.html').mode);
+
 
 */

@@ -2,8 +2,8 @@
 <fieldset name="search">
     <h3>Search</h3>
     <input name="search" type="search" placeholder="uuid or name search..." autocomplete="off" list="ide-channel-search-list" live-trigger="keyup:IdeChannelSearch" />
-    <button name="load" live-trigger="click:IdeChannelConfigure">Load</button>
-    <button name="new" live-trigger="click:IdeChannelConfigure">New</button>
+    <button name="load" live-trigger="click:IdeChannelSearch">Load</button>
+    <button name="new" live-trigger="click:IdeChannelSearch">New</button>
     <datalist id="ide-channel-search-list"></datalist>
 </fieldset>
 <fieldset name="configure">
@@ -14,19 +14,19 @@
     </label>
     <label>
         Channel ID
-        <input name="id" type="uuid" readonly="readonly" live-trigger="change:IdeChannelConfigure" />
+        <input name="id" type="uuid" readonly="readonly" />
     </label>
     <label>
         Receive Key
-        <input name="receiveKey" type="uuid" readonly="readonly" live-trigger="change:IdeChannelConfigure" />
+        <input name="receiveKey" type="uuid" readonly="readonly" />
     </label>
     <label>
         Send Key
-        <input name="sendKey" type="uuid" readonly="readonly" live-trigger="change:IdeChannelConfigure" />
+        <input name="sendKey" type="uuid" readonly="readonly" />
     </label>
     <label>
         Admin Key
-        <input name="adminKey" type="uuid" readonly="readonly" live-trigger="change:IdeChannelConfigure" />
+        <input name="adminKey" type="uuid" readonly="readonly" />
     </label>
     <button name="create" live-trigger="click:IdeChannelConfigure">Create</button>
     <details>
@@ -51,7 +51,7 @@ window.fetch(
     <h3>Code</h3>
     <label>
         Receive URL
-        <input name="receive_url" type="url" readonly="readonly" live-subscription="IdeChannelCode:IdeChannelCode" live-trigger="input:IdeChannelCode" />
+        <input name="receive_url" type="url" readonly="readonly" />
         <details>
             <summary>Snippet</summary>
             <div class="snippet">
@@ -61,7 +61,7 @@ var socket = new WebSocket('${window.LiveElement.Scale.Console.IDE.Channel.Code.
     </label>
     <label>
         Send URL
-        <input name="send_url" type="url" readonly="readonly" live-subscription="IdeChannelCode:IdeChannelCode" />
+        <input name="send_url" type="url" readonly="readonly" />
         <details>
             <summary>Snippet</summary>
             <div class="snippet">
@@ -77,7 +77,7 @@ window.fetch(
     </label>
     <label>
         Admin URL
-        <input name="admin_url" type="url" readonly="readonly" live-subscription="IdeChannelCode:IdeChannelCode" />
+        <input name="admin_url" type="url" readonly="readonly" />
         <details>
             <summary>Snippet</summary>
             <div class="snippet">

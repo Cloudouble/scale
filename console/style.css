@@ -202,4 +202,5 @@ details > summary > h2, details > summary > h3, details > summary > h4 {
 
 input[readonly], pre code {
     cursor: cell;
+    background-color: whitesmoke;
 }
