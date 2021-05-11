@@ -1,0 +1,8 @@
+#ide[entity-type="record"] > section[name="record"] {
+    display: block;
+}
+
+#ide > section[name="record"] > fieldset[name="search"] > input[type="search"] {
+    width: 23em;
+}
+
