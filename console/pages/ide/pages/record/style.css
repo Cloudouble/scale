@@ -7,10 +7,18 @@
 }
 
 #ide > section[name="record"] > fieldset[name="edit"] > table.editor {
+    border-collapse: collapse;
     margin-top: 2em;
     width: 60em;
     max-height: 36em;
 }
+#ide > section[name="record"] > fieldset[name="edit"] > table.editor > thead > tr {
+    height: 3em;
+}
+#ide > section[name="record"] > fieldset[name="edit"] > table.editor tbody tr {
+    height: 5em;
+}
 #ide > section[name="record"] > fieldset[name="edit"] > table.editor input {
-    width: 100%;
+    width: calc(100% - 5px);
+    min-width: 15em;
 }

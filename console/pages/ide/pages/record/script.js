@@ -209,3 +209,24 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
 window.LiveElement.Live.listeners.IdeRecordSearch = {processor: 'IdeRecordSearch', expired: true}
 
 window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="record"] fieldset[name="search"]'), 'IdeRecordSearch', 'loaded', false, true)
+
+
+window.LiveElement.Scale.Console.System.invokeLambda({
+    page: 'ide', 
+    entity_type: 'record', 
+    heading: 'search',
+    classes: true
+}).then(classes => {
+    if (classes && typeof classes == 'object') {
+        console.log('line 221', classes)
+        window.LiveElement.Scale.Console.IDE.Record.Search.classes = classes
+        var classList = document.getElementById('ide-record-search-type-list')
+        classList.innerHTML = ''
+        Object.keys(classes).forEach(className => {
+            var optionElement = document.createElement('option')
+            optionElement.setAttribute('value', className)
+            optionElement.innerHTML = `${classes[className].label} [${classes[className].parents.join('&rarr;')}]`
+            classList.appendChild(optionElement)
+        })
+    }
+})
