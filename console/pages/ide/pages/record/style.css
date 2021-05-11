@@ -6,3 +6,15 @@
     width: 23em;
 }
 
+#ide > section[name="record"] > fieldset[name="edit"] > div.editor {
+    margin-top: 2em;
+    width: 60em;
+    max-height: 36em;
+}
+#ide > section[name="record"] > fieldset[name="edit"] > div.editor > label {
+}
+#ide > section[name="record"] > fieldset[name="edit"] > div.editor > label > input {
+    display: inline-block;
+    width: 15em;
+    margin-right: 1em;
+}
