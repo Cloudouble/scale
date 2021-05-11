@@ -62,40 +62,50 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
 window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
     if (handlerType == 'subscription') {
-        var editor = input.subscriber.querySelector('div.editor')
+        var editor = input.subscriber.querySelector('table.editor tbody')
         editor.innerHTML = ''
         Object.keys(input.payload).sort().forEach(property => {
-            var labelElement = document.createElement('label')
-            labelElement.setAttribute('name', property)
+            var trElement = document.createElement('tr')
+            trElement.setAttribute('name', property)
 
-            var propertyElement = document.createElement('input')
-            propertyElement.setAttribute('name', 'property')
-            propertyElement.setAttribute('type', 'search')
-            propertyElement.setAttribute('list', 'ide-record-edit-properties-list')
-            propertyElement.value = property
-            labelElement.appendChild(propertyElement)
+            var propertyTdElement = document.createElement('td')
+            var propertyInputElement = document.createElement('input')
+            propertyTdElement.setAttribute('name', 'property')
+            propertyTdElement.setAttribute('colspan', '2')
+            propertyInputElement.setAttribute('type', 'search')
+            propertyInputElement.setAttribute('list', 'ide-record-edit-properties-list')
+            propertyInputElement.value = property
+            propertyTdElement.appendChild(propertyInputElement)
+            trElement.appendChild(propertyTdElement)
+            
+            var typeTdElement = document.createElement('td')
+            typeTdElement.setAttribute('name', 'type')
+            typeTdElement.setAttribute('colspan', '1')
             
             var listElementId = window.LiveElement.Scale.Core.generateUUID4()
             var listElement = document.createElement('datalist')
             listElement.setAttribute('name', 'types')
             listElement.setAttribute('id', listElementId)
-            labelElement.appendChild(listElement)
+            typeTdElement.appendChild(listElement)
 
-            var typeElement = document.createElement('input')
-            typeElement.setAttribute('name', 'type')
-            typeElement.setAttribute('list', listElementId)
-            labelElement.appendChild(typeElement)
+            var typeInputElement = document.createElement('input')
+            typeInputElement.setAttribute('list', listElementId)
+            typeTdElement.appendChild(typeInputElement)
+            trElement.appendChild(typeTdElement)
 
-            var valueElement = document.createElement('input')
-            valueElement.setAttribute('name', 'value')
-            valueElement.value = input.payload[property]
-            labelElement.appendChild(valueElement)
+            var valueTdElement = document.createElement('td')
+            var valueInputElement = document.createElement('input')
+            valueTdElement.setAttribute('name', 'value')
+            valueTdElement.setAttribute('colspan', '4')
+            valueInputElement.value = input.payload[property]
+            valueTdElement.appendChild(valueInputElement)
+            trElement.appendChild(valueTdElement)
             
-            editor.appendChild(labelElement)
+            editor.appendChild(trElement)
         })
         var injectDataTypes = function() {
             var properties = window.LiveElement.Scale.Console.IDE.Record.Edit.class[window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']].properties
-            editor.querySelectorAll('label').forEach(label => {
+            editor.querySelectorAll('tr').forEach(tr => {
                 var property = label.getAttribute('name')
                 var types
                 if (property in properties) {
@@ -113,6 +123,9 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                         : type
                     datalist.appendChild(option)
                 })
+                if (types.length == 1) {
+                    label.querySelector('input[name="type"]').value = types[0]
+                }
             })
         }
         var injectProperties = function() {
