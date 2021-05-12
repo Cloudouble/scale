@@ -161,36 +161,44 @@ def main(event, context):
                                 assets = {}
                         retval['result'] = assets
                 elif entity_type == 'record':
+                    input_name = event.get('input_name')
                     record_type = event.get('record_type')
                     if heading == 'search':
-                        input_name = event.get('input_name')
-                        search = event.get('search')
-                        if input_name and search:
-                            retval = {'search': search, 'result': []} 
-                            prefix = None
-                            if input_name in ['search-type', 'search-uuid']:
-                                if input_name == 'search-type':
-                                    prefix = '{data_root}/system/class/{search}'.format(data_root=env['data_root'], search=search)
-                                elif input_name == 'search-uuid' and record_type:
-                                    prefix = '{data_root}/record/{record_type}/{search}'.format(data_root=env['data_root'], record_type=record_type, search=search)
-                                if prefix:
-                                    retval['result'] = s3_client.list_objects_v2(Bucket=env['bucket'], MaxKeys=1000,  Prefix=prefix)['Contents']
-                                    try:
-                                        retval['result'] = [e['Key'].split('/')[-1].replace('.json', '') for e in retval['result']]
-                                    except:
-                                        retval['result'] = []
-                        elif input_name == 'load' and record_type and event.get('record_uuid'):
-                            record_uuid = event['record_uuid']
-                            record = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/record/{record_type}/{record_uuid}.json'.format(data_root=env['data_root'], record_type=record_type, record_uuid=record_uuid))['Body'].read().decode('utf-8'))
-                            retval = record
+                        if record_type and input_name:
+                            if input_name == 'search-uuid' and event.get('search'):
+                                retval = {'search': event['search'], 'result': []} 
+                                prefix = '{data_root}/record/{record_type}/{search}'.format(data_root=env['data_root'], record_type=record_type, search=event['search'])
+                                retval['result'] = s3_client.list_objects_v2(Bucket=env['bucket'], MaxKeys=1000,  Prefix=prefix)['Contents']
+                                try:
+                                    retval['result'] = [e['Key'].split('/')[-1].replace('.json', '') for e in retval['result']]
+                                except:
+                                    retval['result'] = []
+                            elif input_name == 'load' and event.get('record_uuid'):
+                                record_uuid = event['record_uuid']
+                                record = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/record/{record_type}/{record_uuid}.json'.format(data_root=env['data_root'], record_type=record_type, record_uuid=record_uuid))['Body'].read().decode('utf-8'))
+                                retval = record
+                        elif event.get('classes'):        
+                            classes = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/system/class/index.json'.format(data_root=env['data_root']))['Body'].read().decode('utf-8'))
+                            for class_name in classes:
+                                classes[class_name]['label'] = classes[class_name].get('comment')
+                                del classes[class_name]['comment']
+                            retval = classes
                     elif heading == 'edit':
-                        class_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/system/class/{record_type}.json'.format(data_root=env['data_root'], record_type=record_type))['Body'].read().decode('utf-8'))
-                        properties = class_definition.get('properties', {})
-                        for property_name, property_types in properties.items():
-                            property_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/system/property/{property_name}.json'.format(data_root=env['data_root'], property_name=property_name))['Body'].read().decode('utf-8'))
-                            class_definition['properties'][property_name] = {'label': property_definition.get('comment', ''), 'types': property_types}
-                        retval = class_definition
+                        if record_type:
+                            class_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/system/class/{record_type}.json'.format(data_root=env['data_root'], record_type=record_type))['Body'].read().decode('utf-8'))
+                            properties = class_definition.get('properties', {})
+                            for property_name, property_types in properties.items():
+                                property_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/system/property/{property_name}.json'.format(data_root=env['data_root'], property_name=property_name))['Body'].read().decode('utf-8'))
+                                class_definition['properties'][property_name] = {'label': property_definition.get('comment', ''), 'types': property_types}
+                            retval = class_definition
+                        elif event.get('datatypes'):
+                            datatypes = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/system/datatype/index.json'.format(data_root=env['data_root']))['Body'].read().decode('utf-8'))
+                            for type_name in datatypes:
+                                datatypes[type_name]['label'] = datatypes[type_name].get('comment')
+                                del datatypes[type_name]['comment']
+                            retval = datatypes
 
                         
 
     return retval
+

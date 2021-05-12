@@ -6,30 +6,27 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
         var searchFieldset = input.triggersource.closest('fieldset')
         var searchTypeInput = searchFieldset.querySelector('input[name="search-type"]')
         var searchUuidInput = searchFieldset.querySelector('input[name="search-uuid"]')
-        if ((input.attributes.name == 'search-type') || (input.attributes.name == 'search-uuid')) {
-            var event = input.vector.split(':').shift()
-            if (event == 'keyup') {
-                window.LiveElement.Scale.Console.System.invokeLambda({
-                    page: 'ide', 
-                    entity_type: 'record', 
-                    heading: 'search',
-                    input_name: input.attributes.name, 
-                    record_type: searchTypeInput.value, 
-                    search: input.properties.value
-                }).then(searchResult => {
-                    if (searchResult && typeof searchResult == 'object' && searchResult.result && typeof searchResult.result == 'object') {
-                        window.LiveElement.Scale.Console.IDE.Record.Search[input.attributes.name] = searchResult.result
-                        var datalist = document.getElementById(`ide-record-${input.attributes.name}-list`)
-                        datalist.innerHTML = ''
-                        window.LiveElement.Scale.Console.IDE.Record.Search[input.attributes.name].sort().forEach(k => {
-                            var optionElement = document.createElement('option')
-                            optionElement.setAttribute('value', k)
-                            optionElement.innerHTML = k
-                            datalist.appendChild(optionElement)
-                        })
-                    }
-                })
-            }
+        if (input.attributes.name == 'search-uuid') {
+            window.LiveElement.Scale.Console.System.invokeLambda({
+                page: 'ide', 
+                entity_type: 'record', 
+                heading: 'search',
+                input_name: input.attributes.name, 
+                record_type: searchTypeInput.value, 
+                search: input.properties.value
+            }).then(searchResult => {
+                if (searchResult && typeof searchResult == 'object' && searchResult.result && typeof searchResult.result == 'object') {
+                    window.LiveElement.Scale.Console.IDE.Record.Search[input.attributes.name] = searchResult.result
+                    var datalist = document.getElementById(`ide-record-${input.attributes.name}-list`)
+                    datalist.innerHTML = ''
+                    window.LiveElement.Scale.Console.IDE.Record.Search[input.attributes.name].sort().forEach(k => {
+                        var optionElement = document.createElement('option')
+                        optionElement.setAttribute('value', k)
+                        optionElement.innerHTML = k
+                        datalist.appendChild(optionElement)
+                    })
+                }
+            })
         } else if (input.attributes.name == 'load') {
             window.LiveElement.Scale.Console.IDE.Record.Edit.record_type = searchTypeInput.value
             window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid = searchUuidInput.value
@@ -76,6 +73,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
             propertyTdElement.setAttribute('colspan', '2')
             propertyInputElement.setAttribute('type', 'search')
             propertyInputElement.setAttribute('list', 'ide-record-edit-properties-list')
+            propertyInputElement.setAttribute('live-trigger', 'change:IdeRecordEdit')
             propertyInputElement.value = property
             if (property == '@id' || property == '@type') {
                 propertyInputElement.setAttribute('readonly', true)
@@ -96,6 +94,8 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
             var typeSmallElement = document.createElement('small')
             typeSmallElement.innerHTML = '&nbsp;'
             typeInputElement.setAttribute('list', listElementId)
+            typeInputElement.setAttribute('type', 'search')
+            typeInputElement.setAttribute('live-trigger', 'change:IdeRecordEdit')
             if (property == '@id' || property == '@type') {
                 typeInputElement.setAttribute('readonly', true)
             }
@@ -142,10 +142,11 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                         : type
                     datalist.appendChild(option)
                 })
-                tr.querySelector('td[name="property"] small').innerHTML = label
+                tr.querySelector('td[name="property"] small').innerHTML = label.length > 45 ? `${label.slice(0, 45)}...` : label
                 if (types.length == 1) {
                     tr.querySelector('td[name="type"] input').value = types[0]
-                    tr.querySelector('td[name="type"] small').innerHTML = window.LiveElement.Scale.Console.IDE.Record.Edit.datatype[types[0]].label
+                    label = window.LiveElement.Scale.Console.IDE.Record.Edit.datatype[types[0]].label
+                    tr.querySelector('td[name="type"] small').innerHTML = label.length > 45 ? `${label.slice(0, 45)}...` : label
                 }
             })
         }
@@ -196,7 +197,51 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
         }
         
     } else if (handlerType == 'trigger') {
-        console.log('line 67', input)
+        var td = input.triggersource.closest('td')
+        var name = td.getAttribute('name')
+        if (name == 'property') {
+            var typeTdElement = td.nextElementSibling
+            var listElement = typeTdElement.querySelector('datalist')
+            var typeInputElement = typeTdElement.querySelector('input')
+            var typeSmallElement = typeTdElement.querySelector('small')
+            typeSmallElement.innerHTML = '&nbsp;'
+            listElement.innerHTML = ''
+            if (window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type'] in window.LiveElement.Scale.Console.IDE.Record.Edit.class) {
+                var classDefinition = window.LiveElement.Scale.Console.IDE.Record.Edit.class[window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']]
+                if (classDefinition.properties && (input.properties.value in classDefinition.properties)) {
+                    var propertyDefinition = classDefinition.properties[input.properties.value]
+                    td.querySelector('small').innerHTML = propertyDefinition.label.length > 45 ? `${propertyDefinition.label.slice(0, 45)}...` : propertyDefinition.label
+                    if ('types' in propertyDefinition) {
+                        propertyDefinition.types.sort().forEach(type => {
+                            var option = document.createElement('option')
+                            option.setAttribute('value', type)
+                            option.innerHTML = window.LiveElement.Scale.Console.IDE.Record.Edit.datatype && type in window.LiveElement.Scale.Console.IDE.Record.Edit.datatype 
+                                ? window.LiveElement.Scale.Console.IDE.Record.Edit.datatype[type].label 
+                                : (window.LiveElement.Scale.Console.IDE.Record.Search.classes && type in window.LiveElement.Scale.Console.IDE.Record.Search.classes ? window.LiveElement.Scale.Console.IDE.Record.Search.classes[type].label : type)
+                            listElement.appendChild(option)
+                        })
+                    }
+                    if (propertyDefinition.types.length == 1) {
+                        typeInputElement.value = propertyDefinition.types[0]
+                        typeInputElement.dispatchEvent(new window.Event('change'))
+                    } else {
+                        typeInputElement.value = ''
+                        typeInputElement.focus()
+                    }
+                }
+                
+            }
+        } else if (name == 'type') {
+            var ll
+            if (input.properties.value in window.LiveElement.Scale.Console.IDE.Record.Edit.datatype) {
+                ll = window.LiveElement.Scale.Console.IDE.Record.Edit.datatype[input.properties.value].label
+            } else if (input.properties.value in window.LiveElement.Scale.Console.IDE.Record.Search.classes) {
+                ll = window.LiveElement.Scale.Console.IDE.Record.Search.classes[input.properties.value].label
+            }
+            if (ll) {
+                td.querySelector('small').innerHTML = ll.length > 45 ? `${ll.slice(0, 45)}...` : ll
+            }
+        }
     }
 }
 
@@ -218,7 +263,6 @@ window.LiveElement.Scale.Console.System.invokeLambda({
     classes: true
 }).then(classes => {
     if (classes && typeof classes == 'object') {
-        console.log('line 221', classes)
         window.LiveElement.Scale.Console.IDE.Record.Search.classes = classes
         var classList = document.getElementById('ide-record-search-type-list')
         classList.innerHTML = ''

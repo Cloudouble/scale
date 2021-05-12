@@ -18,7 +18,11 @@
 #ide > section[name="record"] > fieldset[name="edit"] > table.editor tbody tr {
     height: 5em;
 }
-#ide > section[name="record"] > fieldset[name="edit"] > table.editor input {
-    width: calc(100% - 5px);
-    min-width: 15em;
+#ide > section[name="record"] > fieldset[name="edit"] > table.editor td[name="property"] > input, 
+    #ide > section[name="record"] > fieldset[name="edit"] > table.editor td[name="property"] > small {
+    width: 300px;
+}
+#ide > section[name="record"] > fieldset[name="edit"] > table.editor td[name="type"] > input, 
+    #ide > section[name="record"] > fieldset[name="edit"] > table.editor td[name="type"] > small {
+    width: 350px;
 }
