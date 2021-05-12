@@ -2,6 +2,9 @@
     display: block;
 }
 
+#ide > section[name="record"] > fieldset {
+    min-width: 1110px;
+}
 #ide > section[name="record"] > fieldset[name="search"] > input[type="search"] {
     width: 23em;
 }
@@ -21,8 +24,19 @@
 #ide > section[name="record"] > fieldset[name="edit"] > table.editor td[name="property"] > input, 
     #ide > section[name="record"] > fieldset[name="edit"] > table.editor td[name="property"] > small {
     width: 300px;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 #ide > section[name="record"] > fieldset[name="edit"] > table.editor td[name="type"] > input, 
     #ide > section[name="record"] > fieldset[name="edit"] > table.editor td[name="type"] > small {
-    width: 350px;
+    width: 300px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+#ide > section[name="record"] > fieldset[name="edit"] > table.editor td[name="value"] > input,
+    #ide > section[name="record"] > fieldset[name="edit"] > table.editor td[name="value"] > textarea,
+    #ide > section[name="record"] > fieldset[name="edit"] > table.editor td[name="value"] > small {
+    width: 500px;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }

@@ -223,11 +223,11 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                     }
                     if (propertyDefinition.types.length == 1) {
                         typeInputElement.value = propertyDefinition.types[0]
-                        typeInputElement.dispatchEvent(new window.Event('change'))
                     } else {
                         typeInputElement.value = ''
                         typeInputElement.focus()
                     }
+                    typeInputElement.dispatchEvent(new window.Event('change'))
                 }
                 
             }
@@ -241,13 +241,58 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
             if (ll) {
                 td.querySelector('small').innerHTML = ll.length > 45 ? `${ll.slice(0, 45)}...` : ll
             }
+            var valueTdElement = td.nextElementSibling
+            var valueInputElement = valueTdElement.querySelector('input')
+            ;(['checked', 'readonly', 'step']).forEach(a => {
+                valueInputElement.removeAttribute(a)
+            })
+            switch(input.properties.value) {
+                case 'Boolean':
+                case 'True':
+                case 'False':
+                    valueInputElement.setAttribute('type', 'checkbox')
+                    if (valueInputElement.value || input.properties.value === 'True') {
+                        valueInputElement.setAttribute('checked', 'true')
+                    }
+                    if (input.properties.value !== 'Boolean') {
+                        valueInputElement.setAttribute('readonly', true)
+                    }
+                    break
+                case 'Date':
+                case 'DateTime':
+                case 'Time':
+                    var inputTypeAttribute = input.properties.value.toLowerCase()
+                    inputTypeAttribute = inputTypeAttribute == 'datetime' ? `${inputTypeAttribute}-local` : inputTypeAttribute
+                    valueInputElement.setAttribute('type', inputTypeAttribute)
+                    break
+                case 'Number':
+                case 'Float':
+                case 'Integer':
+                    valueInputElement.setAttribute('type', 'number')
+                    if (input.properties.value === 'Integer') {
+                        valueInputElement.setAttribute('step', 1)
+                    }
+                    break
+                case 'URL':
+                    valueInputElement.setAttribute('type', 'url')
+                    break
+                case 'Text':
+                case 'CssSelectorType':
+                case 'CssSelectorType':
+                case 'PronounceableText':
+                case 'XPathType':
+                    valueInputElement.setAttribute('type', 'text')
+                default:
+                    valueInputElement.setAttribute('type', 'text')
+                    
+            }
         }
     }
 }
 
 
 
-
+// "CssSelectorType", "PronounceableText", "Text", "XPathType"
 
 
 
