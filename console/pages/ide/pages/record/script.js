@@ -243,9 +243,11 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
             }
             var valueTdElement = td.nextElementSibling
             var valueInputElement = valueTdElement.querySelector('input')
+            var valueSmallElement = valueTdElement.querySelector('small')
             ;(['checked', 'readonly', 'step']).forEach(a => {
                 valueInputElement.removeAttribute(a)
             })
+            valueSmallElement.innerHTML = '&nbsp;'
             switch(input.properties.value) {
                 case 'Boolean':
                 case 'True':
@@ -256,6 +258,9 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                     }
                     if (input.properties.value !== 'Boolean') {
                         valueInputElement.setAttribute('readonly', true)
+                        valueSmallElement.innerHTML = `Requires a ${input.properties.value} value`
+                    } else {
+                        valueSmallElement.innerHTML = `Requires a True (checked box) or False (unchecked box) value`
                     }
                     break
                 case 'Date':
@@ -264,6 +269,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                     var inputTypeAttribute = input.properties.value.toLowerCase()
                     inputTypeAttribute = inputTypeAttribute == 'datetime' ? `${inputTypeAttribute}-local` : inputTypeAttribute
                     valueInputElement.setAttribute('type', inputTypeAttribute)
+                    valueSmallElement.innerHTML = `Specify the ${input.properties.value} value`
                     break
                 case 'Number':
                 case 'Float':
@@ -272,19 +278,25 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                     if (input.properties.value === 'Integer') {
                         valueInputElement.setAttribute('step', 1)
                     }
+                    valueSmallElement.innerHTML = `Specify the ${input.properties.value} value`
                     break
                 case 'URL':
                     valueInputElement.setAttribute('type', 'url')
+                    valueSmallElement.innerHTML = `Requires a valid URL`
                     break
                 case 'Text':
-                case 'CssSelectorType':
                 case 'CssSelectorType':
                 case 'PronounceableText':
                 case 'XPathType':
                     valueInputElement.setAttribute('type', 'text')
+                    valueSmallElement.innerHTML = `Any text value`
+                    break
                 default:
                     valueInputElement.setAttribute('type', 'text')
-                    
+                    if (input.properties.value) {
+                        valueInputElement.setAttribute('pattern', '[a-z0-9]{8}-[a-z0-9]{4}-4[a-z0-9]{3}-[89ab][a-z0-9]{3}-[a-z0-9]{12}')
+                        valueSmallElement.innerHTML = `Requires a valid UUID of a linked record of the type ${input.properties.value}`
+                    }
             }
         }
     }
