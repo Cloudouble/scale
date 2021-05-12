@@ -4,6 +4,7 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
         return window.LiveElement.Scale.Console.IDE.Record.Edit.record
     } else if (handlerType == 'trigger') {
         var searchFieldset = input.triggersource.closest('fieldset')
+        var editFieldset = searchFieldset.nextElementSibling
         var searchTypeInput = searchFieldset.querySelector('input[name="search-type"]')
         var searchUuidInput = searchFieldset.querySelector('input[name="search-uuid"]')
         if (input.attributes.name == 'search-uuid') {
@@ -27,7 +28,24 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
                     })
                 }
             })
+            if (window.LiveElement.Scale.Console.IDE.Record.Search.classes 
+                    && (searchTypeInput.value in window.LiveElement.Scale.Console.IDE.Record.Search.classes)
+                    && window.LiveElement.Scale.Console.IDE.Record.Search['search-uuid'] 
+                    && (window.LiveElement.Scale.Console.IDE.Record.Search['search-uuid']).includes(input.properties.value)
+                    ) {
+                searchFieldset.querySelector('button[name="load"]').removeAttribute('disabled')
+            } else {
+                searchFieldset.querySelector('button[name="load"]').setAttribute('disabled', true)
+            }
+            
+        } else if (input.attributes.name == 'search-type') {
+            if (window.LiveElement.Scale.Console.IDE.Record.Search.classes && (input.properties.value in window.LiveElement.Scale.Console.IDE.Record.Search.classes)) {
+                searchFieldset.querySelector('button[name="new"]').removeAttribute('disabled')
+            } else {
+                searchFieldset.querySelector('button[name="new"]').setAttribute('disabled', true)
+            }
         } else if (input.attributes.name == 'load') {
+            editFieldset.setAttribute('active', true)
             window.LiveElement.Scale.Console.IDE.Record.Edit.record_type = searchTypeInput.value
             window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid = searchUuidInput.value
             window.LiveElement.Scale.Console.System.invokeLambda({
@@ -46,6 +64,7 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
                 }
             })
         } else if (input.attributes.name == 'new') {
+            editFieldset.setAttribute('active', true)
             searchTypeInput.value = ''
             searchUuidInput.value = ''
             window.LiveElement.Scale.Console.IDE.Record.Edit.record_type = ''

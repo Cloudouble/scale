@@ -1,16 +1,18 @@
 <h2>Record</h2>
 <fieldset name="search">
     <h3>Search</h3>
-    <input name="search-type" type="search" placeholder="search record type..." autocomplete="off" list="ide-record-search-type-list" />
+    <input name="search-type" type="search" placeholder="search record type..." autocomplete="off" list="ide-record-search-type-list" live-trigger="keyup:IdeRecordSearch" />
     <input name="search-uuid" type="search" placeholder="search record UUID..." autocomplete="off" list="ide-record-search-uuid-list" live-trigger="keyup:IdeRecordSearch" />
-    <button name="load" live-trigger="click:IdeRecordSearch">Load</button>
-    <button name="new" live-trigger="click:IdeRecordSearch">New</button>
+    <button name="load" disabled="true" live-trigger="click:IdeRecordSearch">Load</button>
+    <button name="new" disabled="true" live-trigger="click:IdeRecordSearch">New</button>
     <datalist id="ide-record-search-type-list"></datalist>
     <datalist id="ide-record-search-uuid-list"></datalist>
 </fieldset>
 <fieldset name="edit" live-subscription="IdeRecordSearch:IdeRecordEdit">
     <h3>Edit</h3>
-    <button name="save" live-trigger="click:IdeAssetEdit">Save</button>
+    <button name="save" disabled="true" live-trigger="click:IdeAssetEdit">Save</button>
+    <button name="duplicate" disabled="true" live-trigger="click:IdeAssetEdit">Duplicate</button>
+    <button name="delete" disabled="true" live-trigger="click:IdeAssetEdit">Delete</button>
     <table class="editor">
         <thead>
             <tr>
