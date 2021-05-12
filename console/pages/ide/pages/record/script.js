@@ -46,6 +46,7 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
             }
         } else if (input.attributes.name == 'load') {
             editFieldset.setAttribute('active', true)
+            editFieldset.querySelector('button[name="duplicate"]').removeAttribute('disabled')
             window.LiveElement.Scale.Console.IDE.Record.Edit.record_type = searchTypeInput.value
             window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid = searchUuidInput.value
             window.LiveElement.Scale.Console.System.invokeLambda({
@@ -212,7 +213,12 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
         }
     } else if (handlerType == 'trigger') {
         var td = input.triggersource.closest('td')
-        var name = td.getAttribute('name')
+        var name
+        if (td) {
+            name = td.getAttribute('name')
+        } else {
+            name = input.triggersource.name
+        }
         if (name == 'property') {
             var typeTdElement = td.nextElementSibling
             var listElement = typeTdElement.querySelector('datalist')
@@ -351,6 +357,21 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                     }
                 })
             }
+        } else if (name == 'save') {
+            
+            
+        } else if (name == 'duplicate') {
+            console.log('line 364', input)
+            var searchFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="record"] fieldset[name="search"]')
+            var editFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="record"] fieldset[name="edit"]')
+            console.log('line 367', searchFieldset, searchFieldset.querySelector('input[name="search-uuid"]'))
+            searchFieldset.querySelector('input[name="search-uuid"]').value = ''
+            window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid = window.LiveElement.Scale.Core.generateUUID4()
+            window.LiveElement.Scale.Console.IDE.Record.Edit.record['@id'] = window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid
+            console.log('line 371', editFieldset, editFieldset.querySelector('tr[name="@id"] td[name="value"] input'))
+            editFieldset.querySelector('tr[name="@id"] td[name="value"] input').value = window.LiveElement.Scale.Console.IDE.Record.Edit.record['@id']
+        } else if (name == 'delete') {
+            
         }
     }
 }
