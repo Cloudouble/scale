@@ -78,63 +78,67 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
 
 window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
+    var editor = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="record"] fieldset[name="edit"] table.editor tbody')
+    var buildRow = function(property) {
+        var trElement = document.createElement('tr')
+        trElement.setAttribute('name', property)
+        var propertyTdElement = document.createElement('td')
+        var propertyInputElement = document.createElement('input')
+        var propertySmallElement = document.createElement('small')
+        propertySmallElement.innerHTML = '&nbsp;'
+        propertyTdElement.setAttribute('name', 'property')
+        propertyTdElement.setAttribute('colspan', '2')
+        propertyInputElement.setAttribute('type', 'search')
+        propertyInputElement.setAttribute('list', 'ide-record-edit-properties-list')
+        propertyInputElement.setAttribute('live-trigger', 'change:IdeRecordEdit')
+        propertyInputElement.value = property
+        if (property == '@id' || property == '@type') {
+            propertyInputElement.setAttribute('readonly', true)
+        }
+        propertyTdElement.appendChild(propertyInputElement)
+        propertyTdElement.appendChild(propertySmallElement)
+        trElement.appendChild(propertyTdElement)
+        var typeTdElement = document.createElement('td')
+        typeTdElement.setAttribute('name', 'type')
+        typeTdElement.setAttribute('colspan', '1')
+        var listElementId = window.LiveElement.Scale.Core.generateUUID4()
+        var listElement = document.createElement('datalist')
+        listElement.setAttribute('name', 'types')
+        listElement.setAttribute('id', listElementId)
+        typeTdElement.appendChild(listElement)
+        var typeInputElement = document.createElement('input')
+        var typeSmallElement = document.createElement('small')
+        typeSmallElement.innerHTML = '&nbsp;'
+        typeInputElement.setAttribute('list', listElementId)
+        typeInputElement.setAttribute('type', 'search')
+        typeInputElement.setAttribute('live-trigger', 'change:IdeRecordEdit')
+        if (property == '@id' || property == '@type') {
+            typeInputElement.setAttribute('readonly', true)
+        }
+        typeTdElement.appendChild(typeInputElement)
+        typeTdElement.appendChild(typeSmallElement)
+        trElement.appendChild(typeTdElement)
+        var valueTdElement = document.createElement('td')
+        var valueInputElement = document.createElement('input')
+        var valueSmallElement = document.createElement('small')
+        valueSmallElement.innerHTML = '&nbsp;'
+        valueTdElement.setAttribute('name', 'value')
+        valueTdElement.setAttribute('colspan', '4')
+        valueInputElement.value = input.payload[property] || ''
+        if (property == '@id' || property == '@type') {
+            valueInputElement.setAttribute('readonly', true)
+        }
+        valueTdElement.appendChild(valueInputElement)
+        valueTdElement.appendChild(valueSmallElement)
+        trElement.appendChild(valueTdElement)
+        editor.appendChild(trElement)
+    }
     if (handlerType == 'subscription') {
-        var editor = input.subscriber.querySelector('table.editor tbody')
         editor.innerHTML = ''
         Object.keys(input.payload).sort().forEach(property => {
-            var trElement = document.createElement('tr')
-            trElement.setAttribute('name', property)
-            var propertyTdElement = document.createElement('td')
-            var propertyInputElement = document.createElement('input')
-            var propertySmallElement = document.createElement('small')
-            propertySmallElement.innerHTML = '&nbsp;'
-            propertyTdElement.setAttribute('name', 'property')
-            propertyTdElement.setAttribute('colspan', '2')
-            propertyInputElement.setAttribute('type', 'search')
-            propertyInputElement.setAttribute('list', 'ide-record-edit-properties-list')
-            propertyInputElement.setAttribute('live-trigger', 'change:IdeRecordEdit')
-            propertyInputElement.value = property
-            if (property == '@id' || property == '@type') {
-                propertyInputElement.setAttribute('readonly', true)
-            }
-            propertyTdElement.appendChild(propertyInputElement)
-            propertyTdElement.appendChild(propertySmallElement)
-            trElement.appendChild(propertyTdElement)
-            var typeTdElement = document.createElement('td')
-            typeTdElement.setAttribute('name', 'type')
-            typeTdElement.setAttribute('colspan', '1')
-            var listElementId = window.LiveElement.Scale.Core.generateUUID4()
-            var listElement = document.createElement('datalist')
-            listElement.setAttribute('name', 'types')
-            listElement.setAttribute('id', listElementId)
-            typeTdElement.appendChild(listElement)
-            var typeInputElement = document.createElement('input')
-            var typeSmallElement = document.createElement('small')
-            typeSmallElement.innerHTML = '&nbsp;'
-            typeInputElement.setAttribute('list', listElementId)
-            typeInputElement.setAttribute('type', 'search')
-            typeInputElement.setAttribute('live-trigger', 'change:IdeRecordEdit')
-            if (property == '@id' || property == '@type') {
-                typeInputElement.setAttribute('readonly', true)
-            }
-            typeTdElement.appendChild(typeInputElement)
-            typeTdElement.appendChild(typeSmallElement)
-            trElement.appendChild(typeTdElement)
-            var valueTdElement = document.createElement('td')
-            var valueInputElement = document.createElement('input')
-            var valueSmallElement = document.createElement('small')
-            valueSmallElement.innerHTML = '&nbsp;'
-            valueTdElement.setAttribute('name', 'value')
-            valueTdElement.setAttribute('colspan', '4')
-            valueInputElement.value = input.payload[property]
-            if (property == '@id' || property == '@type') {
-                valueInputElement.setAttribute('readonly', true)
-            }
-            valueTdElement.appendChild(valueInputElement)
-            valueTdElement.appendChild(valueSmallElement)
-            trElement.appendChild(valueTdElement)
-            editor.appendChild(trElement)
+            buildRow(property)
         })
+        buildRow('')
         var injectDataTypes = function() {
             var properties = window.LiveElement.Scale.Console.IDE.Record.Edit.class[window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']].properties
             editor.querySelectorAll('tr').forEach(tr => {
@@ -220,6 +224,13 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
             name = input.triggersource.name
         }
         if (name == 'property') {
+            var trElement = input.triggersource.closest('tr')
+            trElement.setAttribute('name', input.properties.value)
+            
+            if (!Array.from(editor.querySelectorAll('tr[name]')).filter(tr => !tr.getAttribute('name')).length) {
+                buildRow('')
+            }
+            
             var typeTdElement = td.nextElementSibling
             var listElement = typeTdElement.querySelector('datalist')
             var typeInputElement = typeTdElement.querySelector('input')
