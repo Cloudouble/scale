@@ -46,4 +46,4 @@ def main(event, context):
                 for channel_index in channel_indexes:
                     lambda_client.invoke(FunctionName=getprocessor(env, 'send', 'core', 'channel'), Payload=bytes(json.dumps({'index': channel_index['Key'], 'message': message}), 'utf-8'), InvocationType='Event')
                     counter = counter + 1
-            s3_client.delete_object(Bucket=env['bucket'], Key=event['key'])
+                s3_client.delete_object(Bucket=env['bucket'], Key=event['key'])
