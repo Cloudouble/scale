@@ -124,7 +124,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
         valueSmallElement.innerHTML = '&nbsp;'
         valueTdElement.setAttribute('name', 'value')
         valueTdElement.setAttribute('colspan', '4')
-        valueInputElement.value = input.payload[property] || ''
+        valueInputElement.value = input && input.payload ? input.payload[property] || '' : ''
         if (property == '@id' || property == '@type') {
             valueInputElement.setAttribute('readonly', true)
         }
@@ -228,6 +228,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
             trElement.setAttribute('name', input.properties.value)
             
             if (!Array.from(editor.querySelectorAll('tr[name]')).filter(tr => !tr.getAttribute('name')).length) {
+                console.log('line 231', input)
                 buildRow('')
             }
             
@@ -372,14 +373,11 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
             
             
         } else if (name == 'duplicate') {
-            console.log('line 364', input)
             var searchFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="record"] fieldset[name="search"]')
             var editFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="record"] fieldset[name="edit"]')
-            console.log('line 367', searchFieldset, searchFieldset.querySelector('input[name="search-uuid"]'))
             searchFieldset.querySelector('input[name="search-uuid"]').value = ''
             window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid = window.LiveElement.Scale.Core.generateUUID4()
             window.LiveElement.Scale.Console.IDE.Record.Edit.record['@id'] = window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid
-            console.log('line 371', editFieldset, editFieldset.querySelector('tr[name="@id"] td[name="value"] input'))
             editFieldset.querySelector('tr[name="@id"] td[name="value"] input').value = window.LiveElement.Scale.Console.IDE.Record.Edit.record['@id']
         } else if (name == 'delete') {
             
