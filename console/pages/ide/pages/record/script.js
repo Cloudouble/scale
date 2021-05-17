@@ -124,7 +124,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                         : type}
                 })))
                 tr.querySelector('td[name="property"] small').innerHTML = label.length > 45 ? `${label.slice(0, 45)}...` : label
-                if (types.length == 1) {
+                if (types.length == 1 && tr.querySelector('td[name="property"] input') && tr.querySelector('td[name="property"] input').value) {
                     var typeInputElement = tr.querySelector('td[name="type"] input')
                     typeInputElement.value = types[0]
                     typeInputElement.dispatchEvent(new window.Event('change'))
@@ -175,6 +175,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
         }
     } else if (handlerType == 'trigger') {
         var td = input.triggersource.closest('td')
+        var trElement = input.triggersource.closest('tr')
         var name
         if (td) {
             name = td.getAttribute('name')
@@ -182,61 +183,62 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
             name = input.triggersource.name
         }
         if (name == 'property') {
-            var trElement = input.triggersource.closest('tr')
             trElement.setAttribute('name', input.properties.value)
-            
-            if (!Array.from(editor.querySelectorAll('tr[name]')).filter(tr => !tr.getAttribute('name')).length) {
-                console.log('line 231', input)
+            var blankRows = Array.from(editor.querySelectorAll('tr[name]')).filter(tr => !tr.getAttribute('name'))
+            if (!blankRows.length) {
                 buildRow('')
+            } else if (blankRows.length > 1) {
+                blankRows.slice(1).forEach(row => {
+                    row.remove()
+                })
             }
-            
-            var typeTdElement = td.nextElementSibling
-            var typeInputElement = typeTdElement.querySelector('input')
-            var typeSmallElement = typeTdElement.querySelector('small')
+            var typeTdElement = td.nextElementSibling, typeInputElement = typeTdElement.querySelector('input'), typeSmallElement = typeTdElement.querySelector('small')
             typeSmallElement.innerHTML = '&nbsp;'
             var listElement = typeTdElement.querySelector('datalist')
             listElement.innerHTML = ''
-            if (window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type'] in window.LiveElement.Scale.Console.IDE.Record.Edit.class) {
-                var classDefinition = window.LiveElement.Scale.Console.IDE.Record.Edit.class[window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']]
-                if (classDefinition.properties && (input.properties.value in classDefinition.properties)) {
-                    var propertyDefinition = classDefinition.properties[input.properties.value]
-                    td.querySelector('small').innerHTML = propertyDefinition.label.length > 45 ? `${propertyDefinition.label.slice(0, 45)}...` : propertyDefinition.label
-                    if ('types' in propertyDefinition) {
-                        window.LiveElement.Scale.Core.buildDataList(listElement, Object.assign({}, ...propertyDefinition.types.sort().map(type => { 
-                            return {[type]:  window.LiveElement.Scale.Console.IDE.Record.Edit.datatype && type in window.LiveElement.Scale.Console.IDE.Record.Edit.datatype 
-                                ? window.LiveElement.Scale.Console.IDE.Record.Edit.datatype[type].label 
-                                : (window.LiveElement.Scale.Console.IDE.Record.Search.classes && type in window.LiveElement.Scale.Console.IDE.Record.Search.classes ? window.LiveElement.Scale.Console.IDE.Record.Search.classes[type].label : type) }
-                        })))
+            if (input.properties.value) {
+                if (window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type'] in window.LiveElement.Scale.Console.IDE.Record.Edit.class) {
+                    var classDefinition = window.LiveElement.Scale.Console.IDE.Record.Edit.class[window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']]
+                    if (classDefinition.properties && (input.properties.value in classDefinition.properties)) {
+                        var propertyDefinition = classDefinition.properties[input.properties.value]
+                        td.querySelector('small').innerHTML = propertyDefinition.label.length > 45 ? `${propertyDefinition.label.slice(0, 45)}...` : propertyDefinition.label
+                        if ('types' in propertyDefinition) {
+                            window.LiveElement.Scale.Core.buildDataList(listElement, Object.assign({}, ...propertyDefinition.types.sort().map(type => { 
+                                return {[type]:  window.LiveElement.Scale.Console.IDE.Record.Edit.datatype && type in window.LiveElement.Scale.Console.IDE.Record.Edit.datatype 
+                                    ? window.LiveElement.Scale.Console.IDE.Record.Edit.datatype[type].label 
+                                    : (window.LiveElement.Scale.Console.IDE.Record.Search.classes && type in window.LiveElement.Scale.Console.IDE.Record.Search.classes ? window.LiveElement.Scale.Console.IDE.Record.Search.classes[type].label : type) }
+                            })))
+                        }
+                        if (propertyDefinition.types.length == 1) {
+                            typeInputElement.value = propertyDefinition.types[0]
+                        } else {
+                            typeInputElement.value = ''
+                            typeInputElement.focus()
+                        }
+                        typeInputElement.dispatchEvent(new window.Event('change'))
                     }
-                    if (propertyDefinition.types.length == 1) {
-                        typeInputElement.value = propertyDefinition.types[0]
-                    } else {
-                        typeInputElement.value = ''
-                        typeInputElement.focus()
-                    }
-                    typeInputElement.dispatchEvent(new window.Event('change'))
                 }
+            } else {
+                td.querySelector('small').innerHTML = '&nbsp;'
+                typeInputElement.value = ''
+                typeInputElement.dispatchEvent(new window.Event('change'))
             }
         } else if (name == 'type') {
-            var ll
+            var datatypeLabel
             if (input.properties.value in window.LiveElement.Scale.Console.IDE.Record.Edit.datatype) {
-                ll = window.LiveElement.Scale.Console.IDE.Record.Edit.datatype[input.properties.value].label
+                datatypeLabel = window.LiveElement.Scale.Console.IDE.Record.Edit.datatype[input.properties.value].label
             } else if (input.properties.value in window.LiveElement.Scale.Console.IDE.Record.Search.classes) {
-                ll = window.LiveElement.Scale.Console.IDE.Record.Search.classes[input.properties.value].label
+                datatypeLabel = window.LiveElement.Scale.Console.IDE.Record.Search.classes[input.properties.value].label
             }
-            if (ll) {
-                td.querySelector('small').innerHTML = ll.length > 45 ? `${ll.slice(0, 45)}...` : ll
+            if (datatypeLabel) {
+                td.querySelector('small').innerHTML = datatypeLabel.length > 45 ? `${datatypeLabel.slice(0, 45)}...` : datatypeLabel
             }
-            var trElement = td.closest('tr')
-            var propertyName = trElement.getAttribute('name')
-            var valueTdElement = td.nextElementSibling
-            var valueInputElement = valueTdElement.querySelector('input')
-            var valueSmallElement = valueTdElement.querySelector('small')
-            var valueDatalistElement = valueTdElement.querySelector('datalist')
+            var propertyName = trElement.getAttribute('name'), valueTdElement = td.nextElementSibling
+            var valueInputElement = valueTdElement.querySelector('input'), valueSmallElement = valueTdElement.querySelector('small'), valueDatalistElement = valueTdElement.querySelector('datalist')
             if (valueDatalistElement) {
                 valueDatalistElement.remove()
             }
-            ;(['checked', 'readonly', 'step', 'live-trigger', 'list']).forEach(a => {
+            (['checked', 'readonly', 'step', 'live-trigger', 'list', 'pattern']).forEach(a => {
                 valueInputElement.removeAttribute(a)
             })
             valueSmallElement.innerHTML = '&nbsp;'
@@ -284,24 +286,27 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                     valueSmallElement.innerHTML = propertyName == '@id' || propertyName == '@type' ? `The ${propertyName} of the record` : 'Any text value'
                     break
                 default:
-                    valueInputElement.setAttribute('type', 'search')
                     if (input.properties.value) {
-                        var valueDatalistElement = document.createElement('datalist')
+                        valueInputElement.setAttribute('type', 'search')
+                        var newValueDatalistElement = document.createElement('datalist')
                         var datalistId = window.LiveElement.Scale.Core.generateUUID4()
-                        valueDatalistElement.setAttribute('id', datalistId)
+                        newValueDatalistElement.setAttribute('id', datalistId)
                         valueInputElement.setAttribute('list', datalistId)
                         valueInputElement.setAttribute('pattern', '[a-z0-9]{8}-[a-z0-9]{4}-4[a-z0-9]{3}-[89ab][a-z0-9]{3}-[a-z0-9]{12}')
                         valueSmallElement.innerHTML = `Requires a valid UUID of a linked record of the type ${input.properties.value}`
                         valueInputElement.setAttribute('live-trigger', 'keyup:IdeRecordEdit')
-                        valueTdElement.appendChild(valueDatalistElement)
+                        valueTdElement.appendChild(newValueDatalistElement)
+                    } else {
+                        valueInputElement.setAttribute('type', 'text')
+                        valueInputElement.value = ''
+                        valueInputElement.dispatchEvent(new window.Event('change'))
                     }
             }
             if (propertyName == '@id' || propertyName == '@type') {
                 valueInputElement.setAttribute('readonly', 'true')
             }
         } else if (name == 'value') {
-            var tr = td.closest('tr')
-            var typeInputElement = tr.querySelector('td[name="type"] input')
+            var typeInputElement = trElement.querySelector('td[name="type"] input')
             if (typeInputElement.value) {
                 window.LiveElement.Scale.Console.System.invokeLambda({
                     page: 'ide', 
