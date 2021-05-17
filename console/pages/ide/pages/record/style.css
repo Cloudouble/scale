@@ -6,7 +6,7 @@
     min-width: 1110px;
 }
 #ide > section[name="record"] > fieldset[name="edit"] {
-    display: block;
+    display: none;
 }
 #ide > section[name="record"] > fieldset[name="edit"][active] {
     display: block;

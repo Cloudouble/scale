@@ -53,6 +53,26 @@ window.LiveElement.Scale.Core.buildSnippet = function(codeElement) {
       snippetContainer.setAttribute('built', true)
     }
 }
+window.LiveElement.Scale.Core.buildDataList = function(datalistElement, optionValues) {
+    datalistElement.innerHTML = ''
+    if (optionValues && typeof optionValues == 'object') {
+      if (Array.isArray(optionValues)) {
+        optionValues.sort().forEach(k => {
+            var optionElement = document.createElement('option')
+            optionElement.setAttribute('value', k)
+            optionElement.innerHTML = k
+            datalistElement.appendChild(optionElement)
+        })
+      } else {
+        Object.keys(optionValues).sort().forEach(k => {
+            var optionElement = document.createElement('option')
+            optionElement.setAttribute('value', k)
+            optionElement.innerHTML = optionValues[k]
+            datalistElement.appendChild(optionElement)
+        })
+      }
+    }
+}
 window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/element@1.7.5/elements/'
 window.LiveElement.Element.load().then(() => {
   window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/schema@1.0.4/types/'

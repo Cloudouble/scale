@@ -19,13 +19,7 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
                 if (searchResult && typeof searchResult == 'object' && searchResult.result && typeof searchResult.result == 'object') {
                     window.LiveElement.Scale.Console.IDE.Record.Search[input.attributes.name] = searchResult.result
                     var datalist = document.getElementById(`ide-record-${input.attributes.name}-list`)
-                    datalist.innerHTML = ''
-                    window.LiveElement.Scale.Console.IDE.Record.Search[input.attributes.name].sort().forEach(k => {
-                        var optionElement = document.createElement('option')
-                        optionElement.setAttribute('value', k)
-                        optionElement.innerHTML = k
-                        datalist.appendChild(optionElement)
-                    })
+                    window.LiveElement.Scale.Core.buildDataList(datalist, window.LiveElement.Scale.Console.IDE.Record.Search[input.attributes.name])
                 }
             })
             if (window.LiveElement.Scale.Console.IDE.Record.Search.classes 
@@ -82,54 +76,36 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
     var buildRow = function(property) {
         var trElement = document.createElement('tr')
         trElement.setAttribute('name', property)
-        var propertyTdElement = document.createElement('td')
-        var propertyInputElement = document.createElement('input')
-        var propertySmallElement = document.createElement('small')
-        propertySmallElement.innerHTML = '&nbsp;'
-        propertyTdElement.setAttribute('name', 'property')
-        propertyTdElement.setAttribute('colspan', '2')
-        propertyInputElement.setAttribute('type', 'search')
-        propertyInputElement.setAttribute('list', 'ide-record-edit-properties-list')
-        propertyInputElement.setAttribute('live-trigger', 'change:IdeRecordEdit')
-        propertyInputElement.value = property
-        if (property == '@id' || property == '@type') {
-            propertyInputElement.setAttribute('readonly', true)
+        var buildCell = function(name, value, colspan, inputType, listId, trigger) {
+            var cellTdElement = document.createElement('td')
+            var cellInputElement = document.createElement('input')
+            var cellSmallElement = document.createElement('small')
+            cellSmallElement.innerHTML = '&nbsp;'
+            cellTdElement.setAttribute('name', name)
+            cellTdElement.setAttribute('colspan', colspan)
+            cellInputElement.setAttribute('type', inputType)
+            if (listId) {
+                cellInputElement.setAttribute('list', listId)
+            }
+            cellInputElement.setAttribute('live-trigger', trigger)
+            cellInputElement.value = value
+            if (property == '@id' || property == '@type') {
+                cellInputElement.setAttribute('readonly', true)
+            }
+            cellTdElement.appendChild(cellInputElement)
+            cellTdElement.appendChild(cellSmallElement)
+            return cellTdElement
         }
-        propertyTdElement.appendChild(propertyInputElement)
-        propertyTdElement.appendChild(propertySmallElement)
+        var propertyTdElement = buildCell('property', property, 2, 'search', 'ide-record-edit-properties-list', 'change:IdeRecordEdit')
         trElement.appendChild(propertyTdElement)
-        var typeTdElement = document.createElement('td')
-        typeTdElement.setAttribute('name', 'type')
-        typeTdElement.setAttribute('colspan', '1')
-        var listElementId = window.LiveElement.Scale.Core.generateUUID4()
-        var listElement = document.createElement('datalist')
-        listElement.setAttribute('name', 'types')
-        listElement.setAttribute('id', listElementId)
-        typeTdElement.appendChild(listElement)
-        var typeInputElement = document.createElement('input')
-        var typeSmallElement = document.createElement('small')
-        typeSmallElement.innerHTML = '&nbsp;'
-        typeInputElement.setAttribute('list', listElementId)
-        typeInputElement.setAttribute('type', 'search')
-        typeInputElement.setAttribute('live-trigger', 'change:IdeRecordEdit')
-        if (property == '@id' || property == '@type') {
-            typeInputElement.setAttribute('readonly', true)
-        }
-        typeTdElement.appendChild(typeInputElement)
-        typeTdElement.appendChild(typeSmallElement)
+        var typeListElementId = window.LiveElement.Scale.Core.generateUUID4()
+        var typeTdElement = buildCell('type', '', 1, 'search', typeListElementId, 'change:IdeRecordEdit')
+        var typeListElement = document.createElement('datalist')
+        typeListElement.setAttribute('name', 'types')
+        typeListElement.setAttribute('id', typeListElementId)
+        typeTdElement.appendChild(typeListElement)
         trElement.appendChild(typeTdElement)
-        var valueTdElement = document.createElement('td')
-        var valueInputElement = document.createElement('input')
-        var valueSmallElement = document.createElement('small')
-        valueSmallElement.innerHTML = '&nbsp;'
-        valueTdElement.setAttribute('name', 'value')
-        valueTdElement.setAttribute('colspan', '4')
-        valueInputElement.value = input && input.payload ? input.payload[property] || '' : ''
-        if (property == '@id' || property == '@type') {
-            valueInputElement.setAttribute('readonly', true)
-        }
-        valueTdElement.appendChild(valueInputElement)
-        valueTdElement.appendChild(valueSmallElement)
+        var valueTdElement = buildCell('value', input && input.payload ? input.payload[property] || '' : '', 4, 'text', '')
         trElement.appendChild(valueTdElement)
         editor.appendChild(trElement)
     }
@@ -152,16 +128,12 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                     types = ['Text']
                     label = '&nbsp;'
                 }
-                var datalist = tr.querySelector('datalist[name="types"]')
-                datalist.innerHTML = ''
-                types.sort().forEach(type => {
-                    var option = document.createElement('option')
-                    option.setAttribute('value', type)
-                    option.innerHTML = window.LiveElement.Scale.Console.IDE.Record.Edit.datatype[type] 
+                var datalist = tr.querySelector('td[name="type"] datalist[name="types"]')
+                window.LiveElement.Scale.Core.buildDataList(datalist, Object.assign({}, ...types.sort().map(type => { 
+                    return {[type]: window.LiveElement.Scale.Console.IDE.Record.Edit.datatype[type] 
                         ? window.LiveElement.Scale.Console.IDE.Record.Edit.datatype[type].label 
-                        : type
-                    datalist.appendChild(option)
-                })
+                        : type}
+                })))
                 tr.querySelector('td[name="property"] small').innerHTML = label.length > 45 ? `${label.slice(0, 45)}...` : label
                 if (types.length == 1) {
                     var typeInputElement = tr.querySelector('td[name="type"] input')
@@ -176,12 +148,9 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                 listElement.innerHTML = ''
                 listElement.setAttribute('class', window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type'])
                 var properties = window.LiveElement.Scale.Console.IDE.Record.Edit.class[window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']].properties
-                Object.keys(properties).sort().forEach(property_name => {
-                    var optionElement = document.createElement('option')
-                    optionElement.setAttribute('value', property_name)
-                    optionElement.innerHTML = properties[property_name].label
-                    listElement.appendChild(optionElement)
-                })
+                window.LiveElement.Scale.Core.buildDataList(listElement, Object.assign({}, ...Object.keys(properties).sort().map(propertyName => {
+                    return {[propertyName]: properties[propertyName].label}
+                })))
                 if (!window.LiveElement.Scale.Console.IDE.Record.Edit.datatype) {
                     window.LiveElement.Scale.Console.System.invokeLambda({
                         page: 'ide', 
@@ -233,10 +202,10 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
             }
             
             var typeTdElement = td.nextElementSibling
-            var listElement = typeTdElement.querySelector('datalist')
             var typeInputElement = typeTdElement.querySelector('input')
             var typeSmallElement = typeTdElement.querySelector('small')
             typeSmallElement.innerHTML = '&nbsp;'
+            var listElement = typeTdElement.querySelector('datalist')
             listElement.innerHTML = ''
             if (window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type'] in window.LiveElement.Scale.Console.IDE.Record.Edit.class) {
                 var classDefinition = window.LiveElement.Scale.Console.IDE.Record.Edit.class[window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']]
@@ -244,14 +213,11 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                     var propertyDefinition = classDefinition.properties[input.properties.value]
                     td.querySelector('small').innerHTML = propertyDefinition.label.length > 45 ? `${propertyDefinition.label.slice(0, 45)}...` : propertyDefinition.label
                     if ('types' in propertyDefinition) {
-                        propertyDefinition.types.sort().forEach(type => {
-                            var option = document.createElement('option')
-                            option.setAttribute('value', type)
-                            option.innerHTML = window.LiveElement.Scale.Console.IDE.Record.Edit.datatype && type in window.LiveElement.Scale.Console.IDE.Record.Edit.datatype 
+                        window.LiveElement.Scale.Core.buildDataList(listElement, Object.assign({}, ...propertyDefinition.types.sort().map(type => { 
+                            return {[type]:  window.LiveElement.Scale.Console.IDE.Record.Edit.datatype && type in window.LiveElement.Scale.Console.IDE.Record.Edit.datatype 
                                 ? window.LiveElement.Scale.Console.IDE.Record.Edit.datatype[type].label 
-                                : (window.LiveElement.Scale.Console.IDE.Record.Search.classes && type in window.LiveElement.Scale.Console.IDE.Record.Search.classes ? window.LiveElement.Scale.Console.IDE.Record.Search.classes[type].label : type)
-                            listElement.appendChild(option)
-                        })
+                                : (window.LiveElement.Scale.Console.IDE.Record.Search.classes && type in window.LiveElement.Scale.Console.IDE.Record.Search.classes ? window.LiveElement.Scale.Console.IDE.Record.Search.classes[type].label : type) }
+                        })))
                     }
                     if (propertyDefinition.types.length == 1) {
                         typeInputElement.value = propertyDefinition.types[0]
@@ -359,13 +325,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                     if (searchResult && typeof searchResult == 'object' && searchResult.result && typeof searchResult.result == 'object') {
                         window.LiveElement.Scale.Console.IDE.Record.Search[input.attributes.name] = searchResult.result
                         var datalist = td.querySelector('datalist')
-                        datalist.innerHTML = ''
-                        searchResult.result.sort().forEach(k => {
-                            var optionElement = document.createElement('option')
-                            optionElement.setAttribute('value', k)
-                            optionElement.innerHTML = k
-                            datalist.appendChild(optionElement)
-                        })
+                        window.LiveElement.Scale.Core.buildDataList(datalist, searchResult.result)
                     }
                 })
             }
@@ -399,13 +359,9 @@ window.LiveElement.Scale.Console.System.invokeLambda({
     if (classes && typeof classes == 'object') {
         window.LiveElement.Scale.Console.IDE.Record.Search.classes = classes
         var classList = document.getElementById('ide-record-search-type-list')
-        classList.innerHTML = ''
-        Object.keys(classes).forEach(className => {
-            var optionElement = document.createElement('option')
-            optionElement.setAttribute('value', className)
-            optionElement.innerHTML = `${classes[className].label} [${classes[className].parents.join('&rarr;')}]`
-            classList.appendChild(optionElement)
-        })
+        window.LiveElement.Scale.Core.buildDataList(classList, Object.assign({}, ...Object.keys(classes).sort().map(className => {
+            return {[className]: `${classes[className].label} [${classes[className].parents.join('&rarr;')}]`}
+        })))
     }
 })
 
