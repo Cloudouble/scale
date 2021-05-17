@@ -5,6 +5,31 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
     } else if (handlerType == 'trigger') {
         var searchFieldset = input.triggersource.closest('fieldset'), editFieldset = searchFieldset.nextElementSibling
         var searchTypeInput = searchFieldset.querySelector('input[name="search-type"]'), searchUuidInput = searchFieldset.querySelector('input[name="search-uuid"]')
+        var writeHistory = function(record_type, record_uuid) {
+            var historyElement = searchFieldset.querySelector('.history')
+            var historySmallElement = historyElement.querySelector('small')
+            var liElement = document.createElement('li')
+            liElement.setAttribute('record-type', record_type)
+            liElement.setAttribute('record-uuid', record_uuid)
+            var hint = ''
+            if (Object.keys(window.LiveElement.Scale.Console.IDE.Record.Edit.record).length > 2) {
+                if (window.LiveElement.Scale.Console.IDE.Record.Edit.record.name) {
+                    hint = `${hint}name="${window.LiveElement.Scale.Console.IDE.Record.Edit.record.name}", `
+                }
+                var extraHintField = Object.keys(window.LiveElement.Scale.Console.IDE.Record.Edit.record)
+                    .filter(k => k != 'name' && k[0] != '@' && typeof window.LiveElement.Scale.Console.IDE.Record.Edit.record[k] != 'object').sort().shift()
+                if (extraHintField) {
+                    hint = `${hint}${extraHintField}=${JSON.stringify(window.LiveElement.Scale.Console.IDE.Record.Edit.record[extraHintField])}`
+                }
+                liElement.innerHTML = window.LiveElement.Scale.Core.truncateLabel(`${record_type}/${record_uuid} [${hint}, ... ]`, 120)
+            } else {
+                liElement.innerHTML = `${record_type}/${record_uuid} [ ---new--- ]`
+            }
+            if (historySmallElement) {
+                historySmallElement.remove()
+            }
+            historyElement.prepend(liElement)
+        }
         if (input.attributes.name == 'search-uuid') {
             window.LiveElement.Scale.Console.System.invokeLambda({
                 page: 'ide', 
@@ -50,18 +75,24 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
                 if (record && typeof record == 'object') {
                     window.LiveElement.Scale.Console.IDE.Record.Edit.record = record
                     if (window.LiveElement.Scale.Console.IDE.Record.Edit.record) {
+                        writeHistory(window.LiveElement.Scale.Console.IDE.Record.Edit.record_type, window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid)
                         searchFieldset.dispatchEvent(new window.CustomEvent('loaded'))
                     }
                 }
             })
         } else if (input.attributes.name == 'new') {
-            editFieldset.setAttribute('active', true)
-            searchTypeInput.value = ''
-            searchUuidInput.value = ''
-            window.LiveElement.Scale.Console.IDE.Record.Edit.record_type = ''
-            window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid = ''
-            window.LiveElement.Scale.Console.IDE.Record.Edit.record = {}
-            searchFieldset.dispatchEvent(new window.CustomEvent('loaded'))
+            if (searchTypeInput.value) {
+                editFieldset.setAttribute('active', true)
+                window.LiveElement.Scale.Console.IDE.Record.Edit.record_type = searchTypeInput.value
+                window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid = window.LiveElement.Scale.Core.generateUUID4()
+                window.LiveElement.Scale.Console.IDE.Record.Edit.record = {
+                    '@type': window.LiveElement.Scale.Console.IDE.Record.Edit.record_type, 
+                    '@id': window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid
+                }
+                searchUuidInput.value = window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid
+                writeHistory(window.LiveElement.Scale.Console.IDE.Record.Edit.record_type, window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid)
+                searchFieldset.dispatchEvent(new window.CustomEvent('loaded'))
+            }
         }
     }
 }
@@ -123,7 +154,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                         ? window.LiveElement.Scale.Console.IDE.Record.Edit.datatype[type].label 
                         : type}
                 })))
-                tr.querySelector('td[name="property"] small').innerHTML = label.length > 45 ? `${label.slice(0, 45)}...` : label
+                tr.querySelector('td[name="property"] small').innerHTML = window.LiveElement.Scale.Core.truncateLabel(label, 45)
                 if (types.length == 1 && tr.querySelector('td[name="property"] input') && tr.querySelector('td[name="property"] input').value) {
                     var typeInputElement = tr.querySelector('td[name="type"] input')
                     typeInputElement.value = types[0]
@@ -201,7 +232,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                     var classDefinition = window.LiveElement.Scale.Console.IDE.Record.Edit.class[window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']]
                     if (classDefinition.properties && (input.properties.value in classDefinition.properties)) {
                         var propertyDefinition = classDefinition.properties[input.properties.value]
-                        td.querySelector('small').innerHTML = propertyDefinition.label.length > 45 ? `${propertyDefinition.label.slice(0, 45)}...` : propertyDefinition.label
+                        td.querySelector('small').innerHTML = window.LiveElement.Scale.Core.truncateLabel(propertyDefinition.label, 45)
                         if ('types' in propertyDefinition) {
                             window.LiveElement.Scale.Core.buildDataList(listElement, Object.assign({}, ...propertyDefinition.types.sort().map(type => { 
                                 return {[type]:  window.LiveElement.Scale.Console.IDE.Record.Edit.datatype && type in window.LiveElement.Scale.Console.IDE.Record.Edit.datatype 
@@ -231,7 +262,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                 datatypeLabel = window.LiveElement.Scale.Console.IDE.Record.Search.classes[input.properties.value].label
             }
             if (datatypeLabel) {
-                td.querySelector('small').innerHTML = datatypeLabel.length > 45 ? `${datatypeLabel.slice(0, 45)}...` : datatypeLabel
+                td.querySelector('small').innerHTML = window.LiveElement.Scale.Core.truncateLabel(datatypeLabel, 45)
             }
             var propertyName = trElement.getAttribute('name'), valueTdElement = td.nextElementSibling
             var valueInputElement = valueTdElement.querySelector('input'), valueSmallElement = valueTdElement.querySelector('small'), valueDatalistElement = valueTdElement.querySelector('datalist')

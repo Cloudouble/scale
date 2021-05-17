@@ -73,6 +73,10 @@ window.LiveElement.Scale.Core.buildDataList = function(datalistElement, optionVa
       }
     }
 }
+window.LiveElement.Scale.Core.truncateLabel = function(label, maxLength) {
+  return label.length > maxLength ? `${label.slice(0, maxLength)}...` : label
+}
+
 window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/element@1.7.5/elements/'
 window.LiveElement.Element.load().then(() => {
   window.LiveElement.Element.root = 'https://cdn.jsdelivr.net/gh/cloudouble/schema@1.0.4/types/'
