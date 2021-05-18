@@ -32,6 +32,7 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
             if (historySmallElement) {
                 historySmallElement.remove()
             }
+            liElement.setAttribute('live-trigger', 'click:IdeRecordSearch')
             historyElement.prepend(liElement)
         }
         if (input.attributes.name == 'search-uuid') {
@@ -92,27 +93,31 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
                 record_type: window.LiveElement.Scale.Console.IDE.Record.Edit.record_type, 
                 record_uuid: window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid
             }).then(record => {
-                if (record && typeof record == 'object') {
+                if (record && typeof record == 'object' && '@type' in record && '@id' in record) {
                     window.LiveElement.Scale.Console.IDE.Record.Edit.record = record
                     if (window.LiveElement.Scale.Console.IDE.Record.Edit.record) {
                         writeHistory(window.LiveElement.Scale.Console.IDE.Record.Edit.record_type, window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid)
                         searchFieldset.dispatchEvent(new window.CustomEvent('loaded'))
                     }
+                } else {
+                    window.LiveElement.Scale.Console.IDE.Record.Edit.record = {
+                        '@type': window.LiveElement.Scale.Console.IDE.Record.Edit.record_type, 
+                        '@id': window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid
+                    }
+                    writeHistory(window.LiveElement.Scale.Console.IDE.Record.Edit.record_type, window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid)
+                    searchFieldset.dispatchEvent(new window.CustomEvent('loaded'))
                 }
             })
-        } else if (input.attributes.name == 'new') {
-            if (searchTypeInput.value) {
-                editFieldset.setAttribute('active', true)
-                window.LiveElement.Scale.Console.IDE.Record.Edit.record_type = searchTypeInput.value
-                window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid = window.LiveElement.Scale.Core.generateUUID4()
-                window.LiveElement.Scale.Console.IDE.Record.Edit.record = {
-                    '@type': window.LiveElement.Scale.Console.IDE.Record.Edit.record_type, 
-                    '@id': window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid
-                }
-                searchUuidInput.value = window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid
-                writeHistory(window.LiveElement.Scale.Console.IDE.Record.Edit.record_type, window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid)
-                searchFieldset.dispatchEvent(new window.CustomEvent('loaded'))
-            }
+        } else if (input.attributes['record-type'] && input.attributes['record-uuid']) {
+            searchTypeInput.focus()
+            searchTypeInput.value = input.attributes['record-type']
+            searchTypeInput.dispatchEvent(new window.Event('search'))
+            searchUuidInput.focus()
+            searchUuidInput.value = input.attributes['record-uuid']
+            searchUuidInput.dispatchEvent(new window.Event('search'))
+            loadButton.removeAttribute('disabled')
+            loadButton.focus()
+            loadButton.click()
         }
     }
 }
