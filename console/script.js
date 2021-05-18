@@ -53,7 +53,7 @@ window.LiveElement.Scale.Core.buildSnippet = function(codeElement) {
       snippetContainer.setAttribute('built', true)
     }
 }
-window.LiveElement.Scale.Core.buildDataList = function(datalistElement, optionValues) {
+window.LiveElement.Scale.Core.buildDataList = function(datalistElement, optionValues, blankOptions) {
     datalistElement.innerHTML = ''
     if (optionValues && typeof optionValues == 'object') {
       if (Array.isArray(optionValues)) {
@@ -69,6 +69,21 @@ window.LiveElement.Scale.Core.buildDataList = function(datalistElement, optionVa
             optionElement.setAttribute('value', k)
             optionElement.innerHTML = optionValues[k]
             datalistElement.appendChild(optionElement)
+        })
+      }
+    }
+    if (blankOptions && typeof blankOptions == 'object') {
+      if (!Array.isArray(blankOptions)) {
+        blankOptions = [blankOptions]
+      }
+      if (blankOptions && typeof Array.isArray(blankOptions)) {
+        blankOptions.filter(b => b && typeof b == 'object').reverse().forEach(blankOption => {
+          Object.keys(blankOption).sort().forEach(value => {
+            var newOptionElement = document.createElement('option')
+            newOptionElement.setAttribute('value', value)
+            newOptionElement.innerHTML = blankOption[value] || value
+            datalistElement.prepend(newOptionElement)
+          })
         })
       }
     }

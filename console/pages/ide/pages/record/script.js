@@ -5,6 +5,10 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
     } else if (handlerType == 'trigger') {
         var searchFieldset = input.triggersource.closest('fieldset'), editFieldset = searchFieldset.nextElementSibling
         var searchTypeInput = searchFieldset.querySelector('input[name="search-type"]'), searchUuidInput = searchFieldset.querySelector('input[name="search-uuid"]')
+        var loadButton = searchFieldset.querySelector('button[name="load"]')
+        var newFlag = '---new---'
+        var blankOptions = {[newFlag]: 'Generate UUID for a new record...'}
+        var searchUUIDDatalistElement = document.getElementById('ide-record-search-uuid-list')
         var writeHistory = function(record_type, record_uuid) {
             var historyElement = searchFieldset.querySelector('.history')
             var historySmallElement = historyElement.querySelector('small')
@@ -23,7 +27,7 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
                 }
                 liElement.innerHTML = window.LiveElement.Scale.Core.truncateLabel(`${record_type}/${record_uuid} [${hint}, ... ]`, 120)
             } else {
-                liElement.innerHTML = `${record_type}/${record_uuid} [ ---new--- ]`
+                liElement.innerHTML = `${record_type}/${record_uuid} [${newFlag}]`
             }
             if (historySmallElement) {
                 historySmallElement.remove()
@@ -31,33 +35,46 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
             historyElement.prepend(liElement)
         }
         if (input.attributes.name == 'search-uuid') {
-            window.LiveElement.Scale.Console.System.invokeLambda({
-                page: 'ide', 
-                entity_type: 'record', 
-                heading: 'search',
-                input_name: input.attributes.name, 
-                record_type: searchTypeInput.value, 
-                search: input.properties.value
-            }).then(searchResult => {
-                if (searchResult && typeof searchResult == 'object' && searchResult.result && typeof searchResult.result == 'object') {
-                    window.LiveElement.Scale.Console.IDE.Record.Search[input.attributes.name] = searchResult.result
-                    window.LiveElement.Scale.Core.buildDataList(document.getElementById(`ide-record-${input.attributes.name}-list`), window.LiveElement.Scale.Console.IDE.Record.Search[input.attributes.name])
-                }
-            })
-            if (window.LiveElement.Scale.Console.IDE.Record.Search.classes 
-                    && (searchTypeInput.value in window.LiveElement.Scale.Console.IDE.Record.Search.classes)
-                    && window.LiveElement.Scale.Console.IDE.Record.Search['search-uuid'] 
-                    && (window.LiveElement.Scale.Console.IDE.Record.Search['search-uuid']).includes(input.properties.value)
-                    ) {
-                searchFieldset.querySelector('button[name="load"]').removeAttribute('disabled')
+            if (input.properties.value == newFlag) {
+                input.triggersource.value = window.LiveElement.Scale.Core.generateUUID4()
+                window.LiveElement.Scale.Console.IDE.Record.Search['search-uuid'] = []
+                window.LiveElement.Scale.Core.buildDataList(searchUUIDDatalistElement, window.LiveElement.Scale.Console.IDE.Record.Search['search-uuid'])
+                loadButton.removeAttribute('disabled')
+            } else if (!input.properties.value) {
+                console.log('line 44')
+                loadButton.setAttribute('disabled', true)
+                window.LiveElement.Scale.Core.buildDataList(searchUUIDDatalistElement, [], blankOptions)
             } else {
-                searchFieldset.querySelector('button[name="load"]').setAttribute('disabled', true)
+                window.LiveElement.Scale.Console.System.invokeLambda({
+                    page: 'ide', 
+                    entity_type: 'record', 
+                    heading: 'search',
+                    input_name: 'search-uuid', 
+                    record_type: searchTypeInput.value, 
+                    search: input.properties.value
+                }).then(searchResult => {
+                    if (searchResult && typeof searchResult == 'object' && searchResult.result && typeof searchResult.result == 'object') {
+                        window.LiveElement.Scale.Console.IDE.Record.Search['search-uuid'] = searchResult.result
+                        window.LiveElement.Scale.Core.buildDataList(searchUUIDDatalistElement, window.LiveElement.Scale.Console.IDE.Record.Search['search-uuid'], blankOptions)
+                    }
+                })
+                if (window.LiveElement.Scale.Console.IDE.Record.Search.classes 
+                    && (searchTypeInput.value in window.LiveElement.Scale.Console.IDE.Record.Search.classes)
+                    && Array.isArray(window.LiveElement.Scale.Console.IDE.Record.Search['search-uuid'])
+                    && window.LiveElement.Scale.Console.IDE.Record.Search['search-uuid'].includes(input.properties.value)  
+                    ) {
+                    loadButton.removeAttribute('disabled')
+                } else {
+                    loadButton.setAttribute('disabled', true)
+                }
             }
         } else if (input.attributes.name == 'search-type') {
-            if (window.LiveElement.Scale.Console.IDE.Record.Search.classes && (input.properties.value in window.LiveElement.Scale.Console.IDE.Record.Search.classes)) {
-                searchFieldset.querySelector('button[name="new"]').removeAttribute('disabled')
+            window.LiveElement.Scale.Console.IDE.Record.Search['search-uuid'] = []
+            loadButton.setAttribute('disabled', true)
+            if (input.properties.value && window.LiveElement.Scale.Console.IDE.Record.Search.classes && (input.properties.value in window.LiveElement.Scale.Console.IDE.Record.Search.classes)) {
+                window.LiveElement.Scale.Core.buildDataList(searchUUIDDatalistElement, [], blankOptions)
             } else {
-                searchFieldset.querySelector('button[name="new"]').setAttribute('disabled', true)
+                window.LiveElement.Scale.Core.buildDataList(searchUUIDDatalistElement)
             }
         } else if (input.attributes.name == 'load') {
             editFieldset.setAttribute('active', true)
@@ -186,6 +203,8 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                 } else {
                     injectDataTypes()
                 }
+            } else {
+                injectDataTypes()
             }
         }
         window.LiveElement.Scale.Console.IDE.Record.Edit.class = window.LiveElement.Scale.Console.IDE.Record.Edit.class || {}
