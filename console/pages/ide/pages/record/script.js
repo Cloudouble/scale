@@ -39,9 +39,12 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
                 input.triggersource.value = window.LiveElement.Scale.Core.generateUUID4()
                 window.LiveElement.Scale.Console.IDE.Record.Search['search-uuid'] = []
                 window.LiveElement.Scale.Core.buildDataList(searchUUIDDatalistElement, window.LiveElement.Scale.Console.IDE.Record.Search['search-uuid'])
-                loadButton.removeAttribute('disabled')
+                if (window.LiveElement.Scale.Console.IDE.Record.Search.classes && (searchTypeInput.value in window.LiveElement.Scale.Console.IDE.Record.Search.classes)) {
+                    loadButton.removeAttribute('disabled')
+                } else {
+                    loadButton.setAttribute('disabled', true)
+                }
             } else if (!input.properties.value) {
-                console.log('line 44')
                 loadButton.setAttribute('disabled', true)
                 window.LiveElement.Scale.Core.buildDataList(searchUUIDDatalistElement, [], blankOptions)
             } else {
