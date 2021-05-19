@@ -421,10 +421,11 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
             } else {
                 editFieldset.querySelector('button[name="save"]').removeAttribute('disabled')
                 var propertyTypeInputElement = trElement.querySelector('td[name="type"] input')
-                if (input.attributes.type == 'search' && input.attributes.list) {
+                var propertyType = propertyTypeInputElement.value, propertyName = trElement.getAttribute('name')
+                if (propertyName && propertyType && input.attributes.type == 'search' && input.attributes.list) {
                     var blankOptions = {[window.LiveElement.Scale.Console.IDE.newFlag]: 'Generate UUID for a new record...'}
                     var datalist = td.querySelector('datalist')
-                    if (propertyTypeInputElement.value) {
+                    if (propertyType) {
                         if (input.properties.value == window.LiveElement.Scale.Console.IDE.newFlag) {
                             input.triggersource.value = window.LiveElement.Scale.Core.generateUUID4()
                             input.triggersource.dispatchEvent(new window.Event('search'))
@@ -434,7 +435,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                                 entity_type: 'record', 
                                 heading: 'search',
                                 input_name: 'search-uuid', 
-                                record_type: propertyTypeInputElement.value, 
+                                record_type: propertyType, 
                                 search: input.properties.value
                             }).then(searchResult => {
                                 if (searchResult && typeof searchResult == 'object' && searchResult.result && typeof searchResult.result == 'object') {
@@ -444,12 +445,54 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                             })
                         }
                     }
+                    if (input.properties.value && input.properties.value != window.LiveElement.Scale.Console.IDE.newFlag && input.triggersource.reportValidity()) {
+                        window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = {'@type': propertyType, '@id': input.properties.value}
+                    }
                 } else {
-                    console.log('line 443', trElement.getAttribute('name'), ' = ', input.properties.value)
-                    console.log('line 444', input.triggersource)
-                
-                    console.log('line 446', input.triggersource.reportValidity())
-                    
+                    if (propertyName && propertyType && input.triggersource.reportValidity()) {
+                        switch(propertyType) {
+                            case 'Boolean':
+                                window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = input.triggersource.checked
+                            break
+                            case 'True':
+                                window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = true
+                            break
+                            case 'False':
+                                window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = false
+                            break
+                            case 'Date':
+                            case 'DateTime':
+                            case 'Time':
+                                window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = input.properties.value
+                            break
+                            case 'Number':
+                                let floatVal = parseFloat(input.properties.value), intVal = parseInt(input.properties.value, 10)
+                                window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = floatVal == intVal ? intVal : floatVal
+                            break
+                            case 'Float':
+                                window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = parseFloat(input.properties.value)
+                            break
+                            case 'Integer':
+                                window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = parseInt(input.properties.value, 10)
+                            break
+                            case 'URL':
+                                window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = input.properties.value
+                            break
+                            case 'Text':
+                            case 'CssSelectorType':
+                            case 'PronounceableText':
+                            case 'XPathType':
+                                window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = input.properties.value
+                            break
+                            default:
+                                try {
+                                    window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = JSON.parse(input.properties.value)
+                                } catch(e) {
+                                    window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = input.properties.value
+                                }
+                        }
+                        console.log('line 494', JSON.stringify(window.LiveElement.Scale.Console.IDE.Record.Edit.record))
+                    }
                 }
             }
         } else if (name == 'save') {
