@@ -82,7 +82,21 @@
     right: 5em;
     top: 2.2em;
     display: none;
+    color: black;
 }
+#ide > section[name="record"] > fieldset[name="edit"] td[name="value"] > input, 
+    #ide > section[name="record"] > fieldset[name="edit"] td[name="value"] > input:invalid {
+    outline: 1px solid red;    
+    color: red;
+}
+#ide > section[name="record"] > fieldset[name="edit"][disabled] td[name="value"] > input, 
+    #ide > section[name="record"] > fieldset[name="edit"] td[name="value"] > input[readonly], 
+    #ide > section[name="record"] > fieldset[name="edit"] tr[name=""] td[name="value"] > input, 
+    #ide > section[name="record"] > fieldset[name="edit"] td[name="value"] > input:valid {
+    outline: none;
+    color: black;
+}
+
 #ide > section[name="record"] > fieldset[name="edit"] td[name="value"] > input:valid:hover ~ button, 
 #ide > section[name="record"] > fieldset[name="edit"] td[name="value"] > input:valid:focus ~ button, 
 #ide > section[name="record"] > fieldset[name="edit"] td[name="value"] > input:valid:active ~ button, 
