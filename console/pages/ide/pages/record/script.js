@@ -501,7 +501,6 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                 }
             }
         } else if (name == 'save') {
-            editFieldset.querySelector('button[name="save"]').setAttribute('disabled', true)
             var cleanRecord = Object.assign({}, ...Array.from(editor.querySelectorAll('tr[name]')).filter(tr => {
                 var trName = tr.getAttribute('name')
                 return trName && trName in window.LiveElement.Scale.Console.IDE.Record.Edit.record
@@ -512,8 +511,22 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                 var aKey = Object.keys(a)[0], bKey = Object.keys(b)[0]
                 return aKey < bKey ? -1 : (aKey > bKey ? 1 : 0)
             }))
-            console.log('line 509', cleanRecord)
-            
+            window.LiveElement.Scale.Console.IDE.Record.Edit.record = cleanRecord
+            editFieldset.setAttribute('disabled', true)
+            window.fetch(
+                `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/record/${window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']}/${window.LiveElement.Scale.Console.IDE.Record.Edit.record['@id']}.json`, 
+                {
+                    method: 'PUT', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify(window.LiveElement.Scale.Console.IDE.Record.Edit.record)
+                }
+            ).then(() => {
+                editFieldset.removeAttribute('disabled')
+                editFieldset.querySelector('button[name="save"]').setAttribute('disabled', true)
+            }).catch(() => {
+                editFieldset.removeAttribute('disabled')
+                editFieldset.querySelector('button[name="save"]').setAttribute('disabled', true)
+            })
         } else if (name == 'duplicate') {
             editFieldset.querySelector('button[name="save"]').removeAttribute('disabled')
             var searchFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="record"] fieldset[name="search"]')
@@ -524,7 +537,27 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
             editFieldset.querySelector('tr[name="@id"] td[name="value"] input').value = window.LiveElement.Scale.Console.IDE.Record.Edit.record['@id']
         } else if (name == 'delete') {
             editFieldset.querySelector('button[name="save"]').removeAttribute('disabled')
-            console.log('line 449: delete', window.LiveElement.Scale.Console.IDE.Record.Edit.record)            
+            window.fetch(
+                `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/record/${window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']}/${window.LiveElement.Scale.Console.IDE.Record.Edit.record['@id']}.json`, 
+                {
+                    method: 'DELETE'
+                }
+            ).then(() => {
+                editor.querySelectorAll('tr[name]').forEach(tr => {
+                    var trName = tr.getAttribute('name')
+                    if (trName && trName != '@id' && trName != '@type') {
+                        tr.remove()
+                        if (window.LiveElement.Scale.Console.IDE.Record.Edit.record[trName]) {
+                            delete window.LiveElement.Scale.Console.IDE.Record.Edit.record[trName]
+                        }
+                    }
+                })                
+                editFieldset.removeAttribute('disabled')
+                editFieldset.querySelector('button[name="save"]').removeAttribute('disabled')
+            }).catch(() => {
+                editFieldset.removeAttribute('disabled')
+                editFieldset.querySelector('button[name="save"]').setAttribute('disabled', true)
+            })
             
         }
     }
