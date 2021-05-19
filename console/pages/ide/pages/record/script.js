@@ -154,14 +154,14 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
             cellTdElement.appendChild(cellSmallElement)
             return cellTdElement
         }
-        trElement.appendChild(buildCell('property', property, 2, 'search', 'ide-record-edit-properties-list', 'change:IdeRecordEdit', input.payload))
+        trElement.appendChild(buildCell('property', property, 2, 'search', 'ide-record-edit-properties-list', 'input:IdeRecordEdit change:IdeRecordEdit', input.payload))
         var typeListElementId = window.LiveElement.Scale.Core.generateUUID4(), typeListElement = document.createElement('datalist')
-        var typeTdElement = buildCell('type', '', 1, 'search', typeListElementId, 'change:IdeRecordEdit', input.payload)
+        var typeTdElement = buildCell('type', '', 1, 'search', typeListElementId, 'input:IdeRecordEdit change:IdeRecordEdit', input.payload)
         typeListElement.setAttribute('name', 'types')
         typeListElement.setAttribute('id', typeListElementId)
         typeTdElement.appendChild(typeListElement)
         trElement.appendChild(typeTdElement)
-        var valueTdElement = buildCell('value', input && input.payload ? input.payload[property] || '' : '', 4, 'text', '', 'change:IdeRecordEdit', input.payload)
+        var valueTdElement = buildCell('value', input && input.payload ? input.payload[property] || '' : '', 4, 'text', '', 'input:IdeRecordEdit change:IdeRecordEdit', input.payload)
         valueTdElement.querySelector('input').setAttribute('required', true)
         trElement.appendChild(valueTdElement)
         editor.appendChild(trElement)
@@ -192,7 +192,11 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                 if (types.length == 1 && tr.querySelector('td[name="property"] input') && tr.querySelector('td[name="property"] input').value) {
                     var typeInputElement = tr.querySelector('td[name="type"] input')
                     typeInputElement.value = typeInputElement.value || types[0]
-                    typeInputElement.dispatchEvent(new window.Event('change'))
+                    typeof window.requestIdleCallback == 'function' ? window.requestIdleCallback(function() {
+                        typeInputElement.dispatchEvent(new window.Event('input'))
+                    }, {timeout: 1000}) : window.setTimeout(function() {
+                        typeInputElement.dispatchEvent(new window.Event('input'))
+                    }, 1000)
                 }
             })
         }
@@ -242,6 +246,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                 }
             })
         } else {
+            editFieldset.setAttribute('disabled', true)
             injectProperties().then(() => {
                 editFieldset.removeAttribute('disabled')
                 editFieldset.querySelector('button[name="save"]').setAttribute('disabled', true)
