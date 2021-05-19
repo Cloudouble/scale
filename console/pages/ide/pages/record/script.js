@@ -126,7 +126,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
     var buildRow = function(property) {
         var trElement = document.createElement('tr')
         trElement.setAttribute('name', property)
-        var buildCell = function(name, value, colspan, inputType, listId, trigger) {
+        var buildCell = function(name, value, colspan, inputType, listId, trigger, record) {
             var cellTdElement = document.createElement('td'), cellInputElement = document.createElement('input'),  cellSmallElement = document.createElement('small')
             cellSmallElement.innerHTML = '&nbsp;'
             cellTdElement.setAttribute('name', name)
@@ -136,7 +136,17 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                 cellInputElement.setAttribute('list', listId)
             }
             cellInputElement.setAttribute('live-trigger', trigger)
-            cellInputElement.value = value
+            if (record && property in record && record[property] && typeof record[property] == 'object') {
+                if (name == 'type') {
+                    cellInputElement.value = record[property]['@type'] || value
+                } else if (name == 'value') {
+                    cellInputElement.value = record[property]['@id'] || ''
+                } else {
+                    cellInputElement.value = value
+                }
+            } else {
+                cellInputElement.value = value
+            }
             if (property == '@id' || property == '@type') {
                 cellInputElement.setAttribute('readonly', true)
             }
@@ -144,14 +154,14 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
             cellTdElement.appendChild(cellSmallElement)
             return cellTdElement
         }
-        trElement.appendChild(buildCell('property', property, 2, 'search', 'ide-record-edit-properties-list', 'change:IdeRecordEdit'))
+        trElement.appendChild(buildCell('property', property, 2, 'search', 'ide-record-edit-properties-list', 'change:IdeRecordEdit', input.payload))
         var typeListElementId = window.LiveElement.Scale.Core.generateUUID4(), typeListElement = document.createElement('datalist')
-        var typeTdElement = buildCell('type', '', 1, 'search', typeListElementId, 'change:IdeRecordEdit')
+        var typeTdElement = buildCell('type', '', 1, 'search', typeListElementId, 'change:IdeRecordEdit', input.payload)
         typeListElement.setAttribute('name', 'types')
         typeListElement.setAttribute('id', typeListElementId)
         typeTdElement.appendChild(typeListElement)
         trElement.appendChild(typeTdElement)
-        var valueTdElement = buildCell('value', input && input.payload ? input.payload[property] || '' : '', 4, 'text', '', 'change:IdeRecordEdit')
+        var valueTdElement = buildCell('value', input && input.payload ? input.payload[property] || '' : '', 4, 'text', '', 'change:IdeRecordEdit', input.payload)
         valueTdElement.querySelector('input').setAttribute('required', true)
         trElement.appendChild(valueTdElement)
         editor.appendChild(trElement)
@@ -181,7 +191,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                 tr.querySelector('td[name="property"] small').innerHTML = window.LiveElement.Scale.Core.truncateLabel(label, 45)
                 if (types.length == 1 && tr.querySelector('td[name="property"] input') && tr.querySelector('td[name="property"] input').value) {
                     var typeInputElement = tr.querySelector('td[name="type"] input')
-                    typeInputElement.value = types[0]
+                    typeInputElement.value = typeInputElement.value || types[0]
                     typeInputElement.dispatchEvent(new window.Event('change'))
                 }
             })
