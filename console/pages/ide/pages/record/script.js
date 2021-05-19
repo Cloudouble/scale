@@ -339,6 +339,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                     if (valueInputElement.value || input.properties.value === 'True') {
                         valueInputElement.setAttribute('checked', 'true')
                     }
+                    valueInputElement.setAttribute('live-trigger', 'input:IdeRecordEdit change:IdeRecordEdit')
                     if (input.properties.value !== 'Boolean') {
                         valueInputElement.setAttribute('readonly', true)
                         valueSmallElement.innerHTML = `Requires a ${input.properties.value} value`
@@ -353,6 +354,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                     inputTypeAttribute = inputTypeAttribute == 'datetime' ? `${inputTypeAttribute}-local` : inputTypeAttribute
                     valueInputElement.setAttribute('type', inputTypeAttribute)
                     valueInputElement.setAttribute('required', true)
+                    valueInputElement.setAttribute('live-trigger', 'input:IdeRecordEdit change:IdeRecordEdit')
                     valueSmallElement.innerHTML = `Specify the ${input.properties.value} value`
                     break
                 case 'Number':
@@ -363,11 +365,13 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                         valueInputElement.setAttribute('step', 1)
                     }
                     valueInputElement.setAttribute('required', true)
+                    valueInputElement.setAttribute('live-trigger', 'input:IdeRecordEdit change:IdeRecordEdit')
                     valueSmallElement.innerHTML = `Specify the ${input.properties.value} value`
                     break
                 case 'URL':
                     valueInputElement.setAttribute('type', 'url')
                     valueInputElement.setAttribute('required', true)
+                    valueInputElement.setAttribute('live-trigger', 'input:IdeRecordEdit change:IdeRecordEdit')
                     valueSmallElement.innerHTML = `Requires a valid URL`
                     break
                 case 'Text':
@@ -376,6 +380,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                 case 'XPathType':
                     valueInputElement.setAttribute('type', 'text')
                     valueInputElement.setAttribute('required', true)
+                    valueInputElement.setAttribute('live-trigger', 'input:IdeRecordEdit change:IdeRecordEdit')
                     valueSmallElement.innerHTML = propertyName == '@id' || propertyName == '@type' ? `The ${propertyName} of the record` : 'Any text value'
                     break
                 default:
@@ -404,6 +409,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
             if (propertyName == '@id' || propertyName == '@type') {
                 valueInputElement.setAttribute('readonly', 'true')
             }
+            valueInputElement.dispatchEvent(new window.Event('input'))
         } else if (name == 'value') {
             if (input.triggersource.tagName.toLowerCase() == 'button') {
                 var searchFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="record"] fieldset[name="search"]') 
@@ -491,13 +497,22 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                                     window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = input.properties.value
                                 }
                         }
-                        console.log('line 494', JSON.stringify(window.LiveElement.Scale.Console.IDE.Record.Edit.record))
                     }
                 }
             }
         } else if (name == 'save') {
             editFieldset.querySelector('button[name="save"]').setAttribute('disabled', true)
-            console.log('line 437: save', window.LiveElement.Scale.Console.IDE.Record.Edit.record)            
+            var cleanRecord = Object.assign({}, ...Array.from(editor.querySelectorAll('tr[name]')).filter(tr => {
+                var trName = tr.getAttribute('name')
+                return trName && trName in window.LiveElement.Scale.Console.IDE.Record.Edit.record
+            }).map(tr => {
+                var trName = tr.getAttribute('name')
+                return {[trName]: window.LiveElement.Scale.Console.IDE.Record.Edit.record[trName]}
+            }).sort((a, b) => {
+                var aKey = Object.keys(a)[0], bKey = Object.keys(b)[0]
+                return aKey < bKey ? -1 : (aKey > bKey ? 1 : 0)
+            }))
+            console.log('line 509', cleanRecord)
             
         } else if (name == 'duplicate') {
             editFieldset.querySelector('button[name="save"]').removeAttribute('disabled')
