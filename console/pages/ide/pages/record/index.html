@@ -2,7 +2,7 @@
 <fieldset name="search">
     <h3>Search</h3>
     <input name="search-type" type="search" placeholder="search record type..." autocomplete="off" list="ide-record-search-type-list" live-trigger="search:IdeRecordSearch" />
-    <input name="search-uuid" type="search" placeholder="search record UUID..." autocomplete="off" list="ide-record-search-uuid-list" live-trigger="search:IdeRecordSearch input:IdeRecordSearch focus:IdeRecordSearch" />
+    <input name="search-uuid" type="search" placeholder="search record UUID..." autocomplete="off" list="ide-record-search-uuid-list" live-trigger="focus:IdeRecordSearch input:IdeRecordSearch search:IdeRecordSearch" />
     <button name="load" disabled="true" live-trigger="click:IdeRecordSearch">Load</button>
     <datalist id="ide-record-search-type-list"></datalist>
     <datalist id="ide-record-search-uuid-list"></datalist>

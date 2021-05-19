@@ -1,5 +1,6 @@
 window.LiveElement.Scale.Console.IDE = window.LiveElement.Scale.Console.IDE || {}
 window.LiveElement.Scale.Console.IDE.pageElement = document.getElementById('ide')
+window.LiveElement.Scale.Console.IDE.newFlag = '---new---'
 var p = []
 window.LiveElement.Scale.Console.IDE.pageElement.querySelectorAll(`:scope > section[name]`).forEach(sectionElement => {
     var entity_type = sectionElement.getAttribute('name')
@@ -11,6 +12,16 @@ window.LiveElement.Scale.Console.IDE.pageElement.querySelectorAll(`:scope > sect
         sectionElement.innerHTML = t
     }))
 })
+p.push(window.LiveElement.Scale.Core.waitUntil(() => window.LiveElement.Scale.Console.System && typeof window.LiveElement.Scale.Console.System.invokeLambda == 'function').then(() => {
+    return window.LiveElement.Scale.Console.System.invokeLambda({
+        page: 'ide', 
+        entity_type: 'classes'
+    }).then(classes => {
+        if (classes && typeof classes == 'object') {
+            window.LiveElement.Scale.Console.IDE.classes = classes
+        }
+    })
+}))
 Promise.all(p).then(() => {
     window.LiveElement.Scale.Console.IDE.pageElement.querySelectorAll('div[name="sidebar"] button').forEach(button => {
         window.LiveElement.Scale.Console.IDE[button.innerHTML] = window.LiveElement.Scale.Console.IDE[button.innerHTML] || {}

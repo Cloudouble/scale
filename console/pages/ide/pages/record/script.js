@@ -6,8 +6,7 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
         var searchFieldset = input.triggersource.closest('fieldset'), editFieldset = searchFieldset.nextElementSibling
         var searchTypeInput = searchFieldset.querySelector('input[name="search-type"]'), searchUuidInput = searchFieldset.querySelector('input[name="search-uuid"]')
         var loadButton = searchFieldset.querySelector('button[name="load"]')
-        var newFlag = '---new---'
-        var blankOptions = {[newFlag]: 'Generate UUID for a new record...'}
+        var blankOptions = {[window.LiveElement.Scale.Console.IDE.newFlag]: 'Generate UUID for a new record...'}
         var searchUUIDDatalistElement = document.getElementById('ide-record-search-uuid-list')
         var writeHistory = function(record_type, record_uuid) {
             var historyElement = searchFieldset.querySelector('.history')
@@ -27,7 +26,7 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
                 }
                 liElement.innerHTML = window.LiveElement.Scale.Core.truncateLabel(`${record_type}/${record_uuid} [${hint}, ... ]`, 120)
             } else {
-                liElement.innerHTML = `${record_type}/${record_uuid} [${newFlag}]`
+                liElement.innerHTML = `${record_type}/${record_uuid} [${window.LiveElement.Scale.Console.IDE.newFlag}]`
             }
             if (historySmallElement) {
                 historySmallElement.remove()
@@ -36,11 +35,11 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
             historyElement.prepend(liElement)
         }
         if (input.attributes.name == 'search-uuid') {
-            if (input.properties.value == newFlag) {
+            if (input.properties.value == window.LiveElement.Scale.Console.IDE.newFlag) {
                 input.triggersource.value = window.LiveElement.Scale.Core.generateUUID4()
                 window.LiveElement.Scale.Console.IDE.Record.Search['search-uuid'] = []
                 window.LiveElement.Scale.Core.buildDataList(searchUUIDDatalistElement, window.LiveElement.Scale.Console.IDE.Record.Search['search-uuid'])
-                if (window.LiveElement.Scale.Console.IDE.Record.Search.classes && (searchTypeInput.value in window.LiveElement.Scale.Console.IDE.Record.Search.classes)) {
+                if (searchTypeInput.value in window.LiveElement.Scale.Console.IDE.classes) {
                     loadButton.removeAttribute('disabled')
                 } else {
                     loadButton.setAttribute('disabled', true)
@@ -62,8 +61,7 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
                         window.LiveElement.Scale.Core.buildDataList(searchUUIDDatalistElement, window.LiveElement.Scale.Console.IDE.Record.Search['search-uuid'], blankOptions)
                     }
                 })
-                if (window.LiveElement.Scale.Console.IDE.Record.Search.classes 
-                    && (searchTypeInput.value in window.LiveElement.Scale.Console.IDE.Record.Search.classes)
+                if ((searchTypeInput.value in window.LiveElement.Scale.Console.IDE.classes)
                     && Array.isArray(window.LiveElement.Scale.Console.IDE.Record.Search['search-uuid'])
                     && window.LiveElement.Scale.Console.IDE.Record.Search['search-uuid'].includes(input.properties.value)  
                     ) {
@@ -75,7 +73,7 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
         } else if (input.attributes.name == 'search-type') {
             window.LiveElement.Scale.Console.IDE.Record.Search['search-uuid'] = []
             loadButton.setAttribute('disabled', true)
-            if (input.properties.value && window.LiveElement.Scale.Console.IDE.Record.Search.classes && (input.properties.value in window.LiveElement.Scale.Console.IDE.Record.Search.classes)) {
+            if (input.properties.value && (input.properties.value in window.LiveElement.Scale.Console.IDE.classes)) {
                 window.LiveElement.Scale.Core.buildDataList(searchUUIDDatalistElement, [], blankOptions)
             } else {
                 window.LiveElement.Scale.Core.buildDataList(searchUUIDDatalistElement)
@@ -261,11 +259,27 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                         var propertyDefinition = classDefinition.properties[input.properties.value]
                         td.querySelector('small').innerHTML = window.LiveElement.Scale.Core.truncateLabel(propertyDefinition.label, 45)
                         if ('types' in propertyDefinition) {
-                            window.LiveElement.Scale.Core.buildDataList(listElement, Object.assign({}, ...propertyDefinition.types.sort().map(type => { 
-                                return {[type]:  window.LiveElement.Scale.Console.IDE.Record.Edit.datatype && type in window.LiveElement.Scale.Console.IDE.Record.Edit.datatype 
-                                    ? window.LiveElement.Scale.Console.IDE.Record.Edit.datatype[type].label 
-                                    : (window.LiveElement.Scale.Console.IDE.Record.Search.classes && type in window.LiveElement.Scale.Console.IDE.Record.Search.classes ? window.LiveElement.Scale.Console.IDE.Record.Search.classes[type].label : type) }
-                            })))
+                            var childrenSet = new window.Set()
+                            var optionsMap = Object.assign({}, ...propertyDefinition.types.sort().map(type => {
+                                if (window.LiveElement.Scale.Console.IDE.Record.Edit.datatype && type in window.LiveElement.Scale.Console.IDE.Record.Edit.datatype) {
+                                    return {[type]: window.LiveElement.Scale.Console.IDE.Record.Edit.datatype[type].label}
+                                } else if (type in window.LiveElement.Scale.Console.IDE.classes) {
+                                    if (window.LiveElement.Scale.Console.IDE.classes[type].children) {
+                                        window.LiveElement.Scale.Console.IDE.classes[type].children.forEach(childClass => {
+                                            childrenSet.add(childClass)
+                                        })
+                                    }
+                                    return {[type]: window.LiveElement.Scale.Console.IDE.classes[type].label}
+                                } else {
+                                    return {[type]: type}
+                                }
+                            }))
+                            childrenSet.forEach(childClass => {
+                                if (window.LiveElement.Scale.Console.IDE.classes[childClass] && !optionsMap[childClass]) {
+                                    optionsMap[childClass] = window.LiveElement.Scale.Console.IDE.classes[childClass].label
+                                }
+                            })
+                            window.LiveElement.Scale.Core.buildDataList(listElement, optionsMap)
                         }
                         if (propertyDefinition.types.length == 1) {
                             typeInputElement.value = propertyDefinition.types[0]
@@ -285,8 +299,8 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
             var datatypeLabel
             if (input.properties.value in window.LiveElement.Scale.Console.IDE.Record.Edit.datatype) {
                 datatypeLabel = window.LiveElement.Scale.Console.IDE.Record.Edit.datatype[input.properties.value].label
-            } else if (input.properties.value in window.LiveElement.Scale.Console.IDE.Record.Search.classes) {
-                datatypeLabel = window.LiveElement.Scale.Console.IDE.Record.Search.classes[input.properties.value].label
+            } else if (input.properties.value in window.LiveElement.Scale.Console.IDE.classes) {
+                datatypeLabel = window.LiveElement.Scale.Console.IDE.classes[input.properties.value].label
             }
             if (datatypeLabel) {
                 td.querySelector('small').innerHTML = window.LiveElement.Scale.Core.truncateLabel(datatypeLabel, 45)
@@ -296,9 +310,13 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
             if (valueDatalistElement) {
                 valueDatalistElement.remove()
             }
-            (['checked', 'readonly', 'step', 'live-trigger', 'list', 'pattern']).forEach(a => {
+            (['checked', 'readonly', 'step', 'live-trigger', 'list', 'pattern', 'required']).forEach(a => {
                 valueInputElement.removeAttribute(a)
             })
+            valueLoadButton = valueTdElement.querySelector('button')
+            if (valueLoadButton) {
+                valueLoadButton.remove()
+            }
             valueSmallElement.innerHTML = '&nbsp;'
             switch(input.properties.value) {
                 case 'Boolean':
@@ -350,10 +368,16 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                         var datalistId = window.LiveElement.Scale.Core.generateUUID4()
                         newValueDatalistElement.setAttribute('id', datalistId)
                         valueInputElement.setAttribute('list', datalistId)
-                        valueInputElement.setAttribute('pattern', '[a-z0-9]{8}-[a-z0-9]{4}-4[a-z0-9]{3}-[89ab][a-z0-9]{3}-[a-z0-9]{12}')
-                        valueSmallElement.innerHTML = `Requires a valid UUID of a linked record of the type ${input.properties.value}`
-                        valueInputElement.setAttribute('live-trigger', 'keyup:IdeRecordEdit')
+                        valueInputElement.setAttribute('required', true)
+                        valueInputElement.setAttribute('pattern', '(^---new---$)|(^[a-z0-9]{8}-[a-z0-9]{4}-4[a-z0-9]{3}-[89ab][a-z0-9]{3}-[a-z0-9]{12}$)')
+                        valueSmallElement.innerHTML = `Requires a UUID of a linked record of this type or '---new---'`
+                        valueInputElement.setAttribute('live-trigger', 'focus:IdeRecordEdit input:IdeRecordEdit search:IdeRecordEdit')
                         valueTdElement.appendChild(newValueDatalistElement)
+                        var valueLoadButton = document.createElement('button')
+                        valueLoadButton.setAttribute('name', 'load')
+                        valueLoadButton.setAttribute('live-trigger', 'click:IdeRecordEdit')
+                        valueLoadButton.innerHTML = 'Load'
+                        valueTdElement.appendChild(valueLoadButton)
                     } else {
                         valueInputElement.setAttribute('type', 'text')
                         valueInputElement.value = ''
@@ -364,22 +388,44 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                 valueInputElement.setAttribute('readonly', 'true')
             }
         } else if (name == 'value') {
-            var typeInputElement = trElement.querySelector('td[name="type"] input')
-            if (typeInputElement.value) {
-                window.LiveElement.Scale.Console.System.invokeLambda({
-                    page: 'ide', 
-                    entity_type: 'record', 
-                    heading: 'search',
-                    input_name: 'search-uuid', 
-                    record_type: typeInputElement.value, 
-                    search: input.properties.value
-                }).then(searchResult => {
-                    if (searchResult && typeof searchResult == 'object' && searchResult.result && typeof searchResult.result == 'object') {
-                        window.LiveElement.Scale.Console.IDE.Record.Search[input.attributes.name] = searchResult.result
-                        var datalist = td.querySelector('datalist')
-                        window.LiveElement.Scale.Core.buildDataList(datalist, searchResult.result)
+            if (input.triggersource.tagName.toLowerCase() == 'button') {
+                var searchFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="record"] fieldset[name="search"]') 
+                var editFieldset = searchFieldset.nextElementSibling
+                var searchTypeInput = searchFieldset.querySelector('input[name="search-type"]'), searchUuidInput = searchFieldset.querySelector('input[name="search-uuid"]')
+                var searchLoadButton = searchFieldset.querySelector('button[name="load"]')
+                searchTypeInput.focus()
+                searchTypeInput.value = trElement.querySelector('td[name="type"] input').value
+                searchTypeInput.dispatchEvent(new window.Event('search'))
+                searchUuidInput.focus()
+                searchUuidInput.value = trElement.querySelector('td[name="value"] input').value
+                searchUuidInput.dispatchEvent(new window.Event('search'))
+                searchLoadButton.removeAttribute('disabled')
+                searchLoadButton.focus()
+                searchLoadButton.click()
+            } else {
+                var propertyTypeInputElement = trElement.querySelector('td[name="type"] input')
+                var blankOptions = {[window.LiveElement.Scale.Console.IDE.newFlag]: 'Generate UUID for a new record...'}
+                var datalist = td.querySelector('datalist')
+                if (propertyTypeInputElement.value) {
+                    if (input.properties.value == window.LiveElement.Scale.Console.IDE.newFlag) {
+                        input.triggersource.value = window.LiveElement.Scale.Core.generateUUID4()
+                        input.triggersource.dispatchEvent(new window.Event('search'))
+                    } else {
+                        window.LiveElement.Scale.Console.System.invokeLambda({
+                            page: 'ide', 
+                            entity_type: 'record', 
+                            heading: 'search',
+                            input_name: 'search-uuid', 
+                            record_type: propertyTypeInputElement.value, 
+                            search: input.properties.value
+                        }).then(searchResult => {
+                            if (searchResult && typeof searchResult == 'object' && searchResult.result && typeof searchResult.result == 'object') {
+                                window.LiveElement.Scale.Console.IDE.Record.Search[input.attributes.name] = searchResult.result
+                                window.LiveElement.Scale.Core.buildDataList(datalist, searchResult.result, blankOptions)
+                            }
+                        })
                     }
-                })
+                }
             }
         } else if (name == 'save') {
             
@@ -402,18 +448,7 @@ window.LiveElement.Live.listeners.IdeRecordSearch = {processor: 'IdeRecordSearch
 
 window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="record"] fieldset[name="search"]'), 'IdeRecordSearch', 'loaded', false, true)
 
-window.LiveElement.Scale.Console.System.invokeLambda({
-    page: 'ide', 
-    entity_type: 'record', 
-    heading: 'search',
-    classes: true
-}).then(classes => {
-    if (classes && typeof classes == 'object') {
-        window.LiveElement.Scale.Console.IDE.Record.Search.classes = classes
-        var classList = document.getElementById('ide-record-search-type-list')
-        window.LiveElement.Scale.Core.buildDataList(classList, Object.assign({}, ...Object.keys(classes).sort().map(className => {
-            return {[className]: `${classes[className].label} [${classes[className].parents.join('&rarr;')}]`}
-        })))
-    }
-})
-
+var classList = document.getElementById('ide-record-search-type-list')
+window.LiveElement.Scale.Core.buildDataList(classList, Object.assign({}, ...Object.keys(window.LiveElement.Scale.Console.IDE.classes).sort().map(className => {
+    return {[className]: `${window.LiveElement.Scale.Console.IDE.classes[className].label} [${window.LiveElement.Scale.Console.IDE.classes[className].parents.join('&rarr;')}]`}
+})))

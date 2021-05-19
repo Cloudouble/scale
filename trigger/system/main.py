@@ -312,7 +312,7 @@ def main(event, context):
                     for classes_definition_entry in classes_list:
                         if classes_definition_entry['Key'] != classes_index_path:
                             class_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=classes_definition_entry['Key'])['Body'].read().decode('utf-8'))
-                            class_definition = {k: v for k, v in class_definition.items() if k in ['@schema', 'comment', 'label', 'parents']}
+                            class_definition = {k: v for k, v in class_definition.items() if k in ['@schema', 'comment', 'label', 'parents', 'children']}
                             classes_index[classes_definition_entry['Key'].split('/')[-1].replace('.json', '')] = class_definition
                             counter = counter + 1
                     if current_classes_index_json != json.dumps(classes_index, sort_keys=True):

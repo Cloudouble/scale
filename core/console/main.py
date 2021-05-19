@@ -133,6 +133,7 @@ def main(event, context):
                 elif test == 'build-snapshot':
                     retval = run_test('system/snapshot/{snapshot_id}.json'.format(snapshot_id=result), None, None, start_time, s3_client)
             elif page == 'ide':
+                retval = {}
                 entity_type = event.get('entity_type')
                 heading = event.get('heading')
                 if entity_type == 'channel': 
@@ -160,15 +161,24 @@ def main(event, context):
                             except:
                                 assets = {}
                         retval['result'] = assets
+                elif entity_type == 'classes':
+                    classes = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/system/class/index.json'.format(data_root=env['data_root']))['Body'].read().decode('utf-8'))
+                    for class_name in classes:
+                        classes[class_name]['label'] = classes[class_name].get('comment')
+                        del classes[class_name]['comment']
+                    retval = classes
                 elif entity_type == 'record':
                     input_name = event.get('input_name')
                     record_type = event.get('record_type')
                     if heading == 'search':
                         if record_type and input_name:
-                            if input_name == 'search-uuid' and event.get('search'):
+                            if input_name == 'search-uuid' and 'search' in event:
                                 retval = {'search': event['search'], 'result': []} 
                                 prefix = '{data_root}/record/{record_type}/{search}'.format(data_root=env['data_root'], record_type=record_type, search=event['search'])
-                                retval['result'] = s3_client.list_objects_v2(Bucket=env['bucket'], MaxKeys=1000,  Prefix=prefix)['Contents']
+                                try:
+                                    retval['result'] = s3_client.list_objects_v2(Bucket=env['bucket'], MaxKeys=1000,  Prefix=prefix)['Contents']
+                                except:
+                                    retval['result'] = []
                                 try:
                                     retval['result'] = [e['Key'].split('/')[-1].replace('.json', '') for e in retval['result']]
                                 except:
@@ -177,12 +187,6 @@ def main(event, context):
                                 record_uuid = event['record_uuid']
                                 record = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/record/{record_type}/{record_uuid}.json'.format(data_root=env['data_root'], record_type=record_type, record_uuid=record_uuid))['Body'].read().decode('utf-8'))
                                 retval = record
-                        elif event.get('classes'):        
-                            classes = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/system/class/index.json'.format(data_root=env['data_root']))['Body'].read().decode('utf-8'))
-                            for class_name in classes:
-                                classes[class_name]['label'] = classes[class_name].get('comment')
-                                del classes[class_name]['comment']
-                            retval = classes
                     elif heading == 'edit':
                         if record_type:
                             class_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/system/class/{record_type}.json'.format(data_root=env['data_root'], record_type=record_type))['Body'].read().decode('utf-8'))

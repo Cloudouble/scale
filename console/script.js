@@ -22,6 +22,20 @@ window.LiveElement.Scale.Core.generateUUID4 = function() {
     }
     return u
 }
+window.LiveElement.Scale.Core.waitUntil = function(condition, aggressiveness=100) {
+  return new Promise(function(resolve, reject) {
+    if (condition && typeof condition == 'function') {
+      var i = window.setInterval(function() {
+          if (condition()) {
+              window.clearInterval(i)
+              resolve()
+          }
+      }, aggressiveness)
+    } else {
+      resolve()
+    }
+  })
+}
 window.LiveElement.Scale.Core.syncWithLocalStorage = function(page, checkboxElement, inputElement) {
     if (checkboxElement.checked) {
         window.localStorage.setItem(`${page}:${inputElement.getAttribute('name')}`, inputElement.value)

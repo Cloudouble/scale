@@ -72,3 +72,22 @@
 #ide > section[name="record"] > fieldset[name="search"] > .history li:hover {
     font-weight: bold;
 }
+
+#ide > section[name="record"] > fieldset[name="edit"] td[name="value"] {
+    position: relative;
+}
+#ide > section[name="record"] > fieldset[name="edit"] td[name="value"] > input ~ button {
+    font-size: 65%;
+    position: absolute;
+    right: 5em;
+    top: 2.2em;
+    display: none;
+}
+#ide > section[name="record"] > fieldset[name="edit"] td[name="value"] > input:valid:hover ~ button, 
+#ide > section[name="record"] > fieldset[name="edit"] td[name="value"] > input:valid:focus ~ button, 
+#ide > section[name="record"] > fieldset[name="edit"] td[name="value"] > input:valid:active ~ button, 
+#ide > section[name="record"] > fieldset[name="edit"] td[name="value"] > input:valid ~ button:hover, 
+#ide > section[name="record"] > fieldset[name="edit"] td[name="value"] > input:valid ~ button:focus, 
+#ide > section[name="record"] > fieldset[name="edit"] td[name="value"] > input:valid ~ button:active {
+    display: block;
+}
