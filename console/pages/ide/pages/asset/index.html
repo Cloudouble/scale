@@ -3,7 +3,6 @@
     <h3>Search</h3>
     <input name="search" type="search" placeholder="path search..." autocomplete="off" list="ide-asset-search-list" live-trigger="keyup:IdeAssetSearch" />
     <button name="load" live-trigger="click:IdeAssetSearch">Load</button>
-    <button name="new" live-trigger="click:IdeAssetSearch">New</button>
     <datalist id="ide-asset-search-list"></datalist>
 </fieldset>
 <fieldset name="edit" live-subscription="IdeAssetSearch:IdeAssetEdit">
@@ -14,7 +13,7 @@
     </label>
     <label>
         Content-Type
-        <input name="content-type" type="text" autocomplete="off" list="ide-asset-edit-content-type" live-trigger="change:IdeAssetEdit" />
+        <input name="content-type" type="search" autocomplete="off" list="ide-asset-edit-content-type" live-trigger="change:IdeAssetEdit" />
         <datalist id="ide-asset-edit-content-type">
             <option value="application/epub+zip">Electronic publication (EPUB) (.epub)</option>
             <option value="application/gzip">GZip Compressed Archive (.gz)</option>
@@ -95,26 +94,12 @@
             <option value="video/x-msvideo">AVI: Audio Video Interleave (.avi)</option>
         </datalist>
     </label>
-    <button name="save" live-trigger="click:IdeAssetEdit">Save</button>
-    <label>
-        Body
-        <div class="editor" id="ide-asset-editor"></div>
-    </label>
+    <button name="upload" live-trigger="click:IdeAssetEdit">Upload Content</button>
+    <button name="clear" live-trigger="click:IdeAssetEdit">Clear Content</button>
+    <button name="save" live-trigger="click:IdeAssetEdit">Save To Asset</button>
+    <div class="editor" id="ide-asset-editor" disabled="true"></div>
     <details class="snippet-container">
         <summary>Snippet</summary>
         <div class="snippet"></div>
     </details>
-</fieldset>
-<fieldset name="code">
-    <h3>Code</h3>
-    <label>
-        View URL
-        <input name="view_url" type="url" readonly="readonly" live-subscription="IdeAssetCode:IdeAssetCode" live-trigger="input:IdeAssetCode" />
-        <details>
-            <summary>Snippet</summary>
-            <pre><code>
-var socket = new WebSocket('${window.LiveElement.Scale.Console.IDE.Channel.Code.receive_url}')
-            </code></pre>
-        </details>
-    </label>
 </fieldset>

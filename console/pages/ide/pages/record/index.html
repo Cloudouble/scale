@@ -32,19 +32,19 @@
         <div class="snippet">
 /* SAVE record */
 window.fetch(
-    `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/record/${window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']}/${window.LiveElement.Scale.Console.IDE.Record.Edit.record['@id']}.json`, 
+    `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/record/${window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']}/${window.LiveElement.Scale.Console.IDE.Record.record['@id']}.json`, 
     {
         method: 'PUT', 
         headers: {'Content-Type': 'application/json'}, 
         body: JSON.stringify({
-            ${JSON.stringify(window.LiveElement.Scale.Console.IDE.Record.Edit.record, null, 20).slice(1, -1)}
+            ${JSON.stringify(window.LiveElement.Scale.Console.IDE.Record.record, null, 20).slice(1, -1)}
         }) 
     }
 )
             
 /* DELETE record */
 window.fetch(
-    `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/record/${window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']}/${window.LiveElement.Scale.Console.IDE.Record.Edit.record['@id']}.json`, 
+    `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/record/${window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']}/${window.LiveElement.Scale.Console.IDE.Record.record['@id']}.json`, 
     {
         method: 'DELETE'
     }

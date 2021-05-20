@@ -37,26 +37,22 @@
     margin-right: 0;
 }
 
-#ide > section[name="asset"] > fieldset[name="edit"] > label:last-of-type {
-    display: block;
-}
-#ide > section[name="asset"] > fieldset[name="edit"] > label:last-of-type div.editor {
+#ide > section[name="asset"] > fieldset[name="edit"] > .editor {
     display: block;
     width: 80em;
     height: 47em;
+    min-height: 600px;
+    background-color: #202020;
 }
-#ide > section[name="asset"] > fieldset[name="code"] > label {
+#ide > section[name="asset"] > fieldset[name="edit"] > .editor[disabled="true"]::after {
+    content: 'this content type can not be edited here';
     display: block;
+    width: 100%;
+    height: calc(100% - 60px);
+    text-align: center;
+    padding-top: 60px;
 }
-#ide > section[name="asset"] > fieldset[name="code"] > label > input {
-    width: calc(100% - 4px);
+
+#ide > section[name="asset"] > fieldset[name="edit"] > button[name="clear"] {
+    margin-right: 2em;
 }
-
-
-
-
-
-
-
-
-

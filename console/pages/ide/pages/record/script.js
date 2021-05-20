@@ -5,7 +5,7 @@ window.LiveElement.Scale.Console.IDE.Record.buildSnippet = function() {
 window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
     if (handlerType == 'listener') {
-        return window.LiveElement.Scale.Console.IDE.Record.Edit.record
+        return window.LiveElement.Scale.Console.IDE.Record.record
     } else if (handlerType == 'trigger') {
         var searchFieldset = input.triggersource.closest('fieldset'), editFieldset = searchFieldset.nextElementSibling
         var searchTypeInput = searchFieldset.querySelector('input[name="search-type"]'), searchUuidInput = searchFieldset.querySelector('input[name="search-uuid"]')
@@ -58,32 +58,32 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
             }
         } else if (input.attributes.name == 'load') {
             editFieldset.setAttribute('active', true)
-            window.LiveElement.Scale.Console.IDE.Record.Edit.record_type = searchTypeInput.value
-            window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid = searchUuidInput.value
+            window.LiveElement.Scale.Console.IDE.Record.record_type = searchTypeInput.value
+            window.LiveElement.Scale.Console.IDE.Record.record_uuid = searchUuidInput.value
             window.LiveElement.Scale.Console.System.invokeLambda({
                 page: 'ide', 
                 entity_type: 'record', 
                 heading: 'search',
                 input_name: input.attributes.name,
-                record_type: window.LiveElement.Scale.Console.IDE.Record.Edit.record_type, 
-                record_uuid: window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid
+                record_type: window.LiveElement.Scale.Console.IDE.Record.record_type, 
+                record_uuid: window.LiveElement.Scale.Console.IDE.Record.record_uuid
             }).then(record => {
                 if (record && typeof record == 'object' && '@type' in record && '@id' in record) {
-                    window.LiveElement.Scale.Console.IDE.Record.Edit.record = record
-                    if (window.LiveElement.Scale.Console.IDE.Record.Edit.record) {
+                    window.LiveElement.Scale.Console.IDE.Record.record = record
+                    if (window.LiveElement.Scale.Console.IDE.Record.record) {
                         window.LiveElement.Scale.Console.IDE.writeHistory('record', 
-                            window.LiveElement.Scale.Console.IDE.Record.Edit.record_type, window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid, 
-                            window.LiveElement.Scale.Console.IDE.Record.Edit.record, 'click:IdeRecordSearch', searchFieldset)
+                            window.LiveElement.Scale.Console.IDE.Record.record_type, window.LiveElement.Scale.Console.IDE.Record.record_uuid, 
+                            window.LiveElement.Scale.Console.IDE.Record.record, 'click:IdeRecordSearch', searchFieldset)
                         searchFieldset.dispatchEvent(new window.CustomEvent('loaded'))
                     }
                 } else {
-                    window.LiveElement.Scale.Console.IDE.Record.Edit.record = {
-                        '@type': window.LiveElement.Scale.Console.IDE.Record.Edit.record_type, 
-                        '@id': window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid
+                    window.LiveElement.Scale.Console.IDE.Record.record = {
+                        '@type': window.LiveElement.Scale.Console.IDE.Record.record_type, 
+                        '@id': window.LiveElement.Scale.Console.IDE.Record.record_uuid
                     }
                     window.LiveElement.Scale.Console.IDE.writeHistory('record', 
-                        window.LiveElement.Scale.Console.IDE.Record.Edit.record_type, window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid, 
-                        window.LiveElement.Scale.Console.IDE.Record.Edit.record, 'click:IdeRecordSearch', searchFieldset)
+                        window.LiveElement.Scale.Console.IDE.Record.record_type, window.LiveElement.Scale.Console.IDE.Record.record_uuid, 
+                        window.LiveElement.Scale.Console.IDE.Record.record, 'click:IdeRecordSearch', searchFieldset)
                     searchFieldset.dispatchEvent(new window.CustomEvent('loaded'))
                 }
                 window.LiveElement.Scale.Console.IDE.Record.buildSnippet()
@@ -149,7 +149,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
         })
         buildRow('')
         var injectDataTypes = function() {
-            var properties = window.LiveElement.Scale.Console.IDE.Record.Edit.class[window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']].properties
+            var properties = window.LiveElement.Scale.Console.IDE.Record.Edit.class[window.LiveElement.Scale.Console.IDE.Record.record['@type']].properties
             editor.querySelectorAll('tr').forEach(tr => {
                 var property = tr.getAttribute('name'), types, label
                 if (property in properties) {
@@ -178,10 +178,10 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
         }
         var injectProperties = function() {
             var listElement = document.getElementById('ide-record-edit-properties-list')
-            if (window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type'] != listElement.getAttribute('class')) {
+            if (window.LiveElement.Scale.Console.IDE.Record.record['@type'] != listElement.getAttribute('class')) {
                 listElement.innerHTML = ''
-                listElement.setAttribute('class', window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type'])
-                var properties = window.LiveElement.Scale.Console.IDE.Record.Edit.class[window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']].properties
+                listElement.setAttribute('class', window.LiveElement.Scale.Console.IDE.Record.record['@type'])
+                var properties = window.LiveElement.Scale.Console.IDE.Record.Edit.class[window.LiveElement.Scale.Console.IDE.Record.record['@type']].properties
                 window.LiveElement.Scale.Core.buildDataList(listElement, Object.assign({}, ...Object.keys(properties).sort().map(propertyName => {
                     return {[propertyName]: properties[propertyName].label}
                 })))
@@ -205,16 +205,16 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
             }
         }
         window.LiveElement.Scale.Console.IDE.Record.Edit.class = window.LiveElement.Scale.Console.IDE.Record.Edit.class || {}
-        if (!window.LiveElement.Scale.Console.IDE.Record.Edit.class[window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']]) {
+        if (!window.LiveElement.Scale.Console.IDE.Record.Edit.class[window.LiveElement.Scale.Console.IDE.Record.record['@type']]) {
             editFieldset.setAttribute('disabled', true)
             window.LiveElement.Scale.Console.System.invokeLambda({
                 page: 'ide', 
                 entity_type: 'record', 
                 heading: 'edit',
-                record_type: window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']
+                record_type: window.LiveElement.Scale.Console.IDE.Record.record['@type']
             }).then(classDefinition => {
                 if (classDefinition && typeof classDefinition == 'object') {
-                    window.LiveElement.Scale.Console.IDE.Record.Edit.class[window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']] = classDefinition
+                    window.LiveElement.Scale.Console.IDE.Record.Edit.class[window.LiveElement.Scale.Console.IDE.Record.record['@type']] = classDefinition
                     injectProperties().then(() => {
                         editFieldset.removeAttribute('disabled')
                         editFieldset.querySelector('button[name="save"]').setAttribute('disabled', true)
@@ -252,7 +252,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                     //do nothing
                 }
             })
-            window.LiveElement.Scale.Console.IDE.Record.Edit.record = window.LiveElement.Scale.Console.IDE.cleanEditorEntity(editor, window.LiveElement.Scale.Console.IDE.Record.Edit, 'record')
+            window.LiveElement.Scale.Console.IDE.Record.record = window.LiveElement.Scale.Console.IDE.cleanEditorEntity(editor, window.LiveElement.Scale.Console.IDE.Record, 'record')
             window.LiveElement.Scale.Console.IDE.Record.buildSnippet()
             blankRows = Array.from(editor.querySelectorAll('tr[name]')).filter(tr => !tr.getAttribute('name'))
             if (!blankRows.length) {
@@ -263,8 +263,8 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
             var listElement = typeTdElement.querySelector('datalist')
             listElement.innerHTML = ''
             if (input.properties.value) {
-                if (window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type'] in window.LiveElement.Scale.Console.IDE.Record.Edit.class) {
-                    var classDefinition = window.LiveElement.Scale.Console.IDE.Record.Edit.class[window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']]
+                if (window.LiveElement.Scale.Console.IDE.Record.record['@type'] in window.LiveElement.Scale.Console.IDE.Record.Edit.class) {
+                    var classDefinition = window.LiveElement.Scale.Console.IDE.Record.Edit.class[window.LiveElement.Scale.Console.IDE.Record.record['@type']]
                     if (classDefinition.properties && (input.properties.value in classDefinition.properties)) {
                         var propertyDefinition = classDefinition.properties[input.properties.value]
                         td.querySelector('small').innerHTML = window.LiveElement.Scale.Core.truncateLabel(propertyDefinition.label, 45)
@@ -449,50 +449,50 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                         }
                     }
                     if (input.properties.value && input.properties.value != window.LiveElement.Scale.Console.IDE.newFlag && input.triggersource.reportValidity()) {
-                        window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = {'@type': propertyType, '@id': input.properties.value}
+                        window.LiveElement.Scale.Console.IDE.Record.record[propertyName] = {'@type': propertyType, '@id': input.properties.value}
                         window.LiveElement.Scale.Console.IDE.Record.buildSnippet()
                     }
                 } else {
                     if (propertyName && propertyType && input.triggersource.reportValidity()) {
                         switch(propertyType) {
                             case 'Boolean':
-                                window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = input.triggersource.checked
+                                window.LiveElement.Scale.Console.IDE.Record.record[propertyName] = input.triggersource.checked
                             break
                             case 'True':
-                                window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = true
+                                window.LiveElement.Scale.Console.IDE.Record.record[propertyName] = true
                             break
                             case 'False':
-                                window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = false
+                                window.LiveElement.Scale.Console.IDE.Record.record[propertyName] = false
                             break
                             case 'Date':
                             case 'DateTime':
                             case 'Time':
-                                window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = input.properties.value
+                                window.LiveElement.Scale.Console.IDE.Record.record[propertyName] = input.properties.value
                             break
                             case 'Number':
                                 let floatVal = parseFloat(input.properties.value), intVal = parseInt(input.properties.value, 10)
-                                window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = floatVal == intVal ? intVal : floatVal
+                                window.LiveElement.Scale.Console.IDE.Record.record[propertyName] = floatVal == intVal ? intVal : floatVal
                             break
                             case 'Float':
-                                window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = parseFloat(input.properties.value)
+                                window.LiveElement.Scale.Console.IDE.Record.record[propertyName] = parseFloat(input.properties.value)
                             break
                             case 'Integer':
-                                window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = parseInt(input.properties.value, 10)
+                                window.LiveElement.Scale.Console.IDE.Record.record[propertyName] = parseInt(input.properties.value, 10)
                             break
                             case 'URL':
-                                window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = input.properties.value
+                                window.LiveElement.Scale.Console.IDE.Record.record[propertyName] = input.properties.value
                             break
                             case 'Text':
                             case 'CssSelectorType':
                             case 'PronounceableText':
                             case 'XPathType':
-                                window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = input.properties.value
+                                window.LiveElement.Scale.Console.IDE.Record.record[propertyName] = input.properties.value
                             break
                             default:
                                 try {
-                                    window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = JSON.parse(input.properties.value)
+                                    window.LiveElement.Scale.Console.IDE.Record.record[propertyName] = JSON.parse(input.properties.value)
                                 } catch(e) {
-                                    window.LiveElement.Scale.Console.IDE.Record.Edit.record[propertyName] = input.properties.value
+                                    window.LiveElement.Scale.Console.IDE.Record.record[propertyName] = input.properties.value
                                 }
                         }
                         window.LiveElement.Scale.Console.IDE.Record.buildSnippet()
@@ -500,14 +500,14 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                 }
             }
         } else if (name == 'save') {
-            window.LiveElement.Scale.Console.IDE.Record.Edit.record = window.LiveElement.Scale.Console.IDE.cleanEditorEntity(editor, window.LiveElement.Scale.Console.IDE.Record.Edit, 'record')
+            window.LiveElement.Scale.Console.IDE.Record.record = window.LiveElement.Scale.Console.IDE.cleanEditorEntity(editor, window.LiveElement.Scale.Console.IDE.Record, 'record')
             editFieldset.setAttribute('disabled', true)
             window.fetch(
-                `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/record/${window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']}/${window.LiveElement.Scale.Console.IDE.Record.Edit.record['@id']}.json`, 
+                `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/record/${window.LiveElement.Scale.Console.IDE.Record.record['@type']}/${window.LiveElement.Scale.Console.IDE.Record.record['@id']}.json`, 
                 {
                     method: 'PUT', 
                     headers: {'Content-Type': 'application/json'}, 
-                    body: JSON.stringify(window.LiveElement.Scale.Console.IDE.Record.Edit.record)
+                    body: JSON.stringify(window.LiveElement.Scale.Console.IDE.Record.record)
                 }
             ).then(() => {
                 editFieldset.removeAttribute('disabled')
@@ -520,17 +520,17 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
         } else if (name == 'duplicate') {
             editFieldset.querySelector('button[name="save"]').removeAttribute('disabled')
             searchFieldset.querySelector('input[name="search-uuid"]').value = ''
-            window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid = window.LiveElement.Scale.Core.generateUUID4()
-            window.LiveElement.Scale.Console.IDE.Record.Edit.record['@id'] = window.LiveElement.Scale.Console.IDE.Record.Edit.record_uuid
-            editFieldset.querySelector('tr[name="@id"] td[name="value"] input').value = window.LiveElement.Scale.Console.IDE.Record.Edit.record['@id']
+            window.LiveElement.Scale.Console.IDE.Record.record_uuid = window.LiveElement.Scale.Core.generateUUID4()
+            window.LiveElement.Scale.Console.IDE.Record.record['@id'] = window.LiveElement.Scale.Console.IDE.Record.record_uuid
+            editFieldset.querySelector('tr[name="@id"] td[name="value"] input').value = window.LiveElement.Scale.Console.IDE.Record.record['@id']
             window.LiveElement.Scale.Console.IDE.writeHistory('record', 
-                window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type'], window.LiveElement.Scale.Console.IDE.Record.Edit.record['@id'], 
-                window.LiveElement.Scale.Console.IDE.Record.Edit.record, 'click:IdeRecordSearch', searchFieldset)
+                window.LiveElement.Scale.Console.IDE.Record.record['@type'], window.LiveElement.Scale.Console.IDE.Record.record['@id'], 
+                window.LiveElement.Scale.Console.IDE.Record.record, 'click:IdeRecordSearch', searchFieldset)
             window.LiveElement.Scale.Console.IDE.Record.buildSnippet()
         } else if (name == 'delete') {
             editFieldset.querySelector('button[name="save"]').removeAttribute('disabled')
             window.fetch(
-                `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/record/${window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']}/${window.LiveElement.Scale.Console.IDE.Record.Edit.record['@id']}.json`, 
+                `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/record/${window.LiveElement.Scale.Console.IDE.Record.record['@type']}/${window.LiveElement.Scale.Console.IDE.Record.record['@id']}.json`, 
                 {
                     method: 'DELETE'
                 }
@@ -539,14 +539,14 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
                     var trName = tr.getAttribute('name')
                     if (trName && trName != '@id' && trName != '@type') {
                         tr.remove()
-                        if (window.LiveElement.Scale.Console.IDE.Record.Edit.record[trName]) {
-                            delete window.LiveElement.Scale.Console.IDE.Record.Edit.record[trName]
+                        if (window.LiveElement.Scale.Console.IDE.Record.record[trName]) {
+                            delete window.LiveElement.Scale.Console.IDE.Record.record[trName]
                         }
                     }
                 })
                 editFieldset.removeAttribute('disabled')
                 editFieldset.querySelector('button[name="save"]').removeAttribute('disabled')
-                window.LiveElement.Scale.Console.IDE.Record.Edit.record = window.LiveElement.Scale.Console.IDE.cleanEditorEntity(editor, window.LiveElement.Scale.Console.IDE.Record.Edit, 'record')
+                window.LiveElement.Scale.Console.IDE.Record.record = window.LiveElement.Scale.Console.IDE.cleanEditorEntity(editor, window.LiveElement.Scale.Console.IDE.Record, 'record')
                 window.LiveElement.Scale.Console.IDE.Record.buildSnippet()
             }).catch(() => {
                 editFieldset.removeAttribute('disabled')

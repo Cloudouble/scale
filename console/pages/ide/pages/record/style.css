@@ -1,7 +1,6 @@
 #ide[entity-type="record"] > section[name="record"] {
     display: block;
 }
-
 #ide > section[name="record"] > fieldset {
     min-width: 1110px;
 }
