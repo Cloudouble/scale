@@ -41,7 +41,7 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
     if (handlerType == 'trigger') {
         var editFieldset = input.triggersource.closest('fieldset')
         var datalist = editFieldset.querySelector('datalist')
-        if (input.triggersource.name == 'path') {
+        if (input.attributes.name == 'path') {
             window.LiveElement.Scale.Console.IDE.Asset.asset = window.LiveElement.Scale.Console.IDE.Asset.asset || {}
             window.LiveElement.Scale.Console.IDE.Asset.asset.path = input.properties.value
             var contentTypeInput = editFieldset.querySelector('input[name="content-type"]')
@@ -79,9 +79,42 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                 console.log('line 79: upload only', editorMode, contentTypeBase)
                 editorDiv.setAttribute('disabled', true)
             }
-        } else if (input.triggersource.name == 'content-type') {
+        } else if (input.attributes.name == 'content-type') {
+            //console.log('line 83: content-type', input)
             
-            //console.log('line 64', input)
+        } else if (input.attributes.name == 'upload') {
+            console.log('line 86: upload', input)
+            window.LiveElement.Scale.Console.IDE.Asset.asset = window.LiveElement.Scale.Console.IDE.Asset.asset || {}
+            if (input.triggersource.files.length) {
+                var file = input.triggersource.files[0]
+                window.LiveElement.Scale.Console.IDE.Asset.asset.ContentType = file.type
+                if (window.LiveElement.Scale.Console.IDE.Asset.asset.path.slice(-1) == '/') {
+                    window.LiveElement.Scale.Console.IDE.Asset.asset.path = `${window.LiveElement.Scale.Console.IDE.Asset.asset.path}${file.name}`
+                } else if (!window.LiveElement.Scale.Console.IDE.Asset.asset.path) {
+                    window.LiveElement.Scale.Console.IDE.Asset.asset.path = file.name
+                }
+                var reader = new window.FileReader();
+                reader.addEventListener('load', event => {
+                    window.LiveElement.Scale.Console.IDE.Asset.asset.body = event.target.result.slice(event.target.result.indexOf(',') + 1)
+                    window.LiveElement.Scale.Console.IDE.Asset.asset.encoding = 'base64'
+                    console.log('line 100', window.LiveElement.Scale.Console.IDE.Asset.asset)
+                })
+                reader.readAsDataURL(file)
+                
+            } else {
+                delete window.LiveElement.Scale.Console.IDE.Asset.asset.body
+                delete window.LiveElement.Scale.Console.IDE.Asset.asset.encoding
+            }
+        } else if (input.attributes.name == 'clear') {
+            console.log('line 90: clear', input)
+            window.LiveElement.Scale.Console.IDE.Asset.asset = window.LiveElement.Scale.Console.IDE.Asset.asset || {}
+            delete window.LiveElement.Scale.Console.IDE.Asset.asset.body
+            delete window.LiveElement.Scale.Console.IDE.Asset.asset.encoding
+            
+        } else if (input.attributes.name == 'save') {
+            console.log('line 94: save', input)
+            
+            
         }
     } else if (handlerType == 'subscription') {
         var pathInput = input.subscriber.querySelector(`input[name="path"]`)
@@ -105,7 +138,7 @@ window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.pageElement.
 
 
 
-
+// asset = {body, encoding, ContentType, path, ContentLength, ContentType}
 
 
 

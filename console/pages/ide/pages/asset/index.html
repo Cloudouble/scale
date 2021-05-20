@@ -94,7 +94,7 @@
             <option value="video/x-msvideo">AVI: Audio Video Interleave (.avi)</option>
         </datalist>
     </label>
-    <button name="upload" live-trigger="click:IdeAssetEdit">Upload Content</button>
+    <label name="upload">Upload Content<input type="file" name="upload" live-trigger="change:IdeAssetEdit" /></label>
     <button name="clear" live-trigger="click:IdeAssetEdit">Clear Content</button>
     <button name="save" live-trigger="click:IdeAssetEdit">Save To Asset</button>
     <div class="editor" id="ide-asset-editor" disabled="true"></div>
