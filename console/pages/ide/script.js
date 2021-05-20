@@ -1,6 +1,68 @@
 window.LiveElement.Scale.Console.IDE = window.LiveElement.Scale.Console.IDE || {}
 window.LiveElement.Scale.Console.IDE.pageElement = document.getElementById('ide')
 window.LiveElement.Scale.Console.IDE.newFlag = '---new---'
+
+window.LiveElement.Scale.Console.IDE.writeHistory = function(entity_type, entity_subtype, entity_uuid, entity, trigger, searchFieldset) {
+    var historyElement = searchFieldset.querySelector('.history')
+    var historySmallElement = historyElement.querySelector('small')
+    var liElement = document.createElement('li')
+    liElement.classList.add('history-entry')
+    liElement.setAttribute('entity-type', entity_type)
+    liElement.setAttribute('entity-subtype', entity_subtype)
+    liElement.setAttribute('entity-uuid', entity_uuid)
+    var hint = ''
+    var path = ''
+    if (Object.keys(entity).length > 2) {
+        if (entity.name) {
+            hint = `${hint}name="${entity.name}", `
+        }
+        var extraHintField = Object.keys(entity)
+            .filter(k => k != 'name' && k[0] != '@' && typeof entity[k] != 'object').sort().shift()
+        if (extraHintField) {
+            hint = `${hint}${extraHintField}=${JSON.stringify(entity[extraHintField])}`
+        }
+        path = entity_subtype ? `${entity_type}/${entity_subtype}/${entity_uuid}` : `${entity_type}/${entity_uuid}`
+        liElement.innerHTML = window.LiveElement.Scale.Core.truncateLabel(`${path} [${hint}, ... ]`, 120)
+    } else {
+        path = entity_subtype ? `${entity_type}/${entity_subtype}/${entity_uuid}` : `${entity_type}/${entity_uuid}`
+        liElement.innerHTML = `${path} [${window.LiveElement.Scale.Console.IDE.newFlag}]`
+    }
+    if (historySmallElement) {
+        historySmallElement.remove()
+    }
+    if (trigger) {
+        liElement.setAttribute('live-trigger', trigger)
+    }
+    historyElement.prepend(liElement)
+}
+window.LiveElement.Scale.Console.IDE.loadHistory = function(historyEntry, entityTypeInput, entitySubtypeInput, entityUuidInput, loadButton) {
+    Object.entries({'entity-type': entityTypeInput, 'entity-subtype': entitySubtypeInput, 'entity-uuid': entityUuidInput}).forEach(entry => {
+        if (entry[1]) {
+            entry[1].focus()
+            entry[1].value = historyEntry.getAttribute(entry[0]) || ''
+            entry[1].dispatchEvent(new window.Event('search'))
+        }
+    })
+    if (loadButton) {
+        loadButton.removeAttribute('disabled')
+        loadButton.focus()
+        loadButton.click()
+    }
+}
+window.LiveElement.Scale.Console.IDE.cleanEditorEntity = function(editor, context, targetKey) {
+    var cleanRecord = Object.assign({}, ...Array.from(editor.querySelectorAll('tr[name]')).filter(tr => {
+        var trName = tr.getAttribute('name')
+        return trName && trName in context[targetKey]
+    }).map(tr => {
+        var trName = tr.getAttribute('name')
+        return {[trName]: context[targetKey][trName]}
+    }).sort((a, b) => {
+        var aKey = Object.keys(a)[0], bKey = Object.keys(b)[0]
+        return aKey < bKey ? -1 : (aKey > bKey ? 1 : 0)
+    }))
+    return cleanRecord
+}
+
 var p = []
 window.LiveElement.Scale.Console.IDE.pageElement.querySelectorAll(`:scope > section[name]`).forEach(sectionElement => {
     var entity_type = sectionElement.getAttribute('name')
@@ -48,8 +110,4 @@ Promise.all(p).then(() => {
         })
     })
 })
-
-
-
-
 
