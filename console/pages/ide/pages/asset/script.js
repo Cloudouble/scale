@@ -41,10 +41,11 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
     if (handlerType == 'trigger') {
         var editFieldset = input.triggersource.closest('fieldset')
         var datalist = editFieldset.querySelector('datalist')
+        var pathInput = editFieldset.querySelector('input[name="path"]')
+        var contentTypeInput = editFieldset.querySelector('input[name="content-type"]')
         if (input.attributes.name == 'path') {
             window.LiveElement.Scale.Console.IDE.Asset.asset = window.LiveElement.Scale.Console.IDE.Asset.asset || {}
             window.LiveElement.Scale.Console.IDE.Asset.asset.path = input.properties.value
-            var contentTypeInput = editFieldset.querySelector('input[name="content-type"]')
             var suffix = `.${input.properties.value.split('.').pop()}`
             var matchedOptions = Array.from(datalist.querySelectorAll('option')).filter(opt => opt.innerText.indexOf(`(${suffix})`) > 0 )
             contentTypeInput.value = matchedOptions.length ? matchedOptions[0].getAttribute('value') : 'application/octet-stream'
@@ -88,7 +89,7 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
             if (input.triggersource.files.length) {
                 var file = input.triggersource.files[0]
                 window.LiveElement.Scale.Console.IDE.Asset.asset.ContentType = file.type
-                if (window.LiveElement.Scale.Console.IDE.Asset.asset.path.slice(-1) == '/') {
+                if (window.LiveElement.Scale.Console.IDE.Asset.asset.path && window.LiveElement.Scale.Console.IDE.Asset.asset.path.slice(-1) == '/') {
                     window.LiveElement.Scale.Console.IDE.Asset.asset.path = `${window.LiveElement.Scale.Console.IDE.Asset.asset.path}${file.name}`
                 } else if (!window.LiveElement.Scale.Console.IDE.Asset.asset.path) {
                     window.LiveElement.Scale.Console.IDE.Asset.asset.path = file.name
@@ -100,6 +101,9 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                     console.log('line 100', window.LiveElement.Scale.Console.IDE.Asset.asset)
                 })
                 reader.readAsDataURL(file)
+                pathInput.value = window.LiveElement.Scale.Console.IDE.Asset.asset.path
+                contentTypeInput.value = window.LiveElement.Scale.Console.IDE.Asset.asset.ContentType
+
                 
             } else {
                 delete window.LiveElement.Scale.Console.IDE.Asset.asset.body
