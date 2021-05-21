@@ -1,0 +1,32 @@
+<style>
+:host {
+    contain: content;
+    display: inline-block;
+}
+</style>
+<template>
+    Image Editor
+    <slot></slot>
+</template>
+<script>
+    /* global */
+    class ImageEditor extends window.LiveElement.Element.elements.HTMLElement {
+
+        static __extends = 'HTMLElement'
+        static __properties = []
+
+        constructor() {
+            super()
+        }
+        
+
+        static get observedAttributes() {
+            return (super.observedAttributes || []).concat()
+        }
+        
+
+    }
+</script>
+
+https://developer.mozilla.org/en-US/docs/Web/API/HTMLAudioElement
+https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement
