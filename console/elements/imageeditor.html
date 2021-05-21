@@ -1,11 +1,25 @@
 <style>
 :host {
     contain: content;
-    display: inline-block;
+    display: block;
+    position: relative;
+}
+
+:host canvas {
+    width: auto;
+    height: auto;
+    outline: 1px solid red;
+}
+
+::slotted(*) {
+    display: none;
+    
 }
 </style>
 <template>
-    Image Editor
+    <canvas></canvas>
+    
+    
     <slot></slot>
 </template>
 <script>
@@ -17,16 +31,39 @@
 
         constructor() {
             super()
+            var $this = this
+            var observer = new window.MutationObserver(function() {
+                var canvas = $this.shadowRoot.querySelector('canvas')
+                var ctx = canvas.getContext('2d')
+                $this.querySelectorAll(':scope > *').forEach(childElement => {
+                    if (childElement.constructor.name == 'HTMLImageElement') {
+                        childElement.addEventListener('load', event => {
+                            ctx.drawImage(childElement, canvas.width/2 - childElement.width/2, canvas.height/2 - childElement.height/2)
+                            var src = childElement.getAttribute('src')
+                            if (src && src.indexOf('blob:') == 0) {
+                              window.URL.revokeObjectURL(src)
+                            }
+                        })
+                    } else {
+                        childElement.remove()
+                    }
+                })
+            })
+            observer.observe($this, {childList: true})
         }
-        
 
         static get observedAttributes() {
             return (super.observedAttributes || []).concat()
         }
         
+        connectedCallback() {
+            var $this = this
+            var canvas = $this.shadowRoot.querySelector('canvas')
+            canvas.width = window.parseInt(window.getComputedStyle($this).width, 10)
+            canvas.height = window.parseInt(window.getComputedStyle($this).height, 10)
+
+        }
+        
 
     }
 </script>
-
-https://developer.mozilla.org/en-US/docs/Web/API/HTMLAudioElement
-https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement

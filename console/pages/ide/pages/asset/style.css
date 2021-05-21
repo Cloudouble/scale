@@ -52,7 +52,11 @@
     text-align: center;
     padding-top: 60px;
 }
-
+#ide > section[name="asset"] > fieldset[name="edit"] > .editor element-imageeditor {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
 #ide > section[name="asset"] > fieldset[name="edit"] > button[name="clear"] {
     margin-right: 2em;
 }

@@ -86,6 +86,7 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                     var imgElement = document.createElement('img')
                     imgElement.setAttribute('src', window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL)
                     window.LiveElement.Scale.Console.IDE.Asset.editor.appendChild(imgElement)
+                    delete window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL
                 }
                 window.LiveElement.Scale.Console.IDE.Asset.Edit.div.appendChild(window.LiveElement.Scale.Console.IDE.Asset.editor)
                 window.LiveElement.Scale.Console.IDE.Asset.Edit.div.setAttribute('editor', 'image')
@@ -94,11 +95,9 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                 window.LiveElement.Scale.Console.IDE.Asset.Edit.div.removeAttribute('editor')
             }
         } else if (input.attributes.name == 'upload') {
-            console.log('line 95: upload', input)
             window.LiveElement.Scale.Console.IDE.Asset.asset = window.LiveElement.Scale.Console.IDE.Asset.asset || {}
             if (input.triggersource.files.length) {
                 window.LiveElement.Scale.Console.IDE.Asset.asset.file = input.triggersource.files[0]
-                window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL = URL.createObjectURL(window.LiveElement.Scale.Console.IDE.Asset.asset.file)
                 window.LiveElement.Scale.Console.IDE.Asset.asset.ContentType = window.LiveElement.Scale.Console.IDE.Asset.asset.file.type
                 if (window.LiveElement.Scale.Console.IDE.Asset.asset.path && window.LiveElement.Scale.Console.IDE.Asset.asset.path.slice(-1) == '/') {
                     window.LiveElement.Scale.Console.IDE.Asset.asset.path = `${window.LiveElement.Scale.Console.IDE.Asset.asset.path}${window.LiveElement.Scale.Console.IDE.Asset.asset.file.name}`
@@ -107,24 +106,13 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                 }
                 pathInput.value = window.LiveElement.Scale.Console.IDE.Asset.asset.path
                 contentTypeInput.value = window.LiveElement.Scale.Console.IDE.Asset.asset.ContentType
+                window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL = URL.createObjectURL(window.LiveElement.Scale.Console.IDE.Asset.asset.file)
                 contentTypeInput.dispatchEvent(new window.Event('change'))
-                /*var reader = new window.FileReader()
-                reader.addEventListener('load', event => {
-                    window.LiveElement.Scale.Console.IDE.Asset.asset.dataURL = event.target.result
-                    contentTypeInput.dispatchEvent(new window.Event('change'))
-                    window.LiveElement.Scale.Console.IDE.Asset.asset.body = event.target.result.slice(event.target.result.indexOf(',') + 1)
-                    window.LiveElement.Scale.Console.IDE.Asset.asset.encoding = 'base64'
-                    console.log('line 113', window.LiveElement.Scale.Console.IDE.Asset.asset)
-                })
-                reader.readAsDataURL(window.LiveElement.Scale.Console.IDE.Asset.asset.file)*/
-                // URL.revokeObjectURL(objectURL)
-                //contentTypeInput.dispatchEvent(new window.Event('change'))
             } else {
                 delete window.LiveElement.Scale.Console.IDE.Asset.asset.body
                 delete window.LiveElement.Scale.Console.IDE.Asset.asset.encoding
             }
         } else if (input.attributes.name == 'clear') {
-            console.log('line 90: clear', input)
             window.LiveElement.Scale.Console.IDE.Asset.asset = window.LiveElement.Scale.Console.IDE.Asset.asset || {}
             delete window.LiveElement.Scale.Console.IDE.Asset.asset.body
             delete window.LiveElement.Scale.Console.IDE.Asset.asset.encoding
