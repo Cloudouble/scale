@@ -40,20 +40,31 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
     if (handlerType == 'trigger') {
         var editFieldset = input.triggersource.closest('fieldset')
-        var datalist = editFieldset.querySelector('datalist')
+        var datalistContentTypes = document.getElementById('ide--content-type')
         var pathInput = editFieldset.querySelector('input[name="path"]')
         var contentTypeInput = editFieldset.querySelector('input[name="content-type"]')
         if (input.attributes.name == 'path') {
             window.LiveElement.Scale.Console.IDE.Asset.asset = window.LiveElement.Scale.Console.IDE.Asset.asset || {}
             window.LiveElement.Scale.Console.IDE.Asset.asset.path = input.properties.value
-            var suffix = `.${input.properties.value.split('.').pop()}`
-            var matchedOptions = Array.from(datalist.querySelectorAll('option')).filter(opt => opt.innerText.indexOf(`(${suffix})`) > 0 )
-            contentTypeInput.value = matchedOptions.length ? matchedOptions[0].getAttribute('value') : 'application/octet-stream'
-            contentTypeInput.dispatchEvent(new window.Event('change'))
-            window.LiveElement.Scale.Console.IDE.Asset.Edit.modelist = window.LiveElement.Scale.Console.IDE.Asset.Edit.modelist || window.ace.require("ace/ext/modelist")
-            var editorMode = window.LiveElement.Scale.Console.IDE.Asset.Edit.modelist.getModeForPath(input.properties.value).mode
+            if (input.properties.value && !contentTypeInput.value || contentTypeInput.value == 'application/octet-stream') {
+                var matchedOption = datalistContentTypes.querySelector(`option[suffix="${input.properties.value.split('.').pop()}"]`)
+                var newValue = matchedOption ? matchedOption.getAttribute('value') : 'application/octet-stream'
+                if (contentTypeInput.value != newValue) {
+                    contentTypeInput.value = newValue
+                    contentTypeInput.dispatchEvent(new window.Event('change'))
+                }
+            }
+        } else if (input.attributes.name == 'content-type') {
+            var matchedOption = datalistContentTypes.querySelector(`option[value="${input.properties.value}"]`), aceMode
+            if (matchedOption) {
+                window.LiveElement.Scale.Console.IDE.Asset.Edit.modelist = window.LiveElement.Scale.Console.IDE.Asset.Edit.modelist || window.ace.require("ace/ext/modelist")
+                aceMode = window.LiveElement.Scale.Console.IDE.Asset.Edit.modelist.getModeForPath(`test.${matchedOption.getAttribute('suffix')}`).mode
+            }
+            if (!aceMode) {
+                aceMode = 'ace/mode/text'
+            }
             var editorDiv = editFieldset.querySelector('div.editor')
-            var contentTypeBase = contentTypeInput.value.split('/')[0]
+            var contentTypeBase = input.properties.value.split('/')[0]
             if (window.LiveElement.Scale.Console.IDE.Asset.editor) {
                 if (typeof window.LiveElement.Scale.Console.IDE.Asset.editor.unmount == 'function') {
                     window.LiveElement.Scale.Console.IDE.Asset.editor.unmount()
@@ -61,15 +72,13 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                     window.LiveElement.Scale.Console.IDE.Asset.editor.destroy()
                 }
             }
-            if (editorMode != 'ace/mode/text' || contentTypeBase == 'text') {
-                console.log('line 64: code editor', editorMode, contentTypeBase)
+            if (aceMode != 'ace/mode/text' || contentTypeBase == 'text') {
                 editorDiv.removeAttribute('disabled')
                 window.LiveElement.Scale.Console.IDE.Asset.editor = window.ace.edit(editorDiv)
                 window.LiveElement.Scale.Console.IDE.Asset.editor.setOptions({...window.LiveElement.Scale.Console.aceOptions, ...{minLines: 47, maxLines: 47}})
                 window.LiveElement.Scale.Console.IDE.Asset.editor.renderer.setScrollMargin(10, 10)
-                window.LiveElement.Scale.Console.IDE.Asset.editor.session.setMode(editorMode)
+                window.LiveElement.Scale.Console.IDE.Asset.editor.session.setMode(aceMode)
             } else if (contentTypeBase == 'image') {
-                console.log('line 71: image editor', editorMode, contentTypeBase)
                 editorDiv.removeAttribute('disabled')
                 window.LiveElement.Scale.Console.IDE.Asset.editor = new window.FilerobotImageEditor({
                     showInModal: false,
@@ -77,12 +86,8 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                 })
                 window.LiveElement.Scale.Console.IDE.Asset.editor.open('https://live-element.net/images/logo/logo-1000x400.png')
             } else {
-                console.log('line 79: upload only', editorMode, contentTypeBase)
                 editorDiv.setAttribute('disabled', true)
             }
-        } else if (input.attributes.name == 'content-type') {
-            //console.log('line 83: content-type', input)
-            
         } else if (input.attributes.name == 'upload') {
             console.log('line 86: upload', input)
             window.LiveElement.Scale.Console.IDE.Asset.asset = window.LiveElement.Scale.Console.IDE.Asset.asset || {}
