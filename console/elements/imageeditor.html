@@ -78,11 +78,13 @@
         }
         
         valueOf() {
-            return this.toBlob()
+            var $this = this
+            return $this.toBlob()
         }
         
         toString() {
-            var dataURL = this.toDataURL()
+            var $this = this
+            var dataURL = $this.toDataURL()
             return dataURL.slice(dataURL.indexOf(',')+1)
         }
 

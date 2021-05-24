@@ -44,7 +44,8 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
         var datalistContentTypes = document.getElementById('ide--content-type')
         var pathInput = editFieldset.querySelector('input[name="path"]')
         var contentTypeInput = editFieldset.querySelector('input[name="content-type"]')
-        var clearInput = editFieldset.querySelector('input[name="clear"]')
+        var clearButton = editFieldset.querySelector('button[name="clear"]')
+        var saveButton = editFieldset.querySelector('button[name="save"]')
         if (input.attributes.name == 'path') {
             window.LiveElement.Scale.Console.IDE.Asset.asset = window.LiveElement.Scale.Console.IDE.Asset.asset || {}
             window.LiveElement.Scale.Console.IDE.Asset.asset.path = input.properties.value
@@ -91,6 +92,7 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                 }
                 window.LiveElement.Scale.Console.IDE.Asset.Edit.div.appendChild(window.LiveElement.Scale.Console.IDE.Asset.editor)
                 window.LiveElement.Scale.Console.IDE.Asset.Edit.div.setAttribute('editor', 'image')
+                saveButton.removeAttribute('disabled')
             } else {
                 window.LiveElement.Scale.Console.IDE.Asset.Edit.div.setAttribute('disabled', true)
                 window.LiveElement.Scale.Console.IDE.Asset.Edit.div.removeAttribute('editor')
@@ -110,7 +112,7 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                 window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL = URL.createObjectURL(window.LiveElement.Scale.Console.IDE.Asset.asset.file)
                 contentTypeInput.dispatchEvent(new window.Event('change'))
             } else {
-                clearInput.dispatchEvent(new window.Event('click'))
+                clearButton.dispatchEvent(new window.Event('click'))
             }
         } else if (input.attributes.name == 'clear') {
             window.LiveElement.Scale.Console.IDE.Asset.asset = window.LiveElement.Scale.Console.IDE.Asset.asset || {}
@@ -121,13 +123,22 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                 window.LiveElement.Scale.Console.IDE.Asset.editor.querySelectorAll('img').forEach(imgElement => {
                     imgElement.remove()
                 })
+                saveButton.setAttribute('disabled', true)
             } else {
                 //clear the text editor
             }
         } else if (input.attributes.name == 'save') {
-            console.log('line 94: save', input)
-            
-            
+            if (window.LiveElement.Scale.Console.IDE.Asset.Edit.div.getAttribute('editor') == 'image') {
+                window.LiveElement.Scale.Console.IDE.Asset.editor.mime = contentTypeInput.value
+                window.fetch(
+                    `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/asset/${pathInput.value}`, 
+                    {method: 'PUT', headers: {"Content-Type": contentTypeInput.value}, body: `${window.LiveElement.Scale.Console.IDE.Asset.editor}`}
+                ).then(r => {
+                    saveButton.setAttribute('disabled', true)
+                })
+            } else {
+                //save the text editor value
+            }
         }
     } else if (handlerType == 'subscription') {
         var pathInput = input.subscriber.querySelector(`input[name="path"]`)
