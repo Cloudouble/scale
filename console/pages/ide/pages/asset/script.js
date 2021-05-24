@@ -44,6 +44,7 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
         var datalistContentTypes = document.getElementById('ide--content-type')
         var pathInput = editFieldset.querySelector('input[name="path"]')
         var contentTypeInput = editFieldset.querySelector('input[name="content-type"]')
+        var clearInput = editFieldset.querySelector('input[name="clear"]')
         if (input.attributes.name == 'path') {
             window.LiveElement.Scale.Console.IDE.Asset.asset = window.LiveElement.Scale.Console.IDE.Asset.asset || {}
             window.LiveElement.Scale.Console.IDE.Asset.asset.path = input.properties.value
@@ -109,14 +110,20 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                 window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL = URL.createObjectURL(window.LiveElement.Scale.Console.IDE.Asset.asset.file)
                 contentTypeInput.dispatchEvent(new window.Event('change'))
             } else {
-                delete window.LiveElement.Scale.Console.IDE.Asset.asset.body
-                delete window.LiveElement.Scale.Console.IDE.Asset.asset.encoding
+                clearInput.dispatchEvent(new window.Event('click'))
             }
         } else if (input.attributes.name == 'clear') {
             window.LiveElement.Scale.Console.IDE.Asset.asset = window.LiveElement.Scale.Console.IDE.Asset.asset || {}
+            delete window.LiveElement.Scale.Console.IDE.Asset.asset.file
             delete window.LiveElement.Scale.Console.IDE.Asset.asset.body
             delete window.LiveElement.Scale.Console.IDE.Asset.asset.encoding
-            
+            if (window.LiveElement.Scale.Console.IDE.Asset.Edit.div.getAttribute('editor') == 'image') {
+                window.LiveElement.Scale.Console.IDE.Asset.editor.querySelectorAll('img').forEach(imgElement => {
+                    imgElement.remove()
+                })
+            } else {
+                //clear the text editor
+            }
         } else if (input.attributes.name == 'save') {
             console.log('line 94: save', input)
             
