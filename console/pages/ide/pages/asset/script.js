@@ -97,6 +97,7 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                         var imgElement = document.createElement('img')
                         imgElement.setAttribute('src', window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL)
                         window.LiveElement.Scale.Console.IDE.Asset.editor.appendChild(imgElement)
+                        window.LiveElement.Scale.Console.IDE.Asset.editor.setAttribute('mime', input.properties.value)
                         delete window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL
                     }
                     window.LiveElement.Scale.Console.IDE.Asset.Edit.div.appendChild(window.LiveElement.Scale.Console.IDE.Asset.editor)
