@@ -11,12 +11,66 @@
     position: absolute;
 }
 
+:host menu {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 12px;
+    z-index: 1;
+}
+
+:host menu li {
+    display: inline-block;
+    width: 100px;
+}
+:host menu li:last-child {
+    width: 200px;
+    position: relative;
+    top: 6px;
+}
+
+:host menu li label {
+    display: inline-block;
+    width: 100%;
+}
+:host menu li label input {
+    display: block;
+    width: 80px;
+}
+:host menu li label input[readonly] {
+    opacity: 0.8;
+}
+:host menu li:last-child label input {
+    width: 200px;
+}
+
 ::slotted(*) {
     display: none;
     
 }
 </style>
 <template>
+    <datalist>
+        <option>16</option>
+        <option>32</option>
+        <option>70</option>
+        <option>150</option>
+        <option>152</option>
+        <option>167</option>
+        <option>180</option>
+        <option>310</option>
+        <option>500</option>
+        <option>1000</option>
+        <option>2000</option>
+    </datalist>
+    <menu>
+        <li><label>Width (px)<input name="width" type="number" step="1" min="0" max="10000" /></label></li>
+        <li><label>Quality<input name="quality" type="number" step="0.01" min="0" max="1" value="0.8" /></label></li>
+        <li><label>File Type<input name="type" readonly="true" /></label></li>
+        <li><label>File Size (kB)<input name="size" readonly="true" /></li>
+        <li><label>Zoom<input name="zoom" type="range" min="0" max="2" value="1" step="0.01" /></label></li>
+    </menu>
     <canvas></canvas>
     <slot></slot>
 </template>
@@ -33,6 +87,8 @@
             var observer = new window.MutationObserver(function() {
                 var canvas = $this.shadowRoot.querySelector('canvas')
                 var ctx = canvas.getContext('2d')
+                var widthInput = $this.shadowRoot.querySelector('input[name="width"]')
+                var sizeInput = $this.shadowRoot.querySelector('input[name="size"]')
                 ctx.clearRect(0, 0, canvas.width, canvas.height)
                 $this.querySelectorAll(':scope > *').forEach(childElement => {
                     if (childElement.constructor.name == 'HTMLImageElement') {
@@ -45,6 +101,8 @@
                             if (src && src.indexOf('blob:') == 0) {
                               window.URL.revokeObjectURL(src)
                             }
+                            widthInput.value = canvas.width
+                            sizeInput.value = Math.round( window.atob(`${$this}`).length / 1024 * 1000) / 1000
                         })
                     } else {
                         childElement.remove()
@@ -60,7 +118,36 @@
         
         connectedCallback() {
             var $this = this
-
+            var canvas = $this.shadowRoot.querySelector('canvas')
+            var datalist = $this.shadowRoot.querySelector('datalist')
+            var randomID = parseInt(Math.random()*1000000000000, 10)
+            datalist.setAttribute('id', randomID)
+            var widthInput = $this.shadowRoot.querySelector('input[name="width"]')
+            var sizeInput = $this.shadowRoot.querySelector('input[name="size"]')
+            var qualityInput = $this.shadowRoot.querySelector('input[name="quality"]')
+            widthInput.setAttribute('list', randomID)
+            var zoomInput = $this.shadowRoot.querySelector('input[name="zoom"]')
+            zoomInput.addEventListener('input', event => {
+                var zoomedWidth = canvas.width * event.target.value, zoomedHeight = canvas.height * event.target.value
+                var zoomedLeft = $this.parentElement.offsetWidth/2 - zoomedWidth/2, zoomedTop = $this.parentElement.offsetHeight/2 - zoomedHeight/2
+                canvas.setAttribute('style', `width: ${zoomedWidth}px; height: ${zoomedHeight}px; left: ${zoomedLeft}px; top: ${zoomedTop}px`)
+            })
+            widthInput.addEventListener('change', event => {
+                window.createImageBitmap(canvas).then(bitmap => {
+                    var newCanvasWidth = event.target.value, newCanvasHeight = canvas.height / canvas.width * newCanvasWidth
+                    canvas.width = newCanvasWidth
+                    canvas.height = newCanvasHeight
+                    var zoomedWidth = canvas.width * zoomInput.value, zoomedHeight = canvas.height * zoomInput.value
+                    var zoomedLeft = $this.parentElement.offsetWidth/2 - zoomedWidth/2, zoomedTop = $this.parentElement.offsetHeight/2 - zoomedHeight/2
+                    canvas.setAttribute('style', `width: ${zoomedWidth}px; height: ${zoomedHeight}px; left: ${zoomedLeft}px; top: ${zoomedTop}px`)
+                    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+                    sizeInput.value = `${Math.round($this.toBlob($this.mime, qualityInput.value).size / 1024 * 1000) / 1000}`
+                })
+            })
+            qualityInput.addEventListener('change', event => {
+                $this.quality = event.target.value
+                sizeInput.value = Math.round( window.atob(`${$this}`).length / 1024 * 1000) / 1000
+            })
         }
         
         toBlob(mime, quality) {
