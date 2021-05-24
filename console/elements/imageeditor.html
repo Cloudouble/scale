@@ -8,7 +8,7 @@
 :host canvas {
     width: auto;
     height: auto;
-    outline: 1px solid red;
+    position: absolute;
 }
 
 ::slotted(*) {
@@ -18,8 +18,6 @@
 </style>
 <template>
     <canvas></canvas>
-    
-    
     <slot></slot>
 </template>
 <script>
@@ -39,7 +37,10 @@
                 $this.querySelectorAll(':scope > *').forEach(childElement => {
                     if (childElement.constructor.name == 'HTMLImageElement') {
                         childElement.addEventListener('load', event => {
-                            ctx.drawImage(childElement, canvas.width/2 - childElement.width/2, canvas.height/2 - childElement.height/2)
+                            canvas.width = childElement.naturalWidth
+                            canvas.height = childElement.naturalHeight
+                            canvas.setAttribute('style', `left: ${$this.parentElement.offsetWidth/2 - childElement.naturalWidth/2}px; top: ${$this.parentElement.offsetHeight/2 - childElement.naturalHeight/2}px`)
+                            ctx.drawImage(childElement, 0, 0, canvas.width, canvas.height)
                             var src = childElement.getAttribute('src')
                             if (src && src.indexOf('blob:') == 0) {
                               window.URL.revokeObjectURL(src)
@@ -59,9 +60,6 @@
         
         connectedCallback() {
             var $this = this
-            var canvas = $this.shadowRoot.querySelector('canvas')
-            canvas.width = window.parseInt(window.getComputedStyle($this).width, 10)
-            canvas.height = window.parseInt(window.getComputedStyle($this).height, 10)
 
         }
         

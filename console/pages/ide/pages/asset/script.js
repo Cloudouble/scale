@@ -57,6 +57,7 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                     contentTypeInput.dispatchEvent(new window.Event('change'))
                 }
             }
+            saveButton.removeAttribute('disabled')
         } else if (input.attributes.name == 'content-type') {
             var matchedOption = datalistContentTypes.querySelector(`option[value="${input.properties.value}"]`), aceMode
             if (matchedOption) {
@@ -67,7 +68,7 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                 aceMode = 'ace/mode/text'
             }
             var contentTypeBase = input.properties.value.split('/')[0]
-            if (window.LiveElement.Scale.Console.IDE.Asset.editor) {
+            if (window.LiveElement.Scale.Console.IDE.Asset.editor && window.LiveElement.Scale.Console.IDE.Asset.Edit.div.getAttribute('editor') != contentTypeBase) {
                 if (typeof window.LiveElement.Scale.Console.IDE.Asset.editor.destroy == 'function') {
                     window.LiveElement.Scale.Console.IDE.Asset.editor.destroy()
                 } else if (typeof window.LiveElement.Scale.Console.IDE.Asset.editor.remove == 'function') {
@@ -82,21 +83,31 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                 window.LiveElement.Scale.Console.IDE.Asset.editor.session.setMode(aceMode)
                 window.LiveElement.Scale.Console.IDE.Asset.Edit.div.setAttribute('editor', 'text')
             } else if (contentTypeBase == 'image') {
-                window.LiveElement.Scale.Console.IDE.Asset.Edit.div.removeAttribute('disabled')
-                window.LiveElement.Scale.Console.IDE.Asset.editor = document.createElement('element-imageeditor')
-                if (window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL) {
-                    var imgElement = document.createElement('img')
-                    imgElement.setAttribute('src', window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL)
-                    window.LiveElement.Scale.Console.IDE.Asset.editor.appendChild(imgElement)
-                    delete window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL
+                if (window.LiveElement.Scale.Console.IDE.Asset.Edit.div.getAttribute('editor') == 'image') {
+                    if (window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL) {
+                        var imgElement = document.createElement('img')
+                        imgElement.setAttribute('src', window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL)
+                        window.LiveElement.Scale.Console.IDE.Asset.editor.appendChild(imgElement)
+                        delete window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL
+                    }
+                } else {
+                    window.LiveElement.Scale.Console.IDE.Asset.Edit.div.removeAttribute('disabled')
+                    window.LiveElement.Scale.Console.IDE.Asset.editor = document.createElement('element-imageeditor')
+                    if (window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL) {
+                        var imgElement = document.createElement('img')
+                        imgElement.setAttribute('src', window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL)
+                        window.LiveElement.Scale.Console.IDE.Asset.editor.appendChild(imgElement)
+                        delete window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL
+                    }
+                    window.LiveElement.Scale.Console.IDE.Asset.Edit.div.appendChild(window.LiveElement.Scale.Console.IDE.Asset.editor)
+                    window.LiveElement.Scale.Console.IDE.Asset.Edit.div.setAttribute('editor', contentTypeBase)
+                    saveButton.removeAttribute('disabled')
                 }
-                window.LiveElement.Scale.Console.IDE.Asset.Edit.div.appendChild(window.LiveElement.Scale.Console.IDE.Asset.editor)
-                window.LiveElement.Scale.Console.IDE.Asset.Edit.div.setAttribute('editor', 'image')
-                saveButton.removeAttribute('disabled')
             } else {
                 window.LiveElement.Scale.Console.IDE.Asset.Edit.div.setAttribute('disabled', true)
                 window.LiveElement.Scale.Console.IDE.Asset.Edit.div.removeAttribute('editor')
             }
+            saveButton.removeAttribute('disabled')
         } else if (input.attributes.name == 'upload') {
             window.LiveElement.Scale.Console.IDE.Asset.asset = window.LiveElement.Scale.Console.IDE.Asset.asset || {}
             if (input.triggersource.files.length) {
@@ -114,6 +125,7 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
             } else {
                 clearButton.dispatchEvent(new window.Event('click'))
             }
+            saveButton.removeAttribute('disabled')
         } else if (input.attributes.name == 'clear') {
             window.LiveElement.Scale.Console.IDE.Asset.asset = window.LiveElement.Scale.Console.IDE.Asset.asset || {}
             delete window.LiveElement.Scale.Console.IDE.Asset.asset.file

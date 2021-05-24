@@ -119,7 +119,7 @@ def main(event, context):
                     counter = counter + 1
             elif len(env['path']) == 3 and env['path'][0] == 'system' and env['path'][1] == 'schema':
                 try:
-                    schema_definition = json.loads( base64.b64decode(request['body']).decode('utf-8'))
+                    schema_definition = json.loads(base64.b64decode(request['body']).decode('utf-8'))
                 except:
                     schema_definition = {}
                 if schema_definition:
@@ -149,6 +149,8 @@ def main(event, context):
                                     ContentType='application/json'
                                 )
                                 counter = counter + 1
+                elif not schema_definition and request['method'] == 'DELETE':
+                    lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'system', 'method': 'DELETE', 'path': env['path'], 'entity_key': '{data_root}/system/schema/{schema_id}.json'.format(data_root=env['data_root'], schema_id=env['path'][2]), '_env': env}), 'utf-8'), InvocationType='Event')
             elif len(env['path']) == 3 and env['path'][0] == 'channel':
                 channel_id = env['path'][1] if uuid_valid(env['path'][1]) else None
                 channel_object = bucket.Object('{data_root}/channel/{channel_id}/connect.json'.format(data_root=env['data_root'], channel_id=channel_id))
@@ -190,7 +192,7 @@ def main(event, context):
                         lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({
                             'entity_type': entity_type, 
                             'method': request['method'], 
-                            'body': request['body'], 
+                            'body': str(request['body']).strip() if entity_type == 'error' else base64.b64decode(str(request['body']).strip()).decode('utf-8'), 
                             'content-type': request['content-type'], 
                             'path': object_path, 
                             '_env': env
