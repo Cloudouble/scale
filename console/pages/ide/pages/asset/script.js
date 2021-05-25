@@ -59,6 +59,7 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
             }
             saveButton.removeAttribute('disabled')
         } else if (input.attributes.name == 'content-type') {
+            
             var matchedOption = datalistContentTypes.querySelector(`option[value="${input.properties.value}"]`), aceMode
             if (matchedOption) {
                 window.LiveElement.Scale.Console.IDE.Asset.Edit.modelist = window.LiveElement.Scale.Console.IDE.Asset.Edit.modelist || window.ace.require("ace/ext/modelist")
@@ -82,6 +83,9 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                 window.LiveElement.Scale.Console.IDE.Asset.editor.renderer.setScrollMargin(10, 10)
                 window.LiveElement.Scale.Console.IDE.Asset.editor.session.setMode(aceMode)
                 window.LiveElement.Scale.Console.IDE.Asset.Edit.div.setAttribute('editor', 'text')
+                if (window.LiveElement.Scale.Console.IDE.Asset.asset && window.LiveElement.Scale.Console.IDE.Asset.asset.file) {
+                    window.LiveElement.Scale.Console.IDE.Asset.asset.file.text().then(t => window.LiveElement.Scale.Console.IDE.Asset.editor.setValue(t))
+                }
             } else if (contentTypeBase == 'image') {
                 var imgElement
                 var appendImgElement = function() {
@@ -129,6 +133,7 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                 contentTypeInput.value = window.LiveElement.Scale.Console.IDE.Asset.asset.ContentType
                 window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL = URL.createObjectURL(window.LiveElement.Scale.Console.IDE.Asset.asset.file)
                 contentTypeInput.dispatchEvent(new window.Event('change'))
+                editFieldset.querySelector('input[type="file"]').value = ''
             } else {
                 clearButton.dispatchEvent(new window.Event('click'))
             }
