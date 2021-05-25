@@ -98,7 +98,7 @@
                             $this.quality = 0.8
                             canvas.width = childElement.naturalWidth
                             canvas.height = childElement.naturalHeight
-                            canvas.setAttribute('style', `left: ${$this.parentElement.offsetWidth/2 - childElement.naturalWidth/2}px; top: ${$this.parentElement.offsetHeight/2 - childElement.naturalHeight/2}px`)
+                            canvas.setAttribute('style', `left: ${$this.offsetWidth/2 - childElement.naturalWidth/2}px; top: ${$this.offsetHeight/2 - childElement.naturalHeight/2}px;`)
                             ctx.drawImage(childElement, 0, 0, canvas.width, canvas.height)
                             var src = childElement.getAttribute('src')
                             if (src && src.indexOf('blob:') == 0) {
@@ -181,7 +181,7 @@
                 canvas.width = newCanvasWidth
                 canvas.height = newCanvasHeight
                 var zoomedWidth = canvas.width * $this.zoom, zoomedHeight = canvas.height * $this.zoom
-                var zoomedLeft = $this.parentElement.offsetWidth/2 - zoomedWidth/2, zoomedTop = $this.parentElement.offsetHeight/2 - zoomedHeight/2
+                var zoomedLeft = $this.offsetWidth/2 - zoomedWidth/2, zoomedTop = $this.offsetHeight/2 - zoomedHeight/2
                 canvas.setAttribute('style', `width: ${zoomedWidth}px; height: ${zoomedHeight}px; left: ${zoomedLeft}px; top: ${zoomedTop}px`)
                 canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height)
                 $this.height = canvas.height
@@ -194,7 +194,7 @@
         zoom($this, value) {
             var canvas = $this.shadowRoot.querySelector('canvas')
             var zoomedWidth = $this.width * value, zoomedHeight = $this.height * value
-            var zoomedLeft = $this.parentElement.offsetWidth/2 - zoomedWidth/2, zoomedTop = $this.parentElement.offsetHeight/2 - zoomedHeight/2
+            var zoomedLeft = $this.offsetWidth/2 - zoomedWidth/2, zoomedTop = $this.offsetHeight/2 - zoomedHeight/2
             canvas.setAttribute('style', `width: ${zoomedWidth}px; height: ${zoomedHeight}px; left: ${zoomedLeft}px; top: ${zoomedTop}px`)
             $this.shadowRoot.querySelector('input[name="zoom"]').value = value
             return value
@@ -221,6 +221,5 @@
             var dataURL = this.toDataURL()
             return dataURL.slice(dataURL.indexOf(',')+1)
         }
-
     }
 </script>

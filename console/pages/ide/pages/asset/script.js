@@ -102,9 +102,9 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                 } else {
                     window.LiveElement.Scale.Console.IDE.Asset.Edit.div.removeAttribute('disabled')
                     window.LiveElement.Scale.Console.IDE.Asset.editor = document.createElement('element-imageeditor')
-                    appendImgElement()
                     window.LiveElement.Scale.Console.IDE.Asset.Edit.div.appendChild(window.LiveElement.Scale.Console.IDE.Asset.editor)
                     window.LiveElement.Scale.Console.IDE.Asset.Edit.div.setAttribute('editor', contentTypeBase)
+                    appendImgElement()
                     saveButton.removeAttribute('disabled')
                 }
                 if (window.LiveElement.Scale.Console.IDE.Asset.editor) {
@@ -163,13 +163,6 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
         window.LiveElement.Scale.Console.IDE.Asset.asset = {}
         contentTypeInput.value = ''
         pathInput.value = ''
-        if (window.LiveElement.Scale.Console.IDE.Asset.editor) {
-            if (typeof window.LiveElement.Scale.Console.IDE.Asset.editor.destroy == 'function') {
-                window.LiveElement.Scale.Console.IDE.Asset.editor.destroy()
-            } else if (typeof window.LiveElement.Scale.Console.IDE.Asset.editor.remove == 'function') {
-                window.LiveElement.Scale.Console.IDE.Asset.editor.remove()
-            }
-        }
         pathInput.value = input.payload.path || ''
         contentTypeInput.value = input.payload.ContentType || ''
         pathInput.dispatchEvent(new window.Event('change'))
