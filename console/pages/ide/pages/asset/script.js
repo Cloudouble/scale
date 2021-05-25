@@ -144,20 +144,17 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                 })
                 saveButton.setAttribute('disabled', true)
             } else {
-                //clear the text editor
+                window.LiveElement.Scale.Console.IDE.Asset.editor.setValue('')
             }
         } else if (input.attributes.name == 'save') {
-            if (window.LiveElement.Scale.Console.IDE.Asset.Edit.div.getAttribute('editor') == 'image') {
-                window.fetch(
-                    `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/asset/${pathInput.value}`, 
-                    {method: 'PUT', headers: {"Content-Type": window.LiveElement.Scale.Console.IDE.Asset.editor.contenttype}, 
-                        body: `${window.LiveElement.Scale.Console.IDE.Asset.editor}`}
-                ).then(r => {
-                    saveButton.setAttribute('disabled', true)
-                })
-            } else {
-                //save the text editor value
-            }
+            var body = window.LiveElement.Scale.Console.IDE.Asset.Edit.div.getAttribute('editor') == 'image' 
+                ? `${window.LiveElement.Scale.Console.IDE.Asset.editor}` : window.btoa(window.LiveElement.Scale.Console.IDE.Asset.editor.getValue())
+            window.fetch(
+                `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/asset/${pathInput.value}`, 
+                {method: 'PUT', headers: {"Content-Type": window.LiveElement.Scale.Console.IDE.Asset.editor.contenttype}, body: body}
+            ).then(r => {
+                saveButton.setAttribute('disabled', true)
+            })
         }
     } else if (handlerType == 'subscription') {
         window.LiveElement.Scale.Console.IDE.Asset.asset = {}
@@ -179,7 +176,6 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                 contentTypeInput.dispatchEvent(new window.Event('change'))
             }
         })
-        
         if (!pathInput.value) {
             pathInput.focus()
         }
