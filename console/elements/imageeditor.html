@@ -66,8 +66,9 @@
     </datalist>
     <menu>
         <li><label>Width (px)<input name="width" type="number" step="1" min="0" max="10000" /></label></li>
+        <li><label>Height (px)<input name="height" readonly="true" /></label></li>
         <li><label>Quality<input name="quality" type="number" step="0.01" min="0" max="1" value="0.8" /></label></li>
-        <li><label>File Type<input name="mime" readonly="true" /></label></li>
+        <li><label>Content Type<input name="contenttype" readonly="true" /></label></li>
         <li><label>File Size (kB)<input name="size" readonly="true" /></li>
         <li><label>Zoom<input name="zoom" type="range" min="0" max="2" value="1" step="0.01" /></label></li>
     </menu>
@@ -79,7 +80,7 @@
     class ImageEditor extends window.LiveElement.Element.elements.HTMLElement {
 
         static __extends = 'HTMLElement'
-        static __properties = ['mime', 'quality']
+        static __properties = ['contenttype', 'height', 'quality', 'size', 'width', 'zoom']
 
         constructor() {
             super()
@@ -101,8 +102,9 @@
                             if (src && src.indexOf('blob:') == 0) {
                               window.URL.revokeObjectURL(src)
                             }
-                            widthInput.value = canvas.width
-                            sizeInput.value = Math.round( window.atob(`${$this}`).length / 1024 * 1000) / 1000
+                            $this.width = canvas.width
+                            $this.height = canvas.height
+                            $this.refreshSize()
                         })
                     } else {
                         childElement.remove()
@@ -113,7 +115,7 @@
         }
 
         static get observedAttributes() {
-            return (super.observedAttributes || []).concat('mime', 'quality')
+            return (super.observedAttributes || []).concat(...this.__properties)
         }
         
         connectedCallback() {
@@ -125,64 +127,91 @@
             var widthInput = $this.shadowRoot.querySelector('input[name="width"]')
             var sizeInput = $this.shadowRoot.querySelector('input[name="size"]')
             var qualityInput = $this.shadowRoot.querySelector('input[name="quality"]')
+            var contenttypeInput = $this.shadowRoot.querySelector('input[name="quality"]')
             widthInput.setAttribute('list', randomID)
             var zoomInput = $this.shadowRoot.querySelector('input[name="zoom"]')
             zoomInput.addEventListener('input', event => {
-                var zoomedWidth = canvas.width * event.target.value, zoomedHeight = canvas.height * event.target.value
-                var zoomedLeft = $this.parentElement.offsetWidth/2 - zoomedWidth/2, zoomedTop = $this.parentElement.offsetHeight/2 - zoomedHeight/2
-                canvas.setAttribute('style', `width: ${zoomedWidth}px; height: ${zoomedHeight}px; left: ${zoomedLeft}px; top: ${zoomedTop}px`)
+                $this.zoom = event.target.value
             })
             widthInput.addEventListener('change', event => {
-                window.createImageBitmap(canvas).then(bitmap => {
-                    var newCanvasWidth = event.target.value, newCanvasHeight = canvas.height / canvas.width * newCanvasWidth
-                    canvas.width = newCanvasWidth
-                    canvas.height = newCanvasHeight
-                    var zoomedWidth = canvas.width * zoomInput.value, zoomedHeight = canvas.height * zoomInput.value
-                    var zoomedLeft = $this.parentElement.offsetWidth/2 - zoomedWidth/2, zoomedTop = $this.parentElement.offsetHeight/2 - zoomedHeight/2
-                    canvas.setAttribute('style', `width: ${zoomedWidth}px; height: ${zoomedHeight}px; left: ${zoomedLeft}px; top: ${zoomedTop}px`)
-                    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height)
-                    sizeInput.value = `${Math.round($this.toBlob($this.mime, qualityInput.value).size / 1024 * 1000) / 1000}`
-                })
+                $this.width = event.target.value
+            })
+            contenttypeInput.addEventListener('change', event => {
+                $this.contenttype = event.target.value
             })
             qualityInput.addEventListener('change', event => {
                 $this.quality = event.target.value
-                sizeInput.value = Math.round( window.atob(`${$this}`).length / 1024 * 1000) / 1000
             })
         }
         
-        mime($this, value) {
-            var mimeInput = $this.shadowRoot.querySelector('input[name="mime"]')
-            console.log('line 155', value, mimeInput)
-            mimeInput.value = value
+        refreshSize() {
+            this.size = `${Math.round(this.toBlob().size / 1024 * 1000) / 1000}`
+        }
+        
+        
+        contenttype($this, value) {
+            $this.shadowRoot.querySelector('input[name="contenttype"]').value = value
+            $this.refreshSize()
+            return value
+        }
+        
+        height($this, value) {
+            $this.shadowRoot.querySelector('input[name="height"]').value = value
             return value
         }
         
         quality($this, value) {
-            var qualityInput = $this.shadowRoot.querySelector('input[name="quality"]')
-            qualityInput.value = value
+            $this.shadowRoot.querySelector('input[name="quality"]').value = value
+            $this.refreshSize()
             return value
         }
         
-        toBlob(mime, quality) {
-            var $this = this
-            var mimeType = mime || $this.mime
-            var dataURL = $this.toDataURL(mimeType, quality || $this.quality)
-            return new window.Blob([window.atob(dataURL.slice(dataURL.indexOf(',')+1))], {type: mimeType})
+        size($this, value) {
+            $this.shadowRoot.querySelector('input[name="size"]').value = value
+            return value
         }
         
-        toDataURL(mime, quality) {
-            var $this = this
-            return $this.shadowRoot.querySelector('canvas').toDataURL(mime || $this.mime, quality || $this.quality)
+        width($this, value) {
+            var canvas = $this.shadowRoot.querySelector('canvas')
+            window.createImageBitmap(canvas).then(bitmap => {
+                var newCanvasWidth = value, newCanvasHeight = canvas.height / canvas.width * newCanvasWidth
+                canvas.width = newCanvasWidth
+                canvas.height = newCanvasHeight
+                var zoomedWidth = canvas.width * $this.zoom, zoomedHeight = canvas.height * $this.zoom
+                var zoomedLeft = $this.parentElement.offsetWidth/2 - zoomedWidth/2, zoomedTop = $this.parentElement.offsetHeight/2 - zoomedHeight/2
+                canvas.setAttribute('style', `width: ${zoomedWidth}px; height: ${zoomedHeight}px; left: ${zoomedLeft}px; top: ${zoomedTop}px`)
+                canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+                $this.refreshSize()
+            })
+            $this.shadowRoot.querySelector('input[name="width"]').value = value
+            return value
+        }
+        
+        zoom($this, value) {
+            var canvas = $this.shadowRoot.querySelector('canvas')
+            var zoomedWidth = $this.width * value, zoomedHeight = $this.height * value
+            var zoomedLeft = $this.parentElement.offsetWidth/2 - zoomedWidth/2, zoomedTop = $this.parentElement.offsetHeight/2 - zoomedHeight/2
+            canvas.setAttribute('style', `width: ${zoomedWidth}px; height: ${zoomedHeight}px; left: ${zoomedLeft}px; top: ${zoomedTop}px`)
+            $this.shadowRoot.querySelector('input[name="zoom"]').value = value
+            return value
+        }
+        
+        toBlob(contenttype, quality) {
+            contenttype = contenttype || this.contenttype
+            var dataURL = this.toDataURL(contenttype, quality || this.quality)
+            return new window.Blob([window.atob(dataURL.slice(dataURL.indexOf(',')+1))], {type: contenttype})
+        }
+        
+        toDataURL(contenttype, quality) {
+            return this.shadowRoot.querySelector('canvas').toDataURL(contenttype || this.contenttype, quality || this.quality)
         }
         
         valueOf() {
-            var $this = this
-            return $this.toBlob()
+            return this.toBlob()
         }
         
         toString() {
-            var $this = this
-            var dataURL = $this.toDataURL()
+            var dataURL = this.toDataURL()
             return dataURL.slice(dataURL.indexOf(',')+1)
         }
 

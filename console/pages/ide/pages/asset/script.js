@@ -83,9 +83,10 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                 window.LiveElement.Scale.Console.IDE.Asset.editor.session.setMode(aceMode)
                 window.LiveElement.Scale.Console.IDE.Asset.Edit.div.setAttribute('editor', 'text')
             } else if (contentTypeBase == 'image') {
+                var imgElement
                 if (window.LiveElement.Scale.Console.IDE.Asset.Edit.div.getAttribute('editor') == 'image') {
                     if (window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL) {
-                        var imgElement = document.createElement('img')
+                        imgElement = document.createElement('img')
                         imgElement.setAttribute('src', window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL)
                         window.LiveElement.Scale.Console.IDE.Asset.editor.appendChild(imgElement)
                         delete window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL
@@ -94,15 +95,17 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                     window.LiveElement.Scale.Console.IDE.Asset.Edit.div.removeAttribute('disabled')
                     window.LiveElement.Scale.Console.IDE.Asset.editor = document.createElement('element-imageeditor')
                     if (window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL) {
-                        var imgElement = document.createElement('img')
+                        imgElement = document.createElement('img')
                         imgElement.setAttribute('src', window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL)
                         window.LiveElement.Scale.Console.IDE.Asset.editor.appendChild(imgElement)
-                        window.LiveElement.Scale.Console.IDE.Asset.editor.setAttribute('mime', input.properties.value)
                         delete window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL
                     }
                     window.LiveElement.Scale.Console.IDE.Asset.Edit.div.appendChild(window.LiveElement.Scale.Console.IDE.Asset.editor)
                     window.LiveElement.Scale.Console.IDE.Asset.Edit.div.setAttribute('editor', contentTypeBase)
                     saveButton.removeAttribute('disabled')
+                }
+                if (window.LiveElement.Scale.Console.IDE.Asset.editor) {
+                    window.LiveElement.Scale.Console.IDE.Asset.editor.contenttype = input.properties.value
                 }
             } else {
                 window.LiveElement.Scale.Console.IDE.Asset.Edit.div.setAttribute('disabled', true)
@@ -142,7 +145,6 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
             }
         } else if (input.attributes.name == 'save') {
             if (window.LiveElement.Scale.Console.IDE.Asset.Edit.div.getAttribute('editor') == 'image') {
-                window.LiveElement.Scale.Console.IDE.Asset.editor.mime = contentTypeInput.value
                 window.fetch(
                     `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/asset/${pathInput.value}`, 
                     {method: 'PUT', headers: {"Content-Type": contentTypeInput.value}, body: `${window.LiveElement.Scale.Console.IDE.Asset.editor}`}
