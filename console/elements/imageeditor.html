@@ -94,6 +94,8 @@
                 $this.querySelectorAll(':scope > *').forEach(childElement => {
                     if (childElement.constructor.name == 'HTMLImageElement') {
                         childElement.addEventListener('load', event => {
+                            $this.zoom = 1
+                            $this.quality = 0.8
                             canvas.width = childElement.naturalWidth
                             canvas.height = childElement.naturalHeight
                             canvas.setAttribute('style', `left: ${$this.parentElement.offsetWidth/2 - childElement.naturalWidth/2}px; top: ${$this.parentElement.offsetHeight/2 - childElement.naturalHeight/2}px`)
@@ -102,7 +104,6 @@
                             if (src && src.indexOf('blob:') == 0) {
                               window.URL.revokeObjectURL(src)
                             }
-                            $this.zoom = 1
                             $this.width = canvas.width
                             $this.height = canvas.height
                             $this.refreshSize()
@@ -121,6 +122,8 @@
         
         connectedCallback() {
             var $this = this
+            $this.zoom = $this.zoom || 1
+            $this.quality = $this.quality || 0.8
             var canvas = $this.shadowRoot.querySelector('canvas')
             var datalist = $this.shadowRoot.querySelector('datalist')
             var randomID = parseInt(Math.random()*1000000000000, 10)
@@ -128,7 +131,7 @@
             var widthInput = $this.shadowRoot.querySelector('input[name="width"]')
             var sizeInput = $this.shadowRoot.querySelector('input[name="size"]')
             var qualityInput = $this.shadowRoot.querySelector('input[name="quality"]')
-            var contenttypeInput = $this.shadowRoot.querySelector('input[name="quality"]')
+            var contenttypeInput = $this.shadowRoot.querySelector('input[name="contenttype"]')
             widthInput.setAttribute('list', randomID)
             var zoomInput = $this.shadowRoot.querySelector('input[name="zoom"]')
             zoomInput.addEventListener('input', event => {
@@ -145,10 +148,9 @@
             })
         }
         
-        refreshSize() {
-            this.size = `${Math.round(this.toBlob().size / 1024 * 1000) / 1000}`
+        refreshSize(quality) {
+            this.size = `${Math.round(this.toBlob(undefined, quality).size / 1024 * 1000) / 1000}`
         }
-        
         
         contenttype($this, value) {
             $this.shadowRoot.querySelector('input[name="contenttype"]').value = value
@@ -163,7 +165,7 @@
         
         quality($this, value) {
             $this.shadowRoot.querySelector('input[name="quality"]').value = value
-            $this.refreshSize()
+            $this.refreshSize(value)
             return value
         }
         
@@ -182,6 +184,7 @@
                 var zoomedLeft = $this.parentElement.offsetWidth/2 - zoomedWidth/2, zoomedTop = $this.parentElement.offsetHeight/2 - zoomedHeight/2
                 canvas.setAttribute('style', `width: ${zoomedWidth}px; height: ${zoomedHeight}px; left: ${zoomedLeft}px; top: ${zoomedTop}px`)
                 canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+                $this.height = canvas.height
                 $this.refreshSize()
             })
             $this.shadowRoot.querySelector('input[name="width"]').value = value
@@ -199,12 +202,15 @@
         
         toBlob(contenttype, quality) {
             contenttype = contenttype || this.contenttype
-            var dataURL = this.toDataURL(contenttype, quality || this.quality)
+            quality = window.parseFloat(quality || this.quality)
+            var dataURL = this.toDataURL(contenttype, quality)
             return new window.Blob([window.atob(dataURL.slice(dataURL.indexOf(',')+1))], {type: contenttype})
         }
         
         toDataURL(contenttype, quality) {
-            return this.shadowRoot.querySelector('canvas').toDataURL(contenttype || this.contenttype, quality || this.quality)
+            contenttype = contenttype || this.contenttype
+            quality = window.parseFloat(quality || this.quality)
+            return this.shadowRoot.querySelector('canvas').toDataURL(contenttype, quality)
         }
         
         valueOf() {
