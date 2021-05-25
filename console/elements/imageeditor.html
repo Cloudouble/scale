@@ -102,6 +102,7 @@
                             if (src && src.indexOf('blob:') == 0) {
                               window.URL.revokeObjectURL(src)
                             }
+                            $this.zoom = 1
                             $this.width = canvas.width
                             $this.height = canvas.height
                             $this.refreshSize()
