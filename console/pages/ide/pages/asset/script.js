@@ -59,7 +59,6 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
             }
             saveButton.removeAttribute('disabled')
         } else if (input.attributes.name == 'content-type') {
-            
             var matchedOption = datalistContentTypes.querySelector(`option[value="${input.properties.value}"]`), aceMode
             if (matchedOption) {
                 window.LiveElement.Scale.Console.IDE.Asset.Edit.modelist = window.LiveElement.Scale.Console.IDE.Asset.Edit.modelist || window.ace.require("ace/ext/modelist")
@@ -82,9 +81,14 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                 window.LiveElement.Scale.Console.IDE.Asset.editor.setOptions({...window.LiveElement.Scale.Console.aceOptions, ...{minLines: 47, maxLines: 47}})
                 window.LiveElement.Scale.Console.IDE.Asset.editor.renderer.setScrollMargin(10, 10)
                 window.LiveElement.Scale.Console.IDE.Asset.editor.session.setMode(aceMode)
+                window.LiveElement.Scale.Console.IDE.Asset.editor.session.on('change', function() {
+                    saveButton.removeAttribute('disabled')
+                })
                 window.LiveElement.Scale.Console.IDE.Asset.Edit.div.setAttribute('editor', 'text')
                 if (window.LiveElement.Scale.Console.IDE.Asset.asset && window.LiveElement.Scale.Console.IDE.Asset.asset.file) {
                     window.LiveElement.Scale.Console.IDE.Asset.asset.file.text().then(t => window.LiveElement.Scale.Console.IDE.Asset.editor.setValue(t))
+                } else if (window.LiveElement.Scale.Console.IDE.Asset.asset && window.LiveElement.Scale.Console.IDE.Asset.asset.dataURL) {
+                    window.LiveElement.Scale.Console.IDE.Asset.editor.setValue(window.atob(window.LiveElement.Scale.Console.IDE.Asset.asset.dataURL.split(',', 2)[1]))
                 }
             } else if (contentTypeBase == 'image') {
                 var imgElement
@@ -154,9 +158,11 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
         } else if (input.attributes.name == 'save') {
             var body = window.LiveElement.Scale.Console.IDE.Asset.Edit.div.getAttribute('editor') == 'image' 
                 ? `${window.LiveElement.Scale.Console.IDE.Asset.editor}` : window.btoa(window.LiveElement.Scale.Console.IDE.Asset.editor.getValue())
+            var contentType = window.LiveElement.Scale.Console.IDE.Asset.Edit.div.getAttribute('editor') == 'image' 
+                ? window.LiveElement.Scale.Console.IDE.Asset.editor.contenttype : contentTypeInput.value
             window.fetch(
                 `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/asset/${pathInput.value}`, 
-                {method: 'PUT', headers: {"Content-Type": window.LiveElement.Scale.Console.IDE.Asset.editor.contenttype}, body: body}
+                {method: 'PUT', headers: {"Content-Type": contentType}, body: body}
             ).then(r => {
                 saveButton.setAttribute('disabled', true)
             })
@@ -184,83 +190,9 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
         if (!pathInput.value) {
             pathInput.focus()
         }
-    } else if (handlerType == 'listener') {
-        console.log('line 88: listener', input)
     }
 }
-
 
 window.LiveElement.Live.listeners.IdeAssetSearch = {processor: 'IdeAssetSearch', expired: true}
 
 window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="asset"] fieldset[name="search"]'), 'IdeAssetSearch', 'loaded', false, true)
-
-
-
-
-
-// asset = {body, encoding, ContentType, path, ContentLength, ContentType}
-
-
-
-/*
-window.LiveElement.Live.processors.IdeAssetView = function(input) {
-    var handlerType = window.LiveElement.Live.getHandlerType(input)
-    if (handlerType == 'trigger') {
-        
-    } else if (handlerType == 'subscription') {
-        
-    } else if (handlerType == 'listener') {
-        
-    }
-}
-window.LiveElement.Live.processors.IdeChannelCode = function(input) {
-    var handlerType = window.LiveElement.Live.getHandlerType(input)
-    if (handlerType == 'listener') {
-        return {}
-    } else if (handlerType == 'subscription') {
-        window.LiveElement.Scale.Console.IDE.Asset.Code = {
-            view_url: `${window.localStorage.getItem('system:system_access_url').replace('https:', 'wss:')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.receiveKey}`, 
-        }
-        if (input.subscriber.name == 'view_url') {
-            return {'#value': window.LiveElement.Scale.Console.IDE.Channel.Code.receive_url}
-        }
-    }
-}
-*/
-/*
-window.LiveElement.Live.listeners.IdeAssetSearch = {processor: 'IdeAssetSearch', expired: true}
-window.LiveElement.Live.listeners.IdeAssetView = {processor: 'IdeAssetView', expired: true}
-window.LiveElement.Live.listeners.IdeAssetCode = {processor: 'IdeAssetCode', expired: true}
-*/
-
-//window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('fieldset[name="configure"]'), 'IdeChannelCode', 'setup', false, true)
-
-/*
-window.LiveElement.Scale.Console.IDE.Asset.div = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="asset"] div.editor')
-window.LiveElement.Scale.Console.IDE.Asset.editor = window.ace.edit(window.LiveElement.Scale.Console.IDE.Asset.div)
-window.LiveElement.Scale.Console.IDE.Asset.editor.setOptions({
-    autoScrollEditorIntoView: true, 
-    useSoftTabs: true, 
-    navigateWithinSoftTabs: true, 
-    highlightGutterLine: true, 
-    displayIndentGuides: true, 
-    maxLines: 30,
-    minLines: 10, 
-    scrollPastEnd: 0.5, 
-    enableBasicAutocompletion: true,
-    enableLiveAutocompletion: true, 
-    enableSnippets: true, 
-    theme: 'ace/theme/merbivore'
-})
-window.LiveElement.Scale.Console.aceOptions
-window.LiveElement.Scale.Console.IDE.Asset.editor.renderer.setScrollMargin(10, 10)
-window.LiveElement.Scale.Console.IDE.Asset.editor.session.setMode("ace/mode/javascript")
-*/
-/* 
-
-var modelist = ace.require("ace/ext/modelist")
-window.LiveElement.Scale.Console.IDE.Asset.editor.setReadOnly(true)
-window.LiveElement.Scale.Console.IDE.Asset.editor.setMode(modelist.getModeForPath('abc.html').mode);
-
-
-*/
