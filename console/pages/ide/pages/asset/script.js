@@ -38,12 +38,12 @@ window.LiveElement.Live.processors.IdeAssetSearch = function(input) {
 }
 window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
+    var editFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="asset"] fieldset[name="edit"]')
+    var pathInput = editFieldset.querySelector('input[name="path"]')
+    var contentTypeInput = editFieldset.querySelector('input[name="content-type"]')
     if (handlerType == 'trigger') {
-        var editFieldset = input.triggersource.closest('fieldset')
         window.LiveElement.Scale.Console.IDE.Asset.Edit.div = editFieldset.querySelector('div.editor')
         var datalistContentTypes = document.getElementById('ide--content-type')
-        var pathInput = editFieldset.querySelector('input[name="path"]')
-        var contentTypeInput = editFieldset.querySelector('input[name="content-type"]')
         var clearButton = editFieldset.querySelector('button[name="clear"]')
         var saveButton = editFieldset.querySelector('button[name="save"]')
         if (input.attributes.name == 'path') {
@@ -84,22 +84,25 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                 window.LiveElement.Scale.Console.IDE.Asset.Edit.div.setAttribute('editor', 'text')
             } else if (contentTypeBase == 'image') {
                 var imgElement
-                if (window.LiveElement.Scale.Console.IDE.Asset.Edit.div.getAttribute('editor') == 'image') {
-                    if (window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL) {
+                var appendImgElement = function() {
+                    if (window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL || window.LiveElement.Scale.Console.IDE.Asset.asset.dataURL) {
                         imgElement = document.createElement('img')
-                        imgElement.setAttribute('src', window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL)
+                        if (window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL) {
+                            imgElement.setAttribute('src', window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL)
+                            delete window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL
+                        } else {
+                            imgElement.setAttribute('src', window.LiveElement.Scale.Console.IDE.Asset.asset.dataURL)
+                            delete window.LiveElement.Scale.Console.IDE.Asset.asset.dataURL
+                        }
                         window.LiveElement.Scale.Console.IDE.Asset.editor.appendChild(imgElement)
-                        delete window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL
                     }
+                }
+                if (window.LiveElement.Scale.Console.IDE.Asset.Edit.div.getAttribute('editor') == 'image') {
+                    appendImgElement()
                 } else {
                     window.LiveElement.Scale.Console.IDE.Asset.Edit.div.removeAttribute('disabled')
                     window.LiveElement.Scale.Console.IDE.Asset.editor = document.createElement('element-imageeditor')
-                    if (window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL) {
-                        imgElement = document.createElement('img')
-                        imgElement.setAttribute('src', window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL)
-                        window.LiveElement.Scale.Console.IDE.Asset.editor.appendChild(imgElement)
-                        delete window.LiveElement.Scale.Console.IDE.Asset.asset.objectURL
-                    }
+                    appendImgElement()
                     window.LiveElement.Scale.Console.IDE.Asset.Edit.div.appendChild(window.LiveElement.Scale.Console.IDE.Asset.editor)
                     window.LiveElement.Scale.Console.IDE.Asset.Edit.div.setAttribute('editor', contentTypeBase)
                     saveButton.removeAttribute('disabled')
@@ -147,7 +150,8 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
             if (window.LiveElement.Scale.Console.IDE.Asset.Edit.div.getAttribute('editor') == 'image') {
                 window.fetch(
                     `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/asset/${pathInput.value}`, 
-                    {method: 'PUT', headers: {"Content-Type": contentTypeInput.value}, body: `${window.LiveElement.Scale.Console.IDE.Asset.editor}`}
+                    {method: 'PUT', headers: {"Content-Type": window.LiveElement.Scale.Console.IDE.Asset.editor.contenttype}, 
+                        body: `${window.LiveElement.Scale.Console.IDE.Asset.editor}`}
                 ).then(r => {
                     saveButton.setAttribute('disabled', true)
                 })
@@ -156,10 +160,33 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
             }
         }
     } else if (handlerType == 'subscription') {
-        var pathInput = input.subscriber.querySelector(`input[name="path"]`)
+        window.LiveElement.Scale.Console.IDE.Asset.asset = {}
+        contentTypeInput.value = ''
+        pathInput.value = ''
+        if (window.LiveElement.Scale.Console.IDE.Asset.editor) {
+            if (typeof window.LiveElement.Scale.Console.IDE.Asset.editor.destroy == 'function') {
+                window.LiveElement.Scale.Console.IDE.Asset.editor.destroy()
+            } else if (typeof window.LiveElement.Scale.Console.IDE.Asset.editor.remove == 'function') {
+                window.LiveElement.Scale.Console.IDE.Asset.editor.remove()
+            }
+        }
         pathInput.value = input.payload.path || ''
-        input.subscriber.querySelector(`input[name="content-type"]`).value = input.payload.ContentType || ''
+        contentTypeInput.value = input.payload.ContentType || ''
         pathInput.dispatchEvent(new window.Event('change'))
+        window.LiveElement.Scale.Console.System.invokeLambda({
+            page: 'ide', 
+            entity_type: 'asset', 
+            heading: 'fetch',
+            path: input.payload.path
+        }).then(fetchResult => {
+            window.test = fetchResult.result.body
+            if (fetchResult && typeof fetchResult == 'object' && fetchResult.result && typeof fetchResult.result == 'object') {
+                window.LiveElement.Scale.Console.IDE.Asset.asset = window.LiveElement.Scale.Console.IDE.Asset.asset || {}
+                window.LiveElement.Scale.Console.IDE.Asset.asset.dataURL = `data:${input.payload.ContentType};base64,${fetchResult.result.body}`
+                contentTypeInput.dispatchEvent(new window.Event('change'))
+            }
+        })
+        
         if (!pathInput.value) {
             pathInput.focus()
         }
