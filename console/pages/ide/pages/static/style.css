@@ -1,37 +1,27 @@
-#ide[entity-type="asset"] > section[name="asset"] {
+#ide[entity-type="static"] > section[name="static"] {
     display: block;
 }
-#ide > section[name="asset"] > fieldset[name="search"] > input[type="search"] {
+#ide > section[name="static"] > fieldset[name="search"] > input[type="search"] {
     width: 40em;
 }
-#ide > section[name="asset"] > fieldset[name="search"] > button[name="delete"] {
+#ide > section[name="static"] > fieldset[name="search"] > button[name="delete"] {
     margin-left: 8em;
 }
-#ide > section[name="asset"] > fieldset[name="edit"] > label {
+#ide > section[name="static"] > fieldset[name="edit"] > label {
     width: 24em;
     margin-right: 2em;
 }
-#ide > section[name="asset"] > fieldset[name="edit"] > label > input {
+#ide > section[name="static"] > fieldset[name="edit"] > label > input {
     width: calc(100% - 4px);
     margin-right: 2em;
 }
-#ide > section[name="asset"] > fieldset[name="edit"] > label:first-of-type {
+#ide > section[name="static"] > fieldset[name="edit"] > label:first-of-type {
     position: relative;
 }
-#ide > section[name="asset"] > fieldset[name="edit"] > label:first-of-type span:first-of-type {
+#ide > section[name="static"] > fieldset[name="edit"] > label:first-of-type span:first-of-type {
     display: block;
 }
-#ide > section[name="asset"] > fieldset[name="edit"] > label:first-of-type span:nth-of-type(2) {
-    display: inline-block;
-    width: 3em;
-    font-size: 90%;
-    position: absolute;
-    left: 3px;
-    top: 2em;
-    z-index: 1;
-    color: grey;
-}
-#ide > section[name="asset"] > fieldset[name="edit"] > label:first-of-type input {
+#ide > section[name="static"] > fieldset[name="edit"] > label:first-of-type input {
     display: inline-block;
     width: calc(100% - 3.5em);
     padding-left: 3em;
@@ -39,14 +29,14 @@
     left: 0;
     margin-right: 0;
 }
-#ide > section[name="asset"] > fieldset[name="edit"] > .editor {
+#ide > section[name="static"] > fieldset[name="edit"] > .editor {
     display: block;
     width: 80em;
     height: 47em;
     min-height: 600px;
     background-color: #202020;
 }
-#ide > section[name="asset"] > fieldset[name="edit"] > div.editor[disabled="true"]::after {
+#ide > section[name="static"] > fieldset[name="edit"] > div.editor[disabled="true"]::after {
     content: 'this content type can not be edited here';
     display: block;
     width: 100%;
@@ -54,15 +44,15 @@
     text-align: center;
     padding-top: 60px;
 }
-#ide > section[name="asset"] > fieldset[name="edit"] > .editor element-imageeditor {
+#ide > section[name="static"] > fieldset[name="edit"] > .editor element-imageeditor {
     display: block;
     width: 100%;
     height: 100%;
 }
-#ide > section[name="asset"] > fieldset[name="edit"] input[type="file"] {
+#ide > section[name="static"] > fieldset[name="edit"] input[type="file"] {
     display: none;
 }
-#ide > section[name="asset"] > fieldset[name="edit"] label[name="upload"] {
+#ide > section[name="static"] > fieldset[name="edit"] label[name="upload"] {
     appearance: button;
     -moz-appearance: button;
     -webkit-appearance: button;

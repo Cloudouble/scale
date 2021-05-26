@@ -25,7 +25,7 @@
 /* SAVE asset */
 /* NOTE: body => window.btoa('your plain text or raw binary body') */
 window.fetch(
-    `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/asset/${window.LiveElement.Scale.Console.IDE.Asset.snippetParams.path}.json`, 
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${window.LiveElement.Scale.Console.IDE.Asset.snippetParams.path}.json`, 
     {
         method: 'PUT', 
         headers: {'Content-Type': `${window.LiveElement.Scale.Console.IDE.Asset.snippetParams.contenttype}`}, 
@@ -35,7 +35,7 @@ window.fetch(
             
 /* DELETE asset */
 window.fetch(
-    `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/asset/${window.LiveElement.Scale.Console.IDE.Asset.snippetParams.path}.json`, 
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${window.LiveElement.Scale.Console.IDE.Asset.snippetParams.path}.json`, 
     {
         method: 'DELETE'
     }
