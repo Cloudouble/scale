@@ -5,7 +5,7 @@
     position: absolute;
     left: 0;
     top: 60px;
-    width: 129px;
+    width: 149px;
     border-top: 1px solid grey;
     border-right: 1px solid grey;
     padding-top: 30px;
@@ -17,6 +17,18 @@
     border: none;
     cursor: pointer;
     margin-bottom: 0.75em;
+}
+#ide div[name="sidebar"] button.category {
+    font-weight: bold;
+    border-top: 1px solid gray;
+    cursor: default;
+}
+#ide div[name="sidebar"] button.indent {
+    padding-left: 1em;
+    font-size: 90%;
+}
+#ide div[name="sidebar"] button.indent::before {
+    content: ' - ';
 }
 #ide > section {
     position: absolute;
