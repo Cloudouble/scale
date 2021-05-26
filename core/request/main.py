@@ -192,8 +192,8 @@ def main(event, context):
                         lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({
                             'entity_type': entity_type, 
                             'method': request['method'], 
-                            'body': str(request['body']).strip() if entity_type == 'error' else base64.b64decode(str(request['body']).strip()).decode('utf-8'), 
-                            'content-type': request['content-type'], 
+                            'body': str(request.get('body', '')).strip() if entity_type == 'error' else base64.b64decode(str(request.get('body', '')).strip()).decode('utf-8'), 
+                            'content-type': request.get('content-type'), 
                             'path': object_path, 
                             '_env': env
                         }), 'utf-8'), InvocationType='Event')

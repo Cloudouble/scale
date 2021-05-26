@@ -206,8 +206,8 @@ input[readonly], pre code {
 }
 
 
-.snippet-container {
-    display: none;
+.snippet-container:not([built]) {
+    display: none !important; 
 }
 .snippet-container[built] {
     display: block;

@@ -116,3 +116,10 @@
 #ide button {
     cursor: pointer;
 }
+#ide button[name="delete"] {
+    color: red !important;
+}
+#ide button[disabled] {
+    cursor: default !important;
+    color: gray !important;
+}

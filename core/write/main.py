@@ -39,7 +39,7 @@ def main(event, context):
                     counter = counter + 1
                 except:
                     pass
-        elif entity_type in ['asset', 'static', 'error'] and event.get('path') and event.get('body') and event.get('content-type'):
+        elif entity_type in ['asset', 'static', 'error'] and event.get('path'):
             if entity_type == 'asset': 
                 object_path = '{data_root}/asset/{path}'.format(data_root=env['data_root'], path=event['path'])
             elif entity_type == 'static':
@@ -49,7 +49,7 @@ def main(event, context):
                 if object_path.endswith('.html.html'):
                     object_path = object_path.replace('.html.html', '.html')
             the_object = bucket.Object(object_path)
-            if method in ['PUT', 'POST', 'PATCH']:
+            if method in ['PUT', 'POST', 'PATCH'] and event.get('body') and event.get('content-type'):
                 the_object.put(Body=base64.b64decode(event['body']), ContentType=event['content-type'])
                 counter = counter + 1
             elif method == 'DELETE':
