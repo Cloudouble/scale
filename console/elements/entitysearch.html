@@ -168,9 +168,10 @@
         
         writeHistory(entityCore) {
             var $this = this, historyElement = $this.shadowRoot.querySelector('.history'), historySmallElement = historyElement.querySelector('small')
-            var entityType = $this.getAttribute('entityType'), liElement = document.createElement('li'), hint = ''
+            var entityType = $this.getAttribute('entityType'), liElement = document.createElement('li'), hint = '', data = {}
             liElement.classList.add('history-entry')
-            Object.entries(entityCore).forEach(entry => liElement.setAttribute(entry[0].replace(/^@/, '__-__'), entry[1]))
+            Object.entries(entityCore).forEach(entry => data[entry[0]] = entry[1])
+            liElement.setAttribute('data', JSON.stringify(data))
             var historyPath = ($this.getAttribute('historyPath') || '${@id}')
             Object.entries(entityCore).forEach(entry => historyPath = historyPath.replace('${' + entry[0] + '}', entry[1]))
             if ($this.entity && Object.keys($this.entity).length > 2) {
@@ -193,16 +194,16 @@
                 historySmallElement.remove()
             }
             historyElement.addEventListener('click', event => {
-                $this.loadHistory(liElement)
+                $this.loadHistory(event.target)
             })
             historyElement.prepend(liElement)
         }
         
         loadHistory(historyEntry) {
-            var $this = this, loadButton = $this.shadowRoot.querySelector('button[name="load"]')
+            console.log('line 203', historyEntry)
+            var $this = this, loadButton = $this.shadowRoot.querySelector('button[name="load"]'), data = JSON.parse(historyEntry.getAttribute('data') || '{}')
             $this.querySelectorAll('input[name]').forEach(inputElement => {
-                var propertyName = inputElement.getAttribute('name')
-                var historyPropertyValue = historyEntry.getAttribute(propertyName.replace(/^__-__/, '@'))
+                var propertyName = inputElement.getAttribute('name'), historyPropertyValue = data[propertyName]
                 inputElement.value = historyPropertyValue || '' 
             })
             loadButton.removeAttribute('disabled')
