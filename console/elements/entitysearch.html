@@ -5,6 +5,10 @@
     position: relative;
 }
 
+:host > h3 {
+    margin-top: 0;
+}
+
 :host > h4 {
     margin-bottom: 0.25em;
 }
@@ -193,14 +197,13 @@
             if (historySmallElement) {
                 historySmallElement.remove()
             }
-            historyElement.addEventListener('click', event => {
+            liElement.addEventListener('click', event => {
                 $this.loadHistory(event.target)
             })
             historyElement.prepend(liElement)
         }
         
         loadHistory(historyEntry) {
-            console.log('line 203', historyEntry)
             var $this = this, loadButton = $this.shadowRoot.querySelector('button[name="load"]'), data = JSON.parse(historyEntry.getAttribute('data') || '{}')
             $this.querySelectorAll('input[name]').forEach(inputElement => {
                 var propertyName = inputElement.getAttribute('name'), historyPropertyValue = data[propertyName]
