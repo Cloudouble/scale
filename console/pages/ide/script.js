@@ -111,5 +111,8 @@ Promise.all(p).then(() => {
             window.LiveElement.Scale.Console.IDE.pageElement.setAttribute('entity-type', button.innerHTML.toLowerCase())
         })
     })
+    window.LiveElement.Scale.Core.buildDataList(document.getElementById('ide--class'), Object.assign({}, ...Object.keys(window.LiveElement.Scale.Console.IDE.classes).sort().map(className => {
+        return {[className]: `${window.LiveElement.Scale.Console.IDE.classes[className].label} [${window.LiveElement.Scale.Console.IDE.classes[className].parents.join('&rarr;')}]`}
+    })))
 })
 

@@ -5,57 +5,10 @@
     position: relative;
 }
 
-:host canvas {
-    width: auto;
-    height: auto;
-    position: absolute;
-}
-
-:host menu {
-    width: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    font-size: 12px;
-    z-index: 1;
-}
-
-:host menu li {
-    display: inline-block;
-    width: 100px;
-}
-:host menu li:last-child {
-    width: 200px;
-    position: relative;
-    top: 6px;
-}
-
-:host menu li label {
-    display: inline-block;
-    width: 100%;
-}
-:host menu li label input {
-    display: block;
-    width: 80px;
-}
-:host menu li label input[readonly] {
-    opacity: 0.8;
-}
-:host menu li:last-child label input {
-    width: 200px;
-}
-
-::slotted(*) {
-    display: none;
-    
-}
 </style>
 <template>
     <h3>Search</h3>
-    <slot>
-        <!--<input name="search-type" type="search" placeholder="search record type..." autocomplete="off" list="ide-record-search-type-list" live-trigger="search:IdeRecordSearch" />
-        <input name="search-uuid" type="search" placeholder="search record UUID..." autocomplete="off" list="ide-record-search-uuid-list" live-trigger="focus:IdeRecordSearch input:IdeRecordSearch search:IdeRecordSearch" />-->
-    </slot>
+    <slot></slot>
     <button name="load" disabled="true">Load</button>
     <h4>History</h4>
     <ol class="history">
@@ -64,9 +17,9 @@
 </template>
 <script>
     /* global */
-    class EntitySearch extends window.LiveElement.Element.elements.HTMLFieldSetElement {
+    class EntitySearch extends window.LiveElement.Element.elements.HTMLElement {
 
-        static __extends = 'HTMLFieldSetElement'
+        static __extends = 'HTMLElement'
         static __properties = ['heading']
 
         constructor() {
@@ -77,10 +30,55 @@
 
         static get observedAttributes() {
             return (super.observedAttributes || []).concat(...this.__properties)
+            
         }
         
         connectedCallback() {
             var $this = this
+            var loadButton = $this.shadowRoot.querySelector('button[name="load"]')
+            $this.querySelectorAll('input[type="search"][list]').forEach(searchElement => {
+                if (!searchElement.getAttribute('list')) {
+                    var listId = `entitysearch-${$this.getAttribute('name') || ''}-${Math.floor(Math.random()*1000000000)}`
+                    var datalistElement = document.createElement('datalist')
+                    datalistElement.setAttribute('id', listId)
+                    $this.appendChild(datalistElement)
+                    searchElement.setAttribute('list', listId)
+                }
+            })
+            var supportingInputElements = Array.from($this.querySelectorAll('input[secondary]'))
+            supportingInputElements.forEach(supportingInputElement => {
+                supportingInputElement.addEventListener('change', event => {
+                    if (supportingInputElements.every(i => {
+                        if (i.value) {
+                            var datalistElementId = i.getAttribute('list')
+                            if (datalistElementId) {
+                                var datalistElement = document.getElementById(datalistElementId)
+                                if (datalistElement) {
+                                    if (datalistElement.querySelectorAll(`option[value=${i.value}]`).length) {
+                                        return true
+                                    } else {
+                                        return Array.from(datalistElement.querySelectorAll('option')).some(optionElement => optionElement.innerHTML == i.value)
+                                    }
+                                } else {
+                                    return true
+                                }
+                            } else {
+                                return true
+                            }
+                        } else {
+                            return false
+                        }
+                    })) {
+                        loadButton.removeAttribute('disabled')
+                    } else {
+                        loadButton.setAttribute('disabled', true)
+                    }
+                    
+                })                
+            })
+            
+            
+            
         }
         
         size($this, value) {

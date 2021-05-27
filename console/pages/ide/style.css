@@ -1,4 +1,4 @@
-#ide:not([entity-type]) > section[name="connection"] {
+#ide:not([entity-type]) > section[name="record"] {
     display: block;
 }
 #ide div[name="sidebar"] {
@@ -77,10 +77,16 @@
     width: calc(100% - 300px);
 }
 
-#ide > section > fieldset {
+#ide > section > fieldset, #ide > section > element-entitysearch {
     width: calc(100% - 31px);
     max-width: calc(100vw - 231px);
     overflow-x: auto;
+}
+#ide > section > element-entitysearch {
+    display: block;
+    outline: 1px solid black;
+    margin-bottom: 2em;
+    padding: 1em;
 }
 
 #ide > section details {

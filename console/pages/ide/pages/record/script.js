@@ -7,6 +7,15 @@ window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
     if (handlerType == 'listener') {
         return window.LiveElement.Scale.Console.IDE.Record.record
     } else if (handlerType == 'trigger') {
+        
+        
+        
+        
+        
+        console.log('line 10', input)
+        
+        
+        
         var searchFieldset = input.triggersource.closest('fieldset'), editFieldset = searchFieldset.nextElementSibling
         var searchTypeInput = searchFieldset.querySelector('input[name="search-type"]'), searchUuidInput = searchFieldset.querySelector('input[name="search-uuid"]')
         var loadButton = searchFieldset.querySelector('button[name="load"]')

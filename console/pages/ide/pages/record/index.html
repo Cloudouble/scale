@@ -1,5 +1,10 @@
 <h2>Record</h2>
-<element-entitysearch></element-entitysearch>
+
+<element-entitysearch>
+    <input name="class" type="text" placeholder="records of class..." autocomplete="off" list="ide--class" secondary />
+    <input name="uuid" type="search" placeholder="record UUID..." autocomplete="off" list primary />
+</element-entitysearch>
+
 <fieldset name="search">
     <h3>Search</h3>
     <input name="search-type" type="search" placeholder="search record type..." autocomplete="off" list="ide-record-search-type-list" live-trigger="search:IdeRecordSearch" />
@@ -12,6 +17,8 @@
         <small>Reload recent records from here...</small>
     </ol>
 </fieldset>
+
+
 <fieldset name="edit" live-subscription="IdeRecordSearch:IdeRecordEdit">
     <h3>Edit</h3>
     <button name="save" disabled="true" live-trigger="click:IdeRecordEdit">Save</button>
