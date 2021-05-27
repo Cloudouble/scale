@@ -10,7 +10,7 @@
 #ide > section[name="record"] > fieldset[name="edit"][active] {
     display: block;
 }
-#ide > section[name="record"] > fieldset[name="search"] > input[type="search"] {
+#ide > section[name="record"] > element-entitysearch > input {
     width: 23em;
 }
 
@@ -50,26 +50,6 @@
 }
 #ide > section[name="record"] > fieldset[name="edit"] > button[name="delete"] {
     color: red;
-}
-
-#ide > section[name="record"] > fieldset[name="search"] > h4 {
-    margin-bottom: 0.25em;
-}
-#ide > section[name="record"] > fieldset[name="search"] > .history {
-    list-style: none;
-    padding-left: 0;
-    margin-top: 0;
-    margin-bottom: 0;
-    min-height: 1em;
-    max-height: 5em;
-    overflow: auto;
-}
-#ide > section[name="record"] > fieldset[name="search"] > .history li {
-    font-size: 80%;
-    cursor: pointer;
-}
-#ide > section[name="record"] > fieldset[name="search"] > .history li:hover {
-    font-weight: bold;
 }
 
 #ide > section[name="record"] > fieldset[name="edit"] td[name="value"] {

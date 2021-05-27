@@ -5,6 +5,28 @@
     position: relative;
 }
 
+:host > h4 {
+    margin-bottom: 0.25em;
+}
+
+:host > .history {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    min-height: 1em;
+    max-height: 5em;
+    overflow: auto;
+}
+
+:host > .history li {
+    font-size: 80%;
+    cursor: pointer;
+}
+
+:host > .history li:hover {
+    font-weight: bold;
+}
 </style>
 <template>
     <h3>Search</h3>
@@ -20,7 +42,7 @@
     class EntitySearch extends window.LiveElement.Element.elements.HTMLElement {
 
         static __extends = 'HTMLElement'
-        static __properties = ['heading']
+        static __properties = ['entityType']
 
         constructor() {
             super()
@@ -30,12 +52,12 @@
 
         static get observedAttributes() {
             return (super.observedAttributes || []).concat(...this.__properties)
-            
         }
         
         connectedCallback() {
             var $this = this
             var loadButton = $this.shadowRoot.querySelector('button[name="load"]')
+            var entityType = $this.getAttribute('entityType')
             $this.querySelectorAll('input[type="search"][list]').forEach(searchElement => {
                 if (!searchElement.getAttribute('list')) {
                     var listId = `entitysearch-${$this.getAttribute('name') || ''}-${Math.floor(Math.random()*1000000000)}`
@@ -45,8 +67,7 @@
                     searchElement.setAttribute('list', listId)
                 }
             })
-            var supportingInputElements = Array.from($this.querySelectorAll('input[secondary]'))
-            supportingInputElements.forEach(supportingInputElement => {
+            Array.from($this.querySelectorAll('input[secondary]')).forEach((supportingInputElement, index, supportingInputElements) => {
                 supportingInputElement.addEventListener('change', event => {
                     if (supportingInputElements.every(i => {
                         if (i.value) {
@@ -73,17 +94,125 @@
                     } else {
                         loadButton.setAttribute('disabled', true)
                     }
-                    
                 })                
             })
-            
-            
-            
+            var primarySearchInput = $this.querySelector('input[type="search"][primary]')
+            if (primarySearchInput) {
+                primarySearchInput.addEventListener('input', event => {
+                    $this.runPrimarySearch(event.target)
+                })
+                primarySearchInput.addEventListener('search', event => {
+                    $this.runPrimarySearch(event.target)
+                })
+            }
+            loadButton.addEventListener('click', event => {
+                var entityCore = Object.assign({}, ...Array.from($this.querySelectorAll('input[name]')).map(i => ({[i.getAttribute('name')]: i.value})))
+                window.LiveElement.Scale.Console.System.invokeLambda({...{
+                    page: 'ide', 
+                    entity_type: entityType, 
+                    heading: 'search',
+                    input_name: 'load'
+                }, ...entityCore}).then(entity => {
+                    $this.entity = entity && typeof entity == 'object' ? entity : entityCore
+                    $this.writeHistory(entityCore)
+                    $this.dispatchEvent(new window.CustomEvent('loaded'))
+                })
+                
+            })
         }
         
-        size($this, value) {
-            return value
+        runPrimarySearch(searchElement) {
+            var $this = this, loadButton = $this.shadowRoot.querySelector('button[name="load"]')
+            if (searchElement.value) {
+                var datalistElement, listId = searchElement.getAttribute('list'), entityType = $this.getAttribute('entityType')
+                var blankOptions = {[window.LiveElement.Scale.Console.IDE.newFlag]: `Generate UUID for a new ${entityType}...`}
+                if (listId) {
+                    datalistElement = $this.querySelector(`datalist[id="${listId}"]`)
+                }
+                if (searchElement.value == window.LiveElement.Scale.Console.IDE.newFlag) {
+                    searchElement.value = window.LiveElement.Scale.Core.generateUUID4()
+                    $this.result = []
+                    if (datalistElement) {
+                        window.LiveElement.Scale.Core.buildDataList(datalistElement, $this.result)
+                    }
+                } else if (!searchElement.value) {
+                    if (datalistElement) {
+                        window.LiveElement.Scale.Core.buildDataList(datalistElement, [], blankOptions)
+                    }
+                } else {
+                    window.LiveElement.Scale.Console.System.invokeLambda({...{
+                        page: 'ide', 
+                        entity_type: entityType, 
+                        heading: 'search',
+                        input_name: searchElement.getAttribute('name') || this.getAttribute('name') || 'search', 
+                        search: searchElement.value
+                    }, ...Object.assign({}, ...Array.from($this.querySelectorAll('input[supporting][name]')).map(i => ({[i.getAttribute('name')]: i.value})))}).then(searchResult => {
+                        if (searchResult && Array.isArray(searchResult.result)) {
+                            $this.result = searchResult.result
+                            if (datalistElement) {
+                                window.LiveElement.Scale.Core.buildDataList(datalistElement, $this.result, blankOptions)
+                            }
+                        }
+                    })
+                    var loadButtonAlreadyDisabled = loadButton.getAttribute('disabled'), resultIncludesValue = $this.result.includes(searchElement.value)
+                    if (loadButtonAlreadyDisabled && resultIncludesValue) {
+                        loadButton.removeAttribute('disabled')
+                    } else if (!loadButtonAlreadyDisabled && !resultIncludesValue) {
+                        loadButton.setAttribute('disabled', true)
+                    }
+                }
+            } else {
+                loadButton.setAttribute('disabled', true)
+            }
         }
+        
+        writeHistory(entityCore) {
+            var $this = this, historyElement = $this.shadowRoot.querySelector('.history'), historySmallElement = historyElement.querySelector('small')
+            var entityType = $this.getAttribute('entityType'), liElement = document.createElement('li'), hint = ''
+            liElement.classList.add('history-entry')
+            Object.entries(entityCore).forEach(entry => liElement.setAttribute(entry[0].replace(/^@/, '__-__'), entry[1]))
+            var historyPath = ($this.getAttribute('historyPath') || '${@id}')
+            Object.entries(entityCore).forEach(entry => historyPath = historyPath.replace('${' + entry[0] + '}', entry[1]))
+            if ($this.entity && Object.keys($this.entity).length > 2) {
+                if ($this.entity.name) {
+                    hint = `${hint}name="${$this.entity.name}", `
+                }
+                var extraHintField = Object.keys($this.entity)
+                    .filter(k => k != 'name' && k[0] != '@' && typeof $this.entity[k] != 'object').sort().shift()
+                if (extraHintField) {
+                    hint = `${hint}${extraHintField}=${JSON.stringify($this.entity[extraHintField])}`
+                }
+                Object.entries($this.entity).forEach(entry => historyPath = historyPath.replace('${' + entry[0] + '}', entry[1]))
+            }
+            if (hint) {
+                liElement.innerHTML = window.LiveElement.Scale.Core.truncateLabel(`${entityType}/${historyPath} [${hint}, ... ]`, 120)
+            } else {
+                liElement.innerHTML = window.LiveElement.Scale.Core.truncateLabel(`${entityType}/${historyPath} [${window.LiveElement.Scale.Console.IDE.newFlag}]`, 120)
+            }
+            if (historySmallElement) {
+                historySmallElement.remove()
+            }
+            historyElement.addEventListener('click', event => {
+                $this.loadHistory(liElement)
+            })
+            historyElement.prepend(liElement)
+        }
+        
+        loadHistory(historyEntry) {
+            var $this = this, loadButton = $this.shadowRoot.querySelector('button[name="load"]')
+            $this.querySelectorAll('input[name]').forEach(inputElement => {
+                var propertyName = inputElement.getAttribute('name')
+                var historyPropertyValue = historyEntry.getAttribute(propertyName.replace(/^__-__/, '@'))
+                inputElement.value = historyPropertyValue || '' 
+            })
+            loadButton.removeAttribute('disabled')
+            loadButton.focus()
+            loadButton.click()
+        }
+        
+        result = []
+        
+        entity = {}
         
     }
 </script>
