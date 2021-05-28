@@ -42,8 +42,7 @@ window.LiveElement.Live.processors.IdeTunnelTest = function(input) {
 window.LiveElement.Live.listeners.IdeTunnelCreate = {processor: 'IdeTunnelCreate', expired: true}
 window.LiveElement.Live.listeners.IdeTunnelTest = {processor: 'IdeTunnelTest', expired: true}
 
-window.LiveElement.Scale.Core.buildSnippet(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="tunnel"] fieldset[name="create"] div.snippet'))
-window.LiveElement.Scale.Core.buildSnippet(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="tunnel"] fieldset[name="test"] div.snippet'))
+window.LiveElement.Scale.Console.buildSnippets('tunnel')
 
 
 

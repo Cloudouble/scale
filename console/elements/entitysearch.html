@@ -46,7 +46,7 @@
     class EntitySearch extends window.LiveElement.Element.elements.HTMLElement {
 
         static __extends = 'HTMLElement'
-        static __properties = ['entityType']
+        static __properties = ['entityType', 'blankOptionText']
 
         constructor() {
             super()
@@ -101,6 +101,9 @@
                 })                
             })
             var primarySearchInput = $this.querySelector('input[type="search"][primary]')
+            if (!primarySearchInput) {
+                primarySearchInput = $this.querySelector('input[type="search"]')
+            }
             if (primarySearchInput) {
                 primarySearchInput.addEventListener('input', event => {
                     $this.runPrimarySearch(event.target)
@@ -129,7 +132,8 @@
             var $this = this, loadButton = $this.shadowRoot.querySelector('button[name="load"]')
             if (searchElement.value) {
                 var datalistElement, listId = searchElement.getAttribute('list'), entityType = $this.getAttribute('entityType')
-                var blankOptions = {[window.LiveElement.Scale.Console.IDE.newFlag]: `Generate UUID for a new ${entityType}...`}
+                var blankOptionText = $this.getAttribute('blankOptionText')
+                var blankOptions = blankOptionText ? {[window.LiveElement.Scale.Console.IDE.newFlag]: blankOptionText} : {}
                 if (listId) {
                     datalistElement = $this.querySelector(`datalist[id="${listId}"]`)
                 }
@@ -151,11 +155,9 @@
                         input_name: searchElement.getAttribute('name') || this.getAttribute('name') || 'search', 
                         search: searchElement.value
                     }, ...Object.assign({}, ...Array.from($this.querySelectorAll('input[supporting][name]')).map(i => ({[i.getAttribute('name')]: i.value})))}).then(searchResult => {
-                        if (searchResult && Array.isArray(searchResult.result)) {
-                            $this.result = searchResult.result
-                            if (datalistElement) {
-                                window.LiveElement.Scale.Core.buildDataList(datalistElement, $this.result, blankOptions)
-                            }
+                        if (searchResult && searchResult.result) {
+                            $this.result = Array.isArray(searchResult.result) ? searchResult.result : (typeof searchResult.result == 'object' ? Object.keys(searchResult.result) : [])
+                            window.LiveElement.Scale.Core.buildDataList(datalistElement, $this.result, blankOptions)
                         }
                     })
                     var loadButtonAlreadyDisabled = loadButton.getAttribute('disabled'), resultIncludesValue = $this.result.includes(searchElement.value)

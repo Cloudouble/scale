@@ -1,0 +1,53 @@
+<style>
+:host {
+    contain: content;
+    display: block;
+    position: relative;
+    cursor: pointer;
+}
+:host-context(:not([built])) {
+    display: none; 
+}
+:host-context([built]) {
+    display: block;
+}
+:host:focus, :host summary:focus {
+    outline: none;
+}
+</style>
+<template>
+    <table>
+        <thead>
+            <tr>
+                <th colspan="2">Property</th>
+                <th colspan="1">Data Type</th>
+                <th colspan="4">Value</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</template>
+<script>
+    /* global */
+    class OpaqueData extends window.LiveElement.Element.elements.HTMLElement {
+
+        static __extends = 'HTMLElement'
+        static __properties = ['Content-Length', 'Content-Type', 'Last-Modified', 'body', 'path']
+
+        constructor() {
+            super()
+            var $this = this
+            
+        }
+
+        static get observedAttributes() {
+            return (super.observedAttributes || []).concat(...this.__properties)
+        }
+        
+        connectedCallback() {
+            var $this = this
+            $this.build()
+        }
+        
+    }
+</script>

@@ -3,11 +3,11 @@ window.LiveElement.Scale.Console.IDE.Asset.buildSnippet = function(snippetParams
     if (snippetParams && typeof snippetParams == 'object') {
         window.LiveElement.Scale.Console.IDE.Asset.snippetParams = {...window.LiveElement.Scale.Console.IDE.Asset.snippetParams, ...snippetParams}
     }
-    window.LiveElement.Scale.Core.buildSnippet(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="asset"] fieldset[name="edit"] div.snippet'))
+    window.LiveElement.Scale.Console.buildSnippets('asset')
 }
 
 window.LiveElement.Live.processors.IdeAssetSearch = function(input) {
-    var handlerType = window.LiveElement.Live.getHandlerType(input)
+    /*var handlerType = window.LiveElement.Live.getHandlerType(input)
     if (handlerType == 'listener') {
         window.LiveElement.Scale.Console.IDE.Asset.asset = window.LiveElement.Scale.Console.IDE.Asset.asset || {}
         return window.LiveElement.Scale.Console.IDE.Asset.asset
@@ -58,7 +58,7 @@ window.LiveElement.Live.processors.IdeAssetSearch = function(input) {
                 searchInput.focus()
             })
         }
-    }
+    }*/
 }
 window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
@@ -212,4 +212,4 @@ window.LiveElement.Live.listeners.IdeAssetSearch = {processor: 'IdeAssetSearch',
 
 window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="asset"] fieldset[name="search"]'), 'IdeAssetSearch', 'loaded', false, true)
 
-window.LiveElement.Scale.Core.buildSnippet(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="asset"] fieldset[name="edit"] div.snippet'))
+window.LiveElement.Scale.Console.buildSnippets('asset')

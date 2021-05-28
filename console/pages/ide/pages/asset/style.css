@@ -1,7 +1,7 @@
 #ide[entity-type="asset"] > section[name="asset"] {
     display: block;
 }
-#ide > section[name="asset"] > fieldset[name="search"] > input[type="search"] {
+#ide > section[name="asset"] > element-entitysearch > input[type="search"] {
     width: 40em;
 }
 #ide > section[name="asset"] > fieldset[name="search"] > button[name="delete"] {

@@ -3,7 +3,7 @@ window.LiveElement.Scale.Console.IDE.Static.buildSnippet = function(snippetParam
     if (snippetParams && typeof snippetParams == 'object') {
         window.LiveElement.Scale.Console.IDE.Static.snippetParams = {...window.LiveElement.Scale.Console.IDE.Static.snippetParams, ...snippetParams}
     }
-    window.LiveElement.Scale.Core.buildSnippet(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="static"] fieldset[name="edit"] div.snippet'))
+    window.LiveElement.Scale.Console.buildSnippets('static')
 }
 
 window.LiveElement.Live.processors.IdeStaticSearch = function(input) {
@@ -212,4 +212,4 @@ window.LiveElement.Live.listeners.IdeStaticSearch = {processor: 'IdeStaticSearch
 
 window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="static"] fieldset[name="search"]'), 'IdeStaticSearch', 'loaded', false, true)
 
-window.LiveElement.Scale.Core.buildSnippet(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="static"] fieldset[name="edit"] div.snippet'))
+window.LiveElement.Scale.Console.buildSnippets('static')

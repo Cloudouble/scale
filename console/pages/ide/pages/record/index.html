@@ -1,51 +1,16 @@
 <h2>Record</h2>
 
-<element-entitysearch entityType="record" historyPath="${@type}/${@id}">
+<element-entitysearch entityType="record" blankOptionText="Generate UUID for a new record..." historyPath="${@type}/${@id}" live-trigger="loaded:IdeRecordEdit">
     <input name="@type" type="text" placeholder="records of class..." autocomplete="off" list="ide--class" supporting />
     <input name="@id" type="search" placeholder="record UUID..." autocomplete="off" list primary />
 </element-entitysearch>
 
-<element-snippet>
-/* SAVE record */
-window.fetch(
-    `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/record/${window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']}/${window.LiveElement.Scale.Console.IDE.Record.record['@id']}.json`, 
-    {
-        method: 'PUT', 
-        headers: {'Content-Type': 'application/json'}, 
-        body: JSON.stringify({
-            ${JSON.stringify(window.LiveElement.Scale.Console.IDE.Record.record, null, 20).slice(1, -1)}
-        }) 
-    }
-)
-            
-/* DELETE record */
-window.fetch(
-    `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/record/${window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']}/${window.LiveElement.Scale.Console.IDE.Record.record['@id']}.json`, 
-    {
-        method: 'DELETE'
-    }
-)
-</element-snippet>
-
-<fieldset name="edit" live-subscription="IdeRecordSearch:IdeRecordEdit">
+<fieldset name="edit">
     <h3>Edit</h3>
     <button name="save" disabled="true" live-trigger="click:IdeRecordEdit">Save</button>
     <button name="duplicate" disabled="true" live-trigger="click:IdeRecordEdit">Duplicate</button>
     <button name="delete" disabled="true" live-trigger="click:IdeRecordEdit">Delete</button>
-    <table class="editor">
-        <thead>
-            <tr>
-                <th colspan="2">Property</th>
-                <th colspan="1">Data Type</th>
-                <th colspan="4">Value</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-    <datalist id="ide-record-edit-properties-list"></datalist>
-    <details>
-        <summary>Snippet</summary>
-        <div class="snippet">
+    <element-snippet>
 /* SAVE record */
 window.fetch(
     `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/record/${window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']}/${window.LiveElement.Scale.Console.IDE.Record.record['@id']}.json`, 
@@ -65,6 +30,6 @@ window.fetch(
         method: 'DELETE'
     }
 )
-        </div>
-    </details>
+    </element-snippet>
+    <datalist id="ide-record-edit-properties-list"></datalist>
 </fieldset>

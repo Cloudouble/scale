@@ -1,11 +1,7 @@
 <h2>Asset</h2>
-<fieldset name="search">
-    <h3>Search</h3>
-    <input name="search" type="search" placeholder="path search..." autocomplete="off" list="ide-asset-search-list" live-trigger="keyup:IdeAssetSearch input:IdeAssetSearch" />
-    <button name="load" live-trigger="click:IdeAssetSearch" disabled="true">Load</button>
-    <button name="delete" live-trigger="click:IdeAssetSearch" disabled="true">Delete Asset</button>
-    <datalist id="ide-asset-search-list"></datalist>
-</fieldset>
+<element-entitysearch entityType="asset" historyPath="${path}" live-trigger="loaded:IdeAssetEdit">
+    <input name="path" type="search" placeholder="path search..." autocomplete="off" list />
+</element-entitysearch>
 <fieldset name="edit" live-subscription="IdeAssetSearch:IdeAssetEdit">
     <h3>Edit</h3>
     <label>
@@ -19,9 +15,7 @@
     <label name="upload">Upload Content<input type="file" name="upload" live-trigger="change:IdeAssetEdit" /></label>
     <button name="save" live-trigger="click:IdeAssetEdit" disabled="true">Save To Asset</button>
     <div class="editor" id="ide-asset-editor" disabled="true"></div>
-    <details class="snippet-container">
-        <summary>Snippet</summary>
-        <div class="snippet">
+    <element-snippet>
 /* SAVE asset */
 /* NOTE: body => window.btoa('your plain text or raw binary body') */
 window.fetch(
@@ -40,6 +34,5 @@ window.fetch(
         method: 'DELETE'
     }
 )
-        </div>
-    </details>
+    </element-snippet>
 </fieldset>

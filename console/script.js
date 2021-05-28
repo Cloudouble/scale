@@ -43,30 +43,6 @@ window.LiveElement.Scale.Core.syncWithLocalStorage = function(page, checkboxElem
         window.localStorage.removeItem(`${page}:${inputElement.getAttribute('name')}`)
     }
 }
-window.LiveElement.Scale.Core.buildSnippet = function(codeElement) {
-    if (!codeElement.getAttribute('regex')) {
-      codeElement.setAttribute('regex', codeElement.innerText)
-    }
-    var newValue = codeElement.getAttribute('regex').replace(/\$\{(?<code>[^\}]+)\}/g, function(...args) { 
-        var code = args.pop().code 
-        var retval 
-        try {
-          retval = code ? Function(`"use strict";return (${code})`)() : ''
-        } catch(e) {
-          retval = '${'+code+'}'
-        }
-        return retval
-    })
-    var editor = window.ace.edit(codeElement)
-    editor.setOptions({...window.LiveElement.Scale.Console.aceOptions, ...{readOnly: true}})
-    editor.renderer.setScrollMargin(10, 10)
-    editor.session.setMode(`ace/mode/${codeElement.getAttribute('mode') || 'javascript'}`)
-    editor.setValue(newValue)
-    var snippetContainer = codeElement.parentElement
-    if (snippetContainer.classList.contains('snippet-container')) {
-      snippetContainer.setAttribute('built', true)
-    }
-}
 window.LiveElement.Scale.Core.buildDataList = function(datalistElement, optionValues, blankOptions) {
     datalistElement.innerHTML = ''
     if (optionValues && typeof optionValues == 'object') {
@@ -170,7 +146,14 @@ window.LiveElement.Element.load().then(() => {
   
 })    
 
-window.ace.config.set("basePath", "https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/")
+window.LiveElement.Scale.Console.buildSnippets = function(page) {
+  var pageElement = document.getElementById(page)
+  if (pageElement) {
+    pageElement.querySelectorAll('element-snippet').forEach(snippetElement => {
+      snippetElement.build()
+    })
+  }
+}
 
 window.LiveElement.Scale.Console.aceOptions = {
     autoScrollEditorIntoView: true, 
@@ -187,5 +170,6 @@ window.LiveElement.Scale.Console.aceOptions = {
     theme: 'ace/theme/merbivore'
 }
 
+window.ace.config.set("basePath", "https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/")
 
 

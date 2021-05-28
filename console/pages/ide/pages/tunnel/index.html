@@ -6,9 +6,7 @@
         Tunnel ID
         <input name="id" type="uuid" readonly="readonly" live-subscription="IdeTunnelCreate:IdeTunnelCreate" />
     </label>
-    <details>
-        <summary>Snippet</summary>
-        <div class="snippet">
+    <element-snippet>
 var tunnel_handle = window.LiveElement.Scale.Core.generateUUID4()
 var tunnel_url = `${window.localStorage.getItem('system:system_access_url').replace('https:', 'wss:')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/tunnel/${tunnel_handle}`
 var tunnel_id
@@ -16,8 +14,7 @@ var tunnel_socket = new WebSocket(tunnel_url)
 tunnel_socket.addEventListener('message', event => {
     tunnel_id = JSON.parse(event.data).tunnel_id
 }, {once: true})
-        </div>
-    </details>
+    </element-snippet>
 </fieldset>
 <fieldset name="test">
     <h3>Test</h3>
@@ -29,14 +26,11 @@ tunnel_socket.addEventListener('message', event => {
         Received Data
         <textarea name="receive" readonly="readonly" live-subscription="IdeTunnelTest:IdeTunnelTest"></textarea>
     </label>
-    <details>
-        <summary>Snippet</summary>
-        <div class="snippet">
+    <element-snippet>
 var tunnel_id = '${window.LiveElement.Scale.Console.IDE.Tunnel.Create.tunnel_id}'
 window.fetch(`${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/tunnel/${tunnel_id}`, {
     method: 'PUT', 
     body: JSON.stringify(data)
 })
-        </div>
-    </details>
+    </element-snippet>
 </fieldset>

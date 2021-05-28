@@ -30,9 +30,7 @@
     </label>
     <button name="create" live-trigger="click:IdeChannelConfigure">Create</button>
     <button name="delete" live-trigger="click:IdeChannelConfigure">Delete</button>
-    <details class="snippet-container">
-        <summary>Snippet</summary>
-        <div class="snippet">
+    <element-snippet>
 window.fetch(
     '${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/connect.json', 
     {
@@ -45,27 +43,21 @@ window.fetch(
         }) 
     }
 )
-        </div>
-    </details>
+    </element-snippet>
 </fieldset>
 <fieldset name="code" live-subscription="IdeChannelSearch:IdeChannelCode">
     <h3>Code</h3>
     <label>
         Receive URL
         <input name="receive_url" type="url" readonly="readonly" />
-        <details class="snippet-container">
-            <summary>Snippet</summary>
-            <div class="snippet">
+        <element-snippet>
 var socket = new WebSocket('${window.LiveElement.Scale.Console.IDE.Channel.Code.receive_url}')
-            </div>
-        </details>
+        </element-snippet>
     </label>
     <label>
         Send URL
         <input name="send_url" type="url" readonly="readonly" />
-        <details class="snippet-container">
-            <summary>Snippet</summary>
-            <div class="snippet">
+        <element-snippet>
 window.fetch(
     '${window.LiveElement.Scale.Console.IDE.Channel.Code.send_url}', 
     {
@@ -73,23 +65,19 @@ window.fetch(
         body: JSON.stringify(data)
     }
 )
-            </div>
-        </details>
+        </element-snippet>
     </label>
     <label>
         Admin URL
         <input name="admin_url" type="url" readonly="readonly" />
-        <details class="snippet-container">
-            <summary>Snippet</summary>
-            <div class="snippet">
+        <element-snippet>
 window.fetch(
     '${window.LiveElement.Scale.Console.IDE.Channel.Code.admin_url}', 
     { 
         method: 'DELETE'
     }
 )
-            </div>
-        </details>
+        </element-snippet>
     </label>
 </fieldset>
 <fieldset name="test">

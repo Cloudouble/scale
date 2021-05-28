@@ -19,9 +19,7 @@
     <label name="upload">Upload Content<input type="file" name="upload" live-trigger="change:IdeStaticEdit" /></label>
     <button name="save" live-trigger="click:IdeStaticEdit" disabled="true">Save To Static</button>
     <div class="editor" id="ide-static-editor" disabled="true"></div>
-    <details class="snippet-container">
-        <summary>Snippet</summary>
-        <div class="snippet">
+    <element-snippet>
 /* SAVE static */
 /* NOTE: body => window.btoa('your plain text or raw binary body') */
 window.fetch(
@@ -40,6 +38,5 @@ window.fetch(
         method: 'DELETE'
     }
 )
-        </div>
-    </details>
+    </element-snippet>
 </fieldset>

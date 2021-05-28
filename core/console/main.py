@@ -1,7 +1,7 @@
 env = {"bucket": "scale.live-element.net", "lambda_namespace": "liveelement-scale", "system_root": "_", "shared": 0, "authentication_namespace": "LiveElementScale"}
 
 import json, boto3, base64, hashlib, time
-
+from wsgiref.handlers import format_date_time
 
 def run_test(test_path, test_field, test_value, start_time, s3_client):
     end_time = 0
@@ -147,20 +147,37 @@ def main(event, context):
                             except:
                                 channels = {}
                             retval['result'] = channels
-                elif entity_type == 'asset': 
+                elif entity_type in ['asset', 'static']: 
                     if heading == 'search':
                         search = event.get('search')
+                        input_name = event.get('input_name')
                         retval = {'search': search, 'result': {}}
-                        if search:
+                        if input_name == 'path':
+                            prefix = '{data_root}/asset/{search}'.format(data_root=env['data_root'], search=search) if entity_type == 'asset' else search
                             try:
-                                assets = s3_client.list_objects_v2(Bucket=env['bucket'], MaxKeys=100,  Prefix='{data_root}/asset/{search}'.format(data_root=env['data_root'], search=search))['Contents']
+                                assets = s3_client.list_objects_v2(Bucket=env['bucket'], MaxKeys=100,  Prefix=prefix)['Contents']
                                 try:
-                                    assets = {a['Key'].replace('{}/{}'.format(env['data_root'], 'asset'), '', 1).strip('/'): {k: v.timestamp() if k == 'LastModified' else v for k, v in s3_client.head_object(Bucket=env['bucket'], Key=a['Key']).items() if k in ['ContentType', 'ContentLength', 'LastModified'] } for a in assets}
+                                    if entity_type == 'asset':
+                                        assets = {a['Key'].replace('{}/{}'.format(env['data_root'], 'asset'), '', 1).strip('/'): {k: v.timestamp() if k == 'LastModified' else v for k, v in s3_client.head_object(Bucket=env['bucket'], Key=a['Key']).items() if k in ['ContentType', 'ContentLength', 'LastModified'] } for a in assets}
+                                    elif entity_type == 'static':
+                                        assets = {a['Key'].strip('/'): {k: format_date_time(v.timestamp()) if k == 'LastModified' else v for k, v in s3_client.head_object(Bucket=env['bucket'], Key=a['Key']).items() if k in ['ContentType', 'ContentLength', 'LastModified'] } for a in assets  if not a['Key'].startswith(env['system_root'])}
                                 except:
                                     assets = {}
                             except:
                                 assets = {}
-                        retval['result'] = assets
+                            retval['result'] = assets
+                        elif input_name == 'load':
+                            path = event.get('path')
+                            if path:
+                                if entity_type == 'asset':
+                                    asset_obj = s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/asset/{path}'.format(data_root=env['data_root'], path=path))
+                                elif entity_type == 'static' and not path.startswith(env['system_root']):
+                                    asset_obj = s3_client.get_object(Bucket=env['bucket'], Key='{path}'.format(path=path))
+                                retval = {
+                                    'path': path, 
+                                    'Content-Type': asset_obj['ContentType'], 'Content-Length': asset_obj['ContentLength'], 'Last-Modified': format_date_time(asset_obj['LastModified'].timestamp()), 
+                                    'body': base64.b64encode(asset_obj['Body'].read()).decode('utf-8')
+                                }
                 elif entity_type == 'classes':
                     classes = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/system/class/index.json'.format(data_root=env['data_root']))['Body'].read().decode('utf-8'))
                     for class_name in classes:
@@ -169,12 +186,12 @@ def main(event, context):
                     retval = classes
                 elif entity_type == 'record':
                     input_name = event.get('input_name')
-                    record_type = event.get('record_type')
+                    class_name = event.get('@type')
                     if heading == 'search':
-                        if record_type and input_name:
-                            if input_name == 'search-uuid' and 'search' in event:
+                        if class_name and input_name:
+                            if input_name == '@id' and 'search' in event:
                                 retval = {'search': event['search'], 'result': []} 
-                                prefix = '{data_root}/record/{record_type}/{search}'.format(data_root=env['data_root'], record_type=record_type, search=event['search'])
+                                prefix = '{data_root}/record/{class_name}/{search}'.format(data_root=env['data_root'], class_name=class_name, search=event['search'])
                                 try:
                                     retval['result'] = s3_client.list_objects_v2(Bucket=env['bucket'], MaxKeys=1000,  Prefix=prefix)['Contents']
                                 except:
@@ -183,13 +200,13 @@ def main(event, context):
                                     retval['result'] = [e['Key'].split('/')[-1].replace('.json', '') for e in retval['result']]
                                 except:
                                     retval['result'] = []
-                            elif input_name == 'load' and event.get('record_uuid'):
-                                record_uuid = event['record_uuid']
-                                record = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/record/{record_type}/{record_uuid}.json'.format(data_root=env['data_root'], record_type=record_type, record_uuid=record_uuid))['Body'].read().decode('utf-8'))
+                            elif input_name == 'load' and event.get('@id'):
+                                record_uuid = event['@id']
+                                record = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/record/{class_name}/{record_uuid}.json'.format(data_root=env['data_root'], class_name=class_name, record_uuid=record_uuid))['Body'].read().decode('utf-8'))
                                 retval = record
                     elif heading == 'edit':
                         if record_type:
-                            class_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/system/class/{record_type}.json'.format(data_root=env['data_root'], record_type=record_type))['Body'].read().decode('utf-8'))
+                            class_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/system/class/{class_name}.json'.format(data_root=env['data_root'], class_name=class_name))['Body'].read().decode('utf-8'))
                             properties = class_definition.get('properties', {})
                             for property_name, property_types in properties.items():
                                 property_definition = json.loads(s3_client.get_object(Bucket=env['bucket'], Key='{data_root}/system/property/{property_name}.json'.format(data_root=env['data_root'], property_name=property_name))['Body'].read().decode('utf-8'))
