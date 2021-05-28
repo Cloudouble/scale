@@ -205,10 +205,10 @@ input[readonly], pre code {
     background-color: whitesmoke;
 }
 
-
+/*
 .snippet-container:not([built]) {
     display: none !important; 
 }
 .snippet-container[built] {
     display: block;
-}
+}*/

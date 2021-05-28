@@ -162,9 +162,16 @@ window.LiveElement.Element.load().then(() => {
     })
   })
   observer.observe(document.querySelector('main'), {subtree: true, childList: true});
+  
+  window.LiveElement.Element.elements.Snippet.aceOptions = {...window.LiveElement.Scale.Console.aceOptions, ...{readOnly: true}}
+  document.querySelectorAll('element-snippet').forEach(snippetElement => {
+    snippetElement.build()
+  })
+  
 })    
 
 window.ace.config.set("basePath", "https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/")
+
 window.LiveElement.Scale.Console.aceOptions = {
     autoScrollEditorIntoView: true, 
     useSoftTabs: true, 

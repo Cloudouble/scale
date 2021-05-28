@@ -1,0 +1,81 @@
+<style>
+:host {
+    contain: content;
+    display: block;
+    position: relative;
+    cursor: pointer;
+}
+:host-context(:not([built])) {
+    display: none; 
+}
+:host-context([built]) {
+    display: block;
+}
+:host:focus, :host summary:focus {
+    outline: none;
+}
+</style>
+<template>
+    <details open>
+        <summary>Snippet</summary>
+        <slot></slot>
+    </details>
+</template>
+<script>
+    /* global */
+    class Snippet extends window.LiveElement.Element.elements.HTMLElement {
+
+        static __extends = 'HTMLElement'
+        static __properties = ['built', 'mode']
+
+        constructor() {
+            super()
+            var $this = this
+            
+        }
+
+        static get observedAttributes() {
+            return (super.observedAttributes || []).concat(...this.__properties)
+        }
+        
+        static aceOptions = {
+            readOnly: true
+        }
+        
+        connectedCallback() {
+            var $this = this
+            $this.build()
+        }
+        
+        build() {
+            var $this = this, codeElement = document.createElement('div')
+            if (!$this.regex) {
+                $this.regex = $this.innerText
+            }
+            var newValue = $this.regex.replace(/\$\{(?<code>[^\}]+)\}/g, function(...args) { 
+                var code = args.pop().code 
+                var retval 
+                try {
+                  retval = code ? Function(`"use strict";return (${code})`)() : ''
+                } catch(e) {
+                  retval = '${'+code+'}'
+                }
+                return retval
+            })
+            if ($this.editor) {
+                $this.editor.destroy()
+            }
+            $this.innerHTML = ''
+            $this.editor = window.ace.edit(codeElement)
+            $this.editor.setOptions($this.constructor.aceOptions)
+            $this.editor.renderer.setScrollMargin(10, 10)
+            $this.editor.session.setMode(`ace/mode/${$this.getAttribute('mode') || 'javascript'}`)
+            $this.editor.setValue(newValue)
+            $this.appendChild(codeElement)
+            $this.setAttribute('built', true)
+        }
+        
+    }
+</script>
+
+
