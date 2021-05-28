@@ -5,7 +5,7 @@ window.LiveElement.Scale.Console.IDE.Record.buildSnippet = function() {
 window.LiveElement.Live.processors.IdeRecordSearch = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
     if (handlerType == 'listener') {
-        return window.LiveElement.Scale.Console.IDE.Record.record
+        return (input.detail || {}).entity || {}
     }
 }
 
@@ -58,6 +58,7 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
         editor.appendChild(trElement)
     }
     if (handlerType == 'subscription') {
+        console.log('line 61', input)
         editor.innerHTML = ''
         Object.keys(input.payload).sort().forEach(property => {
             buildRow(property)
@@ -475,6 +476,6 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
 
 window.LiveElement.Live.listeners.IdeRecordSearch = {processor: 'IdeRecordSearch', expired: true}
 
-window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="record"] fieldset[name="search"]'), 'IdeRecordSearch', 'loaded', false, true)
+window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="record"] element-entitysearch'), 'IdeRecordSearch', 'loaded', false, true)
 
 window.LiveElement.Scale.Console.IDE.Record.buildSnippet()

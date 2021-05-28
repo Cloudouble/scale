@@ -119,7 +119,7 @@
                 }, ...entityCore}).then(entity => {
                     $this.entity = entity && typeof entity == 'object' ? entity : entityCore
                     $this.writeHistory(entityCore)
-                    $this.dispatchEvent(new window.CustomEvent('loaded'))
+                    $this.dispatchEvent(new window.CustomEvent('loaded', {detail: {entity: $this.entity}}))
                 })
                 
             })
