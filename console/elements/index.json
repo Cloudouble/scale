@@ -2,5 +2,7 @@
     "EntitySearch",
     "ImageEditor", 
     "Snippet", 
-    "Record"
+    "Record", 
+    "OpaqueData", 
+    "Asset"
 ]

@@ -6,62 +6,22 @@ window.LiveElement.Scale.Console.IDE.Asset.buildSnippet = function(snippetParams
     window.LiveElement.Scale.Console.buildSnippets('asset')
 }
 
-window.LiveElement.Live.processors.IdeAssetSearch = function(input) {
-    /*var handlerType = window.LiveElement.Live.getHandlerType(input)
-    if (handlerType == 'listener') {
-        window.LiveElement.Scale.Console.IDE.Asset.asset = window.LiveElement.Scale.Console.IDE.Asset.asset || {}
-        return window.LiveElement.Scale.Console.IDE.Asset.asset
-    } else if (window.LiveElement.Live.getHandlerType(input) == 'trigger') {
-        var searchFieldset = input.triggersource.closest('fieldset')
-        var searchInput = searchFieldset.querySelector('input[name="search"]'), deleteButton = searchFieldset.querySelector('button[name="delete"]')
-        var loadButton = searchFieldset.querySelector('button[name="load"]'), datalist = searchFieldset.querySelector('datalist')
-        if (input.attributes.name == 'search') {
-            var event = input.vector.split(':').shift()
-            if (event == 'keyup') {
-                window.LiveElement.Scale.Console.System.invokeLambda({
-                    page: 'ide', entity_type: 'asset', heading: 'search', search: input.properties.value
-                }).then(searchResult => {
-                    if (searchResult && typeof searchResult == 'object' && searchResult.result && typeof searchResult.result == 'object') {
-                        window.LiveElement.Scale.Console.IDE.Asset.Search.result = searchResult.result
-                        datalist.innerHTML = ''
-                        Object.keys(window.LiveElement.Scale.Console.IDE.Asset.Search.result).sort().forEach(asset_path => {
-                            var optionElement = document.createElement('option')
-                            optionElement.setAttribute('value', asset_path)
-                            optionElement.innerHTML = asset_path
-                            datalist.appendChild(optionElement)
-                        })
-                    }
-                })
-            } else if (event == 'input') {
-                if (datalist.querySelector(`option[value="${input.properties.value}"]`)) {
-                    loadButton.removeAttribute('disabled')
-                    deleteButton.removeAttribute('disabled')
-                } else {
-                    loadButton.setAttribute('disabled', true)
-                    deleteButton.setAttribute('disabled', true)
-                }
-                window.LiveElement.Scale.Console.IDE.Asset.buildSnippet({path: input.properties.value})
-            }
-        } else if (input.attributes.name == 'load') {
-            window.LiveElement.Scale.Console.IDE.Asset.asset = {...window.LiveElement.Scale.Console.IDE.Asset.Search.result[searchInput.value]}
-            window.LiveElement.Scale.Console.IDE.Asset.asset.path = searchInput.value
-            searchFieldset.dispatchEvent(new window.CustomEvent('loaded'))
-            window.LiveElement.Scale.Console.IDE.Asset.buildSnippet({path: searchInput.value})
-        } else if (input.attributes.name == 'delete') {
-            window.fetch(
-                `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${searchInput.value}`, 
-                {method: 'DELETE'}
-            ).then(r => {
-                searchInput.value = ''
-                loadButton.setAttribute('disabled', true)
-                deleteButton.setAttribute('disabled', true)
-                searchInput.focus()
-            })
-        }
-    }*/
-}
+window.LiveElement.Live.processors.IdeAssetSearch = function(input) {}
+
 window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
+    var editFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="asset"] fieldset[name="edit"]')
+    if (handlerType == 'trigger') {
+        console.log('line 14', input)
+        if (input.entity) {
+            var assetElement = document.createElement('element-asset')
+            Object.assign(assetElement, input.entity)
+            editFieldset.querySelector('h3').after(assetElement)
+        }
+    }
+    
+    
+    /*
     var editFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="asset"] fieldset[name="edit"]')
     var pathInput = editFieldset.querySelector('input[name="path"]')
     var contentTypeInput = editFieldset.querySelector('input[name="content-type"]')
@@ -205,11 +165,7 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
         if (!pathInput.value) {
             pathInput.focus()
         }
-    }
+    }*/
 }
-
-window.LiveElement.Live.listeners.IdeAssetSearch = {processor: 'IdeAssetSearch', expired: true}
-
-window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="asset"] fieldset[name="search"]'), 'IdeAssetSearch', 'loaded', false, true)
 
 window.LiveElement.Scale.Console.buildSnippets('asset')

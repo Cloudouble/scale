@@ -1,0 +1,32 @@
+<style>
+:host {
+    contain: content;
+    display: block;
+    position: relative;
+}
+</style>
+<template>
+</template>
+<script>
+    /* global */
+    class Asset extends window.LiveElement.Element.elements.OpaqueData {
+
+        static __extends = 'OpaqueData'
+        static __properties = []
+
+        constructor() {
+            super()
+            var $this = this
+            
+        }
+
+        static get observedAttributes() {
+            return (super.observedAttributes || []).concat()
+        }
+        
+        /*connectedCallback() {
+            var $this = this
+        }*/
+        
+    }
+</script>

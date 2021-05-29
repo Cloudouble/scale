@@ -3,29 +3,9 @@
     contain: content;
     display: block;
     position: relative;
-    cursor: pointer;
-}
-:host-context(:not([built])) {
-    display: none; 
-}
-:host-context([built]) {
-    display: block;
-}
-:host:focus, :host summary:focus {
-    outline: none;
 }
 </style>
 <template>
-    <table>
-        <thead>
-            <tr>
-                <th colspan="2">Property</th>
-                <th colspan="1">Data Type</th>
-                <th colspan="4">Value</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
 </template>
 <script>
     /* global */
@@ -41,12 +21,23 @@
         }
 
         static get observedAttributes() {
-            return (super.observedAttributes || []).concat(...this.__properties)
+            return (super.observedAttributes || []).concat(...window.LiveElement.Element.elements.OpaqueData.__properties)
         }
         
         connectedCallback() {
             var $this = this
-            $this.build()
+            var objectElement = document.createElement('object')
+            if ($this.body && $this['Content-Type']) {
+                objectElement.setAttribute('data', `data:${$this['Content-Type']};base64,${$this.body}`)
+                objectElement.setAttribute('type', $this['Content-Type'])
+            }
+            ['Content-Length', 'Last-Modified', 'path'].forEach(paramName => {
+                if ($this[paramName]) {
+                    var contentLengthParamElement = document.createElement('param')
+                    contentLengthParamElement.setAttribute('name', paramName)
+                    contentLengthParamElement.setAttribute('value', $this[paramName])
+                }
+            })
         }
         
     }
