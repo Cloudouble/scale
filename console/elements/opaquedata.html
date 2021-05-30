@@ -12,7 +12,6 @@
     class OpaqueData extends window.LiveElement.Element.elements.HTMLElement {
 
         static __extends = 'HTMLElement'
-        static __properties = ['Content-Length', 'Content-Type', 'Last-Modified', 'body', 'path']
 
         constructor() {
             super()
@@ -21,7 +20,7 @@
         }
 
         static get observedAttributes() {
-            return (super.observedAttributes || []).concat(...window.LiveElement.Element.elements.OpaqueData.__properties)
+            return (super.observedAttributes || []).concat('Content-Length', 'Content-Type', 'Last-Modified', 'path', 'body')
         }
         
         connectedCallback() {
@@ -30,14 +29,52 @@
             if ($this.body && $this['Content-Type']) {
                 objectElement.setAttribute('data', `data:${$this['Content-Type']};base64,${$this.body}`)
                 objectElement.setAttribute('type', $this['Content-Type'])
+                $this.shadowRoot.appendChild(objectElement)
             }
             ['Content-Length', 'Last-Modified', 'path'].forEach(paramName => {
                 if ($this[paramName]) {
-                    var contentLengthParamElement = document.createElement('param')
-                    contentLengthParamElement.setAttribute('name', paramName)
-                    contentLengthParamElement.setAttribute('value', $this[paramName])
+                    var paramElement = document.createElement('param')
+                    paramElement.setAttribute('name', paramName)
+                    paramElement.setAttribute('value', $this[paramName])
+                    $this.shadowRoot.appendChild(paramElement)
                 }
             })
+        }
+        
+        setParam(name, value) {
+            var $this = this, isNew = false, paramElement = $this.shadowRoot.querySelector(`param[name=${name}]`) || document.createElement('param')
+            if (!paramElement.hasAttribute('name')) {
+                paramElement.setAttribute('name', name)
+                isNew = true
+            }
+            paramElement.setAttribute('value', value)
+            if (isNew) {
+                $this.shadowRoot.appendChild(paramElement)
+            }
+        }
+        
+        ['Content-Length']($this, value) {
+            $this.setParam('Content-Length', value)
+            return value
+        }
+        
+        ['Content-Type']($this, value) {
+            $this.setParam('Content-Type', value)
+            return value
+        }
+        
+        ['Last-Modified']($this, value) {
+            $this.setParam('Last-Modified', value)
+            return value
+        }
+        
+        path($this, value) {
+            $this.setParam('path', value)
+            return value
+        }
+        
+        body($this, value) {
+            console.log('line 77')
         }
         
     }
