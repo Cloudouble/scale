@@ -87,6 +87,7 @@
                 }
             }
             $this.setImageEditorProperty('contenttype', value)
+            /***/
             return value
         }
         
@@ -97,6 +98,9 @@
         
         path($this, value) {
             $this.setParam('path', value)
+            if (!$this['Content-Type']) {
+
+            }
             return value
         }
         
@@ -137,6 +141,7 @@
                     imgElement.setAttribute('src', dataURL)
                     imageEditorElement.appendChild(imgElement)
                 }
+                /***/
             }
         }
         
@@ -149,6 +154,68 @@
                 divElement.setAttribute('style', 'display: block;')
             })
             return value
+        }
+        
+        static contentTypesMap = {
+            "application/epub+zip": {"suffix": "epub", "name": "Electronic publication (EPUB)"},
+            "application/gzip": {"suffix": "gz", "name": "GZip Compressed Archive"},
+            "application/json": {"suffix": "json", "name": "JSON format"},
+            "application/ld+json": {"suffix": "jsonld", "name": "JSON-LD format"},
+            "application/msword": {"suffix": "doc", "name": "Microsoft Word"},
+            "application/octet-stream": {"suffix": "bin", "name": "Any kind of binary data"},
+            "application/pdf": {"suffix": "pdf", "name": "Adobe Portable Document Format (PDF)"},
+            "application/rtf": {"suffix": "rtf", "name": "Rich Text Format (RTF)"},
+            "application/vnd.amazon.ebook": {"suffix": "azw", "name": "Amazon Kindle eBook format"},
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {"suffix": "docx", "name": "Microsoft Word (OpenXML)"},
+            "application/vnd.ms-fontobject": {"suffix": "eot", "name": "MS Embedded OpenType fonts"},
+            "application/vnd.oasis.opendocument.presentation": {"suffix": "odp", "name": "OpenDocument presentation document"},
+            "application/vnd.oasis.opendocument.spreadsheet": {"suffix": "ods", "name": "OpenDocument spreadsheet document"},
+            "application/vnd.oasis.opendocument.text": {"suffix": "odt", "name": "OpenDocument text document"},
+            "application/vnd.ms-powerpoint": {"suffix": "ppt", "name": "Microsoft PowerPoint"},
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation": {"suffix": "pptx", "name": "Microsoft PowerPoint (OpenXML)"},
+            "application/vnd.rar": {"suffix": "rar", "name": "RAR archive"},
+            "application/vnd.ms-excel": {"suffix": "xls", "name": "Microsoft Excel"},
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {"suffix": "xlsx", "name": "Microsoft Excel (OpenXML)"},
+            "application/xhtml+xml": {"suffix": "xhtml", "name": "XHTML"},
+            "text/xml": {"suffix": "xml", "name": "XML - Human Readable"},
+            "application/x-bzip": {"suffix": "bz", "name": "BZip archive"},
+            "application/x-bzip2": {"suffix": "bz2", "name": "BZip2 archive"},
+            "application/x-tar": {"suffix": "tar", "name": "Tape Archive (TAR)"},
+            "application/x-7z-compressed": {"suffix": "7z", "name": "7-zip archive"},
+            "application/zip": {"suffix": "zip", "name": "ZIP archive"},
+            "audio/aac": {"suffix": "aac", "name": "AAC audio"},
+            "audio/midi": {"suffix": "mid", "name": "Musical Instrument Digital Interface (MIDI)"},
+            "audio/mpeg": {"suffix": "mp3", "name": "MP3 audio"},
+            "audio/ogg": {"suffix": "oga", "name": "OGG audio" },
+            "audio/opus": {"suffix": "opus", "name": "Opus audio"},
+            "audio/wav": {"suffix": "wav", "name": "Waveform Audio Format"},
+            "audio/webm": {"suffix": "weba", "name": "WEBM audio"},
+            "font/otf": {"suffix": "otf", "name": "OpenType font"},
+            "font/ttf": {"suffix": "ttf", "name": "TrueType Font"},
+            "font/woff": {"suffix": "woff", "name": "Web Open Font Format (WOFF)"},
+            "font/woff2": {"suffix": "woff2", "name": "Web Open Font Format (WOFF)"},
+            "image/bmp": {"suffix": "bmp", "name": "Windows OS/2 Bitmap Graphics"},
+            "image/gif": {"suffix": "gif", "name": "Graphics Interchange Format (GIF)"},
+            "image/jpeg": {"suffix": "jpeg", "name": "JPEG images"},
+            "image/jpg": {"suffix": "jpg", "name": "JPEG images"},
+            "image/png": {"suffix": "png", "name": "Portable Network Graphics"},
+            "image/svg+xml": {"suffix": "svg", "name": "Scalable Vector Graphics"},
+            "image/tiff": {"suffix": "tiff", "name": "Tagged Image File Format (TIFF)"},
+            "image/vnd.microsoft.icon": {"suffix": "ico", "name": "Icon format"},
+            "image/webp": {"suffix": "webp", "name": "WEBP image"},
+            "text/calendar": {"suffix": "ics", "name": "iCalendar format"},
+            "text/css": {"suffix": "css", "name": "Cascading Style Sheets (CSS)"},
+            "text/csv": {"suffix": "csv", "name": "Comma-separated values (CSV)"},
+            "text/html": {"suffix": "html", "name": "HyperText Markup Language (HTML)"},
+            "text/javascript": {"suffix": "mjs", "name": "JavaScript Module" },
+            "text/plain": {"suffix": "txt", "name": "Text (generally ASCII or ISO 8859-n)"},
+            "text/tab-separated-values": {"suffix": "tsv", "name": "Tab-separated values (TSV)"},
+            "video/mp2t": {"suffix": "ts", "name": "MPEG transport stream"},
+            "video/mpeg": {"suffix": "mpeg", "name": "MPEG Video"},
+            "video/mp4": {"suffix": "mp4", "name": "MP4 audio"},
+            "video/ogg": {"suffix": "ogv", "name": "OGG video"},
+            "video/webm": {"suffix": "webm", "name": "WEBM video"},
+            "video/x-msvideo": {"suffix": "avi", "name": "AVI: Audio Video Interleave"}
         }
         
     }
