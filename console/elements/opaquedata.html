@@ -4,8 +4,13 @@
     display: block;
     position: relative;
 }
+:host > .viewer, :host > .editor {
+    display: none;
+}
 </style>
 <template>
+    <div name="viewer"></div>
+    <div name="editor"></div>
 </template>
 <script>
     /* global */
@@ -20,7 +25,7 @@
         }
 
         static get observedAttributes() {
-            return (super.observedAttributes || []).concat('Content-Length', 'Content-Type', 'Last-Modified', 'path', 'body')
+            return (super.observedAttributes || []).concat('Content-Length', 'Content-Type', 'Last-Modified', 'path', 'body', 'mode')
         }
         
         connectedCallback() {
@@ -28,21 +33,25 @@
         }
         
         setParam(name, value) {
-            var $this = this, isNewParam, isNewObject, paramElement = $this.shadowRoot.querySelector(`object param[name=${name}]`) || document.createElement('param')
-            if (!paramElement.hasAttribute('name')) {
-                paramElement.setAttribute('name', name)
-                isNewParam = true
-            }
-            paramElement.setAttribute('value', value)
-            if (isNewParam) {
-                var objectElement = $this.shadowRoot.querySelector('object')
-                if (!objectElement) {
-                    objectElement = document.createElement('object')
-                    isNewObject = true
+            var $this = this
+            if ($this.mode != 'editor') {
+                var isNewParam, isNewObject, viewerElement = $this.shadowRoot.querySelector('div[name="viewer"]') 
+                var paramElement = viewerElement.querySelector(`object param[name=${name}]`) || document.createElement('param')
+                if (!paramElement.hasAttribute('name')) {
+                    paramElement.setAttribute('name', name)
+                    isNewParam = true
                 }
-                objectElement.appendChild(paramElement)
-                if (isNewObject) {
-                    $this.shadowRoot.appendChild(objectElement)
+                paramElement.setAttribute('value', value)
+                if (isNewParam) {
+                    var objectElement = viewerElement.querySelector('object')
+                    if (!objectElement) {
+                        objectElement = document.createElement('object')
+                        isNewObject = true
+                    }
+                    objectElement.appendChild(paramElement)
+                    if (isNewObject) {
+                        viewerElement.appendChild(objectElement)
+                    }
                 }
             }
         }
@@ -53,9 +62,21 @@
         }
         
         ['Content-Type']($this, value) {
-            var objectElement = $this.shadowRoot.querySelector('object')
-            if (objectElement) {
-                objectElement.setAttribute('type', value)
+            if ($this.mode != 'editor') {
+                var viewerElement = $this.shadowRoot.querySelector('div[name="viewer"]'), editorElement = $this.shadowRoot.querySelector('div[name="editor"]') 
+                var objectElement = viewerElement.querySelector('object')
+                if (objectElement) {
+                    objectElement.setAttribute('type', value)
+                }
+                var contentBase = value.split('/', 2)[0]
+                if (contentBase == 'image') {
+                    var imageEditorElement = editorElement.querySelector('element-imageeditor')
+                    if (!imageEditorElement) {
+                        imageEditorElement = document.createElement('element-imageeditor')
+                        editorElement.appendChild(imageEditorElement)
+                    }
+                    imageEditorElement.contenttype = value
+                }
             }
             return value
         }
@@ -71,14 +92,39 @@
         }
         
         body($this, value) {
-            var isNew, objectElement = $this.shadowRoot.querySelector('object')
-            if (!objectElement) {
-                objectElement = document.createElement('object')
-                isNew = true
+            if ($this.mode != 'editor') {
+                var isNew, viewerElement = $this.shadowRoot.querySelector('div[name="viewer"]'), editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
+                var objectElement = viewerElement.querySelector('object'), dataURL = `data:${$this['Content-Type']};base64,${value}`
+                if (!objectElement) {
+                    objectElement = document.createElement('object')
+                    isNew = true
+                }
+                objectElement.setAttribute('data', dataURL)
+                if (isNew) {
+                    viewerElement.appendChild(objectElement)
+                }
+                if ($this['Content-Type']) {
+                    var contentBase = $this['Content-Type'].split('/', 2)[0]
+                    if (contentBase == 'image') {
+                        var imageEditorElement = editorElement.querySelector('element-imageeditor')
+                        if (!imageEditorElement) {
+                            imageEditorElement = document.createElement('element-imageeditor')
+                            editorElement.appendChild(imageEditorElement)
+                        }
+                        var imgElement = document.createElement('img')
+                        imgElement.setAttribute('src', dataURL)
+                    }
+                }
             }
-            objectElement.setAttribute('data', `data:${$this['Content-Type']};base64,${value}`)
-            if (isNew) {
-                $this.shadowRoot.appendChild(objectElement)
+        }
+        
+        mode($this, value) {
+            $this.shadowRoot.querySelectorAll(':scope > div').forEach(divElement => {
+                divElement.removeAttribute('style')
+            })
+            var divElement = $this.querySelector(`div[name="${value}"]`)
+            if (divElement) {
+                divElement.setAttribute('style', 'display: block;')
             }
         }
         

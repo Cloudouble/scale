@@ -12,9 +12,13 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
     var editFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="asset"] fieldset[name="edit"]')
     if (handlerType == 'trigger') {
-        console.log('line 14', input)
         if (input.entity) {
-            var assetElement = document.createElement('element-asset')
+            var assetElement = editFieldset.querySelector('element-asset')
+            if (assetElement) {
+                assetElement.remove()
+            }
+            assetElement = document.createElement('element-asset')
+            assetElement.mode = 'viewer'
             Object.assign(assetElement, input.entity)
             editFieldset.querySelector('h3').after(assetElement)
         }
