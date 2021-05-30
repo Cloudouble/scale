@@ -18,7 +18,7 @@ window.LiveElement.Live.processors.IdeAssetEdit = function(input) {
                 assetElement.remove()
             }
             assetElement = document.createElement('element-asset')
-            assetElement.mode = 'viewer'
+            assetElement.mode = 'editor'
             Object.assign(assetElement, input.entity)
             editFieldset.querySelector('h3').after(assetElement)
         }

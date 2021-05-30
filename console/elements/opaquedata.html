@@ -56,8 +56,25 @@
             }
         }
         
+        setImageEditorProperty(name, value) {
+            var $this = this
+            if ($this.mode != 'viewer') {
+                var contentBase = ((name == 'contenttype' ? value : $this['Content-Type']) || '').split('/')[0]
+                var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
+                if (contentBase == 'image') {
+                    var imageEditorElement = editorElement.querySelector('element-imageeditor')
+                    if (!imageEditorElement) {
+                        imageEditorElement = document.createElement('element-imageeditor')
+                        editorElement.appendChild(imageEditorElement)
+                    }
+                    imageEditorElement[name] = value
+                }
+            }
+        }
+        
         ['Content-Length']($this, value) {
             $this.setParam('Content-Length', value)
+            $this.setImageEditorProperty('size', value)
             return value
         }
         
@@ -68,16 +85,8 @@
                 if (objectElement) {
                     objectElement.setAttribute('type', value)
                 }
-                var contentBase = value.split('/', 2)[0]
-                if (contentBase == 'image') {
-                    var imageEditorElement = editorElement.querySelector('element-imageeditor')
-                    if (!imageEditorElement) {
-                        imageEditorElement = document.createElement('element-imageeditor')
-                        editorElement.appendChild(imageEditorElement)
-                    }
-                    imageEditorElement.contenttype = value
-                }
             }
+            $this.setImageEditorProperty('contenttype', value)
             return value
         }
         
@@ -92,9 +101,11 @@
         }
         
         body($this, value) {
+            var contentBase = ($this['Content-Type'] || '').split('/')[0], editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
+            var dataURL = `data:${$this['Content-Type']};base64,${value}`
             if ($this.mode != 'editor') {
-                var isNew, viewerElement = $this.shadowRoot.querySelector('div[name="viewer"]'), editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
-                var objectElement = viewerElement.querySelector('object'), dataURL = `data:${$this['Content-Type']};base64,${value}`
+                var isNew, viewerElement = $this.shadowRoot.querySelector('div[name="viewer"]')
+                var objectElement = viewerElement.querySelector('object')
                 if (!objectElement) {
                     objectElement = document.createElement('object')
                     isNew = true
@@ -104,7 +115,6 @@
                     viewerElement.appendChild(objectElement)
                 }
                 if ($this['Content-Type']) {
-                    var contentBase = $this['Content-Type'].split('/', 2)[0]
                     if (contentBase == 'image') {
                         var imageEditorElement = editorElement.querySelector('element-imageeditor')
                         if (!imageEditorElement) {
@@ -116,16 +126,29 @@
                     }
                 }
             }
+            if ($this.mode != 'viewer') {
+                if (contentBase == 'image') {
+                    var imageEditorElement = editorElement.querySelector('element-imageeditor')
+                    if (!imageEditorElement) {
+                        imageEditorElement = document.createElement('element-imageeditor')
+                        editorElement.appendChild(imageEditorElement)
+                    }
+                    var imgElement = document.createElement('img')
+                    imgElement.setAttribute('src', dataURL)
+                    imageEditorElement.appendChild(imgElement)
+                }
+            }
         }
         
         mode($this, value) {
             $this.shadowRoot.querySelectorAll(':scope > div').forEach(divElement => {
                 divElement.removeAttribute('style')
             })
-            var divElement = $this.querySelector(`div[name="${value}"]`)
-            if (divElement) {
+            var divElements = value ? $this.shadowRoot.querySelectorAll(`:scope > div[name="${value}"]`) : $this.shadowRoot.querySelectorAll(`:scope > div`)
+            divElements.forEach(divElement => {
                 divElement.setAttribute('style', 'display: block;')
-            }
+            })
+            return value
         }
         
     }

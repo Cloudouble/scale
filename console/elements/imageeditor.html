@@ -3,6 +3,7 @@
     contain: content;
     display: block;
     position: relative;
+    min-height: 150px;
 }
 
 :host canvas {
@@ -160,6 +161,10 @@
         
         height($this, value) {
             $this.shadowRoot.querySelector('input[name="height"]').value = value
+            var containerHeight = (parseFloat(value) || 0) + 150, styleHeight = parseInt($this.style.height, 10)
+            if (!styleHeight || styleHeight != containerHeight) {
+                $this.style.height = `${containerHeight}px`
+            }
             return value
         }
         
