@@ -25,31 +25,25 @@
         
         connectedCallback() {
             var $this = this
-            var objectElement = document.createElement('object')
-            if ($this.body && $this['Content-Type']) {
-                objectElement.setAttribute('data', `data:${$this['Content-Type']};base64,${$this.body}`)
-                objectElement.setAttribute('type', $this['Content-Type'])
-                $this.shadowRoot.appendChild(objectElement)
-            }
-            ['Content-Length', 'Last-Modified', 'path'].forEach(paramName => {
-                if ($this[paramName]) {
-                    var paramElement = document.createElement('param')
-                    paramElement.setAttribute('name', paramName)
-                    paramElement.setAttribute('value', $this[paramName])
-                    $this.shadowRoot.appendChild(paramElement)
-                }
-            })
         }
         
         setParam(name, value) {
-            var $this = this, isNew = false, paramElement = $this.shadowRoot.querySelector(`param[name=${name}]`) || document.createElement('param')
+            var $this = this, isNewParam, isNewObject, paramElement = $this.shadowRoot.querySelector(`object param[name=${name}]`) || document.createElement('param')
             if (!paramElement.hasAttribute('name')) {
                 paramElement.setAttribute('name', name)
-                isNew = true
+                isNewParam = true
             }
             paramElement.setAttribute('value', value)
-            if (isNew) {
-                $this.shadowRoot.appendChild(paramElement)
+            if (isNewParam) {
+                var objectElement = $this.shadowRoot.querySelector('object')
+                if (!objectElement) {
+                    objectElement = document.createElement('object')
+                    isNewObject = true
+                }
+                objectElement.appendChild(paramElement)
+                if (isNewObject) {
+                    $this.shadowRoot.appendChild(objectElement)
+                }
             }
         }
         
@@ -59,7 +53,10 @@
         }
         
         ['Content-Type']($this, value) {
-            $this.setParam('Content-Type', value)
+            var objectElement = $this.shadowRoot.querySelector('object')
+            if (objectElement) {
+                objectElement.setAttribute('type', value)
+            }
             return value
         }
         
@@ -74,7 +71,15 @@
         }
         
         body($this, value) {
-            console.log('line 77')
+            var isNew, objectElement = $this.shadowRoot.querySelector('object')
+            if (!objectElement) {
+                objectElement = document.createElement('object')
+                isNew = true
+            }
+            objectElement.setAttribute('data', `data:${$this['Content-Type']};base64,${value}`)
+            if (isNew) {
+                $this.shadowRoot.appendChild(objectElement)
+            }
         }
         
     }
