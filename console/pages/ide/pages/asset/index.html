@@ -9,17 +9,17 @@
 /* SAVE asset */
 /* NOTE: body => window.btoa('your plain text or raw binary body') */
 window.fetch(
-    `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${window.LiveElement.Scale.Console.IDE.Asset.snippetParams.path}.json`, 
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${window.LiveElement.Scale.Console.IDE.Asset.assetElement.path}.json`, 
     {
         method: 'PUT', 
-        headers: {'Content-Type': `${window.LiveElement.Scale.Console.IDE.Asset.snippetParams.contenttype}`}, 
-        body: `${window.LiveElement.Scale.Console.IDE.Asset.snippetParams.body}`
+        headers: {'Content-Type': `${window.LiveElement.Scale.Console.IDE.Asset.assetElement.contenttype}`}, 
+        body: `${window.LiveElement.Scale.Console.IDE.Asset.assetElement.dataURL.split(',')[1]}`
     }
 )
             
 /* DELETE asset */
 window.fetch(
-    `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${window.LiveElement.Scale.Console.IDE.Asset.snippetParams.path}.json`, 
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${window.LiveElement.Scale.Console.IDE.Asset.assetElement.path}.json`, 
     {
         method: 'DELETE'
     }

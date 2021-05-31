@@ -4,8 +4,67 @@
     display: block;
     position: relative;
 }
+:host > label {
+    width: 12em;
+    margin-right: 2em;
+    display: inline-block;
+}
+:host > label:first-of-type {
+    width: 21em;
+    margin-right: 0.5em;
+}
+:host > label:nth-of-type(2) {
+    margin-right: 1em;
+}
+:host > label > input {
+    width: calc(100% - 4px);
+    margin-right: 2em;
+}
+:host > button {
+    margin-left: 2em;
+    margin-right: 2em;
+}
+:host > div {
+    margin-top: 1em;
+}
+:host input[type="file"] {
+    display: none;
+}
+:host label[name="upload"] {
+    appearance: button;
+    -moz-appearance: button;
+    -webkit-appearance: button;
+    -webkit-writing-mode: horizontal-tb !important;
+    text-rendering: auto;
+    color: buttontext;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    display: inline-block;
+    text-align: center;
+    align-items: flex-start;
+    cursor: pointer;
+    background-color: buttonface;
+    box-sizing: border-box;
+    margin: 0em;
+    font: 400 13.3333px Arial;
+    padding: 1px 6px;
+    border-width: 2px;
+    border-style: outset;
+    border-color: buttonface;
+    border-image: initial;
+    width: auto;
+}
+:host > button[name="delete"] {
+    color: red;
+}
 </style>
 <template>
+    <label name="upload">Upload<input type="file" name="upload" /></label>
+    <button name="save" disabled="true">Save</button>
+    <button name="delete" disabled="true">Delete</button>
     <div name="viewer"></div>
     <div name="editor"></div>
 </template>
@@ -26,7 +85,73 @@
         }
         
         connectedCallback() {
-            var $this = this
+            var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+            var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
+            $this.shadowRoot.querySelector('input[type="file"]').addEventListener('change', event => {
+                if (event.target.files.length) {
+                    $this.file = event.target.files[0]
+                    $this['Content-Type'] = $this.file.type
+                    if ($this.path && $this.path.slice(-1) == '/') {
+                        $this.path = `${$this.path}${$this.file.name}`
+                    } else if (!$this.path) {
+                        $this.path = $this.file.name
+                    }
+                    var reader = new window.FileReader()
+                    reader.addEventListener('load', event => {
+                        $this.body = event.target.result.split(',')[1]
+                    })
+                    reader.readAsDataURL($this.file)
+                    event.target.value = ''
+                    if (saveButton) {
+                        saveButton.removeAttribute('disabled')
+                    }
+                }
+            })
+            var pathInputElement = $this.shadowRoot.querySelector('input[name="path"]')
+            if (pathInputElement) {
+                pathInputElement.addEventListener('change', event => {
+                    $this.path = event.target.value
+                    if (saveButton) {
+                        saveButton.removeAttribute('disabled')
+                    }
+                })
+            }
+            var contentTypeInputElement = $this.shadowRoot.querySelector('input[name="Content-Type"]')
+            if (contentTypeInputElement) {
+                contentTypeInputElement.addEventListener('change', event => {
+                    $this['Content-Type'] = event.target.value
+                    if (saveButton) {
+                        saveButton.removeAttribute('disabled')
+                    }
+                })
+            }
+            if (saveButton) {
+                saveButton.addEventListener('click', event => {
+                    window.fetch(
+                        `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${$this.path}`, 
+                        {
+                            method: 'PUT', 
+                            headers: {"Content-Type": $this['Content-Type']}, 
+                            body: $this.editorType == 'image' ? `${$this.editor}` : window.btoa($this.editor.getValue())
+                        }
+                    ).then(r => {
+                        saveButton.setAttribute('disabled', true)
+                        if (deleteButton) {
+                            deleteButton.removeAttribute('disabled')
+                        }
+                    })
+                })
+            }
+            if (deleteButton) {
+                deleteButton.addEventListener('click', event => {
+                    window.fetch(
+                        `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${$this.path}`, 
+                        {method: 'DELETE'}
+                    ).then(r => {
+                        saveButton.removeAttribute('disabled')
+                    })
+                })
+            }
         }
         
         setParam(name, value) {
@@ -56,6 +181,7 @@
         ['Content-Length']($this, value) {
             $this.setParam('Content-Length', value)
             $this.setImageEditorProperty('size', value/1024)
+            $this.dispatchEvent(new window.CustomEvent('change'))
             return value
         }
         
@@ -79,11 +205,17 @@
                     $this.editorType = 'upload'
                 }
             }
+            var contentTypeInput = $this.shadowRoot.querySelector('input[name="Content-Type"]')
+            if (contentTypeInput.value != String(value)) {
+                contentTypeInput.value = value
+            }
+            $this.dispatchEvent(new window.CustomEvent('change'))
             return value
         }
         
         ['Last-Modified']($this, value) {
             $this.setParam('Last-Modified', value)
+            $this.dispatchEvent(new window.CustomEvent('change'))
             return value
         }
         
@@ -93,6 +225,11 @@
                 var suffix = value.split('.').pop()
                 $this['Content-Type'] = (([['application/octet-stream']]).concat(Object.entries($this.constructor.contentTypesMap).filter(entry => entry[1].suffix == suffix)))[0][0]
             }
+            var pathInput = $this.shadowRoot.querySelector('input[name="path"]')
+            if (pathInput.value != String(value)) {
+                pathInput.value = value
+            }
+            $this.dispatchEvent(new window.CustomEvent('change'))
             return value
         }
         
@@ -115,6 +252,11 @@
             if ($this.mode != 'viewer') {
                 $this.createEditor()
             }
+            var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
+            if (deleteButton) {
+                deleteButton.removeAttribute('disabled')
+            }
+            $this.dispatchEvent(new window.CustomEvent('change'))
         }
         
         mode($this, value) {
@@ -136,7 +278,7 @@
         }
         
         createEditor(editorType) {
-            var $this = this
+            var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
             editorType = editorType || $this.editorType
             var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
             if ($this.editor && $this.editorType && editorType && editorType != $this.editorType) {
@@ -167,6 +309,12 @@
                 var imageEditorElement = editorElement.querySelector('element-imageeditor')
                 if (!imageEditorElement) {
                     imageEditorElement = document.createElement('element-imageeditor')
+                    imageEditorElement.addEventListener('change', event => {
+                        if (saveButton) {
+                            saveButton.removeAttribute('disabled')
+                        }
+                        $this.dispatchEvent(new window.CustomEvent('change'))
+                    })
                     editorElement.appendChild(imageEditorElement)
                 }
                 $this.editor = imageEditorElement
@@ -210,14 +358,15 @@
                     $this.editor.renderer.setScrollMargin(10, 10)
                     $this.editor.session.setMode($this.aceMode)
                     $this.editor.session.on('change', function() {
-                        //saveButton.removeAttribute('disabled')
-                        //window.LiveElement.Scale.Console.IDE.Asset.buildSnippet({body: window.btoa($this.editor.getValue())})
+                        if (saveButton) {
+                            saveButton.removeAttribute('disabled')
+                        }
+                        $this.dispatchEvent(new window.CustomEvent('change'))
                     })
                     if ($this.file) {
                         $this.file.text().then(t => $this.editor.setValue(t))
                     } else if ($this.dataURL) {
                         $this.editor.setValue(window.atob($this.dataURL.split(',', 2)[1]))
-                        //window.LiveElement.Scale.Console.IDE.Asset.buildSnippet({body: window.LiveElement.Scale.Console.IDE.Asset.asset.dataURL.split(',', 2)[1]})
                     }
                 }
                 window.LiveElement.Scale.Core.waitUntil(function() {

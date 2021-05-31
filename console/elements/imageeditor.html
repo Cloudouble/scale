@@ -40,7 +40,8 @@
     width: 80px;
 }
 :host menu li label input[readonly] {
-    opacity: 0.8;
+    opacity: 0.65;
+    cursor: default;
 }
 :host menu li:last-child label input {
     width: 200px;
@@ -67,10 +68,10 @@
     </datalist>
     <menu>
         <li><label>Width (px)<input name="width" type="number" step="1" min="0" max="10000" /></label></li>
-        <li><label>Height (px)<input name="height" readonly="true" /></label></li>
+        <li><label>Height (px)<input name="height" readonly="true" tabindex="-1" /></label></li>
         <li><label>Quality<input name="quality" type="number" step="0.01" min="0" max="1" value="0.8" /></label></li>
-        <li><label>Content Type<input name="contenttype" readonly="true" /></label></li>
-        <li><label>File Size (kB)<input name="size" readonly="true" /></li>
+        <li><label>Content Type<input name="contenttype" readonly="true" tabindex="-1" /></label></li>
+        <li><label>File Size (kB)<input name="size" readonly="true" tabindex="-1" /></li>
         <li><label>Zoom<input name="zoom" type="range" min="0" max="2" value="1" step="0.01" /></label></li>
     </menu>
     <canvas></canvas>
@@ -108,6 +109,7 @@
                             $this.width = canvas.width
                             $this.height = canvas.height
                             $this.refreshSize()
+                            $this.dispatchEvent(new window.CustomEvent('change'))
                         })
                     } else {
                         childElement.remove()
@@ -154,8 +156,12 @@
         }
         
         contenttype($this, value) {
-            $this.shadowRoot.querySelector('input[name="contenttype"]').value = value
+            var contenttypeInput = $this.shadowRoot.querySelector('input[name="contenttype"]')
+            if (contenttypeInput.value != String(value)) {
+                contenttypeInput.value = value
+            }
             $this.refreshSize()
+            $this.dispatchEvent(new window.CustomEvent('change'))
             return value
         }
         
@@ -169,8 +175,12 @@
         }
         
         quality($this, value) {
-            $this.shadowRoot.querySelector('input[name="quality"]').value = value
+            var qualityInput = $this.shadowRoot.querySelector('input[name="quality"]')
+            if (qualityInput.value != String(value)) {
+                qualityInput.value = value
+            }
             $this.refreshSize(value)
+            $this.dispatchEvent(new window.CustomEvent('change'))
             return value
         }
         
@@ -192,7 +202,11 @@
                 $this.height = canvas.height
                 $this.refreshSize()
             })
-            $this.shadowRoot.querySelector('input[name="width"]').value = value
+            var widthInput = $this.shadowRoot.querySelector('input[name="width"]')
+            if (widthInput.value != String(value)) {
+                widthInput.value = value
+            }
+            $this.dispatchEvent(new window.CustomEvent('change'))
             return value
         }
         

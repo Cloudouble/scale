@@ -4,6 +4,32 @@
     display: block;
     position: relative;
 }
+ 
+:host > label:first-of-type {
+    position: relative;
+}
+:host > label:first-of-type span:first-of-type {
+    display: block;
+}
+:host > label:first-of-type span:nth-of-type(2) {
+    display: inline-block;
+    width: 3em;
+    font-size: 90%;
+    position: absolute;
+    left: 3px;
+    top: 1.5em;
+    z-index: 1;
+    color: grey;
+}
+:host > label:first-of-type input {
+    display: inline-block;
+    width: calc(100% - 3.75em);
+    padding-left: 3.25em;
+    position: relative;
+    left: 0;
+    margin-right: 0;
+}
+ 
 </style>
 <template>
     <label>
@@ -12,10 +38,8 @@
     </label>
     <label>
         Content-Type
-        <input name="content-type" type="search" autocomplete="off" list="ide--content-type" />
+        <input name="Content-Type" type="search" autocomplete="off" />
     </label>
-    <label name="upload">Upload Content<input type="file" name="upload" /></label>
-    <button name="save" disabled="true">Save To Asset</button>
     <template name="OpaqueData"></template>
 </template>
 <script>
