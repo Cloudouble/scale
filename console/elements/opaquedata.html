@@ -4,9 +4,6 @@
     display: block;
     position: relative;
 }
-:host > .viewer, :host > .editor {
-    display: none;
-}
 </style>
 <template>
     <div name="viewer"></div>
@@ -21,11 +18,10 @@
         constructor() {
             super()
             var $this = this
-            
         }
 
         static get observedAttributes() {
-            return (super.observedAttributes || []).concat('Content-Length', 'Content-Type', 'Last-Modified', 'path', 'body', 'mode')
+            return (super.observedAttributes || []).concat('Content-Length', 'Content-Type', 'Last-Modified', 'path', 'body', 'mode', 'editorType')
         }
         
         connectedCallback() {
@@ -35,7 +31,7 @@
         setParam(name, value) {
             var $this = this
             if ($this.mode != 'editor') {
-                var isNewParam, isNewObject, viewerElement = $this.shadowRoot.querySelector('div[name="viewer"]') 
+                var isNewParam, isNewObject, viewerElement = $this.shadowRoot.querySelector('div[name="viewer"]')
                 var paramElement = viewerElement.querySelector(`object param[name=${name}]`) || document.createElement('param')
                 if (!paramElement.hasAttribute('name')) {
                     paramElement.setAttribute('name', name)
@@ -56,38 +52,32 @@
             }
         }
         
-        setImageEditorProperty(name, value) {
-            var $this = this
-            if ($this.mode != 'viewer') {
-                var contentBase = ((name == 'contenttype' ? value : $this['Content-Type']) || '').split('/')[0]
-                var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
-                if (contentBase == 'image') {
-                    var imageEditorElement = editorElement.querySelector('element-imageeditor')
-                    if (!imageEditorElement) {
-                        imageEditorElement = document.createElement('element-imageeditor')
-                        editorElement.appendChild(imageEditorElement)
-                    }
-                    imageEditorElement[name] = value
-                }
-            }
-        }
-        
         ['Content-Length']($this, value) {
             $this.setParam('Content-Length', value)
-            $this.setImageEditorProperty('size', value)
+            $this.setImageEditorProperty('size', value/1024)
             return value
         }
         
         ['Content-Type']($this, value) {
             if ($this.mode != 'editor') {
-                var viewerElement = $this.shadowRoot.querySelector('div[name="viewer"]'), editorElement = $this.shadowRoot.querySelector('div[name="editor"]') 
-                var objectElement = viewerElement.querySelector('object')
+                var viewerElement = $this.shadowRoot.querySelector('div[name="viewer"]'), objectElement = viewerElement.querySelector('object')
                 if (objectElement) {
                     objectElement.setAttribute('type', value)
                 }
             }
-            $this.setImageEditorProperty('contenttype', value)
-            /***/
+            var contentBase = value.split('/')[0]
+            if (contentBase == 'image') {
+                $this.editorType = 'image'
+                $this.setImageEditorProperty('contenttype', value)
+            } else {
+                $this.modelist = $this.modelist || window.ace.require('ace/ext/modelist')
+                $this.aceMode = $this.modelist.getModeForPath(`test.${($this.constructor.contentTypesMap[value] || {suffix: 'bin'}).suffix }`).mode
+                if ($this.aceMode != 'ace/mode/text' || contentBase == 'text') { 
+                    $this.editorType = 'text'
+                } else {
+                    $this.editorType = 'upload'
+                }
+            }
             return value
         }
         
@@ -99,61 +89,108 @@
         path($this, value) {
             $this.setParam('path', value)
             if (!$this['Content-Type']) {
-
+                var suffix = value.split('.').pop()
+                $this['Content-Type'] = (([['application/octet-stream']]).concat(Object.entries($this.constructor.contentTypesMap).filter(entry => entry[1].suffix == suffix)))[0][0]
             }
             return value
         }
         
         body($this, value) {
-            var contentBase = ($this['Content-Type'] || '').split('/')[0], editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
-            var dataURL = `data:${$this['Content-Type']};base64,${value}`
+            $this.dataURL = `data:${$this['Content-Type']};base64,${value}`
             if ($this.mode != 'editor') {
-                var isNew, viewerElement = $this.shadowRoot.querySelector('div[name="viewer"]')
-                var objectElement = viewerElement.querySelector('object')
+                var isNew, viewerElement = $this.shadowRoot.querySelector('div[name="viewer"]'), objectElement = viewerElement.querySelector('object')
                 if (!objectElement) {
                     objectElement = document.createElement('object')
                     isNew = true
                 }
-                objectElement.setAttribute('data', dataURL)
+                objectElement.setAttribute('data', $this.dataURL)
+                if ($this['Content-Type']) {
+                    objectElement.setAttribute('type', $this['Content-Type'])
+                }
                 if (isNew) {
                     viewerElement.appendChild(objectElement)
                 }
-                if ($this['Content-Type']) {
-                    if (contentBase == 'image') {
-                        var imageEditorElement = editorElement.querySelector('element-imageeditor')
-                        if (!imageEditorElement) {
-                            imageEditorElement = document.createElement('element-imageeditor')
-                            editorElement.appendChild(imageEditorElement)
-                        }
-                        var imgElement = document.createElement('img')
-                        imgElement.setAttribute('src', dataURL)
-                    }
-                }
             }
             if ($this.mode != 'viewer') {
-                if (contentBase == 'image') {
-                    var imageEditorElement = editorElement.querySelector('element-imageeditor')
-                    if (!imageEditorElement) {
-                        imageEditorElement = document.createElement('element-imageeditor')
-                        editorElement.appendChild(imageEditorElement)
-                    }
-                    var imgElement = document.createElement('img')
-                    imgElement.setAttribute('src', dataURL)
-                    imageEditorElement.appendChild(imgElement)
-                }
-                /***/
+                $this.createEditor()
             }
         }
         
         mode($this, value) {
-            $this.shadowRoot.querySelectorAll(':scope > div').forEach(divElement => {
+            $this.querySelectorAll(':scope > div').forEach(divElement => {
                 divElement.removeAttribute('style')
             })
-            var divElements = value ? $this.shadowRoot.querySelectorAll(`:scope > div[name="${value}"]`) : $this.shadowRoot.querySelectorAll(`:scope > div`)
+            var divElements = value ? $this.querySelectorAll(`:scope > div[name="${value}"]`) : $this.querySelectorAll(`:scope > div`)
             divElements.forEach(divElement => {
                 divElement.setAttribute('style', 'display: block;')
             })
             return value
+        }
+        
+        editorType($this, value) {
+            if ($this.mode != 'viewer') {
+                $this.createEditor(value)
+            }
+            return value
+        }
+        
+        createEditor(editorType) {
+            var $this = this
+            editorType = editorType || $this.editorType
+            if ($this.editor && $this.editorType && editorType && editorType != $this.editorType) {
+                if (typeof $this.editor.remove == 'function') {
+                    $this.editor.remove()
+                } else if (typeof $this.editor.destroy == 'function') {
+                    $this.editor.destroy()
+                }
+            } 
+            var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
+            if (editorType == 'image') {
+                var imageEditorElement = editorElement.querySelector('element-imageeditor')
+                if (!imageEditorElement) {
+                    imageEditorElement = document.createElement('element-imageeditor')
+                    editorElement.appendChild(imageEditorElement)
+                }
+                $this.editor = imageEditorElement
+                if ($this.dataURL) {
+                    var imgElement = document.createElement('img')
+                    imgElement.setAttribute('src', $this.dataURL)
+                    imageEditorElement.appendChild(imgElement)
+                }
+            } else if (editorType == 'text') {
+                $this.editor = window.ace.edit(editorElement)
+                $this.editor.setOptions({...window.LiveElement.Scale.Console.aceOptions, ...{minLines: 47, maxLines: 47}})
+                $this.editor.renderer.setScrollMargin(10, 10)
+                $this.editor.session.setMode($this.aceMode)
+                $this.editor.session.on('change', function() {
+                    //saveButton.removeAttribute('disabled')
+                    //window.LiveElement.Scale.Console.IDE.Asset.buildSnippet({body: window.btoa($this.editor.getValue())})
+                })
+                if ($this.file) {
+                    $this.file.text().then(t => $this.editor.setValue(t))
+                } else if ($this.dataURL) {
+                    console.log('line 173', window.atob($this.dataURL.split(',', 2)[1]))
+                    $this.editor.setValue(window.atob($this.dataURL.split(',', 2)[1]))
+                    //window.LiveElement.Scale.Console.IDE.Asset.buildSnippet({body: window.LiveElement.Scale.Console.IDE.Asset.asset.dataURL.split(',', 2)[1]})
+                }
+            } else {
+                
+            }
+        }
+        
+        setImageEditorProperty(name, value) {
+            var $this = this
+            if ($this.mode != 'viewer') {
+                var contentBase = ((name == 'contenttype' ? value : $this['Content-Type']) || '').split('/')[0]
+                if (contentBase == 'image') {
+                    var editorElement = $this.shadowRoot.querySelector('div[name="editor"]'), imageEditorElement = editorElement.querySelector('element-imageeditor')
+                    $this.createEditor('image')
+                    imageEditorElement = editorElement.querySelector('element-imageeditor')
+                    if (imageEditorElement) {
+                        imageEditorElement[name] = value
+                    }
+                }
+            }
         }
         
         static contentTypesMap = {
