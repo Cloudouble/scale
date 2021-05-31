@@ -73,11 +73,12 @@
     class OpaqueData extends window.LiveElement.Element.elements.HTMLElement {
 
         static __extends = 'HTMLElement'
-
+        
         constructor() {
             super()
             var $this = this
             $this.textEditorId = Math.floor(Math.random()*1000000000)
+            $this.contentTypesDataListId = Math.floor(Math.random()*1000000000)
         }
 
         static get observedAttributes() {
@@ -124,6 +125,16 @@
                         saveButton.removeAttribute('disabled')
                     }
                 })
+                contentTypeInputElement.setAttribute('list', $this.contentTypesDataListId)
+                var datalistElement = document.createElement('datalist')
+                datalistElement.setAttribute('id', $this.contentTypesDataListId)
+                Object.entries($this.constructor.contentTypesMap).forEach(entry => {
+                    var optionElement = document.createElement('option')
+                    optionElement.setAttribute('value', entry[0])
+                    optionElement.innerHTML = `${entry[1].name} [.${entry[1].suffix}]`
+                    datalistElement.appendChild(optionElement)
+                })
+                $this.shadowRoot.appendChild(datalistElement)
             }
             if (saveButton) {
                 saveButton.addEventListener('click', event => {
