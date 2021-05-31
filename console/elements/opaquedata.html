@@ -18,6 +18,7 @@
         constructor() {
             super()
             var $this = this
+            $this.textEditorId = Math.floor(Math.random()*1000000000)
         }
 
         static get observedAttributes() {
@@ -137,14 +138,18 @@
         createEditor(editorType) {
             var $this = this
             editorType = editorType || $this.editorType
+            var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
             if ($this.editor && $this.editorType && editorType && editorType != $this.editorType) {
                 if (typeof $this.editor.remove == 'function') {
                     $this.editor.remove()
                 } else if (typeof $this.editor.destroy == 'function') {
                     $this.editor.destroy()
+                    var oldTextEditorElement = document.getElementById($this.textEditorId)
+                    if (oldTextEditorElement) {
+                        oldTextEditorElement.remove()
+                    }
                 }
             } 
-            var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
             if (editorType == 'image') {
                 var imageEditorElement = editorElement.querySelector('element-imageeditor')
                 if (!imageEditorElement) {
@@ -158,21 +163,35 @@
                     imageEditorElement.appendChild(imgElement)
                 }
             } else if (editorType == 'text') {
-                $this.editor = window.ace.edit(editorElement)
-                $this.editor.setOptions({...window.LiveElement.Scale.Console.aceOptions, ...{minLines: 47, maxLines: 47}})
-                $this.editor.renderer.setScrollMargin(10, 10)
-                $this.editor.session.setMode($this.aceMode)
-                $this.editor.session.on('change', function() {
-                    //saveButton.removeAttribute('disabled')
-                    //window.LiveElement.Scale.Console.IDE.Asset.buildSnippet({body: window.btoa($this.editor.getValue())})
-                })
-                if ($this.file) {
-                    $this.file.text().then(t => $this.editor.setValue(t))
-                } else if ($this.dataURL) {
-                    console.log('line 173', window.atob($this.dataURL.split(',', 2)[1]))
-                    $this.editor.setValue(window.atob($this.dataURL.split(',', 2)[1]))
-                    //window.LiveElement.Scale.Console.IDE.Asset.buildSnippet({body: window.LiveElement.Scale.Console.IDE.Asset.asset.dataURL.split(',', 2)[1]})
+                var attachTextEditor = function() {
+                    if (!$this.textEditorElement) {
+                        $this.textEditorElement = document.createElement('div')
+                        $this.textEditorElement.setAttribute('id', $this.textEditorId)
+                        $this.textEditorElement.classList.add('text-editor')
+                        //$this.appendChild($this.textEditorElement)
+                        //editorElement.appendChild($this.textEditorElement)
+                        $this.after($this.textEditorElement)
+                    }
+                    $this.editor = window.ace.edit($this.textEditorElement)
+                    $this.editor.setOptions({...window.LiveElement.Scale.Console.aceOptions, ...{minLines: 47, maxLines: 47}})
+                    $this.editor.renderer.setScrollMargin(10, 10)
+                    $this.editor.session.setMode($this.aceMode)
+                    $this.editor.session.on('change', function() {
+                        //saveButton.removeAttribute('disabled')
+                        //window.LiveElement.Scale.Console.IDE.Asset.buildSnippet({body: window.btoa($this.editor.getValue())})
+                    })
+                    if ($this.file) {
+                        $this.file.text().then(t => $this.editor.setValue(t))
+                    } else if ($this.dataURL) {
+                        $this.editor.setValue(window.atob($this.dataURL.split(',', 2)[1]))
+                        //window.LiveElement.Scale.Console.IDE.Asset.buildSnippet({body: window.LiveElement.Scale.Console.IDE.Asset.asset.dataURL.split(',', 2)[1]})
+                    }
                 }
+                window.LiveElement.Scale.Core.waitUntil(function() {
+                    return $this.parentElement
+                }).then(() => {
+                    attachTextEditor()
+                })
             } else {
                 
             }
