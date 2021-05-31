@@ -148,6 +148,19 @@
                     if (oldTextEditorElement) {
                         oldTextEditorElement.remove()
                     }
+                    if ($this.parentElement) {
+                        var textEditorContainer = $this.parentElement.querySelector('div.text-editor-container')
+                        if (textEditorContainer) {
+                            var oldElement = textEditorContainer.querySelector('div.text-editor')
+                            if (oldElement) {
+                                oldElement.remove()
+                            }
+                        } else {
+                            if ($this.nextElementSibling && $this.nextElementSibling.classList.contains('text-editor')) {
+                                $this.nextElementSibling.remove()
+                            }
+                        }
+                    }
                 }
             } 
             if (editorType == 'image') {
@@ -162,6 +175,16 @@
                     imgElement.setAttribute('src', $this.dataURL)
                     imageEditorElement.appendChild(imgElement)
                 }
+                window.setTimeout(function() {
+                    if ($this.parentElement && $this.parentElement.querySelector('div.text-editor-container')) {
+                        $this.parentElement.querySelectorAll('div.text-editor-container div.text-editor').forEach(textEditorElement => {
+                            textEditorElement.remove()
+                        })
+                    }
+                    if ($this.parentElement && $this.nextElementSibling.classList.contains('text-editor')) {
+                        $this.nextElementSibling.remove()
+                    }
+                }, 100)
             } else if (editorType == 'text') {
                 var attachTextEditor = function() {
                     if (!$this.textEditorElement) {
@@ -170,8 +193,15 @@
                         $this.textEditorElement.classList.add('text-editor')
                         var textEditorContainer = $this.parentElement.querySelector('div.text-editor-container')
                         if (textEditorContainer) {
+                            var oldElement = textEditorContainer.querySelector('div.text-editor')
+                            if (oldElement) {
+                                oldElement.remove()
+                            }
                             textEditorContainer.appendChild($this.textEditorElement)
                         } else {
+                            if ($this.nextElementSibling && $this.nextElementSibling.classList.contains('text-editor')) {
+                                $this.nextElementSibling.remove()
+                            }
                             $this.after($this.textEditorElement)
                         }
                     }

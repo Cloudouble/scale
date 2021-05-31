@@ -6,6 +6,16 @@
 }
 </style>
 <template>
+    <label>
+        <span>Path</span>
+        <span>asset/</span><input name="path" type="text" autocomplete="off" />
+    </label>
+    <label>
+        Content-Type
+        <input name="content-type" type="search" autocomplete="off" list="ide--content-type" />
+    </label>
+    <label name="upload">Upload Content<input type="file" name="upload" /></label>
+    <button name="save" disabled="true">Save To Asset</button>
     <template name="OpaqueData"></template>
 </template>
 <script>
