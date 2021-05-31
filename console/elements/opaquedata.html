@@ -168,9 +168,12 @@
                         $this.textEditorElement = document.createElement('div')
                         $this.textEditorElement.setAttribute('id', $this.textEditorId)
                         $this.textEditorElement.classList.add('text-editor')
-                        //$this.appendChild($this.textEditorElement)
-                        //editorElement.appendChild($this.textEditorElement)
-                        $this.after($this.textEditorElement)
+                        var textEditorContainer = $this.parentElement.querySelector('div.text-editor-container')
+                        if (textEditorContainer) {
+                            textEditorContainer.appendChild($this.textEditorElement)
+                        } else {
+                            $this.after($this.textEditorElement)
+                        }
                     }
                     $this.editor = window.ace.edit($this.textEditorElement)
                     $this.editor.setOptions({...window.LiveElement.Scale.Console.aceOptions, ...{minLines: 47, maxLines: 47}})
