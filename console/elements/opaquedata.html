@@ -30,7 +30,7 @@
 :host input[type="file"] {
     display: none;
 }
-:host label[name="upload"] {
+:host label[name="upload"], :host a[name="download"] {
     appearance: button;
     -moz-appearance: button;
     -webkit-appearance: button;
@@ -56,6 +56,7 @@
     border-color: buttonface;
     border-image: initial;
     width: auto;
+    text-decoration: none;
 }
 :host > button[name="delete"] {
     color: red;
@@ -104,6 +105,7 @@
 </style>
 <template>
     <label name="upload">Upload<input type="file" name="upload" /></label>
+    <a name="download" href="path_to_file" disabled="true">Download</a>
     <button name="save" disabled="true">Save</button>
     <button name="delete" disabled="true">Delete</button>
     <div name="viewer"></div>
@@ -144,6 +146,8 @@
                     var reader = new window.FileReader()
                     reader.addEventListener('load', event => {
                         $this.body = event.target.result.split(',')[1]
+                        $this.dataURL = event.target.result
+                        $this.shadowRoot.querySelector('a[name="download"]').setAttribute('href', $this.dataURL)
                     })
                     reader.readAsDataURL($this.file)
                     event.target.value = ''
@@ -285,6 +289,9 @@
             if (pathInput.value != String(value)) {
                 pathInput.value = value
             }
+            if (value) {
+                $this.shadowRoot.querySelector('a[name="download"]').setAttribute('download', value.split('/').pop())
+            }
             $this.dispatchEvent(new window.CustomEvent('change'))
             return value
         }
@@ -317,6 +324,7 @@
             } else {
                 $this.removeAttribute('active')
             }
+            $this.shadowRoot.querySelector('a[name="download"]').setAttribute('href', $this.dataURL)
             $this.dispatchEvent(new window.CustomEvent('change'))
         }
         
@@ -380,6 +388,8 @@
                         if (saveButton) {
                             saveButton.removeAttribute('disabled')
                         }
+                        $this.dataURL = `data:${$this['Content-Type']};base64,${$this.editor}`
+                        $this.shadowRoot.querySelector('a[name="download"]').setAttribute('href', $this.dataURL)
                         $this.dispatchEvent(new window.CustomEvent('change'))
                     })
                     editorElement.appendChild(imageEditorElement)
@@ -428,6 +438,8 @@
                         if (saveButton) {
                             saveButton.removeAttribute('disabled')
                         }
+                        $this.dataURL = `data:${$this['Content-Type']};base64,${window.btoa($this.editor.getValue())}`
+                        $this.shadowRoot.querySelector('a[name="download"]').setAttribute('href', $this.dataURL)
                         $this.dispatchEvent(new window.CustomEvent('change'))
                     })
                     if ($this.file) {
@@ -465,7 +477,6 @@
                     fileInfoElement.appendChild(labelElement)
                 }
                 $this.shadowRoot.appendChild(fileInfoElement)
-                
                 window.LiveElement.Scale.Core.waitUntil(function() {
                     return $this.parentElement
                 }).then(() => {
