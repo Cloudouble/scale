@@ -187,7 +187,7 @@
                         {
                             method: 'PUT', 
                             headers: {"Content-Type": $this['Content-Type']}, 
-                            body: $this.editorType == 'image' ? `${$this.editor}` : window.btoa($this.editor.getValue())
+                            body: $this.editorType == 'image' ? `${$this.editor}` : ($this.editorType == 'text' ? window.btoa($this.editor.getValue()) : ($this.dataURL?$this.dataURL.split(',')[1]:$this.body))
                         }
                     ).then(r => {
                         saveButton.setAttribute('disabled', true)
