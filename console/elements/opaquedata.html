@@ -80,6 +80,27 @@
     display: block;
 }
 
+:host div.file-info-element {
+    width: 800px;
+    margin-left: calc(50% - 400px);
+    font-size: 80%;    
+}
+:host div.file-info-element label {
+    display: inline-block;
+    width: 350px;
+    margin-right: 50px;
+    font-weight: bold;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+:host div.file-info-element label input {
+    display: block;
+    font-weight: normal;
+    font-size: 80%;
+    width: 100%;
+    opacity: 0.6;
+}
+
 </style>
 <template>
     <label name="upload">Upload<input type="file" name="upload" /></label>
@@ -113,6 +134,8 @@
                 if (event.target.files.length) {
                     $this.file = event.target.files[0]
                     $this['Content-Type'] = $this.file.type
+                    $this['Content-Length'] = $this.file.size
+                    $this['Last-Modified'] = $this.file.lastModifiedDate
                     if ($this.path && $this.path.slice(-1) == '/') {
                         $this.path = `${$this.path}${$this.file.name}`
                     } else if (!$this.path) {
@@ -345,6 +368,10 @@
                     }
                 }
             }
+            var oldFileInfoElement = $this.shadowRoot.querySelector('div.file-info-element')
+            if (oldFileInfoElement) {
+                oldFileInfoElement.remove()
+            }
             if (editorType == 'image') {
                 var imageEditorElement = editorElement.querySelector('element-imageeditor')
                 if (!imageEditorElement) {
@@ -415,6 +442,30 @@
                     attachTextEditor()
                 })
             } else {
+                var fileInfoElement = document.createElement('div')
+                fileInfoElement.classList.add('file-info-element')
+                ;(['Content-Length', 'Content-Type', 'Last-Modified']).forEach(f => {
+                    var labelElement = document.createElement('label')
+                    labelElement.setAttribute('name', f)
+                    labelElement.innerHTML = f
+                    var inputElement = document.createElement('input')
+                    inputElement.setAttribute('readonly', true)
+                    inputElement.value = $this[f] || ''
+                    labelElement.appendChild(inputElement)
+                    fileInfoElement.appendChild(labelElement)
+                })
+                if ($this.file) {
+                    var labelElement = document.createElement('label')
+                    labelElement.setAttribute('name', 'name')
+                    labelElement.innerHTML = 'Local File Name'
+                    var inputElement = document.createElement('input')
+                    inputElement.setAttribute('readonly', true)
+                    inputElement.value = $this.file.name
+                    labelElement.appendChild(inputElement)
+                    fileInfoElement.appendChild(labelElement)
+                }
+                $this.shadowRoot.appendChild(fileInfoElement)
+                
                 window.LiveElement.Scale.Core.waitUntil(function() {
                     return $this.parentElement
                 }).then(() => {
