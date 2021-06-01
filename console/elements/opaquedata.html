@@ -60,6 +60,26 @@
 :host > button[name="delete"] {
     color: red;
 }
+
+:host aside {
+    margin-top: 1em;
+    text-align: left;
+    margin-bottom: 1em;
+}
+:host aside, :host([editortype="upload"]) aside {
+    display: block;
+}
+:host([active]) aside, :host([editortype="text"]) aside {
+    display: none;
+}
+
+:host([editortype="image"]) element-imageeditor {
+    display: none;
+}
+:host([editortype="image"][active]) element-imageeditor {
+    display: block;
+}
+
 </style>
 <template>
     <label name="upload">Upload<input type="file" name="upload" /></label>
@@ -67,6 +87,7 @@
     <button name="delete" disabled="true">Delete</button>
     <div name="viewer"></div>
     <div name="editor"></div>
+    <aside>Upload a file to get started.</aside>
 </template>
 <script>
     /* global */
@@ -159,6 +180,7 @@
                         `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${$this.path}`, 
                         {method: 'DELETE'}
                     ).then(r => {
+                        deleteButton.setAttribute('disabled', true)
                         saveButton.removeAttribute('disabled')
                     })
                 })
@@ -234,7 +256,7 @@
             $this.setParam('path', value)
             if (!$this['Content-Type']) {
                 var suffix = value.split('.').pop()
-                $this['Content-Type'] = (([['application/octet-stream']]).concat(Object.entries($this.constructor.contentTypesMap).filter(entry => entry[1].suffix == suffix)))[0][0]
+                $this['Content-Type'] = (Object.entries($this.constructor.contentTypesMap).filter(entry => entry[1].suffix == suffix).shift() || [''])[0]
             }
             var pathInput = $this.shadowRoot.querySelector('input[name="path"]')
             if (pathInput.value != String(value)) {
@@ -267,6 +289,11 @@
             if (deleteButton) {
                 deleteButton.removeAttribute('disabled')
             }
+            if (value) {
+                $this.setAttribute('active', true)
+            } else {
+                $this.removeAttribute('active')
+            }
             $this.dispatchEvent(new window.CustomEvent('change'))
         }
         
@@ -292,30 +319,32 @@
             var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
             editorType = editorType || $this.editorType
             var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
-            if ($this.editor && $this.editorType && editorType && editorType != $this.editorType) {
+            if ($this.editor) {
                 if (typeof $this.editor.remove == 'function') {
                     $this.editor.remove()
                 } else if (typeof $this.editor.destroy == 'function') {
                     $this.editor.destroy()
-                    var oldTextEditorElement = document.getElementById($this.textEditorId)
-                    if (oldTextEditorElement) {
-                        oldTextEditorElement.remove()
-                    }
-                    if ($this.parentElement) {
-                        var textEditorContainer = $this.parentElement.querySelector('div.text-editor-container')
-                        if (textEditorContainer) {
-                            var oldElement = textEditorContainer.querySelector('div.text-editor')
-                            if (oldElement) {
-                                oldElement.remove()
-                            }
-                        } else {
-                            if ($this.nextElementSibling && $this.nextElementSibling.classList.contains('text-editor')) {
-                                $this.nextElementSibling.remove()
-                            }
-                        }
-                    }
                 }
             } 
+            if ($this.textEditorId) {
+                var oldTextEditorElement = document.getElementById($this.textEditorId)
+                if (oldTextEditorElement) {
+                    oldTextEditorElement.remove()
+                }
+            }
+            if ($this.parentElement) {
+                var textEditorContainer = $this.parentElement.querySelector('div.text-editor-container')
+                if (textEditorContainer) {
+                    var oldElement = textEditorContainer.querySelector('div.text-editor')
+                    if (oldElement) {
+                        oldElement.remove()
+                    }
+                } else {
+                    if ($this.nextElementSibling && $this.nextElementSibling.classList.contains('text-editor')) {
+                        $this.nextElementSibling.remove()
+                    }
+                }
+            }
             if (editorType == 'image') {
                 var imageEditorElement = editorElement.querySelector('element-imageeditor')
                 if (!imageEditorElement) {
@@ -386,7 +415,21 @@
                     attachTextEditor()
                 })
             } else {
-                
+                window.LiveElement.Scale.Core.waitUntil(function() {
+                    return $this.parentElement
+                }).then(() => {
+                    var textEditorContainer = $this.parentElement.querySelector('div.text-editor-container')
+                    if (textEditorContainer) {
+                        var oldElement = textEditorContainer.querySelector('div.text-editor')
+                        if (oldElement) {
+                            oldElement.remove()
+                        }
+                    } else {
+                        if ($this.nextElementSibling && $this.nextElementSibling.classList.contains('text-editor')) {
+                            $this.nextElementSibling.remove()
+                        }
+                    }
+                })
             }
         }
         

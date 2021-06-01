@@ -46,16 +46,14 @@
     class EntitySearch extends window.LiveElement.Element.elements.HTMLElement {
 
         static __extends = 'HTMLElement'
-        static __properties = ['entityType', 'blankOptionText']
 
         constructor() {
             super()
             var $this = this
-            
         }
 
         static get observedAttributes() {
-            return (super.observedAttributes || []).concat(...this.__properties)
+            return (super.observedAttributes || []).concat('entityType', 'blankOptionText', 'allowNew')
         }
         
         connectedCallback() {
@@ -137,15 +135,11 @@
                 if (listId) {
                     datalistElement = $this.querySelector(`datalist[id="${listId}"]`)
                 }
-                if (searchElement.value == window.LiveElement.Scale.Console.IDE.newFlag) {
+                if (blankOptionText && (searchElement.value == window.LiveElement.Scale.Console.IDE.newFlag)) {
                     searchElement.value = window.LiveElement.Scale.Core.generateUUID4()
                     $this.result = []
                     if (datalistElement) {
                         window.LiveElement.Scale.Core.buildDataList(datalistElement, $this.result)
-                    }
-                } else if (!searchElement.value) {
-                    if (datalistElement) {
-                        window.LiveElement.Scale.Core.buildDataList(datalistElement, [], blankOptions)
                     }
                 } else {
                     window.LiveElement.Scale.Console.System.invokeLambda({...{
@@ -159,13 +153,13 @@
                             $this.result = Array.isArray(searchResult.result) ? searchResult.result : (typeof searchResult.result == 'object' ? Object.keys(searchResult.result) : [])
                             window.LiveElement.Scale.Core.buildDataList(datalistElement, $this.result, blankOptions)
                         }
+                        var loadButtonAlreadyDisabled = loadButton.getAttribute('disabled'), resultIncludesValue = $this.result.includes(searchElement.value)
+                        if ($this.allowNew || (loadButtonAlreadyDisabled && resultIncludesValue)) {
+                            loadButton.removeAttribute('disabled')
+                        } else if (!loadButtonAlreadyDisabled && !resultIncludesValue) {
+                            loadButton.setAttribute('disabled', true)
+                        }
                     })
-                    var loadButtonAlreadyDisabled = loadButton.getAttribute('disabled'), resultIncludesValue = $this.result.includes(searchElement.value)
-                    if (loadButtonAlreadyDisabled && resultIncludesValue) {
-                        loadButton.removeAttribute('disabled')
-                    } else if (!loadButtonAlreadyDisabled && !resultIncludesValue) {
-                        loadButton.setAttribute('disabled', true)
-                    }
                 }
             } else {
                 loadButton.setAttribute('disabled', true)
