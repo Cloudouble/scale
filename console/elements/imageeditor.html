@@ -82,7 +82,6 @@
     class ImageEditor extends window.LiveElement.Element.elements.HTMLElement {
 
         static __extends = 'HTMLElement'
-        static __properties = ['contenttype', 'height', 'quality', 'size', 'width', 'zoom']
 
         constructor() {
             super()
@@ -120,7 +119,7 @@
         }
 
         static get observedAttributes() {
-            return (super.observedAttributes || []).concat(...this.__properties)
+            return (super.observedAttributes || []).concat('contenttype', 'height', 'quality', 'size', 'width', 'zoom')
         }
         
         connectedCallback() {

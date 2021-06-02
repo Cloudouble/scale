@@ -58,9 +58,35 @@
             return (super.observedAttributes || []).concat()
         }
         
-        /*connectedCallback() {
-            var $this = this
-        }*/
+        save() {
+            var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+            var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
+            window.fetch(
+                `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${$this.path}`, 
+                {
+                    method: 'PUT', 
+                    headers: {"Content-Type": $this['Content-Type']}, 
+                    body: $this.editorType == 'image' ? `${$this.editor}` : ($this.editorType == 'text' ? window.btoa($this.editor.getValue()) : ($this.dataURL?$this.dataURL.split(',')[1]:$this.body))
+                }
+            ).then(r => {
+                saveButton.setAttribute('disabled', true)
+                if (deleteButton) {
+                    deleteButton.removeAttribute('disabled')
+                }
+            })
+        }
         
+        ['delete']() {
+            var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+            var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
+            window.fetch(
+                `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${$this.path}`, 
+                {method: 'DELETE'}
+            ).then(r => {
+                deleteButton.setAttribute('disabled', true)
+                saveButton.removeAttribute('disabled')
+            })
+        }
+
     }
 </script>

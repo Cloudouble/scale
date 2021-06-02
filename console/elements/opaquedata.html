@@ -132,7 +132,17 @@
         connectedCallback() {
             var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
             var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
-            $this.shadowRoot.querySelector('input[type="file"]').addEventListener('change', event => {
+            var fileUploadInput = $this.shadowRoot.querySelector('input[type="file"]')
+            if (Array.isArray($this.constructor.contentTypesAllowList) && $this.constructor.contentTypesAllowList.length) {
+                fileUploadInput.setAttribute('accept', $this.constructor.contentTypesAllowList.sort().map(a => {
+                    var acceptFragmentList = [a]
+                    if ($this.constructor.contentTypesMap[a]) {
+                        acceptFragmentList.push($this.constructor.contentTypesMap[a].suffix)
+                    }
+                    return acceptFragmentList.join(',')
+                }).join(','))
+            }
+            fileUploadInput.addEventListener('change', event => {
                 if (event.target.files.length) {
                     $this.file = event.target.files[0]
                     $this['Content-Type'] = $this.file.type
@@ -176,7 +186,13 @@
                 contentTypeInputElement.setAttribute('list', $this.contentTypesDataListId)
                 var datalistElement = document.createElement('datalist')
                 datalistElement.setAttribute('id', $this.contentTypesDataListId)
-                Object.entries($this.constructor.contentTypesMap).forEach(entry => {
+                Object.entries($this.constructor.contentTypesMap).filter(entry => {
+                    if (Array.isArray($this.constructor.contentTypesAllowList) && $this.constructor.contentTypesAllowList.length) {
+                        return $this.constructor.contentTypesAllowList.includes(entry[0])
+                    } else {
+                        return true
+                    }
+                }).forEach(entry => {
                     var optionElement = document.createElement('option')
                     optionElement.setAttribute('value', entry[0])
                     optionElement.innerHTML = `${entry[1].name} [.${entry[1].suffix}]`
@@ -186,30 +202,16 @@
             }
             if (saveButton) {
                 saveButton.addEventListener('click', event => {
-                    window.fetch(
-                        `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${$this.path}`, 
-                        {
-                            method: 'PUT', 
-                            headers: {"Content-Type": $this['Content-Type']}, 
-                            body: $this.editorType == 'image' ? `${$this.editor}` : ($this.editorType == 'text' ? window.btoa($this.editor.getValue()) : ($this.dataURL?$this.dataURL.split(',')[1]:$this.body))
-                        }
-                    ).then(r => {
-                        saveButton.setAttribute('disabled', true)
-                        if (deleteButton) {
-                            deleteButton.removeAttribute('disabled')
-                        }
-                    })
+                    if ($this.save && typeof $this.save == 'function') {
+                        $this.save()
+                    }
                 })
             }
             if (deleteButton) {
                 deleteButton.addEventListener('click', event => {
-                    window.fetch(
-                        `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${$this.path}`, 
-                        {method: 'DELETE'}
-                    ).then(r => {
-                        deleteButton.setAttribute('disabled', true)
-                        saveButton.removeAttribute('disabled')
-                    })
+                    if ($this.delete && typeof $this.delete == 'function') {
+                        $this.delete()
+                    }
                 })
             }
         }
@@ -255,6 +257,7 @@
             var contentBase = value.split('/')[0]
             if (contentBase == 'image') {
                 $this.editorType = 'image'
+                console.log('line 260', 'setting contenttype value', value)
                 $this.setImageEditorProperty('contenttype', value)
             } else {
                 $this.modelist = $this.modelist || window.ace.require('ace/ext/modelist')
@@ -313,7 +316,10 @@
                 }
             }
             if ($this.mode != 'viewer') {
-                $this.createEditor()
+                if (!$this.editor) {
+                    console.log('line 320', 'calling create Editor from body')
+                    $this.createEditor()
+                }
             }
             var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
             if (deleteButton) {
@@ -341,27 +347,37 @@
         
         editorType($this, value) {
             if ($this.mode != 'viewer') {
+                console.log('line 350', 'calling create Editor from editorType')
                 $this.createEditor(value)
             }
             return value
         }
         
         createEditor(editorType) {
+            console.log('line 357 create Editor', editorType)
             var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
             editorType = editorType || $this.editorType
             var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
+            if ($this.imageEditorElement) {
+                console.log('line 362', 'removing image editor element: $this.imageEditorElement')
+                $this.imageEditorElement.remove()
+                delete $this.imageEditorElement
+            }
             if ($this.editor) {
                 if (typeof $this.editor.remove == 'function') {
+                    console.log('line 368', 'removing image editor element: $this.editor')
                     $this.editor.remove()
                 } else if (typeof $this.editor.destroy == 'function') {
                     $this.editor.destroy()
                 }
+                delete $this.editor
             } 
             if ($this.textEditorId) {
                 var oldTextEditorElement = document.getElementById($this.textEditorId)
                 if (oldTextEditorElement) {
                     oldTextEditorElement.remove()
                 }
+                delete $this.textEditorId
             }
             if ($this.parentElement) {
                 var textEditorContainer = $this.parentElement.querySelector('div.text-editor-container')
@@ -375,16 +391,23 @@
                         $this.nextElementSibling.remove()
                     }
                 }
+                if ($this.textEditorElement) {
+                    if (typeof $this.textEditorElement.remove == 'function') {
+                        $this.textEditorElement.remove()
+                    }
+                    delete $this.textEditorElement
+                }
             }
             var oldFileInfoElement = $this.shadowRoot.querySelector('div.file-info-element')
             if (oldFileInfoElement) {
                 oldFileInfoElement.remove()
             }
             if (editorType == 'image') {
-                var imageEditorElement = editorElement.querySelector('element-imageeditor')
-                if (!imageEditorElement) {
-                    imageEditorElement = document.createElement('element-imageeditor')
-                    imageEditorElement.addEventListener('change', event => {
+                if (!$this.imageEditorElement) {
+                    console.log('line 407', 'creating new image editor element')
+                    $this.imageEditorElement = document.createElement('element-imageeditor')
+                    editorElement.appendChild($this.imageEditorElement)
+                    $this.imageEditorElement.addEventListener('change', event => {
                         if (saveButton) {
                             saveButton.removeAttribute('disabled')
                         }
@@ -392,13 +415,12 @@
                         $this.shadowRoot.querySelector('a[name="download"]').setAttribute('href', $this.dataURL)
                         $this.dispatchEvent(new window.CustomEvent('change'))
                     })
-                    editorElement.appendChild(imageEditorElement)
                 }
-                $this.editor = imageEditorElement
+                $this.editor = $this.imageEditorElement
                 if ($this.dataURL) {
                     var imgElement = document.createElement('img')
                     imgElement.setAttribute('src', $this.dataURL)
-                    imageEditorElement.appendChild(imgElement)
+                    $this.imageEditorElement.appendChild(imgElement)
                 }
                 window.setTimeout(function() {
                     if ($this.parentElement && $this.parentElement.querySelector('div.text-editor-container')) {
@@ -496,19 +518,24 @@
         }
         
         setImageEditorProperty(name, value) {
+            console.log('line 521', `setting ${name} value`, value)
             var $this = this
             if ($this.mode != 'viewer') {
-                var contentBase = ((name == 'contenttype' ? value : $this['Content-Type']) || '').split('/')[0]
-                if (contentBase == 'image') {
-                    var editorElement = $this.shadowRoot.querySelector('div[name="editor"]'), imageEditorElement = editorElement.querySelector('element-imageeditor')
-                    $this.createEditor('image')
-                    imageEditorElement = editorElement.querySelector('element-imageeditor')
-                    if (imageEditorElement) {
-                        imageEditorElement[name] = value
+                if ($this.editorType == 'image') {
+                    var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
+                    if (!$this.imageEditorElement) {
+                        console.log('line 527', 'calling create Editor from setImageEditorProperty')
+                        $this.createEditor('image')
+                    }
+                    if ($this.imageEditorElement) {
+                        console.log('line 531', `${name} value set to`, value)
+                        $this.imageEditorElement[name] = value
                     }
                 }
             }
         }
+        
+        static contentTypesAllowList = []
         
         static contentTypesMap = {
             "application/epub+zip": {"suffix": "epub", "name": "Electronic publication (EPUB)"},
