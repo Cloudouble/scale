@@ -426,7 +426,8 @@
                             saveButton.removeAttribute('disabled')
                         }
                         if ($this['Content-Type']) {
-                            $this.dataURL = `data:${$this['Content-Type']};base64,${$this.editor}`
+                            $this.dataURL = $this.editor.toDataURL()
+                            //$this.dataURL = `data:${$this['Content-Type']};base64,${$this.editor}`
                             $this.shadowRoot.querySelector('a[name="download"]').setAttribute('href', $this.dataURL)
                         }
                         $this.dispatchEvent(new window.CustomEvent('change'))
@@ -595,8 +596,7 @@
             "font/woff2": {"suffix": "woff2", "name": "Web Open Font Format (WOFF)"},
             "image/bmp": {"suffix": "bmp", "name": "Windows OS/2 Bitmap Graphics"},
             "image/gif": {"suffix": "gif", "name": "Graphics Interchange Format (GIF)"},
-            "image/jpeg": {"suffix": "jpeg", "name": "JPEG images"},
-            "image/jpg": {"suffix": "jpg", "name": "JPEG images"},
+            "image/jpeg": {"suffix": "jpg", "name": "JPEG images"},
             "image/png": {"suffix": "png", "name": "Portable Network Graphics"},
             "image/svg+xml": {"suffix": "svg", "name": "Scalable Vector Graphics"},
             "image/tiff": {"suffix": "tiff", "name": "Tagged Image File Format (TIFF)"},

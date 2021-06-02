@@ -151,7 +151,7 @@
         }
         
         refreshSize(quality) {
-            this.size = `${Math.round(this.toBlob(undefined, quality).size / 1024 * 1000) / 1000}`
+            this.size = Math.round(window.atob(this.toString()).length/1024*1000)/1000
         }
         
         contenttype($this, value) {
@@ -200,12 +200,12 @@
                 canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height)
                 $this.height = canvas.height
                 $this.refreshSize()
+                $this.dispatchEvent(new window.CustomEvent('change'))
             })
             var widthInput = $this.shadowRoot.querySelector('input[name="width"]')
             if (widthInput.value != String(value)) {
                 widthInput.value = value
             }
-            $this.dispatchEvent(new window.CustomEvent('change'))
             return value
         }
         
