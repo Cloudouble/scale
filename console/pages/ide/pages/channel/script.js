@@ -62,7 +62,7 @@ window.LiveElement.Live.processors.IdeChannelConfigure = function(input) {
                 }
             }
         })
-        window.LiveElement.Scale.Console.buildSnippets('channel')
+        window.LiveElement.Scale.Console.buildSnippets('ide', 'channel')
         if (complete) {
             input.subscriber.setAttribute('mode', window.LiveElement.Scale.Console.IDE.Channel.Search && window.LiveElement.Scale.Console.IDE.Channel.Search[input.payload.id] ? 'load' : 'new')
         } else {
@@ -74,7 +74,7 @@ window.LiveElement.Live.processors.IdeChannelConfigure = function(input) {
     } else if (window.LiveElement.Live.getHandlerType(input) == 'trigger') {
         if (input.attributes.name == '@name') {
             window.LiveElement.Scale.Console.IDE.Channel.Configure.channel['@name'] = input.triggersource.value
-            window.LiveElement.Scale.Console.buildSnippets('channel')
+            window.LiveElement.Scale.Console.buildSnippets('ide', 'channel')
         } else if (input.attributes.name == 'create') {
             window.fetch(
                 `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/connect.json`, 
@@ -116,10 +116,9 @@ window.LiveElement.Live.processors.IdeChannelCode = function(input) {
             admin_url: window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.adminKey ? `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel.adminKey}` : undefined
         }
         input.subscriber.querySelectorAll('input[name]').forEach(i => {
-            var snippetElement = i.nextElementSibling.querySelector('div.snippet')
             if (window.LiveElement.Scale.Console.IDE.Channel.Code[i.name]) {
                 i.value = window.LiveElement.Scale.Console.IDE.Channel.Code[i.name]
-                window.LiveElement.Scale.Console.buildSnippets('channel')
+                window.LiveElement.Scale.Console.buildSnippets('ide', 'channel')
             } else {
                 i.value = ''
                 i.nextElementSibling.removeAttribute('built')
