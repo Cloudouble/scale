@@ -257,7 +257,7 @@
             var contentBase = value.split('/')[0]
             if (contentBase == 'image') {
                 $this.editorType = 'image'
-                console.log('line 260', 'setting contenttype value', value)
+                //console.log('line 260', 'setting contenttype value', value)
                 $this.setImageEditorProperty('contenttype', value)
             } else {
                 $this.modelist = $this.modelist || window.ace.require('ace/ext/modelist')
@@ -300,7 +300,10 @@
         }
         
         body($this, value) {
-            $this.dataURL = `data:${$this['Content-Type']};base64,${value}`
+            if ($this['Content-Type']) {
+                $this.dataURL = `data:${$this['Content-Type']};base64,${value}`
+                $this.shadowRoot.querySelector('a[name="download"]').setAttribute('href', $this.dataURL)
+            }
             if ($this.mode != 'editor') {
                 var isNew, viewerElement = $this.shadowRoot.querySelector('div[name="viewer"]'), objectElement = viewerElement.querySelector('object')
                 if (!objectElement) {
@@ -317,8 +320,20 @@
             }
             if ($this.mode != 'viewer') {
                 if (!$this.editor) {
-                    console.log('line 320', 'calling create Editor from body')
+                    //console.log('line 320', 'calling create Editor from body')
                     $this.createEditor()
+                }
+                if ($this.editor) {
+                    if ($this.editorType == 'image' && $this.imageEditorElement && $this.dataURL) {
+                        $this.imageEditorElement.querySelectorAll('img').forEach(i => i.remove())
+                        var imgElement = document.createElement('img')
+                        imgElement.setAttribute('src', $this.dataURL)
+                        $this.imageEditorElement.appendChild(imgElement)
+                    } else if ($this.editorType == 'text') {
+                        
+                    } else {
+                        
+                    }
                 }
             }
             var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
@@ -330,7 +345,6 @@
             } else {
                 $this.removeAttribute('active')
             }
-            $this.shadowRoot.querySelector('a[name="download"]').setAttribute('href', $this.dataURL)
             $this.dispatchEvent(new window.CustomEvent('change'))
         }
         
@@ -347,25 +361,25 @@
         
         editorType($this, value) {
             if ($this.mode != 'viewer') {
-                console.log('line 350', 'calling create Editor from editorType')
+                //console.log('line 350', 'calling create Editor from editorType')
                 $this.createEditor(value)
             }
             return value
         }
         
         createEditor(editorType) {
-            console.log('line 357 create Editor', editorType)
+            //console.log('line 357 create Editor', editorType)
             var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
             editorType = editorType || $this.editorType
             var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
             if ($this.imageEditorElement) {
-                console.log('line 362', 'removing image editor element: $this.imageEditorElement')
+                //console.log('line 362', 'removing image editor element: $this.imageEditorElement')
                 $this.imageEditorElement.remove()
                 delete $this.imageEditorElement
             }
             if ($this.editor) {
                 if (typeof $this.editor.remove == 'function') {
-                    console.log('line 368', 'removing image editor element: $this.editor')
+                    //console.log('line 368', 'removing image editor element: $this.editor')
                     $this.editor.remove()
                 } else if (typeof $this.editor.destroy == 'function') {
                     $this.editor.destroy()
@@ -404,20 +418,22 @@
             }
             if (editorType == 'image') {
                 if (!$this.imageEditorElement) {
-                    console.log('line 407', 'creating new image editor element')
+                    //console.log('line 407', 'creating new image editor element')
                     $this.imageEditorElement = document.createElement('element-imageeditor')
                     editorElement.appendChild($this.imageEditorElement)
                     $this.imageEditorElement.addEventListener('change', event => {
                         if (saveButton) {
                             saveButton.removeAttribute('disabled')
                         }
-                        $this.dataURL = `data:${$this['Content-Type']};base64,${$this.editor}`
-                        $this.shadowRoot.querySelector('a[name="download"]').setAttribute('href', $this.dataURL)
+                        if ($this['Content-Type']) {
+                            $this.dataURL = `data:${$this['Content-Type']};base64,${$this.editor}`
+                            $this.shadowRoot.querySelector('a[name="download"]').setAttribute('href', $this.dataURL)
+                        }
                         $this.dispatchEvent(new window.CustomEvent('change'))
                     })
                 }
                 $this.editor = $this.imageEditorElement
-                if ($this.dataURL) {
+                if ($this['Content-Type'] && $this.dataURL) {
                     var imgElement = document.createElement('img')
                     imgElement.setAttribute('src', $this.dataURL)
                     $this.imageEditorElement.appendChild(imgElement)
@@ -460,8 +476,10 @@
                         if (saveButton) {
                             saveButton.removeAttribute('disabled')
                         }
-                        $this.dataURL = `data:${$this['Content-Type']};base64,${window.btoa($this.editor.getValue())}`
-                        $this.shadowRoot.querySelector('a[name="download"]').setAttribute('href', $this.dataURL)
+                        if ($this['Content-Type']) {
+                            $this.dataURL = `data:${$this['Content-Type']};base64,${window.btoa($this.editor.getValue())}`
+                            $this.shadowRoot.querySelector('a[name="download"]').setAttribute('href', $this.dataURL)
+                        }
                         $this.dispatchEvent(new window.CustomEvent('change'))
                     })
                     if ($this.file) {
@@ -518,17 +536,17 @@
         }
         
         setImageEditorProperty(name, value) {
-            console.log('line 521', `setting ${name} value`, value)
+            //console.log('line 521', `setting ${name} value`, value)
             var $this = this
             if ($this.mode != 'viewer') {
                 if ($this.editorType == 'image') {
                     var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
                     if (!$this.imageEditorElement) {
-                        console.log('line 527', 'calling create Editor from setImageEditorProperty')
+                        //console.log('line 527', 'calling create Editor from setImageEditorProperty')
                         $this.createEditor('image')
                     }
                     if ($this.imageEditorElement) {
-                        console.log('line 531', `${name} value set to`, value)
+                        //console.log('line 531', `${name} value set to`, value)
                         $this.imageEditorElement[name] = value
                     }
                 }
