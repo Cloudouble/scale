@@ -1,0 +1,66 @@
+<style>
+:host {
+    contain: content;
+    display: block;
+    position: relative;
+}
+
+</style>
+<template>
+    <label>
+        Path
+        <input name="path" type="text" autocomplete="off" />
+    </label>
+    <label>
+        Content-Type
+        <input name="Content-Type" type="search" autocomplete="off" />
+    </label>
+    <template name="OpaqueData"></template>
+</template>
+<script>
+    /* global */
+    class Static extends window.LiveElement.Element.elements.OpaqueData {
+
+        static __extends = 'OpaqueData'
+
+        constructor() {
+            super()
+            var $this = this
+        }
+
+        static get observedAttributes() {
+            return (super.observedAttributes || []).concat()
+        }
+        
+        save() {
+            var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+            var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
+            window.fetch(
+                `${window.LiveElement.Scale.Console.IDE.connectionURL}/static/${$this.path}`, 
+                {
+                    method: 'PUT', 
+                    headers: {"Content-Type": $this['Content-Type']}, 
+                    body: $this.editorType == 'image' ? `${$this.editor}` : ($this.editorType == 'text' ? window.btoa($this.editor.getValue()) : ($this.dataURL?$this.dataURL.split(',')[1]:$this.body))
+                }
+            ).then(r => {
+                saveButton.setAttribute('disabled', true)
+                if (deleteButton) {
+                    deleteButton.removeAttribute('disabled')
+                }
+            })
+        }
+        
+        ['delete']() {
+            var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+            var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
+            window.fetch(
+                `${window.LiveElement.Scale.Console.IDE.connectionURL}/static/${$this.path}`, 
+                {method: 'DELETE'}
+            ).then(r => {
+                deleteButton.setAttribute('disabled', true)
+                saveButton.removeAttribute('disabled')
+            })
+        }
+
+    }
+</script>

@@ -4,5 +4,6 @@
     "Snippet", 
     "Record", 
     "OpaqueData", 
-    "Asset"
+    "Asset", 
+    "Static"
 ]

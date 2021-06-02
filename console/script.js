@@ -146,12 +146,15 @@ window.LiveElement.Element.load().then(() => {
   
 })    
 
-window.LiveElement.Scale.Console.buildSnippets = function(page) {
+window.LiveElement.Scale.Console.buildSnippets = function(page, section) {
   var pageElement = document.getElementById(page)
   if (pageElement) {
-    pageElement.querySelectorAll('element-snippet').forEach(snippetElement => {
-      snippetElement.build()
-    })
+    var sectionElement = pageElement.querySelector(`:scope > section[name="${section}"]`)
+    if (sectionElement) {
+      sectionElement.querySelectorAll('element-snippet').forEach(snippetElement => {
+        snippetElement.build()
+      })
+    }
   }
 }
 

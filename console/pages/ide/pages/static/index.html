@@ -1,39 +1,25 @@
 <h2>Static</h2>
-<fieldset name="search">
-    <h3>Search</h3>
-    <input name="search" type="search" placeholder="path search..." autocomplete="off" list="ide-static-search-list" live-trigger="keyup:IdeStaticSearch input:IdeStaticSearch" />
-    <button name="load" live-trigger="click:IdeStaticSearch" disabled="true">Load</button>
-    <button name="delete" live-trigger="click:IdeStaticSearch" disabled="true">Delete Static</button>
-    <datalist id="ide-static-search-list"></datalist>
-</fieldset>
+<element-entitysearch entityType="static" historyPath="${path}" live-trigger="loaded:IdeStaticEdit" allowNew="true">
+    <input name="path" type="search" placeholder="search path, will create new if not exists..." autocomplete="off" list />
+</element-entitysearch>
 <fieldset name="edit" live-subscription="IdeStaticSearch:IdeStaticEdit">
     <h3>Edit</h3>
-    <label>
-        <span>Path</span>
-        <input name="path" type="text" autocomplete="off" live-trigger="change:IdeStaticEdit" />
-    </label>
-    <label>
-        Content-Type
-        <input name="content-type" type="search" autocomplete="off" list="ide--content-type" live-trigger="change:IdeStaticEdit" />
-    </label>
-    <label name="upload">Upload Content<input type="file" name="upload" live-trigger="change:IdeStaticEdit" /></label>
-    <button name="save" live-trigger="click:IdeStaticEdit" disabled="true">Save To Static</button>
-    <div class="editor" id="ide-static-editor" disabled="true"></div>
+    <div class="text-editor-container"></div>
     <element-snippet>
 /* SAVE static */
 /* NOTE: body => window.btoa('your plain text or raw binary body') */
 window.fetch(
-    `${window.LiveElement.Scale.Console.IDE.connectionURL}/static/${window.LiveElement.Scale.Console.IDE.Static.snippetParams.path}.json`, 
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/static/${window.LiveElement.Scale.Console.IDE.Static.staticElement.path}.json`, 
     {
         method: 'PUT', 
-        headers: {'Content-Type': `${window.LiveElement.Scale.Console.IDE.Static.snippetParams.contenttype}`}, 
-        body: `${window.LiveElement.Scale.Console.IDE.Static.snippetParams.body}`
+        headers: {'Content-Type': `${window.LiveElement.Scale.Console.IDE.Static.staticElement.contenttype}`}, 
+        body: `${window.LiveElement.Scale.Console.IDE.Static.staticElement.dataURL.split(',')[1]}`
     }
 )
             
-/* DELETE static */
+/* DELETE asset */
 window.fetch(
-    `${window.LiveElement.Scale.Console.IDE.connectionURL}/static/${window.LiveElement.Scale.Console.IDE.Static.snippetParams.path}.json`, 
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/static/${window.LiveElement.Scale.Console.IDE.Static.staticElement.path}.json`, 
     {
         method: 'DELETE'
     }

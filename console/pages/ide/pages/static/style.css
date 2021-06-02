@@ -1,81 +1,10 @@
 #ide[entity-type="static"] > section[name="static"] {
     display: block;
 }
-#ide > section[name="static"] > fieldset[name="search"] > input[type="search"] {
+#ide > section[name="static"] > element-entitysearch > input[type="search"] {
     width: 40em;
 }
-#ide > section[name="static"] > fieldset[name="search"] > button[name="delete"] {
-    margin-left: 8em;
+#ide > section[name="static"] > fieldset[name="edit"] > .text-editor-container {
+    margin-top: 1em;
+    margin-bottom: 1em;
 }
-#ide > section[name="static"] > fieldset[name="edit"] > label {
-    width: 24em;
-    margin-right: 2em;
-}
-#ide > section[name="static"] > fieldset[name="edit"] > label > input {
-    width: calc(100% - 4px);
-    margin-right: 2em;
-}
-#ide > section[name="static"] > fieldset[name="edit"] > label:first-of-type {
-    position: relative;
-}
-#ide > section[name="static"] > fieldset[name="edit"] > label:first-of-type span:first-of-type {
-    display: block;
-}
-#ide > section[name="static"] > fieldset[name="edit"] > label:first-of-type input {
-    display: inline-block;
-    width: calc(100% - 3.5em);
-    padding-left: 3em;
-    position: relative;
-    left: 0;
-    margin-right: 0;
-}
-#ide > section[name="static"] > fieldset[name="edit"] > .editor {
-    display: block;
-    width: 80em;
-    height: 47em;
-    min-height: 600px;
-    background-color: #202020;
-}
-#ide > section[name="static"] > fieldset[name="edit"] > div.editor[disabled="true"]::after {
-    content: 'this content type can not be edited here';
-    display: block;
-    width: 100%;
-    height: calc(100% - 60px);
-    text-align: center;
-    padding-top: 60px;
-}
-#ide > section[name="static"] > fieldset[name="edit"] > .editor element-imageeditor {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-#ide > section[name="static"] > fieldset[name="edit"] input[type="file"] {
-    display: none;
-}
-#ide > section[name="static"] > fieldset[name="edit"] label[name="upload"] {
-    appearance: button;
-    -moz-appearance: button;
-    -webkit-appearance: button;
-    -webkit-writing-mode: horizontal-tb !important;
-    text-rendering: auto;
-    color: buttontext;
-    letter-spacing: normal;
-    word-spacing: normal;
-    text-transform: none;
-    text-indent: 0px;
-    text-shadow: none;
-    display: inline-block;
-    text-align: center;
-    align-items: flex-start;
-    cursor: pointer;
-    background-color: buttonface;
-    box-sizing: border-box;
-    margin: 0em;
-    font: 400 13.3333px Arial;
-    padding: 1px 6px;
-    border-width: 2px;
-    border-style: outset;
-    border-color: buttonface;
-    border-image: initial;
-    width: auto;
- }
