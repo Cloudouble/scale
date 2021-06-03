@@ -1,4 +1,34 @@
-window.LiveElement.Live.processors.IdeChannelSearch = function(input) {
+window.LiveElement.Live.processors.IdeChannelEdit = function(input) {
+    var handlerType = window.LiveElement.Live.getHandlerType(input)
+    var editFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="channel"] fieldset[name="edit"]')
+    if (handlerType == 'trigger') {
+        if (input.entity) {
+            editFieldset.setAttribute('active', true)
+            window.LiveElement.Scale.Console.IDE.Channel.channelElement = editFieldset.querySelector('element-structureddata')
+            if (window.LiveElement.Scale.Console.IDE.Channel.channelElement) {
+                window.LiveElement.Scale.Console.IDE.Channel.channelElement.remove()
+            }
+            window.LiveElement.Scale.Console.IDE.Channel.channelElement = document.createElement('element-structureddata')
+            editFieldset.querySelector('h3').after(window.LiveElement.Scale.Console.IDE.Channel.channelElement)
+            window.LiveElement.Scale.Console.IDE.Channel.channelElement.mode = 'editor'
+            Object.assign(window.LiveElement.Scale.Console.IDE.Channel.channelElement, input.entity)
+            window.LiveElement.Scale.Console.IDE.Channel.channelElement.addEventListener('change', event => {
+                window.LiveElement.Scale.Console.buildSnippets('ide', 'channel')
+            })
+        } else {
+            editFieldset.removeAttribute('active')
+        }
+    }
+}
+
+window.LiveElement.Scale.Console.buildSnippets('ide', 'channel')
+
+
+
+
+
+
+/*window.LiveElement.Live.processors.IdeChannelSearch = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
     if (handlerType == 'listener') {
         return {...window.LiveElement.Scale.Console.IDE.Channel.Configure.channel, ...{id : window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}}
@@ -45,8 +75,10 @@ window.LiveElement.Live.processors.IdeChannelSearch = function(input) {
             searchFieldset.dispatchEvent(new window.CustomEvent('loaded'))
         }
     }
-}
-window.LiveElement.Live.processors.IdeChannelConfigure = function(input) {
+}*/
+
+
+/*window.LiveElement.Live.processors.IdeChannelConfigure = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
     if (handlerType == 'listener') {
         return {...window.LiveElement.Scale.Console.IDE.Channel.Configure.channel, ...{id : window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}}
@@ -169,3 +201,4 @@ window.LiveElement.Live.listeners.IdeChannelSearch = {processor: 'IdeChannelSear
 window.LiveElement.Live.listeners.IdeChannelTest = {processor: 'IdeChannelTest', expired: true}
 
 window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="channel"] fieldset[name="search"]'), 'IdeChannelSearch', 'loaded', false, true)
+*/

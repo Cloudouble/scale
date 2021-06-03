@@ -1,6 +1,12 @@
 #ide[entity-type="asset"] > section[name="asset"] {
     display: block;
 }
+#ide > section[name="asset"] > fieldset[name="edit"] {
+    display: none;
+}
+#ide > section[name="asset"] > fieldset[name="edit"][active] {
+    display: block;
+}
 #ide > section[name="asset"] > fieldset[name="edit"] > .text-editor-container {
     margin-top: 1em;
     margin-bottom: 1em;

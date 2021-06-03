@@ -101,6 +101,10 @@
     width: 100%;
     opacity: 0.6;
 }
+:host input[readonly] {
+    cursor: cell;
+    background-color: whitesmoke;
+}
 
 </style>
 <template>
@@ -131,6 +135,19 @@
         
         connectedCallback() {
             var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+            var makeCopyReady = function(elmt) {
+                $this.shadowRoot.querySelectorAll('input[readonly]:not([copyReady])').forEach(readonlyInputElement => {
+                    readonlyInputElement.addEventListener('click', event => {
+                        event.target.select()
+                    })
+                    readonlyInputElement.setAttribute('copyReady', true)
+                })
+            }
+            var observer = new window.MutationObserver(() => {
+                makeCopyReady()
+            })
+            observer.observe($this.shadowRoot, {subtree: true, childList: true})
+            makeCopyReady()
             var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
             var fileUploadInput = $this.shadowRoot.querySelector('input[type="file"]')
             if (Array.isArray($this.constructor.contentTypesAllowList) && $this.constructor.contentTypesAllowList.length) {
@@ -536,7 +553,6 @@
             var $this = this
             if ($this.mode != 'viewer') {
                 if ($this.editorType == 'image') {
-                    var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
                     if (!$this.imageEditorElement) {
                         $this.createEditor('image')
                     }

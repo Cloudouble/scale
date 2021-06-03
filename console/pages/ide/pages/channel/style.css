@@ -1,6 +1,15 @@
 #ide[entity-type="channel"] > section[name="channel"] {
     display: block;
 }
+#ide > section[name="channel"] > fieldset[name="edit"] {
+    display: none;
+}
+#ide > section[name="channel"] > fieldset[name="edit"][active] {
+    display: block;
+}
+
+
+
 #ide > section[name="channel"] > fieldset[name="configure"] > label {
     margin-right: 2em;
 }
