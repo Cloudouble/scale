@@ -1,0 +1,111 @@
+<style>
+:host {
+    contain: content;
+    display: block;
+    position: relative;
+}
+ 
+:host > label {
+    width: 16em;
+    margin-right: 2em;
+    display: inline-block;
+}
+:host > label:first-of-type {
+    width: 17em;
+    margin-right: 0.5em;
+}
+:host > aside {
+    display: none;
+}
+</style>
+<template>
+    <label>
+        @id
+        <input name="@id" type="text" autocomplete="off" readonly="true" />
+    </label>
+    <label>
+        @name
+        <input name="@name" type="search" autocomplete="off" />
+    </label>
+    <template name="OpaqueData"></template>
+</template>
+<script>
+    /* global */
+    class Channel extends window.LiveElement.Element.elements.Entity {
+
+        static __extends = 'Entity'
+        
+        static entityType = 'channel'
+
+        constructor() {
+            super()
+            var $this = this
+        }
+
+        connectedCallback() {
+            super.connectedCallback()
+            var $this = this
+            
+        }
+        
+        static get observedAttributes() {
+            return (super.observedAttributes || []).concat('receiveKey', 'sendKey', 'adminKey')
+        }
+        
+        static get entityFields() {
+            return (super.entityFields || []).concat('receiveKey', 'sendKey', 'adminKey')
+        }
+        
+        save() {
+            var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+            var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
+            window.fetch(
+                `${window.LiveElement.Scale.Console.IDE.connectionURL}/${$this.constructor.entityType}/${$this['@id']}.json`, 
+                {
+                    method: 'PUT', 
+                    headers: {"Content-Type": 'application/json'}, 
+                    body: `${$this}`
+                }
+            ).then(r => {
+                saveButton.setAttribute('disabled', true)
+                if (deleteButton) {
+                    deleteButton.removeAttribute('disabled')
+                }
+            })
+        }
+        
+        ['delete']() {
+            var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+            var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
+            window.fetch(
+                `${window.LiveElement.Scale.Console.IDE.connectionURL}/${$this.constructor.entityType}/${$this['@id']}.json`, 
+                {method: 'DELETE'}
+            ).then(r => {
+                deleteButton.setAttribute('disabled', true)
+                saveButton.removeAttribute('disabled')
+            })
+        }
+        
+        adminKey($this, value) {
+            var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
+            if (editorElement) {
+                return $this._setField($this, 'adminKey', value, 'label[name="adminKey"] input[name="adminKey"]')
+            }
+        }
+        
+        receiveKey($this, value) {
+            var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
+            if (editorElement) {
+                return $this._setField($this, 'receiveKey', value, 'label[name="receiveKey"] input[name="receiveKey"]')
+            }
+        }
+
+        sendKey($this, value) {
+            var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
+            if (editorElement) {
+                return $this._setField($this, 'sendKey', value, 'label[name="sendKey"] input[name="sendKey"]')
+            }
+        }
+        
+    }
+</script>

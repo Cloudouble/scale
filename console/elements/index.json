@@ -6,5 +6,6 @@
     "OpaqueData", 
     "Asset", 
     "Static", 
-    "Entity"
+    "Entity", 
+    "Channel"
 ]

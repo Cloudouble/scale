@@ -77,6 +77,11 @@
                 refreshDownloadLink()
             })
             refreshDownloadLink()
+            if ($this.shadowRoot.querySelector('div[name="editor"]')) {
+                if ($this.edit && typeof $this.edit == 'function') {
+                    $this.edit()
+                }
+            }
         }
         
         valueOf() {
@@ -94,6 +99,41 @@
         
         static get entityFields() {
             return (super.entityFields || []).concat('@id', '@name')
+        }
+        
+        _setField = function($this, name, value, inputSelector) {
+            var saneValue = value === undefined || value === null ? '' : String(value), idInputElement = $this.shadowRoot.querySelector(inputSelector)
+            if (idInputElement && idInputElement.value != saneValue) {
+                idInputElement.value = saneValue
+                idInputElement.dispatchEvent(new window.Event('change'))
+            }
+            return value
+        }
+        
+        edit() {
+            var $this = this, editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
+            $this.constructor.entityFields.filter(field => !(['@id', '@name']).includes(field)).forEach(field => {
+                var labelElement = editorElement.querySelector(`label[name="${field}"]`)
+                if (!labelElement) {
+                    labelElement = document.createElement('label')
+                    labelElement.setAttribute('name', field)
+                    labelElement.innerHTML = field
+                    editorElement.appendChild(labelElement)
+                }
+                var fieldInputElement = labelElement.querySelector(`input[name="${field}"]`)
+                if (!fieldInputElement) {
+                    fieldInputElement = document.createElement('input')
+                    fieldInputElement.setAttribute('name', field)
+                    labelElement.appendChild(fieldInputElement)
+                }
+                fieldInputElement.value = $this[field] === undefined ? '' : $this[field]
+                fieldInputElement.addEventListener('change', event => {
+                    if (($this[field] === undefined && event.target.value != '') || (String(event.target.value) != String($this[field]))) {
+                        $this[field] = event.target.value
+                        $this.dispatchEvent(new window.Event('change'))
+                    }
+                })
+            })
         }
         
         upload(file) {
@@ -148,12 +188,7 @@
         }
         
         _id($this, value) {
-            var idInputElement = $this.shadowRoot.querySelector('input[name="@id"]')
-            if (idInputElement.value != String(value)) {
-                idInputElement.value = value
-                idInputElement.dispatchEvent(new window.Event('change'))
-            }
-            return value
+            return $this._setField($this, '_id', value, 'input[name="@id"]')
         }
         set ['@id'](value) {
             this._id = value
@@ -163,12 +198,7 @@
         }
 
         _name($this, value) {
-            var nameInputElement = $this.shadowRoot.querySelector('input[name="@name"]')
-            if (nameInputElement.value != String(value)) {
-                nameInputElement.value = value
-                nameInputElement.dispatchEvent(new window.Event('change'))
-            }
-            return value
+            return $this._setField($this, '_name', value, 'input[name="@name"]')
         }
         set ['@name'](value) {
             this._name = value
