@@ -2,7 +2,7 @@
 window.LiveElement.Scale = window.LiveElement.Scale || {}
 window.LiveElement.Scale.Core = window.LiveElement.Scale.Core || {}
 window.LiveElement.Scale.Console = window.LiveElement.Scale.Console || {}
-window.LiveElement.Scale.Core.uuid4Pattern = '^[a-z0-9]{8}-[a-z0-9]{4}-4[a-z0-9]{3}-[89ab][a-z0-9]{3}-[a-z0-9]{12}$'
+window.LiveElement.Scale.Core.uuid4Pattern = '^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$'
 window.LiveElement.Scale.Core.generateUUID4 = function() {
     var u = '********-****-4***-N***-************'
     var v = ['8', '9', 'a', 'b']

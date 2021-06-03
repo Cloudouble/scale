@@ -49,16 +49,22 @@
                 'adminKey': {
                     type: 'text', 
                     pattern: window.LiveElement.Scale.Core.uuid4Pattern, 
+                    title: 'Must be a valid v4 UUID', 
+                    hint: 'Use to delete this channel', 
                     required: true
                 }, 
                 'receiveKey': {
                     type: 'text', 
                     pattern: window.LiveElement.Scale.Core.uuid4Pattern, 
+                    title: 'Must be a valid v4 UUID', 
+                    hint: 'Use to subscribe to this channel', 
                     required: true
                 }, 
                 'sendKey': {
                     type: 'text', 
                     pattern: window.LiveElement.Scale.Core.uuid4Pattern, 
+                    title: 'Must be a valid v4 UUID', 
+                    hint: 'Use to send messages to this channel', 
                     required: true
                 }
             }}

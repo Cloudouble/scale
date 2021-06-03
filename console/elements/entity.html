@@ -18,6 +18,11 @@
     display: none;
 }
 
+:host > label[name="upload"], :host > a[name="download"], :host > button[name="save"], :host > button[name="delete"] {
+    position: relative;
+    top: -1.5em;
+}
+
 :host div[name="editor"] {
     margin-top: 2em;
     margin-bottom: 2em;
@@ -31,16 +36,22 @@
     display: block;
     width: calc(100% - 5px);
 }
+:host div[name="editor"] > label > input:invalid {
+    outline: 1px inset red;
+    color: darkred;
+}
 
 </style>
 <template>
     <label>
         @id
-        <input name="@id" type="text" autocomplete="off" readonly="true" pattern="^[a-z0-9]{8}-[a-z0-9]{4}-4[a-z0-9]{3}-[89ab][a-z0-9]{3}-[a-z0-9]{12}$" required="true" />
+        <input name="@id" type="text" autocomplete="off" readonly="true" pattern="^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$" title="Must be a valid v4 UUID" required="true" />
+        <small>Unique identifier</small>
     </label>
     <label>
         @name
-        <input name="@name" type="text" autocomplete="off" />
+        <input name="@name" type="text" autocomplete="off" title="(optional) Any human-readable name" />
+        <small>Name for humans to read</small>
     </label>
     <template name="OpaqueData"></template>
 </template>
@@ -87,7 +98,14 @@
             $this.addEventListener('change', event => {
                 var saveButton = $this.shadowRoot.querySelector('button[name="save"]')
                 if (saveButton) {
-                    saveButton.removeAttribute('disabled')
+                    if (Object.keys($this.constructor.entityFields).every(field => {
+                        var inputElement = $this.shadowRoot.querySelector(`input[name="${field}"]`)
+                        return (inputElement && inputElement.checkValidity())
+                    })) {
+                        saveButton.removeAttribute('disabled')
+                    } else {
+                        saveButton.setAttribute('disabled', true)
+                    }
                 }
                 refreshDownloadLink()
             })
@@ -117,10 +135,14 @@
                 '@id': {
                     type: 'text', 
                     pattern: window.LiveElement.Scale.Core.uuid4Pattern, 
+                    title: 'Must be a valid v4 UUID', 
+                    hint: 'Unique identifier', 
                     required: true
                 }, 
                 '@name': {
-                    'type': 'text'
+                    type: 'text', 
+                    title: '(optional) Any human-readable name', 
+                    hint: '(optional) A human-readable name'
                 }
             }}
         }
@@ -148,12 +170,20 @@
                 if (!fieldInputElement) {
                     fieldInputElement = document.createElement('input')
                     fieldInputElement.setAttribute('name', field)
+                    var smallElement
                     if ($this.constructor.entityFields[field] && typeof $this.constructor.entityFields[field] == 'object') {
-                        Object.entries($this.constructor.entityFields[field]).forEach(entry => {
+                        Object.entries($this.constructor.entityFields[field]).filter(entry => entry[0] != 'hint').forEach(entry => {
                             fieldInputElement.setAttribute(...entry)
                         })
+                        if ($this.constructor.entityFields[field].hint) {
+                            smallElement = document.createElement('small')
+                            smallElement.innerHTML = $this.constructor.entityFields[field].hint
+                        }
                     }
                     labelElement.appendChild(fieldInputElement)
+                    if (smallElement) {
+                        labelElement.appendChild(smallElement)
+                    }
                 }
                 fieldInputElement.value = $this[field] === undefined ? '' : $this[field]
                 fieldInputElement.addEventListener('change', event => {
