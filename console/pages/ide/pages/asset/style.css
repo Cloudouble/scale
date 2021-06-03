@@ -1,9 +1,6 @@
 #ide[entity-type="asset"] > section[name="asset"] {
     display: block;
 }
-#ide > section[name="asset"] > element-entitysearch > input[type="search"] {
-    width: 40em;
-}
 #ide > section[name="asset"] > fieldset[name="edit"] > .text-editor-container {
     margin-top: 1em;
     margin-bottom: 1em;

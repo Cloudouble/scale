@@ -12,7 +12,6 @@
 :host > h4 {
     margin-bottom: 0.25em;
 }
-
 :host > .history {
     list-style: none;
     padding-left: 0;
@@ -30,6 +29,9 @@
 
 :host > .history li:hover {
     font-weight: bold;
+}
+::slotted(input[type="search"]) {
+    width: 40em;
 }
 </style>
 <template>
@@ -50,21 +52,30 @@
         constructor() {
             super()
             var $this = this
+            if (($this.hasAttribute('allowNew') && !$this.getAttribute('allowNew')) || $this.getAttribute('allowNew') == 'true') {
+                $this.setAttribute('allowNew', window.LiveElement.Scale.Core.uuid4Pattern)
+            }
+            if ($this.allowNew) {
+                $this.blankOptions = {[typeof $this.newFlag == 'string' ? $this.newFlag : window.LiveElement.Scale.Console.IDE.newFlag]: $this.blankOptionText || `create new ${$this.entityType}`}
+            }
         }
 
         static get observedAttributes() {
-            return (super.observedAttributes || []).concat('entityType', 'blankOptionText', 'allowNew')
+            return (super.observedAttributes || []).concat('entityType', 'historyPath', 'blankOptionText', 'allowNew', 'newFlag', 'name')
         }
         
         connectedCallback() {
             var $this = this
             var loadButton = $this.shadowRoot.querySelector('button[name="load"]')
-            var entityType = $this.getAttribute('entityType')
+            var entityType = $this.entityType
             $this.querySelectorAll('input[type="search"][list]').forEach(searchElement => {
                 if (!searchElement.getAttribute('list')) {
-                    var listId = `entitysearch-${$this.getAttribute('name') || ''}-${Math.floor(Math.random()*1000000000)}`
+                    var listId = `entitysearch-${$this.name || ''}-${Math.floor(Math.random()*1000000000)}`
                     var datalistElement = document.createElement('datalist')
                     datalistElement.setAttribute('id', listId)
+                    if ($this.allowNew) {
+                        window.LiveElement.Scale.Core.buildDataList(datalistElement, [], $this.blankOptions)
+                    }
                     $this.appendChild(datalistElement)
                     searchElement.setAttribute('list', listId)
                 }
@@ -129,18 +140,17 @@
         runPrimarySearch(searchElement) {
             var $this = this, loadButton = $this.shadowRoot.querySelector('button[name="load"]')
             if (searchElement.value) {
-                var datalistElement, listId = searchElement.getAttribute('list'), entityType = $this.getAttribute('entityType')
-                var blankOptionText = $this.getAttribute('blankOptionText')
-                var blankOptions = blankOptionText ? {[window.LiveElement.Scale.Console.IDE.newFlag]: blankOptionText} : {}
+                var datalistElement, listId = searchElement.getAttribute('list'), entityType = $this.entityType
                 if (listId) {
                     datalistElement = $this.querySelector(`datalist[id="${listId}"]`)
                 }
-                if (blankOptionText && (searchElement.value == window.LiveElement.Scale.Console.IDE.newFlag)) {
+                if ($this.allowNew && (searchElement.value == window.LiveElement.Scale.Console.IDE.newFlag)) {
                     searchElement.value = window.LiveElement.Scale.Core.generateUUID4()
                     $this.result = []
                     if (datalistElement) {
-                        window.LiveElement.Scale.Core.buildDataList(datalistElement, $this.result)
+                        window.LiveElement.Scale.Core.buildDataList(datalistElement, $this.result, $this.blankOptions)
                     }
+                    searchElement.dispatchEvent(new window.Event('input'))
                 } else {
                     window.LiveElement.Scale.Console.System.invokeLambda({...{
                         page: 'ide', 
@@ -151,10 +161,10 @@
                     }, ...Object.assign({}, ...Array.from($this.querySelectorAll('input[supporting][name]')).map(i => ({[i.getAttribute('name')]: i.value})))}).then(searchResult => {
                         if (searchResult && searchResult.result) {
                             $this.result = Array.isArray(searchResult.result) ? searchResult.result : (typeof searchResult.result == 'object' ? Object.keys(searchResult.result) : [])
-                            window.LiveElement.Scale.Core.buildDataList(datalistElement, $this.result, blankOptions)
+                            window.LiveElement.Scale.Core.buildDataList(datalistElement, $this.result, $this.blankOptions)
                         }
                         var loadButtonAlreadyDisabled = loadButton.getAttribute('disabled'), resultIncludesValue = $this.result.includes(searchElement.value)
-                        if ($this.allowNew || (loadButtonAlreadyDisabled && resultIncludesValue)) {
+                        if ((loadButtonAlreadyDisabled && resultIncludesValue) || ($this.allowNew && new window.RegExp($this.allowNew).test(searchElement.value))) {
                             loadButton.removeAttribute('disabled')
                         } else if (!loadButtonAlreadyDisabled && !resultIncludesValue) {
                             loadButton.setAttribute('disabled', true)
@@ -168,15 +178,18 @@
         
         writeHistory(entityCore) {
             var $this = this, historyElement = $this.shadowRoot.querySelector('.history'), historySmallElement = historyElement.querySelector('small')
-            var entityType = $this.getAttribute('entityType'), liElement = document.createElement('li'), hint = '', data = {}
+            var entityType = $this.entityType, liElement = document.createElement('li'), hint = '', data = {}
             liElement.classList.add('history-entry')
             Object.entries(entityCore).forEach(entry => data[entry[0]] = entry[1])
             liElement.setAttribute('data', JSON.stringify(data))
-            var historyPath = ($this.getAttribute('historyPath') || '${@id}')
+            var historyPath = ($this.historyPath || '${@id}')
             Object.entries(entityCore).forEach(entry => historyPath = historyPath.replace('${' + entry[0] + '}', entry[1]))
             if ($this.entity && Object.keys($this.entity).length > 2) {
                 if ($this.entity.name) {
                     hint = `${hint}name="${$this.entity.name}", `
+                }
+                if ($this.entity['@name']) {
+                    hint = `${hint}@name="${$this.entity['@name']}", `
                 }
                 var extraHintField = Object.keys($this.entity)
                     .filter(k => k != 'name' && k[0] != '@' && typeof $this.entity[k] != 'object').sort().shift()

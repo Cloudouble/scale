@@ -1,5 +1,5 @@
 <h2>Asset</h2>
-<element-entitysearch entityType="asset" historyPath="${path}" live-trigger="loaded:IdeAssetEdit" allowNew="true">
+<element-entitysearch entityType="asset" historyPath="${path}" live-trigger="loaded:IdeAssetEdit" allowNew="[a-zA-Z0-9\-_\.]+" newFlag=''>
     <input name="path" type="search" placeholder="search path, will create new if not exists..." autocomplete="off" list />
 </element-entitysearch>
 <fieldset name="edit" live-subscription="IdeAssetSearch:IdeAssetEdit">

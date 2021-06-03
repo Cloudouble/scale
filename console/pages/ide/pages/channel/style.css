@@ -1,9 +1,6 @@
 #ide[entity-type="channel"] > section[name="channel"] {
     display: block;
 }
-#ide > section[name="channel"] > fieldset[name="search"] > input[type="search"] {
-    width: 40em;
-}
 #ide > section[name="channel"] > fieldset[name="configure"] > label {
     margin-right: 2em;
 }

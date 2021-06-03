@@ -1,4 +1,4 @@
-#ide:not([entity-type]) > section[name="static"] {
+#ide:not([entity-type]) > section[name="channel"] {
     display: block;
 }
 #ide div[name="sidebar"] {

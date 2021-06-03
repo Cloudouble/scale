@@ -1,5 +1,5 @@
 <h2>Static</h2>
-<element-entitysearch entityType="static" historyPath="${path}" live-trigger="loaded:IdeStaticEdit" allowNew="true">
+<element-entitysearch entityType="static" historyPath="${path}" live-trigger="loaded:IdeStaticEdit" allowNew="[a-zA-Z0-9\-_\.]+" newFlag=''>
     <input name="path" type="search" placeholder="search path, will create new if not exists..." autocomplete="off" list />
 </element-entitysearch>
 <fieldset name="edit" live-subscription="IdeStaticSearch:IdeStaticEdit">
