@@ -19,15 +19,7 @@
 }
 </style>
 <template>
-    <label>
-        @id
-        <input name="@id" type="text" autocomplete="off" readonly="true" />
-    </label>
-    <label>
-        @name
-        <input name="@name" type="search" autocomplete="off" />
-    </label>
-    <template name="OpaqueData"></template>
+    <template name="Entity"></template>
 </template>
 <script>
     /* global */
@@ -53,14 +45,30 @@
         }
         
         static get entityFields() {
-            return (super.entityFields || []).concat('receiveKey', 'sendKey', 'adminKey')
+            return {...super.entityFields, ...{
+                'adminKey': {
+                    type: 'text', 
+                    pattern: window.LiveElement.Scale.Core.uuid4Pattern, 
+                    required: true
+                }, 
+                'receiveKey': {
+                    type: 'text', 
+                    pattern: window.LiveElement.Scale.Core.uuid4Pattern, 
+                    required: true
+                }, 
+                'sendKey': {
+                    type: 'text', 
+                    pattern: window.LiveElement.Scale.Core.uuid4Pattern, 
+                    required: true
+                }
+            }}
         }
         
         save() {
             var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
             var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
             window.fetch(
-                `${window.LiveElement.Scale.Console.IDE.connectionURL}/${$this.constructor.entityType}/${$this['@id']}.json`, 
+                `${window.LiveElement.Scale.Console.IDE.connectionURL}/channel/${$this['@id']}/connect.json`, 
                 {
                     method: 'PUT', 
                     headers: {"Content-Type": 'application/json'}, 
@@ -78,7 +86,7 @@
             var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
             var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
             window.fetch(
-                `${window.LiveElement.Scale.Console.IDE.connectionURL}/${$this.constructor.entityType}/${$this['@id']}.json`, 
+                `${window.LiveElement.Scale.Console.IDE.connectionURL}/channel/${$this['@id']}/${$this['adminKey']}.json`, 
                 {method: 'DELETE'}
             ).then(r => {
                 deleteButton.setAttribute('disabled', true)

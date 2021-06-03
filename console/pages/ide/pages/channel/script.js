@@ -15,6 +15,7 @@ window.LiveElement.Live.processors.IdeChannelEdit = function(input) {
             window.LiveElement.Scale.Console.IDE.Channel.channelElement.addEventListener('change', event => {
                 window.LiveElement.Scale.Console.buildSnippets('ide', 'channel')
             })
+            window.LiveElement.Scale.Console.buildSnippets('ide', 'channel')            
         } else {
             editFieldset.removeAttribute('active')
         }

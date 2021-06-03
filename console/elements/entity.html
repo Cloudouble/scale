@@ -36,11 +36,11 @@
 <template>
     <label>
         @id
-        <input name="@id" type="text" autocomplete="off" readonly="true" />
+        <input name="@id" type="text" autocomplete="off" readonly="true" pattern="^[a-z0-9]{8}-[a-z0-9]{4}-4[a-z0-9]{3}-[89ab][a-z0-9]{3}-[a-z0-9]{12}$" required="true" />
     </label>
     <label>
         @name
-        <input name="@name" type="search" autocomplete="off" />
+        <input name="@name" type="text" autocomplete="off" />
     </label>
     <template name="OpaqueData"></template>
 </template>
@@ -101,7 +101,7 @@
         
         valueOf() {
             var $this = this
-            return Object.assign({}, ...$this.constructor.entityFields.map(field => ({[field]: $this[field]})))
+            return Object.assign({}, ...Object.keys($this.constructor.entityFields).sort().map(field => ({[field]: $this[field]})))
         }
         
         toString() {
@@ -113,7 +113,16 @@
         }
         
         static get entityFields() {
-            return (super.entityFields || []).concat('@id', '@name')
+            return {...super.entityFields, ...{
+                '@id': {
+                    type: 'text', 
+                    pattern: window.LiveElement.Scale.Core.uuid4Pattern, 
+                    required: true
+                }, 
+                '@name': {
+                    'type': 'text'
+                }
+            }}
         }
         
         _setField = function($this, name, value, inputSelector) {
@@ -127,7 +136,7 @@
         
         edit() {
             var $this = this, editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
-            $this.constructor.entityFields.filter(field => !(['@id', '@name']).includes(field)).sort().forEach(field => {
+            Object.keys($this.constructor.entityFields).filter(field => !(['@id', '@name']).includes(field)).sort().forEach(field => {
                 var labelElement = editorElement.querySelector(`label[name="${field}"]`)
                 if (!labelElement) {
                     labelElement = document.createElement('label')
@@ -139,6 +148,11 @@
                 if (!fieldInputElement) {
                     fieldInputElement = document.createElement('input')
                     fieldInputElement.setAttribute('name', field)
+                    if ($this.constructor.entityFields[field] && typeof $this.constructor.entityFields[field] == 'object') {
+                        Object.entries($this.constructor.entityFields[field]).forEach(entry => {
+                            fieldInputElement.setAttribute(...entry)
+                        })
+                    }
                     labelElement.appendChild(fieldInputElement)
                 }
                 fieldInputElement.value = $this[field] === undefined ? '' : $this[field]
@@ -161,7 +175,7 @@
                     } catch(e) {
                         entity = {}
                     }
-                    $this.constructor.entityFields.filter(field => field != '@id').forEach(field => {
+                    Object.keys($this.constructor.entityFields).filter(field => field != '@id').sort().forEach(field => {
                         if (field in entity) {
                             if (String($this[field]) != String(entity[field])) {
                                 $this[field] = entity[field]

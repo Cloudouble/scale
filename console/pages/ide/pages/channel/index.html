@@ -7,23 +7,20 @@
     <h3>Edit</h3>
     <div class="text-editor-container"></div>
     <element-snippet>
-/* SAVE asset */
-/* NOTE: body => window.btoa('your plain text or raw binary body') */
+/* SAVE channel */
 window.fetch(
-    `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${window.LiveElement.Scale.Console.IDE.Asset.assetElement.path}.json`, 
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/channel/${window.LiveElement.Scale.Console.IDE.Channel.channelElement['@id']}/connect.json`, 
     {
         method: 'PUT', 
-        headers: {'Content-Type': `${window.LiveElement.Scale.Console.IDE.Asset.assetElement.contenttype}`}, 
-        body: `${window.LiveElement.Scale.Console.IDE.Asset.assetElement.dataURL.split(',')[1]}`
+        headers: {"Content-Type": 'application/json'}, 
+        body: `${window.LiveElement.Scale.Console.IDE.Channel.channelElement}`
     }
 )
-            
-/* DELETE asset */
+
+/* DELETE channel */
 window.fetch(
-    `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${window.LiveElement.Scale.Console.IDE.Asset.assetElement.path}.json`, 
-    {
-        method: 'DELETE'
-    }
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/channel/${window.LiveElement.Scale.Console.IDE.Channel.channelElement['@id']}/${window.LiveElement.Scale.Console.IDE.Channel.channelElement['adminKey']}.json`, 
+    {method: 'DELETE'}
 )
     </element-snippet>
 </fieldset>
