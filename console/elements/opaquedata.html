@@ -150,41 +150,30 @@
             makeCopyReady()
             var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
             var fileUploadInput = $this.shadowRoot.querySelector('input[type="file"]')
-            if (Array.isArray($this.constructor.contentTypesAllowList) && $this.constructor.contentTypesAllowList.length) {
-                fileUploadInput.setAttribute('accept', $this.constructor.contentTypesAllowList.sort().map(a => {
-                    var acceptFragmentList = [a]
-                    if ($this.constructor.contentTypesMap[a]) {
-                        acceptFragmentList.push($this.constructor.contentTypesMap[a].suffix)
+            if (fileUploadInput) {
+                if ($this.upload && typeof $this.upload == 'function') {
+                    if (Array.isArray($this.constructor.contentTypesAllowList) && $this.constructor.contentTypesAllowList.length) {
+                        fileUploadInput.setAttribute('accept', $this.constructor.contentTypesAllowList.sort().map(a => {
+                            var acceptFragmentList = [a]
+                            if ($this.constructor.contentTypesMap[a]) {
+                                acceptFragmentList.push($this.constructor.contentTypesMap[a].suffix)
+                            }
+                            return acceptFragmentList.join(',')
+                        }).join(','))
                     }
-                    return acceptFragmentList.join(',')
-                }).join(','))
-            }
-            fileUploadInput.addEventListener('change', event => {
-                if (event.target.files.length) {
-                    $this.file = event.target.files[0]
-                    $this['Content-Type'] = $this.file.type
-                    $this['Content-Length'] = $this.file.size
-                    $this['Last-Modified'] = $this.file.lastModifiedDate
-                    if ($this.path && $this.path.slice(-1) == '/') {
-                        $this.path = `${$this.path}${$this.file.name}`
-                    } else if (!$this.path) {
-                        $this.path = $this.file.name
-                    }
-                    var reader = new window.FileReader()
-                    reader.addEventListener('load', event => {
-                        $this.body = event.target.result.split(',')[1]
-                        $this.dataURL = event.target.result
-                        var downloadA = $this.shadowRoot.querySelector('a[name="download"]')
-                        downloadA.setAttribute('href', $this.dataURL)
-                        downloadA.setAttribute('download', $this.path || $this.file.name)
+                    fileUploadInput.addEventListener('change', event => {
+                        if (event.target.files.length) {
+                            $this.upload(event.target.files[0])
+                        }
                     })
-                    reader.readAsDataURL($this.file)
-                    event.target.value = ''
-                    if (saveButton) {
-                        saveButton.removeAttribute('disabled')
+                } else {
+                    fileUploadInput.remove()
+                    var uploadButton = $this.shadowRoot.querySelector('label[name="upload"]')
+                    if (uploadButton) {
+                        uploadButton.remove()
                     }
                 }
-            })
+            }
             var pathInputElement = $this.shadowRoot.querySelector('input[name="path"]')
             if (pathInputElement) {
                 pathInputElement.addEventListener('change', event => {
@@ -220,18 +209,22 @@
                 $this.shadowRoot.appendChild(datalistElement)
             }
             if (saveButton) {
-                saveButton.addEventListener('click', event => {
-                    if ($this.save && typeof $this.save == 'function') {
+                if ($this.save && typeof $this.save == 'function') {
+                    saveButton.addEventListener('click', event => {
                         $this.save()
-                    }
-                })
+                    })
+                } else {
+                    saveButton.remove()
+                }
             }
             if (deleteButton) {
-                deleteButton.addEventListener('click', event => {
-                    if ($this.delete && typeof $this.delete == 'function') {
+                if ($this.delete && typeof $this.delete == 'function') {
+                    deleteButton.addEventListener('click', event => {
                         $this.delete()
-                    }
-                })
+                    })
+                } else {
+                    deleteButton.remove()
+                }
             }
         }
         

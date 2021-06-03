@@ -31,10 +31,11 @@
 </template>
 <script>
     /* global */
-    class StructuredData extends window.LiveElement.Element.elements.OpaqueData {
+    class Entity extends window.LiveElement.Element.elements.OpaqueData {
 
         static __extends = 'OpaqueData'
         
+        static entityType = 'entity'
         static contentTypesAllowList = ['application/json']
 
         constructor() {
@@ -46,27 +47,85 @@
             super.connectedCallback()
             var $this = this
             $this.shadowRoot.querySelector(':scope > aside').remove()
+            var idInputElement = $this.shadowRoot.querySelector('input[name="@id"]')
             var nameInputElement = $this.shadowRoot.querySelector('input[name="@name"]')
+            var refreshDownloadLink = function() {
+                var downloadA = $this.shadowRoot.querySelector('a[name="download"]')
+                if (downloadA) {
+                    downloadA.setAttribute('href', `data:application/json;base64,${window.btoa($this)}`)
+                    downloadA.setAttribute('download', `${$this['@id']}.json`)
+                    downloadA.removeAttribute('disabled')
+                }
+            }
+            idInputElement.addEventListener('change', event => {
+                if (event.target.value != String($this['@id'])) {
+                    $this['@id'] = event.target.value
+                    $this.dispatchEvent(new window.Event('change'))
+                }
+            }, {once: true})
             nameInputElement.addEventListener('change', event => {
                 if (event.target.value != String($this['@name'])) {
                     $this['@name'] = event.target.value
+                    $this.dispatchEvent(new window.Event('change'))
                 }
             })
+            $this.addEventListener('change', event => {
+                var saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+                if (saveButton) {
+                    saveButton.removeAttribute('disabled')
+                }
+                refreshDownloadLink()
+            })
+            refreshDownloadLink()
+        }
+        
+        valueOf() {
+            var $this = this
+            return Object.assign({}, ...$this.constructor.entityFields.map(field => ({[field]: $this[field]})))
+        }
+        
+        toString() {
+            return JSON.stringify(this.valueOf())
         }
 
         static get observedAttributes() {
             return (super.observedAttributes || []).concat('_id', '_name')
         }
         
+        static get entityFields() {
+            return (super.entityFields || []).concat('@id', '@name')
+        }
+        
+        upload(file) {
+            if (file) {
+                var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+                file.text().then(fileText => {
+                    var entity = {}
+                    try {
+                        entity = JSON.parse(fileText)
+                    } catch(e) {
+                        entity = {}
+                    }
+                    $this.constructor.entityFields.filter(field => field != '@id').forEach(field => {
+                        if (field in entity) {
+                            if (String($this[field]) != String(entity[field])) {
+                                $this[field] = entity[field]
+                            }
+                        }
+                    })
+                })
+            }
+        }
+        
         save() {
             var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
             var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
             window.fetch(
-                `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${$this.path}`, 
+                `${window.LiveElement.Scale.Console.IDE.connectionURL}/${$this.constructor.entityType}/${$this['@id']}.json`, 
                 {
                     method: 'PUT', 
-                    headers: {"Content-Type": $this['Content-Type']}, 
-                    body: $this.editorType == 'image' ? `${$this.editor}` : ($this.editorType == 'text' ? window.btoa($this.editor.getValue()) : ($this.dataURL?$this.dataURL.split(',')[1]:$this.body))
+                    headers: {"Content-Type": 'application/json'}, 
+                    body: `${$this}`
                 }
             ).then(r => {
                 saveButton.setAttribute('disabled', true)
@@ -80,7 +139,7 @@
             var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
             var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
             window.fetch(
-                `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${$this.path}`, 
+                `${window.LiveElement.Scale.Console.IDE.connectionURL}/${$this.constructor.entityType}/${$this['@id']}.json`, 
                 {method: 'DELETE'}
             ).then(r => {
                 deleteButton.setAttribute('disabled', true)

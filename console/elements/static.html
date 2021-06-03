@@ -32,6 +32,34 @@
             return (super.observedAttributes || []).concat()
         }
         
+        upload(file) {
+            if (file) {
+                var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+                $this.file = file
+                $this['Content-Type'] = $this.file.type
+                $this['Content-Length'] = $this.file.size
+                $this['Last-Modified'] = $this.file.lastModifiedDate
+                if ($this.path && $this.path.slice(-1) == '/') {
+                    $this.path = `${$this.path}${$this.file.name}`
+                } else if (!$this.path) {
+                    $this.path = $this.file.name
+                }
+                var reader = new window.FileReader()
+                reader.addEventListener('load', event => {
+                    $this.body = event.target.result.split(',')[1]
+                    $this.dataURL = event.target.result
+                    var downloadA = $this.shadowRoot.querySelector('a[name="download"]')
+                    downloadA.setAttribute('href', $this.dataURL)
+                    downloadA.setAttribute('download', $this.path || $this.file.name)
+                })
+                reader.readAsDataURL($this.file)
+                event.target.value = ''
+                if (saveButton) {
+                    saveButton.removeAttribute('disabled')
+                }
+            }
+        }
+        
         save() {
             var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
             var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')

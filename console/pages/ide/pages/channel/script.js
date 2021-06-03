@@ -4,11 +4,11 @@ window.LiveElement.Live.processors.IdeChannelEdit = function(input) {
     if (handlerType == 'trigger') {
         if (input.entity) {
             editFieldset.setAttribute('active', true)
-            window.LiveElement.Scale.Console.IDE.Channel.channelElement = editFieldset.querySelector('element-structureddata')
+            window.LiveElement.Scale.Console.IDE.Channel.channelElement = editFieldset.querySelector('element-entity')
             if (window.LiveElement.Scale.Console.IDE.Channel.channelElement) {
                 window.LiveElement.Scale.Console.IDE.Channel.channelElement.remove()
             }
-            window.LiveElement.Scale.Console.IDE.Channel.channelElement = document.createElement('element-structureddata')
+            window.LiveElement.Scale.Console.IDE.Channel.channelElement = document.createElement('element-entity')
             editFieldset.querySelector('h3').after(window.LiveElement.Scale.Console.IDE.Channel.channelElement)
             window.LiveElement.Scale.Console.IDE.Channel.channelElement.mode = 'editor'
             Object.assign(window.LiveElement.Scale.Console.IDE.Channel.channelElement, input.entity)
