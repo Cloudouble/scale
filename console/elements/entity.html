@@ -115,6 +115,29 @@
                     $this.edit()
                 }
             }
+            window.setTimeout(() => {
+                var fillWithUUID = function(inputElement) {
+                    inputElement.value = window.LiveElement.Scale.Core.generateUUID4()
+                    inputElement.dispatchEvent(new window.Event('change'))
+                }
+                $this.shadowRoot.querySelectorAll('input[type="uuid"]').forEach(uuidInputElement => {
+                    if (!uuidInputElement.value) {
+                        uuidInputElement.setAttribute('placeholder', "Valid v4 UUId required, double click or press 'Enter' to auto-generate")
+                        uuidInputElement.addEventListener('dblclick', event => {
+                            fillWithUUID(uuidInputElement)
+                        }, {once: true})
+                        uuidInputElement.addEventListener('beforeinput', event => {
+                            if (uuidInputElement.value.length === 0 && event.inputType == 'insertLineBreak') {
+                                fillWithUUID(uuidInputElement)
+                            }
+                        }, {once: true})
+                    }
+                })
+                var nameInputElement = $this.shadowRoot.querySelector('input[name="@name"]')
+                if (nameInputElement && nameInputElement.value.length === 0) {
+                    nameInputElement.focus()
+                }
+            }, 200)
         }
         
         valueOf() {
@@ -133,7 +156,7 @@
         static get entityFields() {
             return {...super.entityFields, ...{
                 '@id': {
-                    type: 'text', 
+                    type: 'uuid', 
                     pattern: window.LiveElement.Scale.Core.uuid4Pattern, 
                     title: 'Must be a valid v4 UUID', 
                     hint: 'Unique identifier', 

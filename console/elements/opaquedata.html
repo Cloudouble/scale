@@ -108,10 +108,10 @@
 
 </style>
 <template>
-    <label name="upload">Upload<input type="file" name="upload" /></label>
-    <a name="download" href="path_to_file" disabled="true">Download</a>
-    <button name="save" disabled="true">Save</button>
-    <button name="delete" disabled="true">Delete</button>
+    <label name="upload">Upload<input type="file" name="upload" tabindex="-1" /></label>
+    <a name="download" href="path_to_file" disabled="true" tabindex="-1">Download</a>
+    <button name="save" disabled="true" tabindex="-1">Save</button>
+    <button name="delete" disabled="true" tabindex="-1">Delete</button>
     <div name="viewer"></div>
     <div name="editor"></div>
     <aside>Upload a file to get started.</aside>
