@@ -105,6 +105,18 @@
     cursor: cell;
     background-color: whitesmoke;
 }
+:host label[name="upload"], 
+:host a[name="download"], 
+:host button[name="save"], 
+:host button[name="delete"] {
+    cursor: pointer;
+} 
+:host button[name="save"][disabled], 
+:host button[name="delete"][disabled] {
+    opacity: 0.5;
+    color: gray;
+    cursor: default;
+}
 
 </style>
 <template>
