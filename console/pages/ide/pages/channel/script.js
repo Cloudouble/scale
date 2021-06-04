@@ -1,9 +1,20 @@
 window.LiveElement.Live.processors.IdeChannelEdit = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
     var editFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="channel"] fieldset[name="edit"]')
-    if (handlerType == 'trigger') {
+    var codeFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="channel"] fieldset[name="code"]')
+    var testFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="channel"] fieldset[name="test"]')
+    if (handlerType == 'listener') {
+        return {
+            '@id': (window.LiveElement.Scale.Console.IDE.Channel.channelElement || {})['@id'], 
+            adminKey: (window.LiveElement.Scale.Console.IDE.Channel.channelElement || {}).adminKey, 
+            receiveKey: (window.LiveElement.Scale.Console.IDE.Channel.channelElement || {}).receiveKey, 
+            sendKey: (window.LiveElement.Scale.Console.IDE.Channel.channelElement || {}).sendKey
+        }
+    } else if (handlerType == 'trigger') {
         if (input.entity) {
             editFieldset.setAttribute('active', true)
+            codeFieldset.setAttribute('active', true)
+            //testFieldset.setAttribute('active', true)
             window.LiveElement.Scale.Console.IDE.Channel.channelElement = editFieldset.querySelector('element-channel')
             if (window.LiveElement.Scale.Console.IDE.Channel.channelElement) {
                 window.LiveElement.Scale.Console.IDE.Channel.channelElement.remove()
@@ -15,15 +26,43 @@ window.LiveElement.Live.processors.IdeChannelEdit = function(input) {
             window.LiveElement.Scale.Console.IDE.Channel.channelElement.addEventListener('change', event => {
                 window.LiveElement.Scale.Console.buildSnippets('ide', 'channel')
             })
+            window.LiveElement.Scale.Console.IDE.Channel.channelElement.setAttribute('live-subscription', 'IdeChannelEdit:IdeChannelCode')
+            window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.Channel.channelElement, 'IdeChannelEdit', 'change', false, true)
             window.LiveElement.Scale.Console.buildSnippets('ide', 'channel')            
         } else {
             editFieldset.removeAttribute('active')
+            codeFieldset.removeAttribute('active')
+            //testFieldset.removeAttribute('active')
         }
     }
 }
 
+window.LiveElement.Live.processors.IdeChannelCode = function(input) {
+    var handlerType = window.LiveElement.Live.getHandlerType(input)
+    var codeFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="channel"] fieldset[name="code"]')
+    if (handlerType == 'subscription') {
+        (['adminKey', 'receiveKey', 'sendKey']).forEach(key => {
+            var adminUrlInputElement = codeFieldset.querySelector('input[name="adminUrl"]')
+            if (adminUrlInputElement && input.payload.adminKey) {
+                adminUrlInputElement.value = (input.payload.adminKey) ? `${window.LiveElement.Scale.Console.IDE.systemURL}/channel/${input.payload['@id']}/${input.payload.adminKey}` : ''
+            }
+            var receiveUrlInputElement = codeFieldset.querySelector('input[name="receiveUrl"]')
+            if (receiveUrlInputElement && input.payload.receiveKey) {
+                receiveUrlInputElement.value = (input.payload.receiveKey) ? `${window.LiveElement.Scale.Console.IDE.systemURL.replace('https:', 'wss:')}/channel/${input.payload['@id']}/${input.payload.receiveKey}` : ''
+            }
+            var sendUrlInputElement = codeFieldset.querySelector('input[name="sendUrl"]')
+            if (sendUrlInputElement && input.payload.sendKey) {
+                sendUrlInputElement.value = (input.payload.sendKey) ? `${window.LiveElement.Scale.Console.IDE.systemURL}/channel/${input.payload['@id']}/${input.payload.sendKey}` : ''
+            }
+        })
+    }
+    
+}
+
 window.LiveElement.Scale.Console.buildSnippets('ide', 'channel')
 
+window.LiveElement.Live.listeners.IdeChannelEdit = {processor: 'IdeChannelEdit', expired: true}
+//window.LiveElement.Live.listeners.IdeChannelTest = {processor: 'IdeChannelTest', expired: true}
 
 
 

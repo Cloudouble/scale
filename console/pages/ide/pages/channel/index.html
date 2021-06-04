@@ -3,11 +3,11 @@
 <element-entitysearch entityType="channel" historyPath="${@id}" blankOptionText="create new channel" live-trigger="loaded:IdeChannelEdit" allowNew>
     <input name="@id" type="search" placeholder="search @id, or type 'new'..." autocomplete="off" list />
 </element-entitysearch>
-<fieldset name="edit" live-subscription="IdeChannelSearch:IdeChannelEdit">
+<fieldset name="edit">
     <h3>Edit</h3>
     <div class="text-editor-container"></div>
     <element-snippet>
-/* SAVE channel */
+/* CREATE channel */
 window.fetch(
     `${window.LiveElement.Scale.Console.IDE.connectionURL}/channel/${window.LiveElement.Scale.Console.IDE.Channel.channelElement['@id']}/connect.json`, 
     {
@@ -19,69 +19,26 @@ window.fetch(
 
 /* DELETE channel */
 window.fetch(
-    `${window.LiveElement.Scale.Console.IDE.connectionURL}/channel/${window.LiveElement.Scale.Console.IDE.Channel.channelElement['@id']}/${window.LiveElement.Scale.Console.IDE.Channel.channelElement['adminKey']}.json`, 
+    `${window.LiveElement.Scale.Console.IDE.systemURL}/channel/${window.LiveElement.Scale.Console.IDE.Channel.channelElement['@id']}/${window.LiveElement.Scale.Console.IDE.Channel.channelElement['adminKey']}`, 
     {method: 'DELETE'}
 )
     </element-snippet>
 </fieldset>
-
-
-<!--<fieldset name="edit" live-subscription="IdeChannelSearch:IdeChannelEdit">
-    <h3>Edit</h3>
-    <label>
-        Channel @name (optional)
-        <input name="@name" type="text" autocomplete="off" live-trigger="change:IdeChannelConfigure" />
-    </label>
-    <label>
-        Channel ID
-        <input name="id" type="uuid" readonly="readonly" />
-    </label>
-    <label>
-        Receive Key
-        <input name="receiveKey" type="uuid" readonly="readonly" />
-    </label>
-    <label>
-        Send Key
-        <input name="sendKey" type="uuid" readonly="readonly" />
-    </label>
-    <label>
-        Admin Key
-        <input name="adminKey" type="uuid" readonly="readonly" />
-    </label>
-    <button name="create" live-trigger="click:IdeChannelConfigure">Create</button>
-    <button name="delete" live-trigger="click:IdeChannelConfigure">Delete</button>
-    <element-snippet>
-window.fetch(
-    '${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.Configure.channel_id}/connect.json', 
-    {
-        method: 'PUT', 
-        headers: {
-            "Content-Type": "application/json"
-        }, 
-        body: JSON.stringify({
-            ${JSON.stringify(window.LiveElement.Scale.Console.IDE.Channel.Configure.channel, null, 20).slice(1, -1)}
-        }) 
-    }
-)
-    </element-snippet>
-</fieldset>
--->
-<!--
-<fieldset name="code" live-subscription="IdeChannelSearch:IdeChannelCode">
+<fieldset name="code">
     <h3>Code</h3>
     <label>
         Receive URL
-        <input name="receive_url" type="url" readonly="readonly" />
+        <input name="receiveUrl" type="url" readonly="readonly" />
         <element-snippet>
-var socket = new WebSocket('${window.LiveElement.Scale.Console.IDE.Channel.Code.receive_url}')
+var socket = new WebSocket('${window.LiveElement.Scale.Console.IDE.systemURL.replace('https:', 'wss:')}/channel/${window.LiveElement.Scale.Console.IDE.Channel.channelElement['@id']}/${window.LiveElement.Scale.Console.IDE.Channel.channelElement['receiveKey']}')
         </element-snippet>
     </label>
     <label>
         Send URL
-        <input name="send_url" type="url" readonly="readonly" />
+        <input name="sendUrl" type="url" readonly="readonly" />
         <element-snippet>
 window.fetch(
-    '${window.LiveElement.Scale.Console.IDE.Channel.Code.send_url}', 
+    '${window.LiveElement.Scale.Console.IDE.systemURL}/channel/${window.LiveElement.Scale.Console.IDE.Channel.channelElement['@id']}/${window.LiveElement.Scale.Console.IDE.Channel.channelElement['sendKey']}', 
     {
         method: 'POST', 
         body: JSON.stringify(data)
@@ -91,10 +48,10 @@ window.fetch(
     </label>
     <label>
         Admin URL
-        <input name="admin_url" type="url" readonly="readonly" />
+        <input name="adminUrl" type="url" readonly="readonly" />
         <element-snippet>
 window.fetch(
-    '${window.LiveElement.Scale.Console.IDE.Channel.Code.admin_url}', 
+    '${window.LiveElement.Scale.Console.IDE.systemURL}/channel/${window.LiveElement.Scale.Console.IDE.Channel.channelElement['@id']}/${window.LiveElement.Scale.Console.IDE.Channel.channelElement['adminKey']}', 
     { 
         method: 'DELETE'
     }
@@ -102,6 +59,9 @@ window.fetch(
         </element-snippet>
     </label>
 </fieldset>
+
+
+<!--
 <fieldset name="test">
     <h3>Test</h3>
     <label>

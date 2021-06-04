@@ -33,8 +33,9 @@
     margin-bottom: 1.25em;
 }
 :host div[name="editor"] > label > input {
+    margin-left: 1px;
     display: block;
-    width: calc(100% - 5px);
+    width: calc(100% - 6px);
 }
 :host div[name="editor"] > label > input:invalid {
     outline: 1px inset red;
@@ -123,12 +124,15 @@
                 $this.shadowRoot.querySelectorAll('input[type="uuid"]').forEach(uuidInputElement => {
                     if (!uuidInputElement.value) {
                         uuidInputElement.setAttribute('placeholder', "Valid v4 UUId required, double click or press 'Enter' to auto-generate")
-                        uuidInputElement.addEventListener('dblclick', event => {
+                        uuidInputElement.addEventListener('requestUuidAutofill', event => {
                             fillWithUUID(uuidInputElement)
+                        }, {once: true})
+                        uuidInputElement.addEventListener('dblclick', event => {
+                            uuidInputElement.dispatchEvent(new window.CustomEvent('requestUuidAutofill'))
                         }, {once: true})
                         uuidInputElement.addEventListener('beforeinput', event => {
                             if (uuidInputElement.value.length === 0 && event.inputType == 'insertLineBreak') {
-                                fillWithUUID(uuidInputElement)
+                                uuidInputElement.dispatchEvent(new window.CustomEvent('requestUuidAutofill'))
                             }
                         }, {once: true})
                     }
@@ -171,7 +175,8 @@
         }
         
         _setField = function($this, name, value, inputSelector) {
-            var saneValue = value === undefined || value === null ? '' : String(value), idInputElement = $this.shadowRoot.querySelector(inputSelector)
+            var saneValue = value === undefined || value === null ? '' : String(value), 
+                idInputElement = typeof inputSelector == 'string' ? $this.shadowRoot.querySelector(inputSelector) : inputSelector
             if (idInputElement && idInputElement.value != saneValue) {
                 idInputElement.value = saneValue
                 idInputElement.dispatchEvent(new window.Event('change'))
