@@ -12,5 +12,5 @@ def main(event, context):
     connection_record = {'name': '', 'mask': {}}
     if event.get('credentials') and event.get('options'):
         if hashlib.sha512(bytes(event['credentials'].get('key', ''), 'utf-8')).hexdigest() == event['options'].get('key'):
-            connection_record = {'name': event['options'].get('name', 'system'), 'mask': {'*': '*'}}
+            connection_record = {'@name': event['options'].get('@name', 'system'), 'mask': {'*': '*'}}
     return connection_record

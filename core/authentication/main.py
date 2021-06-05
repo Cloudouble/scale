@@ -37,5 +37,6 @@ def main(event, context):
             authentication_channel_result = json.loads(lambda_client.invoke(FunctionName=getprocessor(env, authentication_channel_config['processor'], 'extension', 'authentication'), InvocationType='RequestResponse', Payload=bytes(json.dumps(authentication_payload), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))
             if authentication_channel_result and type(authentication_channel_result) is dict and type(authentication_channel_result.get('mask')) is dict:
                 connection_record = authentication_channel_result
+                connection_record['authentication'] = authentication_channel_name
                 break
     return connection_record

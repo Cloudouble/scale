@@ -53,33 +53,23 @@
         }
         
         static get observedAttributes() {
-            return (super.observedAttributes || []).concat('authentication')
+            return (super.observedAttributes || []).concat('authentication', 'mask')
         }
         
         static get entityFields() {
             return {...super.entityFields, ...{
-                /*
-                'adminKey': {
-                    type: 'uuid', 
-                    pattern: window.LiveElement.Scale.Core.uuid4Pattern, 
-                    title: 'Must be a valid v4 UUID', 
-                    hint: 'Use to delete this channel', 
+                'authentication': {
+                    type: 'select', 
+                    title: 'Must be an installed authentication extension', 
+                    hint: 'Select an authentication mode', 
                     required: true
                 }, 
-                'receiveKey': {
-                    type: 'uuid', 
-                    pattern: window.LiveElement.Scale.Core.uuid4Pattern, 
-                    title: 'Must be a valid v4 UUID', 
-                    hint: 'Use to subscribe to this channel', 
+                'mask': {
+                    type: 'text', 
+                    title: 'Must be a valid mask hash', 
+                    hint: 'The mask for this connection', 
                     required: true
-                }, 
-                'sendKey': {
-                    type: 'uuid', 
-                    pattern: window.LiveElement.Scale.Core.uuid4Pattern, 
-                    title: 'Must be a valid v4 UUID', 
-                    hint: 'Use to send messages to this channel', 
-                    required: true
-                }*/
+                }
             }}
         }
         
@@ -113,39 +103,36 @@
             })
         }
         
-        /*_setChannelField = function(value, field) {
+        edit() {
+            super.edit()
+            var $this = this, editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
+            
+        }
+
+        _setConnectionField = function(value, field) {
             var $this = this
-            if (value && (new window.RegExp(window.LiveElement.Scale.Core.uuid4Pattern)).test(value)) {
+            if (value) {
                 var inputField = $this.shadowRoot.querySelector(`label[name="${field}"] input[name="${field}"]`)
                 if (inputField) {
                     inputField.setAttribute('readonly', true)
                 }
             }
             return $this._setField($this, field, value, inputField)
-        }*/
-        
-        /*
-        adminKey($this, value) {
-            var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
-            if (editorElement) {
-                return $this._setChannelField(value, 'adminKey')
-            }
-        }
-        
-        receiveKey($this, value) {
-            var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
-            if (editorElement) {
-                return $this._setChannelField(value, 'receiveKey')
-            }
         }
 
-        sendKey($this, value) {
+        authentication($this, value) {
             var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
             if (editorElement) {
-                return $this._setChannelField(value, 'sendKey')
+                return $this._setConnectionField(value, 'authentication')
             }
         }
-        */
+        
+        mask($this, value) {
+            var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
+            if (editorElement) {
+                return $this._setConnectionField(value, 'mask')
+            }
+        }
         
     }
 </script>

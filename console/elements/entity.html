@@ -32,16 +32,15 @@
     margin-top: 1.25em;
     margin-bottom: 1.25em;
 }
-:host div[name="editor"] > label > input {
+:host div[name="editor"] > label > input, :host div[name="editor"] > label > select {
     margin-left: 1px;
     display: block;
     width: calc(100% - 6px);
 }
-:host div[name="editor"] > label > input:invalid {
+:host div[name="editor"] > label > input:invalid, :host div[name="editor"] > label > select:invalid {
     outline: 1px inset red;
     color: darkred;
 }
-
 </style>
 <template>
     <label>
@@ -194,9 +193,10 @@
                     labelElement.innerHTML = field
                     editorElement.appendChild(labelElement)
                 }
-                var fieldInputElement = labelElement.querySelector(`input[name="${field}"]`)
+                var inputElementTag = $this.constructor.entityFields[field] && typeof $this.constructor.entityFields[field] == 'object' && $this.constructor.entityFields[field].type == 'select' ? 'select': 'input'
+                var fieldInputElement = labelElement.querySelector(`${inputElementTag}[name="${field}"]`)
                 if (!fieldInputElement) {
-                    fieldInputElement = document.createElement('input')
+                    fieldInputElement = document.createElement(inputElementTag)
                     fieldInputElement.setAttribute('name', field)
                     var smallElement
                     if ($this.constructor.entityFields[field] && typeof $this.constructor.entityFields[field] == 'object') {
