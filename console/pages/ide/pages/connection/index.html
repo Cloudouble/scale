@@ -1,67 +1,61 @@
 <h2>Connection</h2>
-<fieldset name="search">
-    <h3>Search</h3>
-    <input name="search" type="search" placeholder="uuid or name search..." autocomplete="off" list="ide-connection-search-list" live-trigger="keyup:IdeConnectionSearch" />
-    <button name="load" live-trigger="click:IdeConnectionSearch">Load</button>
-    <datalist id="ide-connection-search-list"></datalist>
-</fieldset>
-<fieldset name="configure" live-subscription="IdeConnectionSearch:IdeConnectionConfigure">
-    <h3>Configure</h3>
-    <label>
-        Connection @name (optional)
-        <input name="@name" type="text" autocomplete="off" live-trigger="change:IdeConnectionConfigure" />
-    </label>
-    <label>
-        Connection ID
-        <input name="id" type="uuid" readonly="readonly" />
-    </label>
-    <button name="create" live-trigger="click:IdeConnectionConfigure">Create</button>
-    <button name="delete" live-trigger="click:IdeConnectionConfigure">Delete</button>
-    <details class="snippet-container">
-        <summary>Snippet</summary>
-        <div class="snippet">
+<element-entitysearch entityType="connection" historyPath="${@id}" blankOptionText="create new connection" live-trigger="loaded:IdeConnectionEdit" allowNew>
+    <input name="@id" type="search" placeholder="search @id, or type 'new'..." autocomplete="off" list />
+</element-entitysearch>
+<fieldset name="edit">
+    <h3>Edit</h3>
+    <div class="text-editor-container"></div>
+    <element-snippet>
+/* CREATE connection */
 window.fetch(
-    '${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/connection/${window.LiveElement.Scale.Console.IDE.Connection.Configure.connection_id}/connect.json', 
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/connection/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['@id']}/connect.json`, 
     {
         method: 'PUT', 
-        headers: {
-            "Content-Type": "application/json"
-        }, 
-        body: JSON.stringify({
-            ${JSON.stringify(window.LiveElement.Scale.Console.IDE.Connection.Configure.connection, null, 20).slice(1, -1)}
-        }) 
+        headers: {"Content-Type": 'application/json'}, 
+        body: `${window.LiveElement.Scale.Console.IDE.Connection.connectionElement}`
     }
 )
-        </div>
-    </details>
+
+/* DELETE connection */
+window.fetch(
+    `${window.LiveElement.Scale.Console.IDE.systemURL}/connection/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['@id']}/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['adminKey']}`, 
+    {method: 'DELETE'}
+)
+    </element-snippet>
 </fieldset>
-<fieldset name="code" live-subscription="IdeConnectionSearch:IdeConnectionCode">
+<fieldset name="code">
     <h3>Code</h3>
     <label>
         Receive URL
-        <input name="receive_url" type="url" readonly="readonly" />
-        <details class="snippet-container">
-            <summary>Snippet</summary>
-            <div class="snippet">
-var socket = new WebSocket('${window.LiveElement.Scale.Console.IDE.Connection.Code.receive_url}')
-            </div>
-        </details>
+        <input name="receiveUrl" type="url" readonly="readonly" />
+        <element-snippet>
+var socket = new WebSocket('${window.LiveElement.Scale.Console.IDE.systemURL.replace('https:', 'wss:')}/connection/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['@id']}/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['receiveKey']}')
+        </element-snippet>
     </label>
     <label>
         Send URL
-        <input name="send_url" type="url" readonly="readonly" />
-        <details class="snippet-container">
-            <summary>Snippet</summary>
-            <div class="snippet">
+        <input name="sendUrl" type="url" readonly="readonly" />
+        <element-snippet>
 window.fetch(
-    '${window.LiveElement.Scale.Console.IDE.Connection.Code.send_url}', 
+    '${window.LiveElement.Scale.Console.IDE.systemURL}/connection/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['@id']}/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['sendKey']}', 
     {
         method: 'POST', 
         body: JSON.stringify(data)
     }
 )
-            </div>
-        </details>
+        </element-snippet>
+    </label>
+    <label>
+        Admin URL
+        <input name="adminUrl" type="url" readonly="readonly" />
+        <element-snippet>
+window.fetch(
+    '${window.LiveElement.Scale.Console.IDE.systemURL}/connection/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['@id']}/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['adminKey']}', 
+    { 
+        method: 'DELETE'
+    }
+)
+        </element-snippet>
     </label>
 </fieldset>
 <fieldset name="test">

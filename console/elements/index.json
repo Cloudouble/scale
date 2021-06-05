@@ -7,5 +7,6 @@
     "Asset", 
     "Static", 
     "Entity", 
-    "Channel"
+    "Channel", 
+    "Connection"
 ]

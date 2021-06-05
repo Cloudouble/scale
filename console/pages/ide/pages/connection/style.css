@@ -1,31 +1,22 @@
 #ide[entity-type="connection"] > section[name="connection"] {
     display: block;
 }
-#ide > section[name="connection"] > fieldset[name="search"] > input[type="search"] {
-    width: 40em;
+#ide > section[name="connection"] > fieldset[name="edit"], 
+#ide > section[name="connection"] > fieldset[name="code"], 
+#ide > section[name="connection"] > fieldset[name="test"] {
+    display: none;
 }
-#ide > section[name="connection"] > fieldset[name="configure"] > label {
-    margin-right: 2em;
+#ide > section[name="connection"] > fieldset[name="edit"][active], 
+#ide > section[name="connection"] > fieldset[name="code"][active], 
+#ide > section[name="connection"] > fieldset[name="test"][active] {
+    display: block;
 }
-#ide > section[name="connection"] > fieldset[name="code"] > label, #ide > section[name="connection"] > fieldset[name="test"] > label {
+#ide > section[name="connection"] > fieldset[name="code"] > label, 
+#ide > section[name="connection"] > fieldset[name="test"] > label {
     display: block;
 }
 #ide > section[name="connection"] > fieldset[name="code"] > label > input, 
-    #ide > section[name="connection"] > fieldset[name="test"] > label > input, 
-    #ide > section[name="connection"] > fieldset[name="test"] > label > textarea {
+#ide > section[name="connection"] > fieldset[name="test"] > label > input, 
+#ide > section[name="connection"] > fieldset[name="test"] > label > textarea {
     width: calc(100% - 4px);
-}
-#ide > section[name="connection"] > fieldset[name="configure"] > button[name="create"],
-    #ide > section[name="connection"] > fieldset[name="configure"] > button[name="delete"], 
-    #ide > section[name="connection"] > fieldset[name="configure"] > details {
-    display: none;
-}
-#ide > section[name="connection"] > fieldset[name="configure"][mode="new"] > button[name="create"] {
-    display: inline-block;
-}
-#ide > section[name="connection"] > fieldset[name="configure"][mode="load"] > button[name="delete"] {
-    display: inline-block;
-}
-#ide > section[name="connection"] > fieldset[name="configure"][mode="new"] > details {
-    display: block;
 }

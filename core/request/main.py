@@ -93,29 +93,6 @@ def main(event, context):
                         connection_record = {**connection_record, **json.loads(lambda_client.invoke(FunctionName=getprocessor(env, 'authentication'), Payload=bytes(json.dumps(request['entity']), 'utf-8'), ClientContext=client_context)['Payload'].read().decode('utf-8'))}
                 if request['method'] in ['POST', 'PUT', 'PATCH', 'DELETE']:
                     lambda_client.invoke(FunctionName=getprocessor(env, 'write'), Payload=bytes(json.dumps({'entity_type': 'connection', 'entity': connection_record, 'method': request['method'], '_env': env}), 'utf-8'), InvocationType='Event')
-                    if connection_record and type(request.get('entity')) is dict and len(list(request['entity'].keys())) == 1 and 'sudo' in request['entity']:
-                        subscription_env = {**env}
-                        if 'connection_id' in subscription_env:
-                            del subscription_env['connection_id']
-                        if 'path' in subscription_env:
-                            del subscription_env['path']
-                        bucket.put_object(
-                            Body=bytes(json.dumps(subscription_env), 'utf-8'), 
-                            Key='{data_root}/connection/{connection_id}/subscription/-/00000000-0000-0000-0000-000000000000/env.json'.format(data_root=env['data_root'], connection_id=env['connection_id']), 
-                            ContentType='application/json'
-                        )
-                        modules = {}
-                        for key in [k_obj['Key'] for k_obj in s3_client.list_objects_v2(Bucket=env['bucket'], Prefix='{data_root}/system/'.format(data_root=env['data_root']))['Contents']]:
-                            key_split = key.split('/')
-                            scope = key_split[-2]
-                            module = key_split[-1].replace('.json', '')
-                            modules[scope] = modules.get(scope, {})
-                            modules[scope][module] = json.loads(s3_client.get_object(Bucket=env['bucket'], Key=key)['Body'].read().decode('utf-8'))
-                        bucket.put_object(
-                            Body=bytes(json.dumps(modules), 'utf-8'), 
-                            Key='{data_root}/connection/{connection_id}/subscription/-/00000000-0000-0000-0000-000000000000/modules.json'.format(data_root=env['data_root'], connection_id=env['connection_id']), 
-                            ContentType='application/json'
-                        )
                     counter = counter + 1
             elif len(env['path']) == 3 and env['path'][0] == 'system' and env['path'][1] == 'schema':
                 try:

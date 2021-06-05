@@ -2,7 +2,6 @@ window.LiveElement.Scale.Console.System = window.LiveElement.Scale.Console.Syste
 window.LiveElement.Scale.Console.System.createSudoConnection = function() {
     var connection_id = window.LiveElement.Scale.Core.generateUUID4()
     var system_access_url = window.localStorage.getItem('system:system_access_url')
-    var system_root = window.localStorage.getItem('system:system_root')
     var sudo_key = window.localStorage.getItem('system:sudo_key')
     return window.fetch(`${system_access_url}_/connection/${connection_id}/connect.json`, 
         {method: 'PUT', headers: {"Content-Type": "application/json"}, body: JSON.stringify(
@@ -15,12 +14,11 @@ window.LiveElement.Scale.Console.System.createSudoConnection = function() {
 }
 window.LiveElement.Scale.Console.System.invokeLambda = function(payload) {
     return new Promise(function(resolve, reject) {
-        if (window.LiveElement.Scale.Console.System.environment && window.LiveElement.Scale.Console.System.environment.lambda_namespace && 
-            window.localStorage.getItem('system:sudo_key') && payload && typeof payload == 'object') {
+        if (window.localStorage.getItem('system:lambda_namespace') && window.localStorage.getItem('system:sudo_key') && payload && typeof payload == 'object') {
                 payload._key = window.localStorage.getItem('system:sudo_key')
                 payload._host = window.location.host
             window.LiveElement.Scale.Console.System.lambda.invoke({
-                FunctionName: `${window.LiveElement.Scale.Console.System.environment.lambda_namespace}-core-console`, 
+                FunctionName: `${window.localStorage.getItem('system:lambda_namespace')}-core-console`, 
                 Payload: JSON.stringify(payload)
             }, function(err, data) { 
                 if (err) {
@@ -36,7 +34,7 @@ window.LiveElement.Scale.Console.System.invokeLambda = function(payload) {
 }
 
 
-;(['system_access_url', 'system_root', 'sudo_key', 'aws_region', 'aws_access_key_id', 'aws_secret_access_key']).forEach(name => {
+;(['system_access_url', 'system_root', 'lambda_namespace', 'sudo_key', 'aws_region', 'aws_access_key_id', 'aws_secret_access_key']).forEach(name => {
     var input = document.querySelector(`section[id="system"] input[name="${name}"]`)
     input.value = window.localStorage.getItem(`system:${name}`)
     var checkbox = document.querySelector(`section[id="system"] input[name="${name}"] + small > input[type="checkbox"]`)
@@ -75,23 +73,17 @@ window.LiveElement.Scale.Console.System.invokeLambda = function(payload) {
 })
 
 Promise.resolve(function() {
-    if ((['system_access_url', 'system_root', 'sudo_key']).every(k => window.localStorage.getItem(`system:${k}`)) && !window.localStorage.getItem('system:connection_id')) {
+    if ((['system_access_url', 'system_root', 'lambda_namespace', 'sudo_key']).every(k => window.localStorage.getItem(`system:${k}`)) && !window.localStorage.getItem('system:connection_id')) {
         return window.LiveElement.Scale.Console.System.createSudoConnection()
     } else {
         return document.querySelector(`[name="system:connection_id"]`).innerHTML = window.localStorage.getItem('system:connection_id')
     }
 }()).then(() => {
-    var system_access_url = window.localStorage.getItem('system:system_access_url')
-    var system_root = window.localStorage.getItem('system:system_root')
-    var connection_id = window.localStorage.getItem('system:connection_id')
-    return Promise.all(Object.entries({
-        'system:environment': 'subscription/-/00000000-0000-0000-0000-000000000000/env.json', 
-        'system:modules': 'subscription/-/00000000-0000-0000-0000-000000000000/modules.json'
-    }).map(entry => {
-        return window.fetch(`${system_access_url}${system_root}/connection/${connection_id}/${entry[1]}`).then(r => r.json()).then(r => {
-            window.LiveElement.Scale.Console.System[entry[0].split(':')[1]] = r
-            var table = document.getElementById(entry[0])
-            table.innerHTML = ''
+    return Promise.all((['environment']).map(table => {
+        return window.LiveElement.Scale.Console.System.invokeLambda({page: 'system', table: table}).then(r => {
+            window.LiveElement.Scale.Console.System[table] = r
+            var tableElement = document.getElementById(`system:${table}`)
+            tableElement.innerHTML = ''
             Object.entries(r).forEach(entry => {
                 var tr = document.createElement('tr')
                 if (typeof entry[1] == 'string') {
@@ -102,14 +94,14 @@ Promise.resolve(function() {
                     td.innerHTML = entry[1]
                     tr.append(th)
                     tr.append(td)
-                    table.append(tr)
+                    tableElement.append(tr)
                 } else if (entry[1] && typeof entry[1] == 'object') {
                     var th = document.createElement('th')
                     th.setAttribute('scope', 'col')
                     th.setAttribute('colspan', 2)
                     th.innerHTML = `<h3>${entry[0]}</h3>`
                     tr.append(th)
-                    table.append(tr)
+                    tableElement.append(tr)
                     Object.entries(entry[1]).forEach(moduleentry => {
                         var tr = document.createElement('tr')
                         var th = document.createElement('th')
@@ -119,10 +111,12 @@ Promise.resolve(function() {
                         td.innerHTML = `<code>${JSON.stringify(moduleentry[1])}</code>`
                         tr.append(th)
                         tr.append(td)
-                        table.append(tr)
+                        tableElement.append(tr)
                     })
                 }
             })
+        }).catch(err => {
+            console.log(`line 119: error loading ${table}`, err)
         })
     }))
 })

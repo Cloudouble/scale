@@ -1,184 +1,109 @@
-window.LiveElement.Live.processors.IdeConnectionSearch = function(input) {
+window.LiveElement.Live.processors.IdeConnectionEdit = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
-    var searchFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="connection"] fieldset[name="search"]')
-    var configureFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="connection"] fieldset[name="configure"]')
-    var datalistElement = searchFieldset.querySelector('datalist')
-    var searchInput = searchFieldset.querySelector('input[name="search"]')
-    var loadButton = searchFieldset.querySelector('button[name="load"]')
-    var blankOptions = {[window.LiveElement.Scale.Console.IDE.newFlag]: 'Generate UUID for a new connection...'}
+    var editFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="connection"] fieldset[name="edit"]')
+    var codeFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="connection"] fieldset[name="code"]')
+    var testFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="connection"] fieldset[name="test"]')
     if (handlerType == 'listener') {
-        return {...window.LiveElement.Scale.Console.IDE.Connection.connection}
-    } else if (window.LiveElement.Live.getHandlerType(input) == 'trigger') {
-        if (input.attributes.name == 'search') {
-            
-            if (input.properties.value == window.LiveElement.Scale.Console.IDE.newFlag) {
-                input.triggersource.value = window.LiveElement.Scale.Core.generateUUID4()
-                window.LiveElement.Scale.Console.IDE.Connection.Search.result = {}
-                window.LiveElement.Scale.Core.buildDataList(datalistElement, window.LiveElement.Scale.Console.IDE.Connection.Search.result)
-            } else if (!input.properties.value) {
-                loadButton.setAttribute('disabled', true)
-                window.LiveElement.Scale.Core.buildDataList(datalistElement, {}, blankOptions)
-            } else {
-                window.LiveElement.Scale.Console.System.invokeLambda({
-                    page: 'ide', 
-                    entity_type: 'connection', 
-                    heading: 'search',
-                    search: input.properties.value
-                }).then(searchResult => {
-                    if (searchResult && typeof searchResult == 'object' && searchResult.result && typeof searchResult.result == 'object') {
-                        window.LiveElement.Scale.Console.IDE.Connection.Search.result = searchResult.result
-                        window.LiveElement.Scale.Core.buildDataList(datalistElement, window.LiveElement.Scale.Console.IDE.Connection.Search.result, blankOptions)
-                    }
-                })
-            }
-        } else if (input.attributes.name == 'load') {
-            configureFieldset.setAttribute('active', true)
-            if (record && typeof record == 'object' && '@type' in record && '@id' in record) {
-                window.LiveElement.Scale.Console.IDE.Record.record = record
-                if (window.LiveElement.Scale.Console.IDE.Record.record) {
-                    window.LiveElement.Scale.Console.IDE.writeHistory('record', 
-                        window.LiveElement.Scale.Console.IDE.Record.record_type, window.LiveElement.Scale.Console.IDE.Record.record_uuid, 
-                        window.LiveElement.Scale.Console.IDE.Record.record, 'click:IdeRecordSearch', searchFieldset)
-                    searchFieldset.dispatchEvent(new window.CustomEvent('loaded'))
-                }
-            } else {
-                window.LiveElement.Scale.Console.IDE.Record.record = {
-                    '@type': window.LiveElement.Scale.Console.IDE.Record.record_type, 
-                    '@id': window.LiveElement.Scale.Console.IDE.Record.record_uuid
-                }
-                window.LiveElement.Scale.Console.IDE.writeHistory('record', 
-                    window.LiveElement.Scale.Console.IDE.Record.record_type, window.LiveElement.Scale.Console.IDE.Record.record_uuid, 
-                    window.LiveElement.Scale.Console.IDE.Record.record, 'click:IdeRecordSearch', searchFieldset)
-                searchFieldset.dispatchEvent(new window.CustomEvent('loaded'))
-            }
-            window.LiveElement.Scale.Console.IDE.Record.buildSnippet()
-
-            
-            
-            if (input.attributes.name == 'new') {
-                window.LiveElement.Scale.Console.IDE.Connection.Configure.connection_id = window.LiveElement.Scale.Core.generateUUID4()
-                window.LiveElement.Scale.Console.IDE.Connection.Configure.connection = {
-                    receiveKey: window.LiveElement.Scale.Core.generateUUID4(), 
-                    sendKey: window.LiveElement.Scale.Core.generateUUID4(), 
-                    adminKey: window.LiveElement.Scale.Core.generateUUID4()
-                }
-            } else {
-                var searchElement = searchFieldset.querySelector('input[name="search"]')
-                if (window.LiveElement.Scale.Console.IDE.Connection.Search && window.LiveElement.Scale.Console.IDE.Connection.Search[searchElement.value]) {
-                    window.LiveElement.Scale.Console.IDE.Connection.Configure.connection_id = searchElement.value
-                    window.LiveElement.Scale.Console.IDE.Connection.Configure.connection = window.LiveElement.Scale.Console.IDE.Connection.Search[searchElement.value]
-                }
-            }
-            searchFieldset.dispatchEvent(new window.CustomEvent('loaded'))
+        return {
+            '@id': (window.LiveElement.Scale.Console.IDE.Connection.connectionElement || {})['@id'], 
+            adminKey: (window.LiveElement.Scale.Console.IDE.Connection.connectionElement || {}).adminKey, 
+            receiveKey: (window.LiveElement.Scale.Console.IDE.Connection.connectionElement || {}).receiveKey, 
+            sendKey: (window.LiveElement.Scale.Console.IDE.Connection.connectionElement || {}).sendKey
         }
-    }
-}
-window.LiveElement.Live.processors.IdeConnectionConfigure = function(input) {
-    var handlerType = window.LiveElement.Live.getHandlerType(input)
-    if (handlerType == 'listener') {
-        return {...window.LiveElement.Scale.Console.IDE.Connection.Configure.connection, ...{id : window.LiveElement.Scale.Console.IDE.Connection.Configure.connection_id}}
-    } else if (handlerType == 'subscription') {
-        var complete = true
-        input.subscriber.querySelectorAll('input[name]').forEach(i => {
-            if (i.name in input.payload) {
-                i.value = input.payload[i.name] || ''
-            } else {
-                i.value = ''
-                if (i.name != '@name') {
-                    complete = false
-                }
+    } else if (handlerType == 'trigger') {
+        var cleanUp = function() {
+            if (window.LiveElement.Scale.Console.IDE.Connection.connectionElement) {
+                window.LiveElement.Scale.Console.IDE.Connection.connectionElement.remove()
+                delete window.LiveElement.Scale.Console.IDE.Connection.connectionElement
             }
-        })
-        window.LiveElement.Scale.Core.buildSnippet(input.subscriber.querySelector('div.snippet'))
-        if (complete) {
-            input.subscriber.setAttribute('mode', window.LiveElement.Scale.Console.IDE.Connection.Search && window.LiveElement.Scale.Console.IDE.Connection.Search[input.payload.id] ? 'load' : 'new')
-        } else {
-            input.subscriber.removeAttribute('mode')
-        }
-        if (input.subscriber.getAttribute('mode') == 'new') {
-            input.subscriber.querySelector('input[name="@name"]').value = ''
-        }
-    } else if (window.LiveElement.Live.getHandlerType(input) == 'trigger') {
-        if (input.attributes.name == '@name') {
-            window.LiveElement.Scale.Console.IDE.Connection.Configure.connection['@name'] = input.triggersource.value
-            window.LiveElement.Scale.Core.buildSnippet(input.triggersource.closest('fieldset').querySelector('div.snippet'))
-        } else if (input.attributes.name == 'create') {
-            window.fetch(
-                `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/connection/${window.LiveElement.Scale.Console.IDE.Connection.Configure.connection_id}/connect.json`, 
-                {
-                    method: 'PUT', 
-                    headers: {
-                        "Content-Type": "application/json"
-                    }, 
-                    body: JSON.stringify(window.LiveElement.Scale.Console.IDE.Connection.Configure.connection) 
+            if (window.LiveElement.Scale.Console.IDE.Connection.Test.socket) {
+                if (window.LiveElement.Scale.Console.IDE.Connection.Test.socket.readyState && window.LiveElement.Scale.Console.IDE.Connection.Test.socket.readyState < 2) {
+                    window.LiveElement.Scale.Console.IDE.Connection.Test.socket.close()
                 }
-            )
-        } else if (input.attributes.name == 'delete') {
-            window.fetch(
-                `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.LiveElement.Scale.Console.IDE.Connection.Configure.connection_id}/${window.LiveElement.Scale.Console.IDE.Connection.Configure.connection.adminKey}`, 
-                {
-                    method: 'DELETE', 
-                }
-            ).then(() => {
-                delete window.LiveElement.Scale.Console.IDE.Connection.Configure.connection_id
-                window.LiveElement.Scale.Console.IDE.Connection.Configure.connection = {}
-                var searchFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="connection"] fieldset[name="search"]')
-                input.triggersource.closest('fieldset').removeAttribute('mode')                
-                var searchInput = searchFieldset.querySelector('input')
-                searchInput.value = ''
-                searchInput.focus()
-                searchFieldset.dispatchEvent(new window.CustomEvent('loaded'))
+                delete window.LiveElement.Scale.Console.IDE.Connection.Test.socket
+            }
+            testFieldset.querySelector('textarea').value = ''
+        }
+        if (input.entity) {
+            cleanUp()
+            editFieldset.setAttribute('active', true)
+            codeFieldset.setAttribute('active', true)
+            testFieldset.setAttribute('active', true)
+            window.LiveElement.Scale.Console.IDE.Connection.connectionElement = editFieldset.querySelector('element-connection')
+            if (window.LiveElement.Scale.Console.IDE.Connection.connectionElement) {
+                window.LiveElement.Scale.Console.IDE.Connection.connectionElement.remove()
+            }
+            window.LiveElement.Scale.Console.IDE.Connection.connectionElement = document.createElement('element-connection')
+            editFieldset.querySelector('h3').after(window.LiveElement.Scale.Console.IDE.Connection.connectionElement)
+            window.LiveElement.Scale.Console.IDE.Connection.connectionElement.mode = 'editor'
+            Object.assign(window.LiveElement.Scale.Console.IDE.Connection.connectionElement, input.entity)
+            window.LiveElement.Scale.Console.IDE.Connection.connectionElement.addEventListener('change', event => {
+                window.LiveElement.Scale.Console.buildSnippets('ide', 'connection')
             })
+            window.LiveElement.Scale.Console.IDE.Connection.connectionElement.setAttribute('live-subscription', 'IdeConnectionEdit:IdeConnectionCode')
+            window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.Connection.connectionElement, 'IdeConnectionEdit', 'change', false, true)
+        } else {
+            cleanUp()
+            editFieldset.removeAttribute('active')
+            codeFieldset.removeAttribute('active')
+            testFieldset.removeAttribute('active')
         }
     }
 }
+
 window.LiveElement.Live.processors.IdeConnectionCode = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
-    if (handlerType == 'listener') {
-        return window.LiveElement.Scale.Console.IDE.Connection.Configure
-    } else if (handlerType == 'subscription') {
-        window.LiveElement.Scale.Console.IDE.Connection.Code = {
-            receive_url: window.LiveElement.Scale.Console.IDE.Connection.Configure.connection.receiveKey ? `${window.localStorage.getItem('system:system_access_url').replace('https:', 'wss:')}${window.localStorage.getItem('system:system_root')}/connection/${window.LiveElement.Scale.Console.IDE.Connection.Configure.connection_id}/${window.LiveElement.Scale.Console.IDE.Connection.Configure.connection.receiveKey}` : undefined, 
-            send_url: window.LiveElement.Scale.Console.IDE.Connection.Configure.connection.sendKey ? `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.LiveElement.Scale.Console.IDE.Connection.Configure.connection_id}/${window.LiveElement.Scale.Console.IDE.Connection.Configure.connection.sendKey}` : undefined, 
-            admin_url: window.LiveElement.Scale.Console.IDE.Connection.Configure.connection.adminKey ? `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.LiveElement.Scale.Console.IDE.Connection.Configure.connection_id}/${window.LiveElement.Scale.Console.IDE.Connection.Configure.connection.adminKey}` : undefined
-        }
-        input.subscriber.querySelectorAll('input[name]').forEach(i => {
-            var snippetElement = i.nextElementSibling.querySelector('div.snippet')
-            if (window.LiveElement.Scale.Console.IDE.Connection.Code[i.name]) {
-                i.value = window.LiveElement.Scale.Console.IDE.Connection.Code[i.name]
-                window.LiveElement.Scale.Core.buildSnippet(snippetElement)
-            } else {
-                i.value = ''
-                i.nextElementSibling.removeAttribute('built')
+    var codeFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="connection"] fieldset[name="code"]')
+    if (handlerType == 'subscription') {
+        (['adminKey', 'receiveKey', 'sendKey']).forEach(key => {
+            var adminUrlInputElement = codeFieldset.querySelector('input[name="adminUrl"]')
+            if (adminUrlInputElement && input.payload.adminKey) {
+                adminUrlInputElement.value = (input.payload.adminKey) ? `${window.LiveElement.Scale.Console.IDE.systemURL}/connection/${input.payload['@id']}/${input.payload.adminKey}` : ''
+            }
+            var receiveUrlInputElement = codeFieldset.querySelector('input[name="receiveUrl"]')
+            if (receiveUrlInputElement && input.payload.receiveKey) {
+                receiveUrlInputElement.value = (input.payload.receiveKey) ? `${window.LiveElement.Scale.Console.IDE.systemURL.replace('https:', 'wss:')}/connection/${input.payload['@id']}/${input.payload.receiveKey}` : ''
+            }
+            var sendUrlInputElement = codeFieldset.querySelector('input[name="sendUrl"]')
+            if (sendUrlInputElement && input.payload.sendKey) {
+                sendUrlInputElement.value = (input.payload.sendKey) ? `${window.LiveElement.Scale.Console.IDE.systemURL}/connection/${input.payload['@id']}/${input.payload.sendKey}` : ''
             }
         })
     }
 }
+
 window.LiveElement.Live.processors.IdeConnectionTest = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
     if (handlerType == 'trigger') {
         var event = input.vector.split(':').shift()
         if (event == 'change') {
-            if (!window.LiveElement.Scale.Console.IDE.Connection.Test.socket 
-                || (window.LiveElement.Scale.Console.IDE.Connection.Test.socket && (window.LiveElement.Scale.Console.IDE.Connection.Test.socket.url != window.LiveElement.Scale.Console.IDE.Connection.Code.receive_url))) {
-                try {
-                    window.LiveElement.Scale.Console.IDE.Connection.Test.socket = new WebSocket(window.LiveElement.Scale.Console.IDE.Connection.Code.receive_url)
-                    window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.Connection.Test.socket, 'IdeConnectionTest', 'message', false, true)
-                } catch(e) {
-                    delete window.LiveElement.Scale.Console.IDE.Connection.Test.socket
+            if (window.LiveElement.Scale.Console.IDE.Connection.connectionElement 
+                && window.LiveElement.Scale.Console.IDE.Connection.connectionElement['@id']
+                && window.LiveElement.Scale.Console.IDE.Connection.connectionElement.receiveKey
+                && window.LiveElement.Scale.Console.IDE.Connection.connectionElement.sendKey) {
+                var receiveUrl = `${window.LiveElement.Scale.Console.IDE.systemURL.replace('https:', 'wss:')}/connection/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['@id']}/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement.receiveKey}`
+                if (!window.LiveElement.Scale.Console.IDE.Connection.Test.socket 
+                    || (window.LiveElement.Scale.Console.IDE.Connection.Test.socket && (window.LiveElement.Scale.Console.IDE.Connection.Test.socket.url != receiveUrl))) {
+                    try {
+                        window.LiveElement.Scale.Console.IDE.Connection.Test.socket = new WebSocket(receiveUrl)
+                        window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.Connection.Test.socket, 'IdeConnectionTest', 'message', false, true)
+                    } catch(e) {
+                        delete window.LiveElement.Scale.Console.IDE.Connection.Test.socket
+                    }
                 }
+                var sendUrl = `${window.LiveElement.Scale.Console.IDE.systemURL}/connection/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['@id']}/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement.sendKey}`
+                window.fetch(
+                    sendUrl, 
+                    {
+                        method: 'POST', 
+                        body: JSON.stringify(input.properties.value)
+                    }
+                ).then(() => {
+                    window.setTimeout(function() {
+                        input.triggersource.value = ''
+                    }, 250)
+                })
             }
-            window.fetch(
-                window.LiveElement.Scale.Console.IDE.Connection.Code.send_url, 
-                {
-                    method: 'POST', 
-                    body: JSON.stringify(input.properties.value)
-                }
-            ).then(() => {
-                window.setTimeout(function() {
-                    input.triggersource.value = ''
-                }, 250)
-            })
         }
     } else if (handlerType == 'subscription') {
         return {'#value': `${input.payload.message}\n${input.subscriber.value}`}
@@ -193,7 +118,7 @@ window.LiveElement.Live.processors.IdeConnectionTest = function(input) {
     }
 }
 
-window.LiveElement.Live.listeners.IdeConnectionSearch = {processor: 'IdeConnectionSearch', expired: true}
-window.LiveElement.Live.listeners.IdeConnectionTest = {processor: 'IdeConnectionTest', expired: true}
+window.LiveElement.Scale.Console.buildSnippets('ide', 'connection')
 
-window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="connection"] fieldset[name="search"]'), 'IdeConnectionSearch', 'loaded', false, true)
+window.LiveElement.Live.listeners.IdeConnectionEdit = {processor: 'IdeConnectionEdit', expired: true}
+window.LiveElement.Live.listeners.IdeConnectionTest = {processor: 'IdeConnectionTest', expired: true}
