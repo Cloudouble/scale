@@ -18,7 +18,7 @@ window.LiveElement.Live.processors.IdeChannelEdit = function(input) {
             }
             if (window.LiveElement.Scale.Console.IDE.Channel.Test.socket) {
                 if (window.LiveElement.Scale.Console.IDE.Channel.Test.socket.readyState && window.LiveElement.Scale.Console.IDE.Channel.Test.socket.readyState < 2) {
-                    window.LiveElement.Scale.Console.IDE.Channel.Test.socket.close(1001)
+                    window.LiveElement.Scale.Console.IDE.Channel.Test.socket.close()
                 }
                 delete window.LiveElement.Scale.Console.IDE.Channel.Test.socket
             }
