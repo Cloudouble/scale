@@ -7,7 +7,8 @@ if (entitySearchElement) {
     var classSearchDatalistElement = entitySearchElement.querySelector(`datalist[id="${classSearchInputElement.getAttribute('list')}"]`)
     var querySearchDatalistElement = entitySearchElement.querySelector(`datalist[id="${querySearchInputElement.getAttribute('list')}"]`)
     var entitySearchLoadButton = entitySearchElement.shadowRoot.querySelector('button[name="load"]')
-    connectionSearchInputElement.addEventListener('search', event => {
+    connectionSearchInputElement.addEventListener('input', event => {
+        console.log('line 11', event)
         window.LiveElement.Scale.Console.System.invokeLambda({
             page: 'ide', 
             entity_type: 'feed', 
