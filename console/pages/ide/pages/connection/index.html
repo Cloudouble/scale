@@ -7,69 +7,35 @@
     <div class="text-editor-container"></div>
     <element-snippet>
 /* CREATE connection */
+/* create a new connection id with window.LiveElement.Scale.Core.generateUUID4 */
+/* the structure of the credentials object will depend on the authentication extension selected */
 window.fetch(
-    `${window.LiveElement.Scale.Console.IDE.connectionURL}/connection/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['@id']}/connect.json`, 
+    `${window.LiveElement.Scale.Console.IDE.systemURL}/connection/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['@id']}/connect.json`, 
     {
         method: 'PUT', 
         headers: {"Content-Type": 'application/json'}, 
-        body: `${window.LiveElement.Scale.Console.IDE.Connection.connectionElement}`
+        body: {
+            '${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['authentication']}': {...credentials...}
+        }
     }
 )
 
 /* DELETE connection */
 window.fetch(
-    `${window.LiveElement.Scale.Console.IDE.systemURL}/connection/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['@id']}/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['adminKey']}`, 
+    `${window.LiveElement.Scale.Console.IDE.systemURL}/connection/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['@id']}/connect.json`, 
     {method: 'DELETE'}
 )
     </element-snippet>
 </fieldset>
 
-<!--
 <fieldset name="code">
     <h3>Code</h3>
     <label>
-        Receive URL
-        <input name="receiveUrl" type="url" readonly="readonly" />
+        Websocket URL
+        <input name="websocketUrl" type="url" readonly="readonly" />
         <element-snippet>
-var socket = new WebSocket('${window.LiveElement.Scale.Console.IDE.systemURL.replace('https:', 'wss:')}/connection/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['@id']}/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['receiveKey']}')
+var websocketURL = `${window.LiveElement.Scale.Console.IDE.systemURL}/connection/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['@id']}/websocket`
+window.LiveElement.Scale.Console.IDE.Connection.Code.websocket = new WebSocket(websocketURL)
         </element-snippet>
-    </label>
-    <label>
-        Send URL
-        <input name="sendUrl" type="url" readonly="readonly" />
-        <element-snippet>
-window.fetch(
-    '${window.LiveElement.Scale.Console.IDE.systemURL}/connection/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['@id']}/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['sendKey']}', 
-    {
-        method: 'POST', 
-        body: JSON.stringify(data)
-    }
-)
-        </element-snippet>
-    </label>
-    <label>
-        Admin URL
-        <input name="adminUrl" type="url" readonly="readonly" />
-        <element-snippet>
-window.fetch(
-    '${window.LiveElement.Scale.Console.IDE.systemURL}/connection/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['@id']}/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['adminKey']}', 
-    { 
-        method: 'DELETE'
-    }
-)
-        </element-snippet>
-    </label>
-</fieldset>-->
-<!--
-<fieldset name="test">
-    <h3>Test</h3>
-    <label>
-        Send Data
-        <input type="text" name="send" placeholder="Type and then press 'Enter' to send..." live-trigger="change:IdeConnectionTest" />
-    </label>
-    <label>
-        Received Data
-        <textarea name="receive" readonly="readonly" live-subscription="IdeConnectionTest:IdeConnectionTest"></textarea>
     </label>
 </fieldset>
--->

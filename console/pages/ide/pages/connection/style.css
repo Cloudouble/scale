@@ -2,21 +2,17 @@
     display: block;
 }
 #ide > section[name="connection"] > fieldset[name="edit"], 
-#ide > section[name="connection"] > fieldset[name="code"], 
-#ide > section[name="connection"] > fieldset[name="test"] {
+#ide > section[name="connection"] > fieldset[name="code"] {
     display: none;
 }
 #ide > section[name="connection"] > fieldset[name="edit"][active], 
-#ide > section[name="connection"] > fieldset[name="code"][active], 
-#ide > section[name="connection"] > fieldset[name="test"][active] {
+#ide > section[name="connection"] > fieldset[name="code"][active] {
     display: block;
 }
-#ide > section[name="connection"] > fieldset[name="code"] > label, 
-#ide > section[name="connection"] > fieldset[name="test"] > label {
+#ide > section[name="connection"] > fieldset[name="code"] > label {
     display: block;
 }
 #ide > section[name="connection"] > fieldset[name="code"] > label > input, 
-#ide > section[name="connection"] > fieldset[name="test"] > label > input, 
-#ide > section[name="connection"] > fieldset[name="test"] > label > textarea {
+#ide > section[name="connection"] > fieldset[name="test"] > label > input {
     width: calc(100% - 4px);
 }

@@ -37,10 +37,8 @@
         connectedCallback() {
             super.connectedCallback()
             var $this = this
-            
-            /*
             window.setTimeout(() => {
-                if ($this['@id'] && $this['adminKey'] && $this['receiveKey'] && $this['sendKey']) {
+                if ($this['@id'] && $this['authentication'] && $this['mask']) {
                     $this.shadowRoot.querySelector('button[name="delete"]').removeAttribute('disabled')
                     $this.shadowRoot.querySelector('input[name="@name"]').setAttribute('readonly', true)
                     $this.dispatchEvent(new window.Event('change'))
@@ -49,7 +47,6 @@
                     }, 200)
                 }
             }, 200)
-            */
         }
         
         static get observedAttributes() {
@@ -77,11 +74,11 @@
             var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
             var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
             window.fetch(
-                `${window.LiveElement.Scale.Console.IDE.connectionURL}/channel/${$this['@id']}/connect.json`, 
+                `${window.LiveElement.Scale.Console.IDE.systemURL}/connection/${$this['@id']}/connect.json`, 
                 {
                     method: 'PUT', 
                     headers: {"Content-Type": 'application/json'}, 
-                    body: `${$this}`
+                    body: `${$this.credentials || {}}`
                 }
             ).then(r => {
                 saveButton.setAttribute('disabled', true)
@@ -95,7 +92,7 @@
             var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
             var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
             window.fetch(
-                `${window.LiveElement.Scale.Console.IDE.systemURL}/channel/${$this['@id']}/${$this['adminKey']}`, 
+                `${window.LiveElement.Scale.Console.IDE.systemURL}/connection/${$this['@id']}/connect.json`, 
                 {method: 'DELETE'}
             ).then(r => {
                 deleteButton.setAttribute('disabled', true)
