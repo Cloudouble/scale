@@ -71,7 +71,6 @@ window.LiveElement.Live.processors.IdeFeedEdit = function(input) {
         }
     } else if (handlerType == 'trigger') {
         if (input.entity) {
-            console.log('line 75', input)
             editFieldset.setAttribute('active', true)
             window.LiveElement.Scale.Console.IDE.Feed.feedElement = editFieldset.querySelector('element-feed')
             if (window.LiveElement.Scale.Console.IDE.Feed.feedElement) {
@@ -90,4 +89,4 @@ window.LiveElement.Live.processors.IdeFeedEdit = function(input) {
     }
 }
 
-window.LiveElement.Scale.Console.buildSnippets('ide', 'connection')
+window.LiveElement.Scale.Console.buildSnippets('ide', 'feed')

@@ -16,6 +16,7 @@ window.fetch(
         method: 'PUT', 
         headers: {"Content-Type": 'application/json'}, 
         body: {
+            '@name': '${window.LiveElement.Scale.Console.IDE.Feed.feedElement['@name']}', 
             view: '${window.LiveElement.Scale.Console.IDE.Feed.feedElement.view}'
         }
     }

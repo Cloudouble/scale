@@ -1,0 +1,162 @@
+<style>
+:host {
+    contain: content;
+    display: block;
+    position: relative;
+}
+ 
+:host > label {
+    width: 16em;
+    margin-right: 2em;
+    display: inline-block;
+}
+:host > label:first-of-type {
+    width: 17em;
+    margin-right: 0.5em;
+}
+:host > aside {
+    display: none;
+}
+</style>
+<template>
+    <template name="Entity"></template>
+</template>
+<script>
+    /* global */
+    class Subscription extends window.LiveElement.Element.elements.Entity {
+
+        static __extends = 'Entity'
+        
+        static entityType = 'subscription'
+
+        constructor() {
+            super()
+            var $this = this
+        }
+
+        connectedCallback() {
+            super.connectedCallback()
+            var $this = this
+            window.setTimeout(() => {
+                if ($this['@id'] && $this['connection'] && $this['class'] && $this['record']) {
+                    $this.shadowRoot.querySelector('button[name="delete"]').removeAttribute('disabled')
+                    $this.dispatchEvent(new window.Event('change'))
+                    window.setTimeout(() => {
+                        $this.shadowRoot.querySelector('button[name="save"]').setAttribute('disabled', true)
+                    }, 200)
+                }
+            }, 200)
+        }
+        
+        static get observedAttributes() {
+            return (super.observedAttributes || []).concat('connection', 'class', 'record', 'view')
+        }
+        
+        static get entityFields() {
+            return {...super.entityFields, ...{
+                'connection': {
+                    type: 'text', 
+                    title: 'Must be an existing connection', 
+                    hint: 'Select an existing connection', 
+                    required: true
+                }, 
+                'class': {
+                    type: 'text', 
+                    title: 'Must be a valid record class', 
+                    hint: 'The record class for this feed', 
+                    required: true
+                }, 
+                'record': {
+                    type: 'uuid', 
+                    title: 'Must be a valid record id', 
+                    hint: 'The record for this subscription', 
+                    required: true
+                }, 
+                'view': {
+                    type: 'text', 
+                    title: 'Must be a valid view name', 
+                    hint: 'The view to render this subscription', 
+                    required: true
+                }
+            }}
+        }
+        
+        save() {
+            var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+            var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
+            window.fetch(
+                `${window.LiveElement.Scale.Console.IDE.connectionURL}/subscription/${$this.class}/${$this.record}/${$this['@id']}.json`, 
+                {
+                    method: 'PUT', 
+                    headers: {"Content-Type": 'application/json'}, 
+                    body: {
+                        view: $this.view
+                    }
+                }
+            ).then(r => {
+                saveButton.setAttribute('disabled', true)
+                if (deleteButton) {
+                    deleteButton.removeAttribute('disabled')
+                }
+            })
+        }
+        
+        ['delete']() {
+            var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+            var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
+            window.fetch(
+                `${window.LiveElement.Scale.Console.IDE.connectionURL}/subscription/${$this.class}/${$this.record}/${$this['@id']}.json`, 
+                {method: 'DELETE'}
+            ).then(r => {
+                deleteButton.setAttribute('disabled', true)
+                saveButton.removeAttribute('disabled')
+            })
+        }
+        
+        edit() {
+            super.edit()
+            var $this = this, editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
+            
+        }
+
+        _setSubscriptionField = function(value, field) {
+            var $this = this
+            if (value) {
+                var inputField = $this.shadowRoot.querySelector(`label[name="${field}"] input[name="${field}"]`)
+                if (inputField) {
+                    inputField.setAttribute('readonly', true)
+                }
+            }
+            return $this._setField($this, field, value, inputField)
+        }
+
+        connection($this, value) {
+            var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
+            if (editorElement) {
+                return $this._setSubscriptionField(value, 'connection')
+            }
+        }
+        
+        ['class']($this, value) {
+            var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
+            if (editorElement) {
+                return $this._setSubscriptionField(value, 'class')
+            }
+        }
+        
+        record($this, value) {
+            var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
+            if (editorElement) {
+                return $this._setSubscriptionField(value, 'record')
+            }
+        }
+        
+        view($this, value) {
+            var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
+            if (editorElement) {
+                return $this._setField(value, 'view')
+            }
+        }
+        
+    }
+</script>

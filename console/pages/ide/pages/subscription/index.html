@@ -1,0 +1,31 @@
+<h2>Subscription</h2>
+<element-entitysearch entityType="subscription" historyPath="${connection}/${class}/${record}/${@id}" blankOptionText="create new subscription" live-trigger="loaded:IdeSubscriptionEdit" allowNew>
+    <input name="connection" type="search" placeholder="search connection @id" autocomplete="off" list supporting />
+    <input name="class" type="search" placeholder="search class" autocomplete="off" list supporting />
+    <input name="record" type="search" placeholder="search record" autocomplete="off" list supporting />
+    <input name="@id" type="search" placeholder="search @id, or type 'new'..." autocomplete="off" list primary />
+</element-entitysearch>
+<fieldset name="edit">
+    <h3>Edit</h3>
+    <div class="text-editor-container"></div>
+    <element-snippet>
+/* CREATE feed */
+window.fetch(
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/subscription/${window.LiveElement.Scale.Console.IDE.Subscription.subscriptionElement.class}/${window.LiveElement.Scale.Console.IDE.Subscription.subscriptionElement.record}/${window.LiveElement.Scale.Console.IDE.Subscription.subscriptionElement['@id']}.json`, 
+    {
+        method: 'PUT', 
+        headers: {"Content-Type": 'application/json'}, 
+        body: {
+            '@name': '${window.LiveElement.Scale.Console.IDE.Subscription.subscriptionElement['@name']}', 
+            view: '${window.LiveElement.Scale.Console.IDE.Subscription.subscriptionElement.view}'
+        }
+    }
+)
+
+/* DELETE feed */
+window.fetch(
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/subscription/${window.LiveElement.Scale.Console.IDE.Subscription.subscriptionElement.class}/${window.LiveElement.Scale.Console.IDE.Subscription.subscriptionElement.record}/${window.LiveElement.Scale.Console.IDE.Subscription.subscriptionElement['@id']}.json`, 
+    {method: 'DELETE'}
+)
+    </element-snippet>
+</fieldset>

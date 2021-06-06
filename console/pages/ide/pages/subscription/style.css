@@ -1,0 +1,9 @@
+#ide[entity-type="subscription"] > section[name="subscription"] {
+    display: block;
+}
+#ide > section[name="subscription"] > fieldset[name="edit"] {
+    display: none;
+}
+#ide > section[name="subscription"] > fieldset[name="edit"][active] {
+    display: block;
+}

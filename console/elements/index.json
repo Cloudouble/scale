@@ -9,5 +9,6 @@
     "Entity", 
     "Channel", 
     "Connection", 
-    "Feed"
+    "Feed", 
+    "Subscription"
 ]
