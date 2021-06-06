@@ -199,9 +199,9 @@
                 Object.entries($this.entity).forEach(entry => historyPath = historyPath.replace('${' + entry[0] + '}', entry[1]))
             }
             if (hint) {
-                liElement.innerHTML = window.LiveElement.Scale.Core.truncateLabel(`${entityType}/${historyPath} [${hint}, ... ]`, 120)
+                liElement.innerHTML = window.LiveElement.Scale.Core.truncateLabel(`${entityType}/${historyPath} [${hint}, ... ]`, 150)
             } else {
-                liElement.innerHTML = window.LiveElement.Scale.Core.truncateLabel(`${entityType}/${historyPath} [${window.LiveElement.Scale.Console.IDE.newFlag}]`, 120)
+                liElement.innerHTML = window.LiveElement.Scale.Core.truncateLabel(`${entityType}/${historyPath} [${window.LiveElement.Scale.Console.IDE.newFlag}]`, 150)
             }
             if (historySmallElement) {
                 historySmallElement.remove()

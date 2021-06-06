@@ -3,12 +3,24 @@ if (entitySearchElement) {
     var connectionSearchInputElement = entitySearchElement.querySelector('input[name="connection"]')
     var classSearchInputElement = entitySearchElement.querySelector('input[name="class"]')
     var querySearchInputElement = entitySearchElement.querySelector('input[name="query"]')
+    var feedSearchInputElement = entitySearchElement.querySelector('input[name="@id"]')
     var connectionSearchDatalistElement = entitySearchElement.querySelector(`datalist[id="${connectionSearchInputElement.getAttribute('list')}"]`)
     var classSearchDatalistElement = entitySearchElement.querySelector(`datalist[id="${classSearchInputElement.getAttribute('list')}"]`)
     var querySearchDatalistElement = entitySearchElement.querySelector(`datalist[id="${querySearchInputElement.getAttribute('list')}"]`)
+    var feedSearchDatalistElement = entitySearchElement.querySelector(`datalist[id="${feedSearchInputElement.getAttribute('list')}"]`)
     var entitySearchLoadButton = entitySearchElement.shadowRoot.querySelector('button[name="load"]')
+    var toggleLoadButtonDisabled = function() {
+        var supportInputsAllValid = connectionSearchInputElement.value && connectionSearchDatalistElement.querySelector(`option[value="${connectionSearchInputElement.value}"]`)
+                && classSearchInputElement.value && classSearchDatalistElement.querySelector(`option[value="${classSearchInputElement.value}"]`)
+                && querySearchInputElement.value && querySearchDatalistElement.querySelector(`option[value="${querySearchInputElement.value}"]`)
+        if ((supportInputsAllValid && feedSearchInputElement.value && feedSearchDatalistElement.querySelector(`option[value="${feedSearchInputElement.value}"]`)) 
+                || (entitySearchElement.allowNew && new window.RegExp(entitySearchElement.allowNew).test(feedSearchInputElement.value))) {
+            entitySearchLoadButton.removeAttribute('disabled')
+        } else {
+            entitySearchLoadButton.setAttribute('disabled', true)
+        }
+    }
     connectionSearchInputElement.addEventListener('input', event => {
-        console.log('line 11', event)
         window.LiveElement.Scale.Console.System.invokeLambda({
             page: 'ide', 
             entity_type: 'feed', 
@@ -20,38 +32,28 @@ if (entitySearchElement) {
                 entitySearchElement.connectionSearchResult = Array.isArray(connectionSearchResult.result) ? connectionSearchResult.result : (typeof connectionSearchResult.result == 'object' ? Object.keys(connectionSearchResult.result) : [])
                 window.LiveElement.Scale.Core.buildDataList(connectionSearchDatalistElement, entitySearchElement.connectionSearchResult)
             }
-            var loadButtonAlreadyDisabled = entitySearchLoadButton.getAttribute('disabled'), resultIncludesValue = entitySearchElement.result.includes(connectionSearchInputElement.value)
-            if ((loadButtonAlreadyDisabled && resultIncludesValue) || (entitySearchElement.allowNew && new window.RegExp(entitySearchElement.allowNew).test(connectionSearchInputElement.value))) {
-                entitySearchLoadButton.removeAttribute('disabled')
-            } else if (!loadButtonAlreadyDisabled && !resultIncludesValue) {
-                entitySearchLoadButton.setAttribute('disabled', true)
-            }
+            toggleLoadButtonDisabled()
         })
     })
-    
     window.LiveElement.Scale.Core.buildDataList(classSearchDatalistElement, Object.assign({}, ...Object.entries(window.LiveElement.Scale.Console.IDE.classes).map(entry => ({[entry[0]]: entry[1].label}))))
-    
-    querySearchInputElement.addEventListener('search', event => {
-        window.LiveElement.Scale.Console.System.invokeLambda({
-            page: 'ide', 
-            entity_type: 'feed', 
-            heading: 'search',
-            connection: connectionSearchInputElement.value, 
-            'class': classSearchInputElement.value, 
-            input_name: 'query', 
-            search: querySearchInputElement.value
-        }).then(querySearchResult => {
-            if (querySearchResult && querySearchResult.result) {
-                entitySearchElement.querySearchResult = Array.isArray(querySearchResult.result) ? querySearchResult.result : (typeof querySearchResult.result == 'object' ? Object.keys(querySearchResult.result) : [])
-                window.LiveElement.Scale.Core.buildDataList(querySearchDatalistElement, entitySearchElement.querySearchResult)
-            }
-            var loadButtonAlreadyDisabled = entitySearchLoadButton.getAttribute('disabled'), resultIncludesValue = entitySearchElement.result.includes(querySearchInputElement.value)
-            if ((loadButtonAlreadyDisabled && resultIncludesValue) || (entitySearchElement.allowNew && new window.RegExp(entitySearchElement.allowNew).test(querySearchInputElement.value))) {
-                entitySearchLoadButton.removeAttribute('disabled')
-            } else if (!loadButtonAlreadyDisabled && !resultIncludesValue) {
-                entitySearchLoadButton.setAttribute('disabled', true)
-            }
-        })
+    querySearchInputElement.addEventListener('input', event => {
+        if (connectionSearchInputElement.value && classSearchInputElement.value) {
+            window.LiveElement.Scale.Console.System.invokeLambda({
+                page: 'ide', 
+                entity_type: 'feed', 
+                heading: 'search',
+                connection: connectionSearchInputElement.value, 
+                'class': classSearchInputElement.value, 
+                input_name: 'query', 
+                search: querySearchInputElement.value
+            }).then(querySearchResult => {
+                if (querySearchResult && querySearchResult.result) {
+                    entitySearchElement.querySearchResult = Array.isArray(querySearchResult.result) ? querySearchResult.result : (typeof querySearchResult.result == 'object' ? Object.keys(querySearchResult.result) : [])
+                    window.LiveElement.Scale.Core.buildDataList(querySearchDatalistElement, entitySearchElement.querySearchResult)
+                }
+                toggleLoadButtonDisabled()
+            })
+        }
     })
     
 }
