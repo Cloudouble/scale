@@ -62,7 +62,6 @@ if (entitySearchElement) {
 window.LiveElement.Live.processors.IdeFeedEdit = function(input) {
     var handlerType = window.LiveElement.Live.getHandlerType(input)
     var editFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="feed"] fieldset[name="edit"]')
-    //var codeFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="feed"] fieldset[name="code"]')
     if (handlerType == 'listener') {
         return {
             connection: (window.LiveElement.Scale.Console.IDE.Feed.feedElement || {}).connection, 
@@ -72,8 +71,8 @@ window.LiveElement.Live.processors.IdeFeedEdit = function(input) {
         }
     } else if (handlerType == 'trigger') {
         if (input.entity) {
+            console.log('line 75', input)
             editFieldset.setAttribute('active', true)
-            //codeFieldset.setAttribute('active', true)
             window.LiveElement.Scale.Console.IDE.Feed.feedElement = editFieldset.querySelector('element-feed')
             if (window.LiveElement.Scale.Console.IDE.Feed.feedElement) {
                 window.LiveElement.Scale.Console.IDE.Feed.feedElement.remove()
@@ -85,26 +84,10 @@ window.LiveElement.Live.processors.IdeFeedEdit = function(input) {
             window.LiveElement.Scale.Console.IDE.Feed.feedElement.addEventListener('change', event => {
                 window.LiveElement.Scale.Console.buildSnippets('ide', 'feed')
             })
-            //window.LiveElement.Scale.Console.IDE.Feed.feedElement.setAttribute('live-subscription', 'IdeFeedEdit:IdeFeedCode')
-            //window.LiveElement.Live.listen(window.LiveElement.Scale.Console.IDE.Feed.feedElement, 'IdeFeedEdit', 'change', false, true)
         } else {
             editFieldset.removeAttribute('active')
-            //codeFieldset.removeAttribute('active')
         }
     }
 }
 
-/*window.LiveElement.Live.processors.IdeConnectionCode = function(input) {
-    var handlerType = window.LiveElement.Live.getHandlerType(input)
-    var codeFieldset = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="connection"] fieldset[name="code"]')
-    if (handlerType == 'subscription') {
-        var websocketUrlInputElement = codeFieldset.querySelector('input[name="websocketUrl"]')
-        if (websocketUrlInputElement && input.payload['@id']) {
-            websocketUrlInputElement.value = (input.payload['@id']) ? `${window.LiveElement.Scale.Console.IDE.systemURL}/connection/${input.payload['@id']}/websocket` : ''
-        }
-    }
-}*/
-
 window.LiveElement.Scale.Console.buildSnippets('ide', 'connection')
-
-//window.LiveElement.Live.listeners.IdeConnectionEdit = {processor: 'IdeConnectionEdit', expired: true}

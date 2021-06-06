@@ -1,18 +1,9 @@
 #ide[entity-type="feed"] > section[name="feed"] {
     display: block;
 }
-#ide > section[name="feed"] > fieldset[name="edit"], 
-#ide > section[name="feed"] > fieldset[name="code"] {
+#ide > section[name="feed"] > fieldset[name="edit"] {
     display: none;
 }
-#ide > section[name="feed"] > fieldset[name="edit"][active], 
-#ide > section[name="feed"] > fieldset[name="code"][active] {
+#ide > section[name="feed"] > fieldset[name="edit"][active] {
     display: block;
-}
-#ide > section[name="feed"] > fieldset[name="code"] > label {
-    display: block;
-}
-#ide > section[name="feed"] > fieldset[name="code"] > label > input, 
-#ide > section[name="feed"] > fieldset[name="test"] > label > input {
-    width: calc(100% - 4px);
 }

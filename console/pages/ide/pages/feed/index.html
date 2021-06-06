@@ -11,30 +11,20 @@
     <element-snippet>
 /* CREATE feed */
 window.fetch(
-    `${window.LiveElement.Scale.Console.IDE.connectionURL}/{window.LiveElement.Scale.Console.IDE.Feed.feedElement.class}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement.query]}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement['@id']}.json`, 
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/feed/${window.LiveElement.Scale.Console.IDE.Feed.feedElement.class}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement.query}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement['@id']}.json`, 
     {
         method: 'PUT', 
         headers: {"Content-Type": 'application/json'}, 
-        body: {}
+        body: {
+            view: '${window.LiveElement.Scale.Console.IDE.Feed.feedElement.view}'
+        }
     }
 )
 
 /* DELETE feed */
 window.fetch(
-    `${window.LiveElement.Scale.Console.IDE.connectionURL}/{window.LiveElement.Scale.Console.IDE.Feed.feedElement.class}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement.query]}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement['@id']}.json`, 
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/feed/${window.LiveElement.Scale.Console.IDE.Feed.feedElement.class}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement.query}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement['@id']}.json`, 
     {method: 'DELETE'}
 )
     </element-snippet>
 </fieldset>
-
-<!--<fieldset name="code">
-    <h3>Code</h3>
-    <label>
-        Websocket URL
-        <input name="websocketUrl" type="url" readonly="readonly" />
-        <element-snippet>
-var websocketURL = `${window.LiveElement.Scale.Console.IDE.systemURL}/connection/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['@id']}/websocket`
-window.LiveElement.Scale.Console.IDE.Connection.Code.websocket = new WebSocket(websocketURL)
-        </element-snippet>
-    </label>
-</fieldset>-->
