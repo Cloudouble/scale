@@ -1,0 +1,18 @@
+#ide[entity-type="mask"] > section[name="mask"] {
+    display: block;
+}
+#ide > section[name="mask"] > fieldset[name="edit"], 
+#ide > section[name="mask"] > fieldset[name="code"] {
+    display: none;
+}
+#ide > section[name="mask"] > fieldset[name="edit"][active], 
+#ide > section[name="mask"] > fieldset[name="code"][active] {
+    display: block;
+}
+#ide > section[name="mask"] > fieldset[name="code"] > label {
+    display: block;
+}
+#ide > section[name="mask"] > fieldset[name="code"] > label > input, 
+#ide > section[name="mask"] > fieldset[name="test"] > label > input {
+    width: calc(100% - 4px);
+}

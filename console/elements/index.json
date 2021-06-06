@@ -10,5 +10,6 @@
     "Channel", 
     "Connection", 
     "Feed", 
+    "Mask", 
     "Subscription"
 ]

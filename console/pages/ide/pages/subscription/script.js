@@ -1,57 +1,57 @@
-var entitySearchElement = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="subscription"] element-entitysearch')
-if (entitySearchElement) {
-    var connectionSearchInputElement = entitySearchElement.querySelector('input[name="connection"]')
-    var classSearchInputElement = entitySearchElement.querySelector('input[name="class"]')
-    var recordSearchInputElement = entitySearchElement.querySelector('input[name="record"]')
-    var subscriptionSearchInputElement = entitySearchElement.querySelector('input[name="@id"]')
-    var connectionSearchDatalistElement = entitySearchElement.querySelector(`datalist[id="${connectionSearchInputElement.getAttribute('list')}"]`)
-    var classSearchDatalistElement = entitySearchElement.querySelector(`datalist[id="${classSearchInputElement.getAttribute('list')}"]`)
-    var recordSearchDatalistElement = entitySearchElement.querySelector(`datalist[id="${recordSearchInputElement.getAttribute('list')}"]`)
-    var subscriptionSearchDatalistElement = entitySearchElement.querySelector(`datalist[id="${subscriptionSearchInputElement.getAttribute('list')}"]`)
-    var entitySearchLoadButton = entitySearchElement.shadowRoot.querySelector('button[name="load"]')
-    var toggleLoadButtonDisabled = function() {
-        var supportInputsAllValid = connectionSearchInputElement.value && connectionSearchDatalistElement.querySelector(`option[value="${connectionSearchInputElement.value}"]`)
-                && classSearchInputElement.value && classSearchDatalistElement.querySelector(`option[value="${classSearchInputElement.value}"]`)
-                && recordSearchInputElement.value && recordSearchDatalistElement.querySelector(`option[value="${recordSearchInputElement.value}"]`)
-        if ((supportInputsAllValid && subscriptionSearchInputElement.value && subscriptionSearchDatalistElement.querySelector(`option[value="${subscriptionSearchInputElement.value}"]`)) 
-                || (entitySearchElement.allowNew && new window.RegExp(entitySearchElement.allowNew).test(subscriptionSearchInputElement.value))) {
-            entitySearchLoadButton.removeAttribute('disabled')
+window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="subscription"] element-entitysearch')
+if (window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement) {
+    window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchInputElement = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.querySelector('input[name="connection"]')
+    window.LiveElement.Scale.Console.IDE.Subscription.classSearchInputElement = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.querySelector('input[name="class"]')
+    window.LiveElement.Scale.Console.IDE.Subscription.recordSearchInputElement = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.querySelector('input[name="record"]')
+    window.LiveElement.Scale.Console.IDE.Subscription.subscriptionSearchInputElement = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.querySelector('input[name="@id"]')
+    window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchDatalistElement = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.querySelector(`datalist[id="${window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchInputElement.getAttribute('list')}"]`)
+    window.LiveElement.Scale.Console.IDE.Subscription.classSearchDatalistElement = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.querySelector(`datalist[id="${window.LiveElement.Scale.Console.IDE.Subscription.classSearchInputElement.getAttribute('list')}"]`)
+    window.LiveElement.Scale.Console.IDE.Subscription.recordSearchDatalistElement = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.querySelector(`datalist[id="${window.LiveElement.Scale.Console.IDE.Subscription.recordSearchInputElement.getAttribute('list')}"]`)
+    window.LiveElement.Scale.Console.IDE.Subscription.subscriptionSearchDatalistElement = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.querySelector(`datalist[id="${window.LiveElement.Scale.Console.IDE.Subscription.subscriptionSearchInputElement.getAttribute('list')}"]`)
+    window.LiveElement.Scale.Console.IDE.Subscription.entitySearchLoadButton = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.shadowRoot.querySelector('button[name="load"]')
+    window.LiveElement.Scale.Console.IDE.Subscription.toggleLoadButtonDisabled = function() {
+        var supportInputsAllValid = window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchInputElement.value && window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchDatalistElement.querySelector(`option[value="${window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchInputElement.value}"]`)
+                && window.LiveElement.Scale.Console.IDE.Subscription.classSearchInputElement.value && window.LiveElement.Scale.Console.IDE.Subscription.classSearchDatalistElement.querySelector(`option[value="${window.LiveElement.Scale.Console.IDE.Subscription.classSearchInputElement.value}"]`)
+                && window.LiveElement.Scale.Console.IDE.Subscription.recordSearchInputElement.value && window.LiveElement.Scale.Console.IDE.Subscription.recordSearchDatalistElement.querySelector(`option[value="${window.LiveElement.Scale.Console.IDE.Subscription.recordSearchInputElement.value}"]`)
+        if ((supportInputsAllValid && window.LiveElement.Scale.Console.IDE.Subscription.subscriptionSearchInputElement.value && window.LiveElement.Scale.Console.IDE.Subscription.subscriptionSearchDatalistElement.querySelector(`option[value="${window.LiveElement.Scale.Console.IDE.Subscription.subscriptionSearchInputElement.value}"]`)) 
+                || (window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.allowNew && new window.RegExp(window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.allowNew).test(window.LiveElement.Scale.Console.IDE.Subscription.subscriptionSearchInputElement.value))) {
+            window.LiveElement.Scale.Console.IDE.Subscription.entitySearchLoadButton.removeAttribute('disabled')
         } else {
-            entitySearchLoadButton.setAttribute('disabled', true)
+            window.LiveElement.Scale.Console.IDE.Subscription.entitySearchLoadButton.setAttribute('disabled', true)
         }
     }
-    connectionSearchInputElement.addEventListener('input', event => {
+    window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchInputElement.addEventListener('input', event => {
         window.LiveElement.Scale.Console.System.invokeLambda({
             page: 'ide', 
             entity_type: 'subscription', 
             heading: 'search',
             input_name: 'connection', 
-            search: connectionSearchInputElement.value
+            search: window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchInputElement.value
         }).then(connectionSearchResult => {
             if (connectionSearchResult && connectionSearchResult.result) {
-                entitySearchElement.connectionSearchResult = Array.isArray(connectionSearchResult.result) ? connectionSearchResult.result : (typeof connectionSearchResult.result == 'object' ? Object.keys(connectionSearchResult.result) : [])
-                window.LiveElement.Scale.Core.buildDataList(connectionSearchDatalistElement, entitySearchElement.connectionSearchResult)
+                window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.connectionSearchResult = Array.isArray(connectionSearchResult.result) ? connectionSearchResult.result : (typeof connectionSearchResult.result == 'object' ? Object.keys(connectionSearchResult.result) : [])
+                window.LiveElement.Scale.Core.buildDataList(window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchDatalistElement, window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.connectionSearchResult)
             }
-            toggleLoadButtonDisabled()
+            window.LiveElement.Scale.Console.IDE.Subscription.toggleLoadButtonDisabled()
         })
     })
-    window.LiveElement.Scale.Core.buildDataList(classSearchDatalistElement, Object.assign({}, ...Object.entries(window.LiveElement.Scale.Console.IDE.classes).map(entry => ({[entry[0]]: entry[1].label}))))
-    recordSearchInputElement.addEventListener('input', event => {
-        if (connectionSearchInputElement.value && classSearchInputElement.value) {
+    window.LiveElement.Scale.Core.buildDataList(window.LiveElement.Scale.Console.IDE.Subscription.classSearchDatalistElement, Object.assign({}, ...Object.entries(window.LiveElement.Scale.Console.IDE.classes).map(entry => ({[entry[0]]: entry[1].label}))))
+    window.LiveElement.Scale.Console.IDE.Subscription.recordSearchInputElement.addEventListener('input', event => {
+        if (window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchInputElement.value && window.LiveElement.Scale.Console.IDE.Subscription.classSearchInputElement.value) {
             window.LiveElement.Scale.Console.System.invokeLambda({
                 page: 'ide', 
                 entity_type: 'subscription', 
                 heading: 'search',
-                connection: connectionSearchInputElement.value, 
-                'class': classSearchInputElement.value, 
+                connection: window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchInputElement.value, 
+                'class': window.LiveElement.Scale.Console.IDE.Subscription.classSearchInputElement.value, 
                 input_name: 'record', 
-                search: recordSearchInputElement.value
+                search: window.LiveElement.Scale.Console.IDE.Subscription.recordSearchInputElement.value
             }).then(recordSearchResult => {
                 if (recordSearchResult && recordSearchResult.result) {
-                    entitySearchElement.recordSearchResult = Array.isArray(recordSearchResult.result) ? recordSearchResult.result : (typeof recordSearchResult.result == 'object' ? Object.keys(recordSearchResult.result) : [])
-                    window.LiveElement.Scale.Core.buildDataList(recordSearchDatalistElement, entitySearchElement.recordSearchResult)
+                    window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.recordSearchResult = Array.isArray(recordSearchResult.result) ? recordSearchResult.result : (typeof recordSearchResult.result == 'object' ? Object.keys(recordSearchResult.result) : [])
+                    window.LiveElement.Scale.Core.buildDataList(window.LiveElement.Scale.Console.IDE.Subscription.recordSearchDatalistElement, window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.recordSearchResult)
                 }
-                toggleLoadButtonDisabled()
+                window.LiveElement.Scale.Console.IDE.Subscription.toggleLoadButtonDisabled()
             })
         }
     })
