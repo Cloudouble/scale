@@ -1,4 +1,4 @@
-#ide:not([entity-type]) > section[name="connection"] {
+#ide:not([entity-type]) > section[name="feed"] {
     display: block;
 }
 #ide div[name="sidebar"] {

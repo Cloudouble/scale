@@ -1,0 +1,40 @@
+<h2>Feed</h2>
+<element-entitysearch entityType="feed" historyPath="{connection}/feed/{class}/{query}/${@id}" blankOptionText="create new feed" live-trigger="loaded:IdeFeedEdit" allowNew>
+    <input name="connection" type="search" placeholder="search connection @id" autocomplete="off" list supporting />
+    <input name="class" type="search" placeholder="search class" autocomplete="off" list supporting />
+    <input name="query" type="search" placeholder="search query" autocomplete="off" list supporting />
+    <input name="@id" type="search" placeholder="search @id, or type 'new'..." autocomplete="off" list primary />
+</element-entitysearch>
+<fieldset name="edit">
+    <h3>Edit</h3>
+    <div class="text-editor-container"></div>
+    <element-snippet>
+/* CREATE feed */
+window.fetch(
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/{window.LiveElement.Scale.Console.IDE.Feed.feedElement.class}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement.query]}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement['@id']}.json`, 
+    {
+        method: 'PUT', 
+        headers: {"Content-Type": 'application/json'}, 
+        body: {}
+    }
+)
+
+/* DELETE feed */
+window.fetch(
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/{window.LiveElement.Scale.Console.IDE.Feed.feedElement.class}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement.query]}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement['@id']}.json`, 
+    {method: 'DELETE'}
+)
+    </element-snippet>
+</fieldset>
+
+<!--<fieldset name="code">
+    <h3>Code</h3>
+    <label>
+        Websocket URL
+        <input name="websocketUrl" type="url" readonly="readonly" />
+        <element-snippet>
+var websocketURL = `${window.LiveElement.Scale.Console.IDE.systemURL}/connection/${window.LiveElement.Scale.Console.IDE.Connection.connectionElement['@id']}/websocket`
+window.LiveElement.Scale.Console.IDE.Connection.Code.websocket = new WebSocket(websocketURL)
+        </element-snippet>
+    </label>
+</fieldset>-->

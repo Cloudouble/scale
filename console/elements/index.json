@@ -8,5 +8,6 @@
     "Static", 
     "Entity", 
     "Channel", 
-    "Connection"
+    "Connection", 
+    "Feed"
 ]

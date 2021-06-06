@@ -70,17 +70,17 @@
             var entityType = $this.entityType
             $this.querySelectorAll('input[type="search"][list]').forEach(searchElement => {
                 if (!searchElement.getAttribute('list')) {
-                    var listId = `entitysearch-${$this.name || ''}-${Math.floor(Math.random()*1000000000)}`
+                    var listId = `entitysearch-${searchElement.getAttribute('name') || ''}-${Math.floor(Math.random()*1000000000)}`
                     var datalistElement = document.createElement('datalist')
                     datalistElement.setAttribute('id', listId)
                     if ($this.allowNew) {
-                        window.LiveElement.Scale.Core.buildDataList(datalistElement, [], $this.blankOptions)
+                        window.LiveElement.Scale.Core.buildDataList(datalistElement, [], searchElement.hasAttribute('supporting') ? {} : $this.blankOptions)
                     }
                     $this.appendChild(datalistElement)
                     searchElement.setAttribute('list', listId)
                 }
             })
-            Array.from($this.querySelectorAll('input[secondary]')).forEach((supportingInputElement, index, supportingInputElements) => {
+            Array.from($this.querySelectorAll('input[supporting]')).forEach((supportingInputElement, index, supportingInputElements) => {
                 supportingInputElement.addEventListener('change', event => {
                     if (supportingInputElements.every(i => {
                         if (i.value) {
