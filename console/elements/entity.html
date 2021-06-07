@@ -188,7 +188,7 @@
         
         edit() {
             var $this = this, editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
-            Object.keys($this.constructor.entityFields).filter(field => !(['@id', '@name']).includes(field)).sort().forEach(field => {
+            Object.keys($this.constructor.entityFields).filter(field => field[0] != '@').sort().forEach(field => {
                 var labelElement = editorElement.querySelector(`label[name="${field}"]`)
                 if (!labelElement) {
                     labelElement = document.createElement('label')
