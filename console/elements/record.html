@@ -80,7 +80,7 @@
         }
         
         static get observedAttributes() {
-            return (super.observedAttributes || []).concat('_type')
+            return (super.observedAttributes || []).concat('_type', '_description')
         }
         
         static get entityFields() {
@@ -89,6 +89,12 @@
                     type: 'text', 
                     title: 'an installed class', 
                     hint: 'The record class', 
+                    required: true
+                }, 
+                '@description': {
+                    type: 'text', 
+                    title: 'Any longer human-readable text', 
+                    hint: 'Human-readable meta-description of the record', 
                     required: true
                 }
             }}
@@ -102,9 +108,78 @@
         editRecord() {
             var $this = this, editorElement = $this.shadowRoot.querySelector('div[name="editor"]'), _type = $this['@type']
             if (_type) {
-                console.log('line 92', _type)
+                editorElement.innerHTML = ''
+                editorElement.setAttribute('active', true)
+                var columns = {field: 'Record Field', datatype: 'Data Type', value: 'Field Value'}
+                var recordName = document.createElement('h4')
+                var recordNameLabel = document.createElement('label')
+                var recordNameInput = document.createElement('input')
+                recordNameInput.setAttribute('type', 'text')
+                recordNameInput.setAttribute('name', '@name')
+                recordNameInput.value = $this['@name'] || ''
+                recordNameLabel.appendChild(recordNameInput)
+                recordName.appendChild(recordNameLabel)
+                var recordTable = document.createElement('table')
+                var recordTableCaption = document.createElement('caption')
+                var recordDescripttionInput = document.createElement('input')
+                recordDescripttionInput.setAttribute('type', 'text')
+                recordDescripttionInput.setAttribute('name', '@description')
+                recordDescripttionInput.value = $this['@description'] || ''
+                recordTableCaption.appendChild(recordDescripttionInput)
+                recordTable.appendChild(recordTableCaption)
+                var recordTableHead = document.createElement('thead')
+                var recordTableHeaderRow = document.createElement('tr')
+                Object.entries(columns).forEach(entry => {
+                    var th = document.createElement('th')
+                    th.setAttribute('name', entry[0])
+                    th.setAttribute('scope', 'col')
+                    th.innerHTML = entry[1]
+                    recordTableHeaderRow.appendChild(th)
+                })
+                recordTableHead.appendChild(recordTableHeaderRow)
+                recordTable.appendChild(recordTableHead)
+                var recordTableBody = document.createElement('tbody')
+                var placeholderRow = document.createElement('tr')
+                var placeholderCell = document.createElement('td')
+                placeholderCell.setAttribute('colspan', 3)
+                placeholderCell.innerHTML = `Loading the ${_type} class definition...`
+                placeholderRow.appendChild(placeholderCell)
+                recordTableBody.appendChild(placeholderRow)
+                recordTable.appendChild(recordTableBody)
+                editorElement.innerHTML = ''
+                editorElement.appendChild(recordName)
+                editorElement.appendChild(recordTable)
+                new Promise(function(resolve, reject) {
+                    $this.constructor.classDefinitions = $this.constructor.classDefinitions || {}
+                    if ($this.constructor.classDefinitions[_type]) {
+                        resolve($this.constructor.classDefinitions[_type])
+                    } else {
+                        window.LiveElement.Scale.Console.System.invokeLambda({
+                            page: 'ide', 
+                            entity_type: 'record', 
+                            heading: 'edit',
+                            input_name: 'class', 
+                            '@type': _type
+                        }).then(classDefinition => {
+                            if (classDefinition && typeof classDefinition == 'object') {
+                                $this.constructor.classDefinitions[_type] = classDefinition
+                                resolve($this.constructor.classDefinitions[_type])
+                            } else {
+                                reject(classDefinition)
+                            }
+                        })
+                    }
+                }).then(classDefinition => {
+                    var recordTableBody = document.createElement('tbody')
+                    var placeholderRow = recordTableBody.querySelector('tr td')
+                    if (placeholderRow) {
+                        placeholderRow.innerHTML = `${_type} class definition loaded. Rendering record...`
+                    }
+                    
+                    
+                    
+                })
             } else {
-                console.log('line 94', _type)
                 editorElement.removeAttribute('active')
                 editorElement.innerHTML = 'No data type is selected for editing.'
             }
@@ -183,5 +258,14 @@
             return this._type
         }
 
+        _description($this, value) {
+            return $this._setField($this, '_description', value, $this.shadowRoot.querySelector('table > caption> input[name="@description"]'))
+        }
+        set ['@description'](value) {
+            this._description = value
+        }
+        get ['@description']() {
+            return this._description
+        }
     }
 </script>
