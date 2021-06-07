@@ -1,4 +1,4 @@
-#ide:not([entity-type]) > section[name="mask"] {
+#ide:not([entity-type]) > section[name="processor"] {
     display: block;
 }
 #ide div[name="sidebar"] {

@@ -1,0 +1,120 @@
+<style>
+:host {
+    contain: content;
+    display: block;
+    position: relative;
+}
+ 
+:host > label:first-of-type {
+    position: relative;
+}
+:host > label:first-of-type span:first-of-type {
+    display: block;
+}
+:host > label:first-of-type span:nth-of-type(2) {
+    display: inline-block;
+    width: 3em;
+    font-size: 90%;
+    position: absolute;
+    left: 3px;
+    top: 1.5em;
+    z-index: 1;
+    color: grey;
+}
+:host > label:first-of-type input {
+    display: inline-block;
+    width: calc(100% - 3.75em);
+    padding-left: 3.25em;
+    position: relative;
+    left: 0;
+    margin-right: 0;
+}
+ 
+</style>
+<template>
+    <label>
+        <span>Path</span>
+        <span>asset/</span><input name="path" type="text" autocomplete="off" />
+    </label>
+    <label>
+        Content-Type
+        <input name="Content-Type" type="search" autocomplete="off" />
+    </label>
+    <template name="OpaqueData"></template>
+</template>
+<script>
+    /* global */
+    class Processor extends window.LiveElement.Element.elements.OpaqueData {
+
+        static __extends = 'OpaqueData'
+
+        constructor() {
+            super()
+            var $this = this
+            
+        }
+
+        static get observedAttributes() {
+            return (super.observedAttributes || []).concat()
+        }
+        
+        upload(file) {
+            if (file) {
+                var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+                $this.file = file
+                $this['Content-Type'] = $this.file.type
+                $this['Content-Length'] = $this.file.size
+                $this['Last-Modified'] = $this.file.lastModifiedDate
+                if ($this.path && $this.path.slice(-1) == '/') {
+                    $this.path = `${$this.path}${$this.file.name}`
+                } else if (!$this.path) {
+                    $this.path = $this.file.name
+                }
+                var reader = new window.FileReader()
+                reader.addEventListener('load', event => {
+                    $this.body = event.target.result.split(',')[1]
+                    $this.dataURL = event.target.result
+                    var downloadA = $this.shadowRoot.querySelector('a[name="download"]')
+                    downloadA.setAttribute('href', $this.dataURL)
+                    downloadA.setAttribute('download', $this.path || $this.file.name)
+                })
+                reader.readAsDataURL($this.file)
+                event.target.value = ''
+                if (saveButton) {
+                    saveButton.removeAttribute('disabled')
+                }
+            }
+        }
+        
+        save() {
+            var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+            var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
+            window.fetch(
+                `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${$this.path}`, 
+                {
+                    method: 'PUT', 
+                    headers: {"Content-Type": $this['Content-Type']}, 
+                    body: $this.editorType == 'image' ? `${$this.editor}` : ($this.editorType == 'text' ? window.btoa($this.editor.getValue()) : ($this.dataURL?$this.dataURL.split(',')[1]:$this.body))
+                }
+            ).then(r => {
+                saveButton.setAttribute('disabled', true)
+                if (deleteButton) {
+                    deleteButton.removeAttribute('disabled')
+                }
+            })
+        }
+        
+        ['delete']() {
+            var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+            var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
+            window.fetch(
+                `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${$this.path}`, 
+                {method: 'DELETE'}
+            ).then(r => {
+                deleteButton.setAttribute('disabled', true)
+                saveButton.removeAttribute('disabled')
+            })
+        }
+
+    }
+</script>

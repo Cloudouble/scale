@@ -1,0 +1,28 @@
+<h2>Processor</h2>
+<element-entitysearch entityType="processor" historyPath="${path}" live-trigger="loaded:IdeAssetEdit" allowNew="[a-zA-Z0-9\-_\.]+" newFlag=''>
+    <input name="path" type="search" placeholder="search path, will create new if not exists..." autocomplete="off" list />
+</element-entitysearch>
+<fieldset name="edit" live-subscription="IdeAssetSearch:IdeAssetEdit">
+    <h3>Edit</h3>
+    <div class="text-editor-container"></div>
+    <element-snippet>
+/* SAVE asset */
+/* NOTE: body => window.btoa('your plain text or raw binary body') */
+window.fetch(
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${window.LiveElement.Scale.Console.IDE.Asset.assetElement.path}.json`, 
+    {
+        method: 'PUT', 
+        headers: {'Content-Type': `${window.LiveElement.Scale.Console.IDE.Asset.assetElement.contenttype}`}, 
+        body: `${window.LiveElement.Scale.Console.IDE.Asset.assetElement.dataURL.split(',')[1]}`
+    }
+)
+            
+/* DELETE asset */
+window.fetch(
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${window.LiveElement.Scale.Console.IDE.Asset.assetElement.path}.json`, 
+    {
+        method: 'DELETE'
+    }
+)
+    </element-snippet>
+</fieldset>

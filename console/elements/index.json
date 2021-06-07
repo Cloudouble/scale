@@ -11,5 +11,6 @@
     "Connection", 
     "Feed", 
     "Mask", 
+    "Processor", 
     "Subscription"
 ]

@@ -1,0 +1,13 @@
+#ide[entity-type="processor"] > section[name="processor"] {
+    display: block;
+}
+#ide > section[name="processor"] > fieldset[name="edit"] {
+    display: none;
+}
+#ide > section[name="processor"] > fieldset[name="edit"][active] {
+    display: block;
+}
+#ide > section[name="processor"] > fieldset[name="edit"] > .text-editor-container {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
