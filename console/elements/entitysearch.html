@@ -160,10 +160,20 @@
                         search: searchElement.value
                     }, ...Object.assign({}, ...Array.from($this.querySelectorAll('input[supporting][name]')).map(i => ({[i.getAttribute('name')]: i.value})))}).then(searchResult => {
                         if (searchResult && searchResult.result) {
-                            $this.result = Array.isArray(searchResult.result) ? searchResult.result : (typeof searchResult.result == 'object' ? Object.keys(searchResult.result) : [])
+                            if (Array.isArray(searchResult.result)) {
+                                $this.result = searchResult.result 
+                            } else if (typeof searchResult.result == 'object') {
+                                if (Object.values(searchResult.result).every(v => typeof v == 'string')) {
+                                    $this.result = searchResult.result
+                                } else if (Object.values(searchResult.result).every(v => v && typeof v == 'object')) {
+                                    $this.result = Object.assign({}, ...Object.entries(searchResult.result).map(entry => ({[entry[0]]: entry[1]['@name'] || entry[1]['name'] || entry[0]}))  )
+                                }
+                            }
                             window.LiveElement.Scale.Core.buildDataList(datalistElement, $this.result, $this.blankOptions)
                         }
-                        var loadButtonAlreadyDisabled = loadButton.getAttribute('disabled'), resultIncludesValue = $this.result.includes(searchElement.value)
+                        var loadButtonAlreadyDisabled = loadButton.getAttribute('disabled'), 
+                            resultIncludesValue = Array.isArray($this.result) ? $this.result.includes(searchElement.value) 
+                                : ($this.result && typeof $this.result == 'object' ? Object.keys($this.result).includes(searchElement.value) : false)
                         if ((loadButtonAlreadyDisabled && resultIncludesValue) || ($this.allowNew && new window.RegExp($this.allowNew).test(searchElement.value))) {
                             loadButton.removeAttribute('disabled')
                         } else if (!loadButtonAlreadyDisabled && !resultIncludesValue) {
@@ -192,7 +202,7 @@
                     hint = `${hint}@name="${$this.entity['@name']}", `
                 }
                 var extraHintField = Object.keys($this.entity)
-                    .filter(k => k != 'name' && k[0] != '@' && typeof $this.entity[k] != 'object').sort().shift()
+                    .filter(k => k != 'name' && k[0] != '@' && typeof $this.entity[k] != 'object' && !(k in entityCore)).sort().shift()
                 if (extraHintField) {
                     hint = `${hint}${extraHintField}=${JSON.stringify($this.entity[extraHintField])}`
                 }
