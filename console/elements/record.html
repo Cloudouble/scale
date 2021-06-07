@@ -29,6 +29,36 @@
     padding-bottom: 0;
     text-align: inherit;
 }
+:host > div[name="editor"] table {
+    width: 100%;
+    margin-top: 1em;
+    margin-bottom: 2em;
+}
+:host > div[name="editor"] table caption {
+    margin-top: 1em;
+    margin-bottom: 2em;
+    text-align: left;
+}
+:host > div[name="editor"] table > caption > label {
+    display: inline-block;
+    text-align: left;
+}
+:host > div[name="editor"] table > caption > label:nth-of-type(1) {
+    width: 17em;
+    margin-right: 1em;
+}
+:host > div[name="editor"] table > caption > label:nth-of-type(2) {
+    width: 37em;
+}
+:host > div[name="editor"] table > caption > label > input {
+    padding-left: 1px;
+    padding-right: 1px;
+    display: block;
+    width: calc(100% - 5px);
+}
+:host > div[name="editor"] h4 > label > small {
+    font-weight: normal;
+}
 </style>
 <template>
     <label>
@@ -94,7 +124,7 @@
                 '@description': {
                     type: 'text', 
                     title: 'Any longer human-readable text', 
-                    hint: 'Human-readable meta-description of the record', 
+                    hint: '(optional) Human-readable meta-description of the record', 
                     required: true
                 }
             }}
@@ -111,43 +141,33 @@
                 editorElement.innerHTML = ''
                 editorElement.setAttribute('active', true)
                 var columns = {field: 'Record Field', datatype: 'Data Type', value: 'Field Value'}
-                var recordName = document.createElement('h4')
-                var recordNameLabel = document.createElement('label')
-                var recordNameInput = document.createElement('input')
-                recordNameInput.setAttribute('type', 'text')
-                recordNameInput.setAttribute('name', '@name')
-                recordNameInput.value = $this['@name'] || ''
-                recordNameLabel.appendChild(recordNameInput)
-                recordName.appendChild(recordNameLabel)
                 var recordTable = document.createElement('table')
                 var recordTableCaption = document.createElement('caption')
-                var recordDescripttionInput = document.createElement('input')
-                recordDescripttionInput.setAttribute('type', 'text')
-                recordDescripttionInput.setAttribute('name', '@description')
-                recordDescripttionInput.value = $this['@description'] || ''
-                recordTableCaption.appendChild(recordDescripttionInput)
+                var recordNameLabel = window.LiveElement.Scale.Core.createElement('label', undefined, '@name')
+                recordNameLabel.appendChild(window.LiveElement.Scale.Core.createElement('input', {
+                    type: 'text', name: '@name', title: $this.constructor.entityFields['@name'].title}, $this['@name'] || ''))
+                recordNameLabel.appendChild(window.LiveElement.Scale.Core.createElement('small', null, $this.constructor.entityFields['@name'].hint))
+                recordTableCaption.appendChild(recordNameLabel)
+                var recordDescriptionLabel = window.LiveElement.Scale.Core.createElement('label', undefined, '@description')
+                recordDescriptionLabel.appendChild(window.LiveElement.Scale.Core.createElement('input', {
+                    type: 'text', name: '@description', title: $this.constructor.entityFields['@description'].title}, $this['@description'] || ''))
+                recordDescriptionLabel.appendChild(window.LiveElement.Scale.Core.createElement('small', null, $this.constructor.entityFields['@description'].hint))
+                recordTableCaption.appendChild(recordDescriptionLabel)
                 recordTable.appendChild(recordTableCaption)
                 var recordTableHead = document.createElement('thead')
                 var recordTableHeaderRow = document.createElement('tr')
                 Object.entries(columns).forEach(entry => {
-                    var th = document.createElement('th')
-                    th.setAttribute('name', entry[0])
-                    th.setAttribute('scope', 'col')
-                    th.innerHTML = entry[1]
-                    recordTableHeaderRow.appendChild(th)
+                    recordTableHeaderRow.appendChild(window.LiveElement.Scale.Core.createElement('th', {name: entry[0], scope: 'col'}, entry[1]))
                 })
                 recordTableHead.appendChild(recordTableHeaderRow)
                 recordTable.appendChild(recordTableHead)
                 var recordTableBody = document.createElement('tbody')
                 var placeholderRow = document.createElement('tr')
-                var placeholderCell = document.createElement('td')
-                placeholderCell.setAttribute('colspan', 3)
-                placeholderCell.innerHTML = `Loading the ${_type} class definition...`
-                placeholderRow.appendChild(placeholderCell)
+                placeholderRow.appendChild(window.LiveElement.Scale.Core.createElement('td', {colspan: 3, style: 'text-align: center; padding-top: 2em; padding-bottom: 2em'}, 
+                    `Loading the ${_type} class definition...`))
                 recordTableBody.appendChild(placeholderRow)
                 recordTable.appendChild(recordTableBody)
                 editorElement.innerHTML = ''
-                editorElement.appendChild(recordName)
                 editorElement.appendChild(recordTable)
                 new Promise(function(resolve, reject) {
                     $this.constructor.classDefinitions = $this.constructor.classDefinitions || {}
@@ -170,12 +190,10 @@
                         })
                     }
                 }).then(classDefinition => {
-                    var recordTableBody = document.createElement('tbody')
-                    var placeholderRow = recordTableBody.querySelector('tr td')
-                    if (placeholderRow) {
-                        placeholderRow.innerHTML = `${_type} class definition loaded. Rendering record...`
-                    }
-                    
+                    placeholderRow.innerHTML = ''
+                    placeholderRow.appendChild(window.LiveElement.Scale.Core.createElement('td', {colspan: 3, style: 'text-align: center; padding-top: 2em; padding-bottom: 2em'}, 
+                        `${_type} class definition loaded. Rendering record...`))
+
                     
                     
                 })

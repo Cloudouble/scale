@@ -3,6 +3,27 @@ window.LiveElement.Scale = window.LiveElement.Scale || {}
 window.LiveElement.Scale.Core = window.LiveElement.Scale.Core || {}
 window.LiveElement.Scale.Console = window.LiveElement.Scale.Console || {}
 window.LiveElement.Scale.Core.uuid4Pattern = '^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$'
+window.LiveElement.Scale.Core.setAttributes = function(element, attributes) {
+  if (element && typeof element == 'object' && attributes && typeof attributes == 'object' && typeof element.setAttribute == 'function') {
+    Object.entries(attributes).forEach(entry => element.setAttribute(entry[0], entry[1]))
+  }
+}
+window.LiveElement.Scale.Core.createElement = function(tagName, attributes, value) {
+  if (tagName && typeof tagName == 'string') {
+    var element = document.createElement(tagName)
+    if (attributes && typeof attributes == 'object') {
+      Object.entries(attributes).forEach(entry => element.setAttribute(entry[0], entry[1]))
+    }
+    if (value && typeof value == 'string') {
+      if (tagName == 'input' || tagName == 'select') {
+        element.value = value
+      } else {
+        element.innerHTML = value
+      }
+    }
+    return element
+  }
+}
 window.LiveElement.Scale.Core.generateUUID4 = function() {
     var u = '********-****-4***-N***-************'
     var v = ['8', '9', 'a', 'b']
