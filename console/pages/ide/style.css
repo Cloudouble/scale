@@ -1,14 +1,13 @@
-#ide:not([entity-type]) > section[name="channel"] {
+#ide:not([entity-type]) > section[name="record"] {
     display: block;
 }
 #ide div[name="sidebar"] {
     position: absolute;
     left: 0;
-    top: 60px;
+    top: 0;
     width: 149px;
-    border-top: 1px solid grey;
     border-right: 1px solid grey;
-    padding-top: 30px;
+    padding-top: 10px;
 }
 #ide div[name="sidebar"] button {
     display: block;
@@ -33,7 +32,7 @@
 #ide > section {
     position: absolute;
     left: 180px;
-    top: 60px;
+    top: 10px;
     width: calc(100% - 200px);
     display: none;
     min-height: 500px;

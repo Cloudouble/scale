@@ -33,6 +33,7 @@
     margin-bottom: 1.25em;
 }
 :host div[name="editor"] > label > input, :host div[name="editor"] > label > select {
+    padding: 1px;
     margin-left: 1px;
     display: block;
     width: calc(100% - 6px);
@@ -89,12 +90,14 @@
                     $this.dispatchEvent(new window.Event('change'))
                 }
             }, {once: true})
-            nameInputElement.addEventListener('change', event => {
-                if (event.target.value != String($this['@name'])) {
-                    $this['@name'] = event.target.value
-                    $this.dispatchEvent(new window.Event('change'))
-                }
-            })
+            if (nameInputElement) {
+                nameInputElement.addEventListener('change', event => {
+                    if (event.target.value != String($this['@name'])) {
+                        $this['@name'] = event.target.value
+                        $this.dispatchEvent(new window.Event('change'))
+                    }
+                })
+            }
             $this.addEventListener('change', event => {
                 var saveButton = $this.shadowRoot.querySelector('button[name="save"]')
                 if (saveButton) {

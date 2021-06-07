@@ -3,53 +3,196 @@
     contain: content;
     display: block;
     position: relative;
-    cursor: pointer;
 }
-:host-context(:not([built])) {
-    display: none; 
+ 
+:host > label {
+    width: 16em;
+    margin-right: 2em;
+    display: inline-block;
 }
-:host-context([built]) {
-    display: block;
+:host > label:first-of-type {
+    width: 17em;
+    margin-right: 0.5em;
 }
-:host:focus, :host summary:focus {
-    outline: none;
+:host > aside {
+    display: none;
 }
 </style>
 <template>
-    <table>
-        <thead>
-            <tr>
-                <th colspan="2">Property</th>
-                <th colspan="1">Data Type</th>
-                <th colspan="4">Value</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <label>
+        @id
+        <input name="@id" type="text" autocomplete="off" readonly="true" pattern="^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$" title="Must be a valid v4 UUID" required="true" />
+        <small>Unique identifier</small>
+    </label>
+    <label>
+        @type
+        <input name="@type" type="text" autocomplete="off" title="An installed class" />
+        <small>The record class</small>
+    </label>
+    <template name="OpaqueData"></template>
 </template>
 <script>
     /* global */
-    class Record extends window.LiveElement.Element.elements.HTMLElement {
+    class Record extends window.LiveElement.Element.elements.Entity {
 
-        static __extends = 'HTMLElement'
-        static __properties = []
+        static __extends = 'Entity'
+        
+        static entityType = 'record'
 
         constructor() {
             super()
             var $this = this
-            
         }
 
-        static get observedAttributes() {
-            return (super.observedAttributes || []).concat(...this.__properties)
-        }
-        
         connectedCallback() {
+            super.connectedCallback()
             var $this = this
-            $this.build()
+            var typeInputElement = $this.shadowRoot.querySelector('input[name="@type"]')
+            typeInputElement.addEventListener('change', event => {
+                if (event.target.value != String($this['@type'])) {
+                    $this['@type'] = event.target.value
+                    $this.dispatchEvent(new window.Event('change'))
+                }
+            })
+            window.setTimeout(() => {
+                if ($this['@id'] && $this['@type']) {
+                    $this.shadowRoot.querySelector('button[name="delete"]').removeAttribute('disabled')
+                    $this.shadowRoot.querySelector('input[name="@type"]').setAttribute('readonly', true)
+                    $this.dispatchEvent(new window.Event('change'))
+                    window.setTimeout(() => {
+                        $this.shadowRoot.querySelector('button[name="save"]').setAttribute('disabled', true)
+                    }, 200)
+                }
+            }, 200)
         }
         
+        static get observedAttributes() {
+            return (super.observedAttributes || []).concat('_type')
+        }
+        
+        static get entityFields() {
+            return {...super.entityFields, ...{
+                '@type': {
+                    type: 'text', 
+                    title: 'an installed class', 
+                    hint: 'The record class', 
+                    required: true
+                }
+            }}
+        }
+        
+        edit() {
+            var $this = this, editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
+            Object.keys($this.constructor.entityFields).filter(field => field[0] != '@').sort().forEach(field => {
+                var labelElement = editorElement.querySelector(`label[name="${field}"]`)
+                if (!labelElement) {
+                    labelElement = document.createElement('label')
+                    labelElement.setAttribute('name', field)
+                    labelElement.innerHTML = field
+                    editorElement.appendChild(labelElement)
+                }
+                var inputElementTag = $this.constructor.entityFields[field] && typeof $this.constructor.entityFields[field] == 'object' && $this.constructor.entityFields[field].type == 'select' ? 'select': 'input'
+                var fieldInputElement = labelElement.querySelector(`${inputElementTag}[name="${field}"]`)
+                if (!fieldInputElement) {
+                    fieldInputElement = document.createElement(inputElementTag)
+                    fieldInputElement.setAttribute('name', field)
+                    var smallElement
+                    if ($this.constructor.entityFields[field] && typeof $this.constructor.entityFields[field] == 'object') {
+                        Object.entries($this.constructor.entityFields[field]).filter(entry => entry[0] != 'hint').forEach(entry => {
+                            fieldInputElement.setAttribute(...entry)
+                        })
+                        if ($this.constructor.entityFields[field].hint) {
+                            smallElement = document.createElement('small')
+                            smallElement.innerHTML = $this.constructor.entityFields[field].hint
+                        }
+                    }
+                    labelElement.appendChild(fieldInputElement)
+                    if (smallElement) {
+                        labelElement.appendChild(smallElement)
+                    }
+                }
+                fieldInputElement.value = $this[field] === undefined ? '' : $this[field]
+                fieldInputElement.addEventListener('change', event => {
+                    if (($this[field] === undefined && event.target.value != '') || (String(event.target.value) != String($this[field]))) {
+                        $this[field] = event.target.value
+                        $this.dispatchEvent(new window.Event('change'))
+                    }
+                })
+            })
+        }
+        
+        upload(file) {
+            if (file) {
+                var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+                file.text().then(fileText => {
+                    var entity = {}
+                    try {
+                        entity = JSON.parse(fileText)
+                    } catch(e) {
+                        entity = {}
+                    }
+                    Object.keys($this.constructor.entityFields).filter(field => field != '@id').sort().forEach(field => {
+                        if (field in entity) {
+                            if (String($this[field]) != String(entity[field])) {
+                                $this[field] = entity[field]
+                            }
+                        }
+                    })
+                })
+            }
+        }
+
+        save() {
+            var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+            var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
+            window.fetch(
+                `${window.LiveElement.Scale.Console.IDE.connectionURL}/channel/${$this['@id']}/connect.json`, 
+                {
+                    method: 'PUT', 
+                    headers: {"Content-Type": 'application/json'}, 
+                    body: `${$this}`
+                }
+            ).then(r => {
+                saveButton.setAttribute('disabled', true)
+                if (deleteButton) {
+                    deleteButton.removeAttribute('disabled')
+                }
+            })
+        }
+        
+        ['delete']() {
+            var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+            var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
+            window.fetch(
+                `${window.LiveElement.Scale.Console.IDE.systemURL}/channel/${$this['@id']}/${$this['adminKey']}`, 
+                {method: 'DELETE'}
+            ).then(r => {
+                deleteButton.setAttribute('disabled', true)
+                saveButton.removeAttribute('disabled')
+            })
+        }
+        
+        _setRecordField = function(field, value, readonly) {
+            var $this = this, inputField = $this.shadowRoot.querySelector(`label[name="${field}"] input[name="${field}"]`)
+            if (value) {
+                if (inputField) {
+                    if (readonly) {
+                        inputField.setAttribute('readonly', true)
+                    }
+                }
+            }
+            return $this._setField($this, field, value, inputField || `input[name="${field}"]`)
+        }
+        
+        _type($this, value) {
+            return $this._setField($this, '_type', value, $this.shadowRoot.querySelector(':scope > label > input[name="@type"]'))
+        }
+        set ['@type'](value) {
+            this._type = value
+        }
+        get ['@type']() {
+            return this._type
+        }
+
     }
 </script>
-
-

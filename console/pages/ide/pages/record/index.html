@@ -1,35 +1,26 @@
 <h2>Record</h2>
-
-<element-entitysearch entityType="record" blankOptionText="Generate UUID for a new record..." historyPath="${@type}/${@id}" live-trigger="loaded:IdeRecordEdit">
-    <input name="@type" type="text" placeholder="records of class..." autocomplete="off" list="ide--class" supporting />
-    <input name="@id" type="search" placeholder="record UUID..." autocomplete="off" list primary />
+<element-entitysearch entityType="record" historyPath="${@type}/${@id}" blankOptionText="create new record" live-trigger="loaded:IdeRecordEdit" allowNew>
+    <input name="@type" type="search" placeholder="search class @type..." autocomplete="off" list="ide--class" supporting />
+    <input name="@id" type="search" placeholder="search @id, or type 'new'..." autocomplete="off" list primary />
 </element-entitysearch>
-
 <fieldset name="edit">
     <h3>Edit</h3>
-    <button name="save" disabled="true" live-trigger="click:IdeRecordEdit">Save</button>
-    <button name="duplicate" disabled="true" live-trigger="click:IdeRecordEdit">Duplicate</button>
-    <button name="delete" disabled="true" live-trigger="click:IdeRecordEdit">Delete</button>
+    <div class="text-editor-container"></div>
     <element-snippet>
-/* SAVE record */
+/* CREATE record */
 window.fetch(
-    `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/record/${window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']}/${window.LiveElement.Scale.Console.IDE.Record.record['@id']}.json`, 
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/record/${window.LiveElement.Scale.Console.IDE.Record.recordElement['@id']}.json`, 
     {
         method: 'PUT', 
-        headers: {'Content-Type': 'application/json'}, 
-        body: JSON.stringify({
-            ${JSON.stringify(window.LiveElement.Scale.Console.IDE.Record.record, null, 20).slice(1, -1)}
-        }) 
+        headers: {"Content-Type": 'application/json'}, 
+        body: `${window.LiveElement.Scale.Console.IDE.Record.recordElement}`
     }
 )
-            
+
 /* DELETE record */
 window.fetch(
-    `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}/connection/${window.localStorage.getItem('system:connection_id')}/record/${window.LiveElement.Scale.Console.IDE.Record.Edit.record['@type']}/${window.LiveElement.Scale.Console.IDE.Record.record['@id']}.json`, 
-    {
-        method: 'DELETE'
-    }
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/record/${window.LiveElement.Scale.Console.IDE.Record.recordElement['@id']}.json`, 
+    {method: 'DELETE'}
 )
     </element-snippet>
-    <datalist id="ide-record-edit-properties-list"></datalist>
 </fieldset>
