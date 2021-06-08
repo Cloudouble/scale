@@ -296,9 +296,20 @@
                             fieldNameCellInput.closest('tr').setAttribute('name', fieldNameCellInput.value)
                             fieldNameCellHint.innerHTML = getTruncatedText(fieldNameCellInput.value 
                                 ? (propertiesDatalist.querySelector(`option[value="${fieldNameCellInput.value}"]`) || {}).innerHTML || defaultSmall : defaultSmall, 70)
-                            fieldTypeDatalist.innerHTML = classDefinition.properties[fieldNameCellInput.value].types.map(t => `<option value="${t}">${(($this.constructor.datatypeDefinitions || {})[t] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[t] || {}).label || t}</option>`).join('')
+                            if (fieldNameCellInput.value) {
+                                fieldTypeDatalist.innerHTML = classDefinition.properties[fieldNameCellInput.value].types.map(t => `<option value="${t}">${(($this.constructor.datatypeDefinitions || {})[t] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[t] || {}).label || t}</option>`).join('')
+                            } else {
+                                fieldTypeDatalist.innerHTML = ''
+                            }
                             fieldTypeInput.value = fieldNameCellInput.value ? classDefinition.properties[fieldNameCellInput.value].types.slice(0,1).pop() : ''
                             fieldTypeInput.dispatchEvent(new window.Event('change'))
+                            var tableBodyElement = fieldNameCellInput.closest('tbody')
+                            var blankRows = Array.from(tableBodyElement.querySelectorAll('tr[name]')).filter(r => !r.getAttribute('name').length)
+                            if (blankRows.length == 0) {
+                                recordTableBody.appendChild(makeRow())
+                            } else if (blankRows.length > 1) {
+                                blankRows.slice(1).forEach(r => r.remove())
+                            }
                         })
                         fieldTypeInput.addEventListener('change', event => {
                             var fieldTypeHintText = fieldTypeInput.value ? (($this.constructor.datatypeDefinitions || {})[fieldTypeInput.value] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[fieldTypeInput.value] || {}).label || fieldTypeInput.value : defaultSmall
