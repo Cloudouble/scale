@@ -171,6 +171,57 @@
             return (super.observedAttributes || []).concat('_type', '_description')
         }
         
+        static datatypeElements = {
+            'Boolean': {
+                type: 'checkbox'
+            }, 
+            'True': {
+                type: 'checkbox', 
+                readonly: true, 
+                checked: true
+            }, 
+            'False': {
+                type: 'checkbox', 
+                readonly: true
+            }, 
+            'Date': {
+                type: 'date'
+            }, 
+            'Time': {
+                type: 'time'
+            }, 
+            'DateTime': {
+                type: 'datetime-local'
+            }, 
+            'Number': {
+                type: 'number'
+            }, 
+            'Float': {
+                type: 'number'
+            }, 
+            'Integer': {
+                type: 'number'
+            }, 
+            'URL': {
+                type: 'number'
+            }, 
+            'Text': {
+                type: 'text'
+            }, 
+            'CssSelectorType': {
+                type: 'text'
+            }, 
+            'PronounceableText': {
+                type: 'text'
+            }, 
+            'XPathType': {
+                type: 'text'
+            }, 
+            'Record': {
+                type: 'uuid'
+            }
+        }
+        
         static get entityFields() {
             return {...super.entityFields, ...{
                 '@type': {
@@ -288,7 +339,8 @@
                         fieldRow.appendChild(fieldTypeCell)
                         
                         var fieldValueCell = window.LiveElement.Scale.Core.createElement('td', {name: 'value'})
-                        fieldValueCell.appendChild(window.LiveElement.Scale.Core.createElement('input', {name: 'value', type: 'search'}, field?$this[field]||'':''))
+                        var fieldValueInput = window.LiveElement.Scale.Core.createElement('input', {name: 'value', type: 'search'}, field?$this[field]||'':'')
+                        fieldValueCell.appendChild(fieldValueInput)
                         fieldValueCell.appendChild(window.LiveElement.Scale.Core.createElement('small', null, field?defaultSmall:defaultSmall))
                         fieldRow.appendChild(fieldValueCell)
                         
