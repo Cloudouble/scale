@@ -88,12 +88,19 @@
 }
 :host table small {
     font-weight: normal;
+    height: 2.2em;
+    outline: 1px solid red;
+    width: calc(100% - 10px);
+    overflow: hidden;
+    margin-left: 1px;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
 }
 :host table th input, :host table th small {
     font-weight: bold;
 }
 :host table tbody th, :host table tbody td {
-    padding-bottom: 1.5em;
+    padding-bottom: 1em;
 }
 
 </style>
@@ -109,6 +116,7 @@
         <small>The record class</small>
     </label>
     <template name="OpaqueData"></template>
+    <datalist name="properties"></datalist>
 </template>
 <script>
     /* global */
@@ -126,6 +134,8 @@
         connectedCallback() {
             super.connectedCallback()
             var $this = this
+            var propertiesDatalist = $this.shadowRoot.querySelector('datalist[name="properties"]')
+            propertiesDatalist.setAttribute('id', `properties-${Math.floor(Math.random()*1000000000)}`)
             var typeInputElement = $this.shadowRoot.querySelector('input[name="@type"]')
             typeInputElement.addEventListener('change', event => {
                 if (event.target.value != String($this['@type'])) {
@@ -230,30 +240,48 @@
                     placeholderRow.innerHTML = ''
                     placeholderRow.appendChild(window.LiveElement.Scale.Core.createElement('td', {colspan: 3, style: 'text-align: center; padding-top: 2em; padding-bottom: 2em'}, 
                         `${_type} class definition loaded. Rendering record...`))
+                    var sortedProperties = Object.keys(classDefinition.properties || {}).sort()
+                    var propertiesDatalist = $this.shadowRoot.querySelector('datalist[name="properties"]')
+                    propertiesDatalist.innerHTML = sortedProperties.map(p => `<option value="${p}">${classDefinition.properties[p].label || ''}</option>`).join('')
+                    var propertiesDatalistId = propertiesDatalist.getAttribute('id')
+                    var getruncatedText = function(text, limit) {
+                        var words = text.split(' '), counter = 0, whole = true
+                        words = words.filter(word => counter + word.length <= limit ? counter += word.length : whole = false).join(' ')
+                        return whole ? words : `${words}...`
+                    }
                     var makeRow = function(field) {
+                        var defaultSmall = '&nbsp;<br>&nbsp;'
                         field = field ? field : ''
                         var fieldRow = window.LiveElement.Scale.Core.createElement('tr', {name: field})
                         var fieldNameCell = window.LiveElement.Scale.Core.createElement('th', {scope: 'row', name: 'field'})
-                        fieldNameCell.appendChild(window.LiveElement.Scale.Core.createElement('input', {name: 'field', type: 'search'}, field))
-                        fieldNameCell.appendChild(window.LiveElement.Scale.Core.createElement('small', null, field?classDefinition.properties[field].label||'&nbsp;':'&nbsp;'))
+                        var fieldNameCellInput = window.LiveElement.Scale.Core.createElement('input', {name: 'field', type: 'search', list: propertiesDatalistId}, field)
+                        fieldNameCell.appendChild(fieldNameCellInput)
+                        var fieldNameCellHint = window.LiveElement.Scale.Core.createElement('small', null, 
+                            getruncatedText(field?classDefinition.properties[field].label||defaultSmall:defaultSmall, 75))
+                        fieldNameCell.appendChild(fieldNameCellHint)
                         fieldRow.appendChild(fieldNameCell)
+                        fieldNameCellInput.addEventListener('change', event => {
+                            fieldNameCellHint.innerHTML = getruncatedText(fieldNameCellInput.value 
+                                ? (propertiesDatalist.querySelector(`option[value="${fieldNameCellInput.value}"]`) || {}).innerHTML || defaultSmall : defaultSmall, 75)
+                        })
+                        
                         var fieldTypeCell = window.LiveElement.Scale.Core.createElement('td', {name: 'datatype'})
                         fieldTypeCell.appendChild(window.LiveElement.Scale.Core.createElement('input', {name: 'datatype', type: 'search'}, field?classDefinition.properties[field].types[0]:''))
-                        fieldTypeCell.appendChild(window.LiveElement.Scale.Core.createElement('small', null, field ? 'nbsp' : '&nbsp;'))
+                        fieldTypeCell.appendChild(window.LiveElement.Scale.Core.createElement('small', null, field ? defaultSmall : defaultSmall))
                         fieldRow.appendChild(fieldTypeCell)
                         var fieldValueCell = window.LiveElement.Scale.Core.createElement('td', {name: 'value'})
                         fieldValueCell.appendChild(window.LiveElement.Scale.Core.createElement('input', {name: 'value', type: 'search'}, field?$this[field]||'':''))
-                        fieldValueCell.appendChild(window.LiveElement.Scale.Core.createElement('small', null, field?'nbsp':'&nbsp;'))
+                        fieldValueCell.appendChild(window.LiveElement.Scale.Core.createElement('small', null, field?defaultSmall:defaultSmall))
                         fieldRow.appendChild(fieldValueCell)
                         return fieldRow
                     }
-                    Object.keys(classDefinition.properties || {}).sort().forEach(field => {
+                    sortedProperties.forEach(field => {
                         if ($this[field] != undefined) {
                             if (placeholderRow) {
                                 placeholderRow.remove()
                                 placeholderRow = undefined
                             }
-                            console.log('line 256', field, $this[field], classDefinition.properties[field])
+                            console.log('line 271', field, $this[field], classDefinition.properties[field])
                             recordTableBody.appendChild(makeRow(field))
                         }
                     })
