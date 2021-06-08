@@ -59,6 +59,43 @@
 :host > div[name="editor"] h4 > label > small {
     font-weight: normal;
 }
+
+:host table {
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+:host table thead th {
+    text-align: left;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    text-decoration: underline;
+}
+:host table thead th:nth-child(1) {
+    width: 30%;    
+}
+:host table thead th:nth-child(2) {
+    width: 20%;    
+}
+:host table thead th:nth-child(3) {
+    width: 50%;    
+}
+:host table input, :host table small {
+    padding-left: 1px;
+    padding-right: 1px;
+    display: block;
+    text-align: left;
+    width: calc(100% - 5px);
+}
+:host table small {
+    font-weight: normal;
+}
+:host table th input, :host table th small {
+    font-weight: bold;
+}
+:host table tbody th, :host table tbody td {
+    padding-bottom: 1.5em;
+}
+
 </style>
 <template>
     <label>
@@ -193,9 +230,34 @@
                     placeholderRow.innerHTML = ''
                     placeholderRow.appendChild(window.LiveElement.Scale.Core.createElement('td', {colspan: 3, style: 'text-align: center; padding-top: 2em; padding-bottom: 2em'}, 
                         `${_type} class definition loaded. Rendering record...`))
-
-                    
-                    
+                    var makeRow = function(field) {
+                        field = field ? field : ''
+                        var fieldRow = window.LiveElement.Scale.Core.createElement('tr', {name: field})
+                        var fieldNameCell = window.LiveElement.Scale.Core.createElement('th', {scope: 'row', name: 'field'})
+                        fieldNameCell.appendChild(window.LiveElement.Scale.Core.createElement('input', {name: 'field', type: 'search'}, field))
+                        fieldNameCell.appendChild(window.LiveElement.Scale.Core.createElement('small', null, field?classDefinition.properties[field].label||'&nbsp;':'&nbsp;'))
+                        fieldRow.appendChild(fieldNameCell)
+                        var fieldTypeCell = window.LiveElement.Scale.Core.createElement('td', {name: 'datatype'})
+                        fieldTypeCell.appendChild(window.LiveElement.Scale.Core.createElement('input', {name: 'datatype', type: 'search'}, field?classDefinition.properties[field].types[0]:''))
+                        fieldTypeCell.appendChild(window.LiveElement.Scale.Core.createElement('small', null, field ? 'nbsp' : '&nbsp;'))
+                        fieldRow.appendChild(fieldTypeCell)
+                        var fieldValueCell = window.LiveElement.Scale.Core.createElement('td', {name: 'value'})
+                        fieldValueCell.appendChild(window.LiveElement.Scale.Core.createElement('input', {name: 'value', type: 'search'}, field?$this[field]||'':''))
+                        fieldValueCell.appendChild(window.LiveElement.Scale.Core.createElement('small', null, field?'nbsp':'&nbsp;'))
+                        fieldRow.appendChild(fieldValueCell)
+                        return fieldRow
+                    }
+                    Object.keys(classDefinition.properties || {}).sort().forEach(field => {
+                        if ($this[field] != undefined) {
+                            if (placeholderRow) {
+                                placeholderRow.remove()
+                                placeholderRow = undefined
+                            }
+                            console.log('line 256', field, $this[field], classDefinition.properties[field])
+                            recordTableBody.appendChild(makeRow(field))
+                        }
+                    })
+                    recordTableBody.appendChild(makeRow())
                 })
             } else {
                 editorElement.removeAttribute('active')

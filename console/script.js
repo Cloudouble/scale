@@ -14,12 +14,15 @@ window.LiveElement.Scale.Core.createElement = function(tagName, attributes, valu
     if (attributes && typeof attributes == 'object') {
       Object.entries(attributes).forEach(entry => element.setAttribute(entry[0], entry[1]))
     }
-    if (value && typeof value == 'string') {
+    if (typeof value != 'object') {
+      var renderedValue = value ? value : (value === false ? 'false' : '')
       if (tagName == 'input' || tagName == 'select') {
-        element.value = value
+        element.value = renderedValue
       } else {
-        element.innerHTML = value
+        element.innerHTML = renderedValue
       }
+    } else if (value instanceof window.HTMLElement) {
+      element.appendChild(value)
     }
     return element
   }
