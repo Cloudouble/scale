@@ -88,7 +88,7 @@
 }
 :host table small {
     font-weight: normal;
-    height: 2.2em;
+    height: 2.3em;
     width: calc(100% - 10px);
     overflow: hidden;
     margin-left: 1px;
@@ -255,7 +255,7 @@
                     var propertiesDatalist = $this.shadowRoot.querySelector('datalist[name="properties"]')
                     propertiesDatalist.innerHTML = sortedProperties.map(p => `<option value="${p}">${classDefinition.properties[p].label || ''}</option>`).join('')
                     var propertiesDatalistId = propertiesDatalist.getAttribute('id')
-                    var getruncatedText = function(text, limit) {
+                    var getTruncatedText = function(text, limit) {
                         var words = text.split(' '), counter = 0, whole = true
                         words = words.filter(word => counter + word.length <= limit ? counter += word.length : whole = false).join(' ')
                         return whole ? words : `${words}...`
@@ -268,7 +268,7 @@
                         var fieldNameCellInput = window.LiveElement.Scale.Core.createElement('input', {name: 'field', type: 'search', list: propertiesDatalistId}, field)
                         fieldNameCell.appendChild(fieldNameCellInput)
                         var fieldNameCellHint = window.LiveElement.Scale.Core.createElement('small', null, 
-                            getruncatedText(field?classDefinition.properties[field].label||defaultSmall:defaultSmall, 70))
+                            getTruncatedText(field?classDefinition.properties[field].label||defaultSmall:defaultSmall, 70))
                         fieldNameCell.appendChild(fieldNameCellHint)
                         fieldRow.appendChild(fieldNameCell)
                         
@@ -282,9 +282,9 @@
                             {name: 'datatype', type: 'search', list: fieldTypeDatalistId}, field?classDefinition.properties[field].types.slice(0,1).pop():'')
                         fieldTypeCell.appendChild(fieldTypeInput)
                         fieldTypeCell.appendChild(fieldTypeDatalist)
-                        var fieldTypeHint = window.LiveElement.Scale.Core.createElement('small', null, field ? defaultSmall : defaultSmall)
+                        var fieldTypeHintText = fieldTypeInput.value ? (($this.constructor.datatypeDefinitions || {})[fieldTypeInput.value] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[fieldTypeInput.value] || {}).label || fieldTypeInput.value : defaultSmall
+                        var fieldTypeHint = window.LiveElement.Scale.Core.createElement('small', null, getTruncatedText(fieldTypeHintText, 45))
                         fieldTypeCell.appendChild(fieldTypeHint)
-                        
                         fieldRow.appendChild(fieldTypeCell)
                         
                         var fieldValueCell = window.LiveElement.Scale.Core.createElement('td', {name: 'value'})
@@ -294,10 +294,15 @@
                         
                         fieldNameCellInput.addEventListener('change', event => {
                             fieldNameCellInput.closest('tr').setAttribute('name', fieldNameCellInput.value)
-                            fieldNameCellHint.innerHTML = getruncatedText(fieldNameCellInput.value 
+                            fieldNameCellHint.innerHTML = getTruncatedText(fieldNameCellInput.value 
                                 ? (propertiesDatalist.querySelector(`option[value="${fieldNameCellInput.value}"]`) || {}).innerHTML || defaultSmall : defaultSmall, 70)
                             fieldTypeDatalist.innerHTML = classDefinition.properties[fieldNameCellInput.value].types.map(t => `<option value="${t}">${(($this.constructor.datatypeDefinitions || {})[t] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[t] || {}).label || t}</option>`).join('')
                             fieldTypeInput.value = fieldNameCellInput.value ? classDefinition.properties[fieldNameCellInput.value].types.slice(0,1).pop() : ''
+                            fieldTypeInput.dispatchEvent(new window.Event('change'))
+                        })
+                        fieldTypeInput.addEventListener('change', event => {
+                            var fieldTypeHintText = fieldTypeInput.value ? (($this.constructor.datatypeDefinitions || {})[fieldTypeInput.value] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[fieldTypeInput.value] || {}).label || fieldTypeInput.value : defaultSmall
+                            fieldTypeHint.innerHTML = getTruncatedText(fieldTypeHintText, 45)
                         })
                         
                         return fieldRow
