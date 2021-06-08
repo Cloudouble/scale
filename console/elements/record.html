@@ -89,7 +89,6 @@
 :host table small {
     font-weight: normal;
     height: 2.2em;
-    outline: 1px solid red;
     width: calc(100% - 10px);
     overflow: hidden;
     margin-left: 1px;
@@ -154,6 +153,18 @@
                     }, 200)
                 }
             }, 200)
+            if (!$this.constructor.datatypeDefinitions) {
+                window.LiveElement.Scale.Console.System.invokeLambda({
+                    page: 'ide', 
+                    entity_type: 'record', 
+                    heading: 'edit',
+                    input_name: 'datatype' 
+                }).then(datatypes => {
+                    if (datatypes && typeof datatypes == 'object') {
+                        $this.constructor.datatypeDefinitions = datatypes
+                    }
+                })
+            }
         }
         
         static get observedAttributes() {
@@ -257,22 +268,38 @@
                         var fieldNameCellInput = window.LiveElement.Scale.Core.createElement('input', {name: 'field', type: 'search', list: propertiesDatalistId}, field)
                         fieldNameCell.appendChild(fieldNameCellInput)
                         var fieldNameCellHint = window.LiveElement.Scale.Core.createElement('small', null, 
-                            getruncatedText(field?classDefinition.properties[field].label||defaultSmall:defaultSmall, 75))
+                            getruncatedText(field?classDefinition.properties[field].label||defaultSmall:defaultSmall, 70))
                         fieldNameCell.appendChild(fieldNameCellHint)
                         fieldRow.appendChild(fieldNameCell)
-                        fieldNameCellInput.addEventListener('change', event => {
-                            fieldNameCellHint.innerHTML = getruncatedText(fieldNameCellInput.value 
-                                ? (propertiesDatalist.querySelector(`option[value="${fieldNameCellInput.value}"]`) || {}).innerHTML || defaultSmall : defaultSmall, 75)
-                        })
                         
                         var fieldTypeCell = window.LiveElement.Scale.Core.createElement('td', {name: 'datatype'})
-                        fieldTypeCell.appendChild(window.LiveElement.Scale.Core.createElement('input', {name: 'datatype', type: 'search'}, field?classDefinition.properties[field].types[0]:''))
-                        fieldTypeCell.appendChild(window.LiveElement.Scale.Core.createElement('small', null, field ? defaultSmall : defaultSmall))
+                        var fieldTypeDatalistId = `${field}-${Math.floor(Math.random()*1000000000)}`
+                        var fieldTypeDatalist = window.LiveElement.Scale.Core.createElement('datalist', {id: fieldTypeDatalistId})
+                        if (field) {
+                            fieldTypeDatalist.innerHTML = classDefinition.properties[field].types.map(t => `<option value="${t}">${(($this.constructor.datatypeDefinitions || {})[t] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[t] || {}).label || t}</option>`).join('')
+                        }
+                        var fieldTypeInput = window.LiveElement.Scale.Core.createElement('input', 
+                            {name: 'datatype', type: 'search', list: fieldTypeDatalistId}, field?classDefinition.properties[field].types.slice(0,1).pop():'')
+                        fieldTypeCell.appendChild(fieldTypeInput)
+                        fieldTypeCell.appendChild(fieldTypeDatalist)
+                        var fieldTypeHint = window.LiveElement.Scale.Core.createElement('small', null, field ? defaultSmall : defaultSmall)
+                        fieldTypeCell.appendChild(fieldTypeHint)
+                        
                         fieldRow.appendChild(fieldTypeCell)
+                        
                         var fieldValueCell = window.LiveElement.Scale.Core.createElement('td', {name: 'value'})
                         fieldValueCell.appendChild(window.LiveElement.Scale.Core.createElement('input', {name: 'value', type: 'search'}, field?$this[field]||'':''))
                         fieldValueCell.appendChild(window.LiveElement.Scale.Core.createElement('small', null, field?defaultSmall:defaultSmall))
                         fieldRow.appendChild(fieldValueCell)
+                        
+                        fieldNameCellInput.addEventListener('change', event => {
+                            fieldNameCellInput.closest('tr').setAttribute('name', fieldNameCellInput.value)
+                            fieldNameCellHint.innerHTML = getruncatedText(fieldNameCellInput.value 
+                                ? (propertiesDatalist.querySelector(`option[value="${fieldNameCellInput.value}"]`) || {}).innerHTML || defaultSmall : defaultSmall, 70)
+                            fieldTypeDatalist.innerHTML = classDefinition.properties[fieldNameCellInput.value].types.map(t => `<option value="${t}">${(($this.constructor.datatypeDefinitions || {})[t] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[t] || {}).label || t}</option>`).join('')
+                            fieldTypeInput.value = fieldNameCellInput.value ? classDefinition.properties[fieldNameCellInput.value].types.slice(0,1).pop() : ''
+                        })
+                        
                         return fieldRow
                     }
                     sortedProperties.forEach(field => {
