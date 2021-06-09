@@ -171,9 +171,6 @@
             return (super.observedAttributes || []).concat('_type', '_description')
         }
         
-        
-    'Record': lambda i: type(i) is dict and len(i) == 2 and type(i.get('@type')) is str and uuid_valid(i.get('@id'))
-        
         static datatypeElements = {
             'Boolean': {
                 type: 'checkbox', 
@@ -185,7 +182,7 @@
                     } else {
                         inputElement.setAttribute('checked', true)
                     }
-                },
+                }, 
                 validator: value => !!value || !value
             }, 
             'True': {
@@ -273,14 +270,14 @@
             'XPathType': {
                 type: 'text', 
                 title: 'Any text value', 
-                required: true, 
+                required: true,
                 validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'text'}, value).checkValidity()
             }, 
             'Record': {
                 type: 'uuid', 
                 title: 'Requires a valid UUID of any existing or new record of type', 
                 pattern: window.LiveElement.Scale.Core.uuid4Pattern, 
-                required: true, 
+                required: true,
                 validator: (value, _type) => {
                     return typeof value == 'object' && value['@type'] && value['@type'] == _type && value['@id'] && new RegExp(window.LiveElement.Scale.Core.uuid4Pattern).test(value['@id'])
                 }
