@@ -173,52 +173,84 @@
         
         static datatypeElements = {
             'Boolean': {
-                type: 'checkbox'
+                type: 'checkbox', 
+                title: 'A true (checked) or false (unchecked) value', 
+                required: true
             }, 
             'True': {
                 type: 'checkbox', 
                 readonly: true, 
-                checked: true
+                checked: true, 
+                title: 'Only a true (checked) value permitted', 
+                required: true
             }, 
             'False': {
                 type: 'checkbox', 
-                readonly: true
+                readonly: true, 
+                title: 'Only a false (unchecked) value permitted',
+                required: true
             }, 
             'Date': {
-                type: 'date'
+                type: 'date', 
+                title: 'Choose a date', 
+                required: true
             }, 
             'Time': {
-                type: 'time'
+                type: 'time', 
+                title: 'Choose a time', 
+                required: true
             }, 
             'DateTime': {
-                type: 'datetime-local'
+                type: 'datetime-local', 
+                title: 'Choose a date and time', 
+                required: true
             }, 
             'Number': {
-                type: 'number'
+                type: 'number', 
+                title: 'Choose any number', 
+                required: true
             }, 
             'Float': {
-                type: 'number'
+                type: 'number', 
+                title: 'Choose any Number', 
+                required: true
             }, 
             'Integer': {
-                type: 'number'
+                type: 'number', 
+                title: 'Choose any whole number', 
+                step: 1, 
+                required: true
             }, 
             'URL': {
-                type: 'number'
+                type: 'number', 
+                title: 'Requires a valid URL', 
+                required: true
             }, 
             'Text': {
-                type: 'text'
+                type: 'text', 
+                title: 'Any text value', 
+                required: true
             }, 
             'CssSelectorType': {
-                type: 'text'
+                type: 'text', 
+                title: 'Any text value', 
+                required: true
             }, 
             'PronounceableText': {
-                type: 'text'
+                type: 'text', 
+                title: 'Any text value', 
+                required: true
             }, 
             'XPathType': {
-                type: 'text'
+                type: 'text', 
+                title: 'Any text value', 
+                required: true
             }, 
             'Record': {
-                type: 'uuid'
+                type: 'uuid', 
+                title: 'Requires a valid UUID of any existing or new record of type', 
+                pattern: window.LiveElement.Scale.Core.uuid4Pattern, 
+                required: true
             }
         }
         
@@ -306,20 +338,35 @@
                     var propertiesDatalist = $this.shadowRoot.querySelector('datalist[name="properties"]')
                     propertiesDatalist.innerHTML = sortedProperties.map(p => `<option value="${p}">${classDefinition.properties[p].label || ''}</option>`).join('')
                     var propertiesDatalistId = propertiesDatalist.getAttribute('id')
-                    var getTruncatedText = function(text, limit) {
+                    var getTruncatedText = function(text, limit, setWholeAsTitleForElement) {
                         var words = text.split(' '), counter = 0, whole = true
                         words = words.filter(word => counter + word.length <= limit ? counter += word.length : whole = false).join(' ')
+                        if (typeof setWholeAsTitleForElement == 'object' && setWholeAsTitleForElement instanceof window.HTMLElement && text.length > words.length) {
+                            setWholeAsTitleForElement.setAttribute('title', text)
+                        }
                         return whole ? words : `${words}...`
                     }
                     var makeRow = function(field) {
+                        var createNewValueInput = function(fieldType) {
+                            var fieldTypeValidation = $this.constructor.datatypeElements[fieldType] || $this.constructor.datatypeElements.Record || {}, 
+                                fieldValueInput = window.LiveElement.Scale.Core.createElement(fieldTypeValidation.tagName || 'input', 
+                                    {...fieldTypeValidation, ...{name: 'value'}}, field?$this[field]||'':'')
+                            if (fieldValueInput.getAttribute('title') && (fieldType == 'Record' || !$this.constructor.datatypeElements[fieldType])) {
+                                fieldValueInput.setAttribute('title', `${$this.constructor.datatypeElements.Record.title} ${fieldType}`)
+                            }
+                            if (typeof fieldTypeValidation.modifier == 'function') {
+                                fieldTypeValidation.modifier(fieldValueInput)
+                            }
+                            return fieldValueInput
+                        }
                         var defaultSmall = '&nbsp;<br>&nbsp;'
                         field = field ? field : ''
                         var fieldRow = window.LiveElement.Scale.Core.createElement('tr', {name: field})
                         var fieldNameCell = window.LiveElement.Scale.Core.createElement('th', {scope: 'row', name: 'field'})
                         var fieldNameCellInput = window.LiveElement.Scale.Core.createElement('input', {name: 'field', type: 'search', list: propertiesDatalistId}, field)
                         fieldNameCell.appendChild(fieldNameCellInput)
-                        var fieldNameCellHint = window.LiveElement.Scale.Core.createElement('small', null, 
-                            getTruncatedText(field?classDefinition.properties[field].label||defaultSmall:defaultSmall, 70))
+                        var fieldNameCellHint = window.LiveElement.Scale.Core.createElement('small')
+                        fieldNameCellHint.innerHTML = getTruncatedText(field?classDefinition.properties[field].label||defaultSmall:defaultSmall, 70, fieldNameCellHint)
                         fieldNameCell.appendChild(fieldNameCellHint)
                         fieldRow.appendChild(fieldNameCell)
                         
@@ -334,20 +381,22 @@
                         fieldTypeCell.appendChild(fieldTypeInput)
                         fieldTypeCell.appendChild(fieldTypeDatalist)
                         var fieldTypeHintText = fieldTypeInput.value ? (($this.constructor.datatypeDefinitions || {})[fieldTypeInput.value] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[fieldTypeInput.value] || {}).label || fieldTypeInput.value : defaultSmall
-                        var fieldTypeHint = window.LiveElement.Scale.Core.createElement('small', null, getTruncatedText(fieldTypeHintText, 45))
+                        var fieldTypeHint = window.LiveElement.Scale.Core.createElement('small')
+                        fieldTypeHint.innerHTML = getTruncatedText(fieldTypeHintText, 45, fieldTypeHint)
                         fieldTypeCell.appendChild(fieldTypeHint)
                         fieldRow.appendChild(fieldTypeCell)
                         
-                        var fieldValueCell = window.LiveElement.Scale.Core.createElement('td', {name: 'value'})
-                        var fieldValueInput = window.LiveElement.Scale.Core.createElement('input', {name: 'value', type: 'search'}, field?$this[field]||'':'')
+                        var fieldValueCell = window.LiveElement.Scale.Core.createElement('td', {name: 'value'}), fieldValueInput = createNewValueInput(fieldTypeInput.value)
                         fieldValueCell.appendChild(fieldValueInput)
-                        fieldValueCell.appendChild(window.LiveElement.Scale.Core.createElement('small', null, field?defaultSmall:defaultSmall))
+                        var fieldValueHint = window.LiveElement.Scale.Core.createElement('small')
+                        fieldValueHint.innerHTML = getTruncatedText(field?fieldValueInput.getAttribute('title')||defaultSmall:defaultSmall, 100, fieldValueHint)
+                        fieldValueCell.appendChild(fieldValueHint)
                         fieldRow.appendChild(fieldValueCell)
                         
                         fieldNameCellInput.addEventListener('change', event => {
                             fieldNameCellInput.closest('tr').setAttribute('name', fieldNameCellInput.value)
                             fieldNameCellHint.innerHTML = getTruncatedText(fieldNameCellInput.value 
-                                ? (propertiesDatalist.querySelector(`option[value="${fieldNameCellInput.value}"]`) || {}).innerHTML || defaultSmall : defaultSmall, 70)
+                                ? (propertiesDatalist.querySelector(`option[value="${fieldNameCellInput.value}"]`) || {}).innerHTML || defaultSmall : defaultSmall, 70, fieldNameCellHint)
                             if (fieldNameCellInput.value) {
                                 fieldTypeDatalist.innerHTML = classDefinition.properties[fieldNameCellInput.value].types.map(t => `<option value="${t}">${(($this.constructor.datatypeDefinitions || {})[t] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[t] || {}).label || t}</option>`).join('')
                             } else {
@@ -365,7 +414,11 @@
                         })
                         fieldTypeInput.addEventListener('change', event => {
                             var fieldTypeHintText = fieldTypeInput.value ? (($this.constructor.datatypeDefinitions || {})[fieldTypeInput.value] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[fieldTypeInput.value] || {}).label || fieldTypeInput.value : defaultSmall
-                            fieldTypeHint.innerHTML = getTruncatedText(fieldTypeHintText, 45)
+                            fieldTypeHint.innerHTML = getTruncatedText(fieldTypeHintText, 45, fieldTypeHint)
+                            var newFieldValueInput = createNewValueInput(fieldTypeInput.value)
+                            fieldValueHint.innerHTML = getTruncatedText(newFieldValueInput.getAttribute('title')||defaultSmall, 100, fieldValueHint)
+                            fieldValueInput.replaceWith(newFieldValueInput)
+                            fieldValueInput = newFieldValueInput
                         })
                         
                         return fieldRow
@@ -376,7 +429,7 @@
                                 placeholderRow.remove()
                                 placeholderRow = undefined
                             }
-                            console.log('line 271', field, $this[field], classDefinition.properties[field])
+                            console.log('line 427', field, $this[field], classDefinition.properties[field])
                             recordTableBody.appendChild(makeRow(field))
                         }
                     })
