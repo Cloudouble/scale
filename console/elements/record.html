@@ -101,6 +101,9 @@
 :host table tbody th, :host table tbody td {
     padding-bottom: 1em;
 }
+:host table tbody tr[name]:not([name=""]) th input:invalid, :host table tbody tr[name]:not([name=""]) td input:invalid {
+    outline: 1px solid red;
+}
 
 </style>
 <template>
@@ -256,7 +259,7 @@
                 validator: (value, datatypeName) => window.LiveElement.Scale.Core.createElement('input', {type: 'number', step: 1}, value).checkValidity()
             }, 
             'URL': {
-                type: 'number', 
+                type: 'url', 
                 title: 'Requires a valid URL', 
                 required: true, 
                 validator: (value, datatypeName) => window.LiveElement.Scale.Core.createElement('input', {type: 'url'}, value).checkValidity()
@@ -393,6 +396,12 @@
                             var fieldTypeValidation = $this.constructor.datatypeElements[fieldType] || $this.constructor.datatypeElements.Record || {}, 
                                 fieldValueInput = window.LiveElement.Scale.Core.createElement(fieldTypeValidation.tagName || 'input', 
                                     {...fieldTypeValidation, ...{name: 'value'}}, field?$this[field]||'':'')
+                            if (!fieldType) {
+                                fieldValueInput.setAttribute('type', 'text')
+                                fieldValueInput.removeAttribute('pattern')
+                                fieldValueInput.removeAttribute('title')
+                                fieldValueInput.removeAttribute('required')
+                            }
                             if (fieldValueInput.getAttribute('title') && (fieldType == 'Record' || !$this.constructor.datatypeElements[fieldType])) {
                                 fieldValueInput.setAttribute('title', `${$this.constructor.datatypeElements.Record.title} ${fieldType}`)
                             }
@@ -487,6 +496,7 @@
                         fieldTypeInput.addEventListener('change', event => {
                             var fieldTypeHintText = fieldTypeInput.value ? (($this.constructor.datatypeDefinitions || {})[fieldTypeInput.value] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[fieldTypeInput.value] || {}).label || fieldTypeInput.value : defaultSmall
                             fieldTypeHint.innerHTML = getTruncatedText(fieldTypeHintText, 45, fieldTypeHint)
+                            console.log('line 499', fieldTypeInput.value, event.target.value)
                             var newFieldValueInput = createNewValueInput(fieldTypeInput.value)
                             if (fieldTypeInput.value) {
                                 fieldValueHint.innerHTML = getTruncatedText(newFieldValueInput.getAttribute('title')||defaultSmall, 100, fieldValueHint)

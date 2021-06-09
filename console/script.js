@@ -12,7 +12,13 @@ window.LiveElement.Scale.Core.createElement = function(tagName, attributes, valu
   if (tagName && typeof tagName == 'string') {
     var element = document.createElement(tagName)
     if (attributes && typeof attributes == 'object') {
-      Object.entries(attributes).forEach(entry => element.setAttribute(entry[0], entry[1]))
+      Object.entries(attributes).forEach(entry => {
+        if (typeof entry[1] == 'string' || typeof entry[1] == 'number' || typeof entry[1] == 'boolean') {
+          element.setAttribute(entry[0], entry[1])
+        } else if (entry[1] == null || entry[1] == undefined) {
+          element.setAttribute(entry[0], '')
+        }
+      })
     }
     if (typeof value != 'object') {
       var renderedValue = value ? value : (value === false ? 'false' : '')
