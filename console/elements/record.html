@@ -416,7 +416,12 @@
                             var fieldTypeHintText = fieldTypeInput.value ? (($this.constructor.datatypeDefinitions || {})[fieldTypeInput.value] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[fieldTypeInput.value] || {}).label || fieldTypeInput.value : defaultSmall
                             fieldTypeHint.innerHTML = getTruncatedText(fieldTypeHintText, 45, fieldTypeHint)
                             var newFieldValueInput = createNewValueInput(fieldTypeInput.value)
-                            fieldValueHint.innerHTML = getTruncatedText(newFieldValueInput.getAttribute('title')||defaultSmall, 100, fieldValueHint)
+                            if (fieldTypeInput.value) {
+                                fieldValueHint.innerHTML = getTruncatedText(newFieldValueInput.getAttribute('title')||defaultSmall, 100, fieldValueHint)
+                            } else {
+                                fieldValueHint.removeAttribute('title')
+                                fieldValueHint.innerHTML = defaultSmall
+                            }
                             fieldValueInput.replaceWith(newFieldValueInput)
                             fieldValueInput = newFieldValueInput
                         })
