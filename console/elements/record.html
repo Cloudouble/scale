@@ -105,6 +105,20 @@
     outline: 1px solid red;
 }
 
+:host table tbody tr[name] td[name="value"] {
+    position: relative;
+}
+:host table tbody tr[name] td[name="value"] element-icon {
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    right: 50px;
+    display: none;
+}
+:host table tbody tr[name] td[name="value"] input[name="value"]:valid + element-icon {
+    display: block;
+}
+
 </style>
 <template>
     <label>
@@ -304,10 +318,34 @@
                 title: 'Requires a valid UUID of any existing or new record of type', 
                 pattern: window.LiveElement.Scale.Core.uuid4Pattern, 
                 required: true,
-                modifier: (inputElement, inputCell, recordType) => {
+                modifier: (inputElement, inputCell, recordType, $this) => {
                     inputElement.setAttribute('placeholder', `search @id, or type 'new'...`)
                     inputElement.setAttribute('type', 'search')
                     inputElement.setAttribute('pattern', `^${window.LiveElement.Scale.Console.IDE.newFlag}|${window.LiveElement.Scale.Core.uuid4Pattern.slice(1,-1)}$`)
+                    var jumpButton = document.createElement('element-icon')
+                    jumpButton.innerHTML = 'double_arrow'
+                    jumpButton.addEventListener('click', event => {
+                        console.log('line 328')
+                        var entitySearchElement = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="record"] element-entitysearch')
+                        if (entitySearchElement) {
+                            console.log('line 331')
+                            var searchTypeInput = entitySearchElement.querySelector('input[name="@type"]')
+                            if (searchTypeInput) {
+                                console.log('line 334')
+                                searchTypeInput.value = recordType
+                                searchTypeInput.dispatchEvent(new window.Event('change'))
+                                var searchIdInput = entitySearchElement.querySelector('input[name="@id"]')
+                                searchIdInput.value = inputElement.value
+                                searchIdInput.dispatchEvent(new window.Event('change'))
+                                var searchButton = entitySearchElement.shadowRoot.querySelector('button[name="load"]')
+                                if (searchButton) {
+                                    console.log('line 342')
+                                    searchButton.dispatchEvent(new window.Event('click'))
+                                }
+                            }
+                        }
+                    })
+                    inputElement.after(jumpButton)
                     var datalistElement = inputCell.querySelector('datalist')
                     if (!datalistElement) {
                         var datalistId = `-${Math.floor(Math.random()*1000000000)}`
@@ -358,14 +396,6 @@
                                     }
                                     window.LiveElement.Scale.Core.buildDataList(datalistElement, result, blankOptions)
                                 }
-                                /*var loadButtonAlreadyDisabled = loadButton.getAttribute('disabled'), 
-                                    resultIncludesValue = Array.isArray($this.result) ? $this.result.includes(searchElement.value) 
-                                        : ($this.result && typeof $this.result == 'object' ? Object.keys($this.result).includes(searchElement.value) : false)
-                                if ((loadButtonAlreadyDisabled && resultIncludesValue) || ($this.allowNew && new window.RegExp($this.allowNew).test(searchElement.value))) {
-                                    loadButton.removeAttribute('disabled')
-                                } else if (!loadButtonAlreadyDisabled && !resultIncludesValue) {
-                                    loadButton.setAttribute('disabled', true)
-                                }*/
                             })
                         }
                     })
@@ -483,11 +513,9 @@
                     }
                     var makeRow = function(field, makeRowFieldValue) {
                         var setFieldValue = function(fieldName, fieldType, tbody) {
-                            console.log('line 486', fieldName, fieldType, tbody)
                             if (fieldName) {
                                 var oldValueSerialised = JSON.stringify($this[fieldName] || ''), newValue = Array.from(tbody.querySelectorAll(`tr[name="${fieldName}"] td[name="value"] input[name="value"]`))
                                         .map(i => i.value).filter(v => v != '')
-                                console.log('line 490', JSON.parse(oldValueSerialised), newValue)
                                 if (!newValue.length) {
                                     $this[fieldName] = undefined
                                 } else if (newValue.length == 1) {
@@ -624,7 +652,7 @@
                         if (fieldTypeInput.value) {
                             var modifierFunction = ($this.constructor.datatypeElements[fieldTypeInput.value] || $this.constructor.datatypeElements.Record).modifier
                             if (modifierFunction && typeof modifierFunction == 'function') {
-                                modifierFunction(fieldValueInput, fieldValueCell, fieldTypeInput.value)
+                                modifierFunction(fieldValueInput, fieldValueCell, fieldTypeInput.value, $this)
                             }
                         }
                         fieldNameCellInput.addEventListener('change', event => {
@@ -665,12 +693,14 @@
                                 fieldValueHint.removeAttribute('title')
                                 fieldValueHint.innerHTML = defaultSmall
                             }
+                            fieldValueCell.querySelectorAll('datalist').forEach(d => d.remove())
+                            fieldValueCell.querySelectorAll('element-icon').forEach(i => i.remove())
                             fieldValueInput.replaceWith(newFieldValueInput)
                             fieldValueInput = newFieldValueInput
                             if (fieldTypeInput.value) {
                                 var modifierFunction = ($this.constructor.datatypeElements[fieldTypeInput.value] || $this.constructor.datatypeElements.Record).modifier
                                 if (modifierFunction && typeof modifierFunction == 'function') {
-                                    modifierFunction(fieldValueInput, fieldValueCell, fieldTypeInput.value)
+                                    modifierFunction(fieldValueInput, fieldValueCell, fieldTypeInput.value, $this)
                                 }
                             }
                         })
