@@ -496,7 +496,6 @@
                         fieldTypeInput.addEventListener('change', event => {
                             var fieldTypeHintText = fieldTypeInput.value ? (($this.constructor.datatypeDefinitions || {})[fieldTypeInput.value] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[fieldTypeInput.value] || {}).label || fieldTypeInput.value : defaultSmall
                             fieldTypeHint.innerHTML = getTruncatedText(fieldTypeHintText, 45, fieldTypeHint)
-                            console.log('line 499', fieldTypeInput.value, event.target.value)
                             var newFieldValueInput = createNewValueInput(fieldTypeInput.value)
                             if (fieldTypeInput.value) {
                                 fieldValueHint.innerHTML = getTruncatedText(newFieldValueInput.getAttribute('title')||defaultSmall, 100, fieldValueHint)
@@ -516,7 +515,6 @@
                                 placeholderRow.remove()
                                 placeholderRow = undefined
                             }
-                            console.log('line 509', field, $this[field], classDefinition.properties[field])
                             recordTableBody.appendChild(makeRow(field))
                         }
                     })
