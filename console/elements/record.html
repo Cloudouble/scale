@@ -484,6 +484,28 @@
                                 return null
                             }
                         }
+                        var expandTypeOptions = function(field) {
+                            var datatypeOptions = Object.assign({}, ...classDefinition.properties[field].types.filter(k => $this.constructor.datatypeDefinitions[k]).map(t => ({[t]: (($this.constructor.datatypeDefinitions || {})[t] || {}).label})))
+                            var directClassOptions = Object.assign({}, ...classDefinition.properties[field].types.filter(k => !datatypeOptions[k] && window.LiveElement.Scale.Console.IDE.classes[k]).map(t => ({[t]: window.LiveElement.Scale.Console.IDE.classes[t].label})))
+                            var indirectClassOptions = {}
+                            Object.keys(directClassOptions).forEach(directClassName => {
+                                ((window.LiveElement.Scale.Console.IDE.classes[directClassName] || {}).children || []).forEach(indirectClassName => {
+                                    indirectClassOptions[indirectClassName] = ((window.LiveElement.Scale.Console.IDE.classes || {})[indirectClassName] || {}).label
+                                })
+                            })
+                            var allOptions = {}, allOptionsKeys = []
+                            ;([datatypeOptions, directClassOptions, indirectClassOptions]).forEach(optionsMap => {
+                                Object.keys(optionsMap).sort().forEach(k => {
+                                    if (!allOptions[k]) {
+                                        if (!allOptionsKeys.includes(k)) {
+                                            allOptionsKeys.push(k)
+                                            allOptions[k] = optionsMap[k]
+                                        }
+                                    }
+                                })
+                            })
+                            return allOptionsKeys.map(k => `<option value="${k}">${allOptions[k]}</option>`).join('')
+                        }
                         var defaultSmall = '&nbsp;<br>&nbsp;'
                         field = field ? field : ''
                         var fieldRow = window.LiveElement.Scale.Core.createElement('tr', {name: field})
@@ -498,7 +520,9 @@
                         var fieldTypeDatalistId = `${field}-${Math.floor(Math.random()*1000000000)}`
                         var fieldTypeDatalist = window.LiveElement.Scale.Core.createElement('datalist', {id: fieldTypeDatalistId})
                         if (field) {
-                            fieldTypeDatalist.innerHTML = classDefinition.properties[field].types.map(t => `<option value="${t}">${(($this.constructor.datatypeDefinitions || {})[t] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[t] || {}).label || t}</option>`).join('')
+                            fieldTypeDatalist.innerHTML = expandTypeOptions(field)
+                        } else {
+                            fieldTypeDatalist.innerHTML = ''
                         }
                         var fieldTypeInput = window.LiveElement.Scale.Core.createElement('input', {name: 'datatype', type: 'search', list: fieldTypeDatalistId})
                         fieldTypeInput.value = deduceTypeFromValue(field) || ''
@@ -521,18 +545,29 @@
                         fieldNameCellInput.addEventListener('change', event => {
                             var tr = fieldNameCellInput.closest('tr'), oldName = tr.getAttribute('name')
                             if (oldName != fieldNameCellInput.value) {
+                                tr.setAttribute('name', fieldNameCellInput.value)
+                                var oldValueSerialised = JSON.stringify($this[oldName])
                                 if (Array.isArray($this[oldName]) && $this[oldName].length > 1) {
-                                    $this[oldName] = Array.from(tr.closest('tbody').querySelectorAll(`tr[name="${oldName}"] td[name="value"] input[name="value"]`))
+                                    var newValue = Array.from(tr.closest('tbody').querySelectorAll(`tr[name="${oldName}"] td[name="value"] input[name="value"]`))
                                         .map(i => i.value).filter(v => v != '')
+                                    if (newValue.length == 0) {
+                                        $this[oldName] = newValue 
+                                    } else if (newValue.length == 1) {
+                                        $this[oldName] = newValue[0] 
+                                    } else {
+                                        $this[oldName] = newValue 
+                                    }
                                 } else {
                                     $this[oldName] = undefined
                                 }
-                                tr.setAttribute('name', fieldNameCellInput.value)
+                                if (oldValueSerialised != JSON.stringify($this[oldName])) {
+                                    $this.dispatchEvent(new window.Event('change'))
+                                }
                             }
                             fieldNameCellHint.innerHTML = getTruncatedText(fieldNameCellInput.value 
                                 ? (propertiesDatalist.querySelector(`option[value="${fieldNameCellInput.value}"]`) || {}).innerHTML || defaultSmall : defaultSmall, 70, fieldNameCellHint)
                             if (fieldNameCellInput.value) {
-                                fieldTypeDatalist.innerHTML = classDefinition.properties[fieldNameCellInput.value].types.map(t => `<option value="${t}">${(($this.constructor.datatypeDefinitions || {})[t] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[t] || {}).label || t}</option>`).join('')
+                                fieldTypeDatalist.innerHTML = expandTypeOptions(fieldNameCellInput.value)
                             } else {
                                 fieldTypeDatalist.innerHTML = ''
                             }
