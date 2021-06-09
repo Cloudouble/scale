@@ -183,7 +183,7 @@
                         inputElement.setAttribute('checked', true)
                     }
                 }, 
-                validator: value => {
+                validator: (value, datatypeName) => {
                     return (typeof value == 'boolean') 
                         || (typeof value == 'string' && value.toLowerCase() == 'true' || value.toLowerCase() == 'false') 
                         || (typeof value == 'number' && value == 1 || value == 0) 
@@ -198,7 +198,7 @@
                 modifier: function(inputElement) {
                     inputElement.setAttribute('checked', true)
                 }, 
-                validator: value => {
+                validator: (value, datatypeName) => {
                     return (typeof value == 'boolean' && value) 
                         || (typeof value == 'string' && value.toLowerCase() == 'true') 
                         || (typeof value == 'number' && value == 1) 
@@ -212,7 +212,7 @@
                 modifier: function(inputElement) {
                     inputElement.removeAttribute('checked')
                 }, 
-                validator: value => {
+                validator: (value, datatypeName) => {
                     return (typeof value == 'boolean' && !value) 
                         || (typeof value == 'string' && value.toLowerCase() == 'false') 
                         || (typeof value == 'number' && value == 0) 
@@ -222,76 +222,76 @@
                 type: 'date', 
                 title: 'Choose a date', 
                 required: true, 
-                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'date'}, value).checkValidity()
+                validator: (value, datatypeName) => window.LiveElement.Scale.Core.createElement('input', {type: 'date'}, value).checkValidity()
             }, 
             'Time': {
                 type: 'time', 
                 title: 'Choose a time', 
                 required: true, 
-                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'time'}, value).checkValidity()
+                validator: (value, datatypeName) => window.LiveElement.Scale.Core.createElement('input', {type: 'time'}, value).checkValidity()
             }, 
             'DateTime': {
                 type: 'datetime-local', 
                 title: 'Choose a date and time', 
                 required: true, 
-                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'datetime-local'}, value).checkValidity()
+                validator: (value, datatypeName) => window.LiveElement.Scale.Core.createElement('input', {type: 'datetime-local'}, value).checkValidity()
             }, 
             'Number': {
                 type: 'number', 
                 title: 'Choose any number', 
                 required: true, 
-                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'number'}, value).checkValidity()
+                validator: (value, datatypeName) => window.LiveElement.Scale.Core.createElement('input', {type: 'number'}, value).checkValidity()
             }, 
             'Float': {
                 type: 'number', 
                 title: 'Choose any Number', 
                 required: true, 
-                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'number'}, value).checkValidity()
+                validator: (value, datatypeName) => window.LiveElement.Scale.Core.createElement('input', {type: 'number'}, value).checkValidity()
             }, 
             'Integer': {
                 type: 'number', 
                 title: 'Choose any whole number', 
                 step: 1, 
                 required: true, 
-                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'number', step: 1}, value).checkValidity()
+                validator: (value, datatypeName) => window.LiveElement.Scale.Core.createElement('input', {type: 'number', step: 1}, value).checkValidity()
             }, 
             'URL': {
                 type: 'number', 
                 title: 'Requires a valid URL', 
                 required: true, 
-                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'url'}, value).checkValidity()
+                validator: (value, datatypeName) => window.LiveElement.Scale.Core.createElement('input', {type: 'url'}, value).checkValidity()
             }, 
             'Text': {
                 type: 'text', 
                 title: 'Any text value', 
                 required: true, 
-                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'text'}, value).checkValidity()
+                validator: (value, datatypeName) => window.LiveElement.Scale.Core.createElement('input', {type: 'text'}, value).checkValidity()
             }, 
             'CssSelectorType': {
                 type: 'text', 
                 title: 'Any text value', 
                 required: true, 
-                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'text'}, value).checkValidity()
+                validator: (value, datatypeName) => window.LiveElement.Scale.Core.createElement('input', {type: 'text'}, value).checkValidity()
             }, 
             'PronounceableText': {
                 type: 'text', 
                 title: 'Any text value', 
                 required: true, 
-                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'text'}, value).checkValidity()
+                validator: (value, datatypeName) => window.LiveElement.Scale.Core.createElement('input', {type: 'text'}, value).checkValidity()
             }, 
             'XPathType': {
                 type: 'text', 
                 title: 'Any text value', 
                 required: true,
-                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'text'}, value).checkValidity()
+                validator: (value, datatypeName) => window.LiveElement.Scale.Core.createElement('input', {type: 'text'}, value).checkValidity()
             }, 
             'Record': {
                 type: 'uuid', 
                 title: 'Requires a valid UUID of any existing or new record of type', 
                 pattern: window.LiveElement.Scale.Core.uuid4Pattern, 
                 required: true,
-                validator: (value, _type) => {
-                    return typeof value == 'object' && value['@type'] && value['@type'] == _type && value['@id'] && new RegExp(window.LiveElement.Scale.Core.uuid4Pattern).test(value['@id'])
+                validator: (value, datatypeName) => {
+                    return typeof value == 'object' && value['@type'] && value['@type'] == datatypeName && value['@id'] && new RegExp(window.LiveElement.Scale.Core.uuid4Pattern).test(value['@id'])
                 }
             }
         }
@@ -401,6 +401,36 @@
                             }
                             return fieldValueInput
                         }
+                        var deduceTypeFromValue = function(field) {
+                            if (field) {
+                                if ($this[field] == undefined || $this[field] == null || $this[field] == '') {
+                                    if (classDefinition.properties[field].types.length == 1) {
+                                        return classDefinition.properties[field].types[0]
+                                    } else {
+                                        return null
+                                    }
+                                } else {
+                                    if ((classDefinition.properties[field].types||[]).length == 0) {
+                                        return null
+                                    } else if (classDefinition.properties[field].types.length == 1) {
+                                        return classDefinition.properties[field].types[0]
+                                    } else {
+                                        var deducedType
+                                        classDefinition.properties[field].types.some(t => {
+                                            if ($this.constructor.datatypeElements.validator($this[field], t)) {
+                                                deducedType = t
+                                                return true
+                                            } else {
+                                                return false
+                                            }
+                                        })
+                                        return deducedType
+                                    }
+                                }
+                            } else {
+                                return null
+                            }
+                        }
                         var defaultSmall = '&nbsp;<br>&nbsp;'
                         field = field ? field : ''
                         var fieldRow = window.LiveElement.Scale.Core.createElement('tr', {name: field})
@@ -418,8 +448,8 @@
                         if (field) {
                             fieldTypeDatalist.innerHTML = classDefinition.properties[field].types.map(t => `<option value="${t}">${(($this.constructor.datatypeDefinitions || {})[t] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[t] || {}).label || t}</option>`).join('')
                         }
-                        var fieldTypeInput = window.LiveElement.Scale.Core.createElement('input', 
-                            {name: 'datatype', type: 'search', list: fieldTypeDatalistId}, field?classDefinition.properties[field].types.slice(0,1).pop():'')
+                        var fieldTypeInput = window.LiveElement.Scale.Core.createElement('input', {name: 'datatype', type: 'search', list: fieldTypeDatalistId})
+                        fieldTypeInput.value = deduceTypeFromValue(field) || ''
                         fieldTypeCell.appendChild(fieldTypeInput)
                         fieldTypeCell.appendChild(fieldTypeDatalist)
                         var fieldTypeHintText = fieldTypeInput.value ? (($this.constructor.datatypeDefinitions || {})[fieldTypeInput.value] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[fieldTypeInput.value] || {}).label || fieldTypeInput.value : defaultSmall
@@ -444,7 +474,7 @@
                             } else {
                                 fieldTypeDatalist.innerHTML = ''
                             }
-                            fieldTypeInput.value = fieldNameCellInput.value ? classDefinition.properties[fieldNameCellInput.value].types.slice(0,1).pop() : ''
+                            fieldTypeInput.value = deduceTypeFromValue(fieldNameCellInput.value) || ''
                             fieldTypeInput.dispatchEvent(new window.Event('change'))
                             var tableBodyElement = fieldNameCellInput.closest('tbody')
                             var blankRows = Array.from(tableBodyElement.querySelectorAll('tr[name]')).filter(r => !r.getAttribute('name').length)
@@ -476,7 +506,7 @@
                                 placeholderRow.remove()
                                 placeholderRow = undefined
                             }
-                            console.log('line 427', field, $this[field], classDefinition.properties[field])
+                            console.log('line 509', field, $this[field], classDefinition.properties[field])
                             recordTableBody.appendChild(makeRow(field))
                         }
                     })
