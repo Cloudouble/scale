@@ -171,86 +171,119 @@
             return (super.observedAttributes || []).concat('_type', '_description')
         }
         
+        
+    'Record': lambda i: type(i) is dict and len(i) == 2 and type(i.get('@type')) is str and uuid_valid(i.get('@id'))
+        
         static datatypeElements = {
             'Boolean': {
                 type: 'checkbox', 
                 title: 'A true (checked) or false (unchecked) value', 
-                required: true
+                required: true, 
+                modifier: inputElement => {
+                    if (!inputElement.value || inputElement.value === 'false') {
+                        inputElement.removeAttribute('checked')
+                    } else {
+                        inputElement.setAttribute('checked', true)
+                    }
+                },
+                validator: value => !!value || !value
             }, 
             'True': {
                 type: 'checkbox', 
                 readonly: true, 
                 checked: true, 
                 title: 'Only a true (checked) value permitted', 
-                required: true
+                required: true, 
+                modifier: function(inputElement) {
+                    inputElement.setAttribute('checked', true)
+                }, 
+                validator: value => !!value
             }, 
             'False': {
                 type: 'checkbox', 
                 readonly: true, 
                 title: 'Only a false (unchecked) value permitted',
-                required: true
+                required: true, 
+                modifier: function(inputElement) {
+                    inputElement.removeAttribute('checked')
+                }, 
+                validator: value => !value
             }, 
             'Date': {
                 type: 'date', 
                 title: 'Choose a date', 
-                required: true
+                required: true, 
+                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'date'}, value).checkValidity()
             }, 
             'Time': {
                 type: 'time', 
                 title: 'Choose a time', 
-                required: true
+                required: true, 
+                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'time'}, value).checkValidity()
             }, 
             'DateTime': {
                 type: 'datetime-local', 
                 title: 'Choose a date and time', 
-                required: true
+                required: true, 
+                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'datetime-local'}, value).checkValidity()
             }, 
             'Number': {
                 type: 'number', 
                 title: 'Choose any number', 
-                required: true
+                required: true, 
+                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'number'}, value).checkValidity()
             }, 
             'Float': {
                 type: 'number', 
                 title: 'Choose any Number', 
-                required: true
+                required: true, 
+                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'number'}, value).checkValidity()
             }, 
             'Integer': {
                 type: 'number', 
                 title: 'Choose any whole number', 
                 step: 1, 
-                required: true
+                required: true, 
+                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'number', step: 1}, value).checkValidity()
             }, 
             'URL': {
                 type: 'number', 
                 title: 'Requires a valid URL', 
-                required: true
+                required: true, 
+                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'url'}, value).checkValidity()
             }, 
             'Text': {
                 type: 'text', 
                 title: 'Any text value', 
-                required: true
+                required: true, 
+                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'text'}, value).checkValidity()
             }, 
             'CssSelectorType': {
                 type: 'text', 
                 title: 'Any text value', 
-                required: true
+                required: true, 
+                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'text'}, value).checkValidity()
             }, 
             'PronounceableText': {
                 type: 'text', 
                 title: 'Any text value', 
-                required: true
+                required: true, 
+                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'text'}, value).checkValidity()
             }, 
             'XPathType': {
                 type: 'text', 
                 title: 'Any text value', 
-                required: true
+                required: true, 
+                validator: value => window.LiveElement.Scale.Core.createElement('input', {type: 'text'}, value).checkValidity()
             }, 
             'Record': {
                 type: 'uuid', 
                 title: 'Requires a valid UUID of any existing or new record of type', 
                 pattern: window.LiveElement.Scale.Core.uuid4Pattern, 
-                required: true
+                required: true, 
+                validator: (value, _type) => {
+                    return typeof value == 'object' && value['@type'] && value['@type'] == _type && value['@id'] && new RegExp(window.LiveElement.Scale.Core.uuid4Pattern).test(value['@id'])
+                }
             }
         }
         
