@@ -482,6 +482,39 @@
                         return whole ? words : `${words}...`
                     }
                     var makeRow = function(field, makeRowFieldValue) {
+                        var setFieldValue = function(fieldName, fieldType, tbody) {
+                            console.log('line 486', fieldName, fieldType, tbody)
+                            if (fieldName) {
+                                var oldValueSerialised = JSON.stringify($this[fieldName] || ''), newValue = Array.from(tbody.querySelectorAll(`tr[name="${fieldName}"] td[name="value"] input[name="value"]`))
+                                        .map(i => i.value).filter(v => v != '')
+                                console.log('line 490', JSON.parse(oldValueSerialised), newValue)
+                                if (!newValue.length) {
+                                    $this[fieldName] = undefined
+                                } else if (newValue.length == 1) {
+                                    if ($this.constructor.datatypeElements[fieldType]) {
+                                        $this[fieldName] = newValue[0]
+                                    } else {
+                                        if (newValue[0] && typeof newValue[0] == 'object') {
+                                            $this[fieldName] = newValue[0]
+                                        } else {
+                                            $this[fieldName] = {'@type': fieldType, '@id': newValue[0]}
+                                        }
+                                    }
+                                } else {
+                                    $this[fieldName] = newValue
+                                    if ($this.constructor.datatypeElements[fieldType]) {
+                                        $this[fieldName] = newValue
+                                    } else {
+                                        $this[fieldName] = $this[fieldName].map(v => {
+                                            return (v && typeof v == 'object') ? v : {'@type': fieldType, '@id': v}
+                                        })
+                                    }
+                                }
+                                if (oldValueSerialised != JSON.stringify($this[fieldName] || '')) {
+                                    $this.dispatchEvent(new window.Event('change'))
+                                }
+                            }
+                        }
                         var createNewValueInput = function(fieldType) {
                             var fieldTypeValidation = $this.constructor.datatypeElements[fieldType] || $this.constructor.datatypeElements.Record || {}, 
                                 fieldValueInput = window.LiveElement.Scale.Core.createElement(fieldTypeValidation.tagName || 'input', 
@@ -498,21 +531,7 @@
                             fieldValueInput.addEventListener('change', event => {
                                 var row = fieldValueInput.closest('tr')
                                 if (row) {
-                                    var rowName = row.getAttribute('name')
-                                    if (rowName) {
-                                        var oldValue = $this[rowName], newValue = Array.from(row.closest('tbody').querySelectorAll(`tr[name="${rowName}"] td[name="value"] input[name="value"]`))
-                                                .map(i => i.value).filter(v => v != '')
-                                        if (!newValue.length) {
-                                            $this[rowName] = undefined
-                                        } else if (newValue.length == 1) {
-                                            $this[rowName] = newValue[0]
-                                        } else {
-                                            $this[rowName] = newValue
-                                        }
-                                        if (oldValue != $this[rowName]) {
-                                            $this.dispatchEvent(new window.Event('change'))
-                                        }
-                                    }
+                                    setFieldValue(row.getAttribute('name'), fieldType, row.closest('tbody'))
                                 }
                             })
                             return fieldValueInput
@@ -609,27 +628,9 @@
                             }
                         }
                         fieldNameCellInput.addEventListener('change', event => {
-                            var tr = fieldNameCellInput.closest('tr'), oldName = tr.getAttribute('name')
-                            if (oldName != fieldNameCellInput.value) {
-                                tr.setAttribute('name', fieldNameCellInput.value)
-                                var oldValueSerialised = JSON.stringify($this[oldName])
-                                if (Array.isArray($this[oldName]) && $this[oldName].length > 1) {
-                                    var newValue = Array.from(tr.closest('tbody').querySelectorAll(`tr[name="${oldName}"] td[name="value"] input[name="value"]`))
-                                        .map(i => i.value).filter(v => v != '')
-                                    if (newValue.length == 0) {
-                                        $this[oldName] = newValue 
-                                    } else if (newValue.length == 1) {
-                                        $this[oldName] = newValue[0] 
-                                    } else {
-                                        $this[oldName] = newValue 
-                                    }
-                                } else {
-                                    $this[oldName] = undefined
-                                }
-                                if (oldValueSerialised != JSON.stringify($this[oldName])) {
-                                    $this.dispatchEvent(new window.Event('change'))
-                                }
-                            }
+                            var row = fieldNameCellInput.closest('tr')
+                            var oldFieldName = row.getAttribute('name'), oldFieldType = fieldTypeInput.value
+                            row.setAttribute('name', fieldNameCellInput.value)
                             fieldNameCellHint.innerHTML = getTruncatedText(fieldNameCellInput.value 
                                 ? (propertiesDatalist.querySelector(`option[value="${fieldNameCellInput.value}"]`) || {}).innerHTML || defaultSmall : defaultSmall, 70, fieldNameCellHint)
                             if (fieldNameCellInput.value) {
@@ -638,6 +639,7 @@
                                 fieldTypeDatalist.innerHTML = ''
                             }
                             fieldTypeInput.value = deduceTypeFromValue(fieldNameCellInput.value) || ''
+                            var newFieldName = fieldNameCellInput.value, newFieldType = fieldTypeInput.value
                             fieldTypeInput.dispatchEvent(new window.Event('change'))
                             var tableBodyElement = fieldNameCellInput.closest('tbody')
                             var blankRows = Array.from(tableBodyElement.querySelectorAll('tr[name]')).filter(r => !r.getAttribute('name').length)
@@ -645,6 +647,12 @@
                                 recordTableBody.appendChild(makeRow())
                             } else if (blankRows.length > 1) {
                                 blankRows.slice(1).forEach(r => r.remove())
+                            }
+                            if (oldFieldName && oldFieldType) {
+                                setFieldValue(oldFieldName, oldFieldType, row.closest('tbody'))
+                            }
+                            if (newFieldName && newFieldType) {
+                                setFieldValue(newFieldName, newFieldType, row.closest('tbody'))
                             }
                         })
                         fieldTypeInput.addEventListener('change', event => {
