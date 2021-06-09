@@ -183,7 +183,11 @@
                         inputElement.setAttribute('checked', true)
                     }
                 }, 
-                validator: value => !!value || !value
+                validator: value => {
+                    return (typeof value == 'boolean') 
+                        || (typeof value == 'string' && value.toLowerCase() == 'true' || value.toLowerCase() == 'false') 
+                        || (typeof value == 'number' && value == 1 || value == 0) 
+                }
             }, 
             'True': {
                 type: 'checkbox', 
@@ -194,7 +198,11 @@
                 modifier: function(inputElement) {
                     inputElement.setAttribute('checked', true)
                 }, 
-                validator: value => !!value
+                validator: value => {
+                    return (typeof value == 'boolean' && value) 
+                        || (typeof value == 'string' && value.toLowerCase() == 'true') 
+                        || (typeof value == 'number' && value == 1) 
+                }
             }, 
             'False': {
                 type: 'checkbox', 
@@ -204,7 +212,11 @@
                 modifier: function(inputElement) {
                     inputElement.removeAttribute('checked')
                 }, 
-                validator: value => !value
+                validator: value => {
+                    return (typeof value == 'boolean' && !value) 
+                        || (typeof value == 'string' && value.toLowerCase() == 'false') 
+                        || (typeof value == 'number' && value == 0) 
+                }
             }, 
             'Date': {
                 type: 'date', 
