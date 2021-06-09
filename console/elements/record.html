@@ -418,11 +418,11 @@
                         }
                         return whole ? words : `${words}...`
                     }
-                    var makeRow = function(field) {
+                    var makeRow = function(field, makeRowFieldValue) {
                         var createNewValueInput = function(fieldType) {
                             var fieldTypeValidation = $this.constructor.datatypeElements[fieldType] || $this.constructor.datatypeElements.Record || {}, 
                                 fieldValueInput = window.LiveElement.Scale.Core.createElement(fieldTypeValidation.tagName || 'input', 
-                                    {...fieldTypeValidation, ...{name: 'value'}}, field?$this[field]||'':'')
+                                    {...fieldTypeValidation, ...{name: 'value'}}, field?makeRowFieldValue||'':'')
                             if (!fieldType) {
                                 fieldValueInput.setAttribute('type', 'text')
                                 fieldValueInput.removeAttribute('pattern')
@@ -432,19 +432,31 @@
                             if (fieldValueInput.getAttribute('title') && (fieldType == 'Record' || !$this.constructor.datatypeElements[fieldType])) {
                                 fieldValueInput.setAttribute('title', `${$this.constructor.datatypeElements.Record.title} ${fieldType}`)
                             }
-                            if (field) {
-                                fieldValueInput.addEventListener('change', event => {
-                                    if (event.target.value != String($this[field])) {
-                                        $this[field] = event.target.value
-                                        $this.dispatchEvent(new window.Event('change'))
+                            fieldValueInput.addEventListener('change', event => {
+                                var row = fieldValueInput.closest('tr')
+                                if (row) {
+                                    var rowName = row.getAttribute('name')
+                                    if (rowName) {
+                                        var oldValue = $this[rowName], newValue = Array.from(row.closest('tbody').querySelectorAll(`tr[name="${rowName}"] td[name="value"] input[name="value"]`))
+                                                .map(i => i.value).filter(v => v != '')
+                                        if (!newValue.length) {
+                                            $this[rowName] = undefined
+                                        } else if (newValue.length == 1) {
+                                            $this[rowName] = newValue[0]
+                                        } else {
+                                            $this[rowName] = newValue
+                                        }
+                                        if (oldValue != $this[rowName]) {
+                                            $this.dispatchEvent(new window.Event('change'))
+                                        }
                                     }
-                                })
-                            }
+                                }
+                            })
                             return fieldValueInput
                         }
                         var deduceTypeFromValue = function(field) {
                             if (field) {
-                                if ($this[field] == undefined || $this[field] == null || $this[field] == '') {
+                                if (makeRowFieldValue == undefined || makeRowFieldValue == null || makeRowFieldValue == '') {
                                     if (classDefinition.properties[field].types.length == 1) {
                                         return classDefinition.properties[field].types[0]
                                     } else {
@@ -458,7 +470,7 @@
                                     } else {
                                         var deducedType
                                         classDefinition.properties[field].types.some(t => {
-                                            if ($this.constructor.datatypeElements.validator($this[field], t)) {
+                                            if ($this.constructor.datatypeElements.validator(makeRowFieldValue, t)) {
                                                 deducedType = t
                                                 return true
                                             } else {
@@ -482,7 +494,6 @@
                         fieldNameCellHint.innerHTML = getTruncatedText(field?classDefinition.properties[field].label||defaultSmall:defaultSmall, 70, fieldNameCellHint)
                         fieldNameCell.appendChild(fieldNameCellHint)
                         fieldRow.appendChild(fieldNameCell)
-                        
                         var fieldTypeCell = window.LiveElement.Scale.Core.createElement('td', {name: 'datatype'})
                         var fieldTypeDatalistId = `${field}-${Math.floor(Math.random()*1000000000)}`
                         var fieldTypeDatalist = window.LiveElement.Scale.Core.createElement('datalist', {id: fieldTypeDatalistId})
@@ -498,7 +509,6 @@
                         fieldTypeHint.innerHTML = getTruncatedText(fieldTypeHintText, 45, fieldTypeHint)
                         fieldTypeCell.appendChild(fieldTypeHint)
                         fieldRow.appendChild(fieldTypeCell)
-                        
                         var fieldValueCell = window.LiveElement.Scale.Core.createElement('td', {name: 'value'}), fieldValueInput = createNewValueInput(fieldTypeInput.value)
                         fieldValueCell.appendChild(fieldValueInput)
                         var fieldValueHint = window.LiveElement.Scale.Core.createElement('small')
@@ -508,9 +518,17 @@
                         if (fieldTypeInput.value && typeof ($this.constructor.datatypeElements[fieldTypeInput.value] || {}).modifier == 'function') {
                             $this.constructor.datatypeElements[fieldTypeInput.value].modifier(fieldValueInput)
                         }
-                        
                         fieldNameCellInput.addEventListener('change', event => {
-                            fieldNameCellInput.closest('tr').setAttribute('name', fieldNameCellInput.value)
+                            var tr = fieldNameCellInput.closest('tr'), oldName = tr.getAttribute('name')
+                            if (oldName != fieldNameCellInput.value) {
+                                if (Array.isArray($this[oldName]) && $this[oldName].length > 1) {
+                                    $this[oldName] = Array.from(tr.closest('tbody').querySelectorAll(`tr[name="${oldName}"] td[name="value"] input[name="value"]`))
+                                        .map(i => i.value).filter(v => v != '')
+                                } else {
+                                    $this[oldName] = undefined
+                                }
+                                tr.setAttribute('name', fieldNameCellInput.value)
+                            }
                             fieldNameCellHint.innerHTML = getTruncatedText(fieldNameCellInput.value 
                                 ? (propertiesDatalist.querySelector(`option[value="${fieldNameCellInput.value}"]`) || {}).innerHTML || defaultSmall : defaultSmall, 70, fieldNameCellHint)
                             if (fieldNameCellInput.value) {
@@ -544,7 +562,6 @@
                                 $this.constructor.datatypeElements[fieldTypeInput.value].modifier(fieldValueInput)
                             }
                         })
-                        
                         return fieldRow
                     }
                     sortedProperties.forEach(field => {
@@ -553,7 +570,11 @@
                                 placeholderRow.remove()
                                 placeholderRow = undefined
                             }
-                            recordTableBody.appendChild(makeRow(field))
+                            if (Array.isArray($this[field])) {
+                                $this[field].sort().forEach(v => recordTableBody.appendChild(makeRow(field, v)))
+                            } else {
+                                recordTableBody.appendChild(makeRow(field, $this[field]))
+                            }
                         }
                     })
                     recordTableBody.appendChild(makeRow())
