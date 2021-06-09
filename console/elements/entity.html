@@ -91,8 +91,11 @@
                 }
             }, {once: true})
             if (nameInputElement) {
+                console.log('line 95')
                 nameInputElement.addEventListener('change', event => {
+                    console.log('line 97')
                     if (event.target.value != String($this['@name'])) {
+                        console.log('line 99')
                         $this['@name'] = event.target.value
                         $this.dispatchEvent(new window.Event('change'))
                     }
@@ -148,7 +151,7 @@
         
         valueOf() {
             var $this = this
-            return Object.assign({}, ...Object.keys($this.constructor.entityFields).sort().map(field => ({[field]: $this[field]})))
+            return Object.assign({}, ...Object.keys($this.constructor.entityFields).filter(field => $this[field] != undefined).sort().map(field => ({[field]: $this[field]})))
         }
         
         toString() {

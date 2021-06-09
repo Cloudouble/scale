@@ -170,6 +170,20 @@
             }
         }
         
+        valueOf() {
+            var $this = this, 
+                returnObject = Object.assign({}, ...Object.keys($this.constructor.entityFields).filter(field => $this[field] != undefined).map(field => ({[field]: $this[field]})))
+            if ($this['@type'] && $this.constructor.classDefinitions[$this['@type']]) {
+                var properties = Object.keys($this.constructor.classDefinitions[$this['@type']].properties || {})
+                properties.forEach(property => {
+                    if ($this[property] != undefined) {
+                        returnObject[property] = $this[property]
+                    }
+                })
+            }
+            return Object.assign({}, ...Object.keys(returnObject).sort().map(k => ({[k]: returnObject[k]})))
+        }
+
         static get observedAttributes() {
             return (super.observedAttributes || []).concat('_type', '_description')
         }
@@ -178,7 +192,6 @@
             'Boolean': {
                 type: 'checkbox', 
                 title: 'A true (checked) or false (unchecked) value', 
-                required: true, 
                 modifier: inputElement => {
                     if (!inputElement.value || inputElement.value === 'false') {
                         inputElement.removeAttribute('checked')
@@ -197,8 +210,7 @@
                 readonly: true, 
                 checked: true, 
                 title: 'Only a true (checked) value permitted', 
-                required: true, 
-                modifier: function(inputElement) {
+                modifier: inputElement => {
                     inputElement.setAttribute('checked', true)
                 }, 
                 validator: (value, datatypeName) => {
@@ -211,8 +223,7 @@
                 type: 'checkbox', 
                 readonly: true, 
                 title: 'Only a false (unchecked) value permitted',
-                required: true, 
-                modifier: function(inputElement) {
+                modifier: inputElement => {
                     inputElement.removeAttribute('checked')
                 }, 
                 validator: (value, datatypeName) => {
@@ -293,6 +304,9 @@
                 title: 'Requires a valid UUID of any existing or new record of type', 
                 pattern: window.LiveElement.Scale.Core.uuid4Pattern, 
                 required: true,
+                modifier: inputElement => {
+                    
+                }, 
                 validator: (value, datatypeName) => {
                     return typeof value == 'object' && value['@type'] && value['@type'] == datatypeName && value['@id'] && new RegExp(window.LiveElement.Scale.Core.uuid4Pattern).test(value['@id'])
                 }
@@ -329,14 +343,27 @@
                 var columns = {field: 'Record Field', datatype: 'Data Type', value: 'Field Value'}
                 var recordTable = document.createElement('table')
                 var recordTableCaption = document.createElement('caption')
-                var recordNameLabel = window.LiveElement.Scale.Core.createElement('label', undefined, '@name')
-                recordNameLabel.appendChild(window.LiveElement.Scale.Core.createElement('input', {
-                    type: 'text', name: '@name', title: $this.constructor.entityFields['@name'].title}, $this['@name'] || ''))
+                var recordNameLabel = window.LiveElement.Scale.Core.createElement('label', undefined, '@name'), recordNameInput = window.LiveElement.Scale.Core.createElement('input', {
+                    type: 'text', name: '@name', title: $this.constructor.entityFields['@name'].title}, $this['@name'] || '')
+                recordNameInput.addEventListener('change', event => {
+                    if (event.target.value != String($this['@name'])) {
+                        $this['@name'] = event.target.value
+                        $this.dispatchEvent(new window.Event('change'))
+                    }
+                })
+                recordNameLabel.appendChild(recordNameInput)
+
                 recordNameLabel.appendChild(window.LiveElement.Scale.Core.createElement('small', null, $this.constructor.entityFields['@name'].hint))
                 recordTableCaption.appendChild(recordNameLabel)
-                var recordDescriptionLabel = window.LiveElement.Scale.Core.createElement('label', undefined, '@description')
-                recordDescriptionLabel.appendChild(window.LiveElement.Scale.Core.createElement('input', {
-                    type: 'text', name: '@description', title: $this.constructor.entityFields['@description'].title}, $this['@description'] || ''))
+                var recordDescriptionLabel = window.LiveElement.Scale.Core.createElement('label', undefined, '@description'), recordDescriptionInput = window.LiveElement.Scale.Core.createElement('input', {
+                    type: 'text', name: '@description', title: $this.constructor.entityFields['@description'].title}, $this['@description'] || '')
+                recordDescriptionInput.addEventListener('change', event => {
+                    if (event.target.value != String($this['@description'])) {
+                        $this['@description'] = event.target.value
+                        $this.dispatchEvent(new window.Event('change'))
+                    }
+                })
+                recordDescriptionLabel.appendChild(recordDescriptionInput)
                 recordDescriptionLabel.appendChild(window.LiveElement.Scale.Core.createElement('small', null, $this.constructor.entityFields['@description'].hint))
                 recordTableCaption.appendChild(recordDescriptionLabel)
                 recordTable.appendChild(recordTableCaption)
@@ -405,8 +432,13 @@
                             if (fieldValueInput.getAttribute('title') && (fieldType == 'Record' || !$this.constructor.datatypeElements[fieldType])) {
                                 fieldValueInput.setAttribute('title', `${$this.constructor.datatypeElements.Record.title} ${fieldType}`)
                             }
-                            if (typeof fieldTypeValidation.modifier == 'function') {
-                                fieldTypeValidation.modifier(fieldValueInput)
+                            if (field) {
+                                fieldValueInput.addEventListener('change', event => {
+                                    if (event.target.value != String($this[field])) {
+                                        $this[field] = event.target.value
+                                        $this.dispatchEvent(new window.Event('change'))
+                                    }
+                                })
                             }
                             return fieldValueInput
                         }
@@ -473,6 +505,9 @@
                         fieldValueHint.innerHTML = getTruncatedText(field?fieldValueInput.getAttribute('title')||defaultSmall:defaultSmall, 100, fieldValueHint)
                         fieldValueCell.appendChild(fieldValueHint)
                         fieldRow.appendChild(fieldValueCell)
+                        if (fieldTypeInput.value && typeof ($this.constructor.datatypeElements[fieldTypeInput.value] || {}).modifier == 'function') {
+                            $this.constructor.datatypeElements[fieldTypeInput.value].modifier(fieldValueInput)
+                        }
                         
                         fieldNameCellInput.addEventListener('change', event => {
                             fieldNameCellInput.closest('tr').setAttribute('name', fieldNameCellInput.value)
@@ -505,6 +540,9 @@
                             }
                             fieldValueInput.replaceWith(newFieldValueInput)
                             fieldValueInput = newFieldValueInput
+                            if (fieldTypeInput.value && typeof ($this.constructor.datatypeElements[fieldTypeInput.value] || {}).modifier == 'function') {
+                                $this.constructor.datatypeElements[fieldTypeInput.value].modifier(fieldValueInput)
+                            }
                         })
                         
                         return fieldRow
