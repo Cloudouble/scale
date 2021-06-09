@@ -192,7 +192,7 @@
             'Boolean': {
                 type: 'checkbox', 
                 title: 'A true (checked) or false (unchecked) value', 
-                modifier: inputElement => {
+                modifier: (inputElement, inputCell) => {
                     if (!inputElement.value || inputElement.value === 'false') {
                         inputElement.removeAttribute('checked')
                     } else {
@@ -210,7 +210,7 @@
                 readonly: true, 
                 checked: true, 
                 title: 'Only a true (checked) value permitted', 
-                modifier: inputElement => {
+                modifier: (inputElement, inputCell) => {
                     inputElement.setAttribute('checked', true)
                 }, 
                 validator: (value, datatypeName) => {
@@ -223,7 +223,7 @@
                 type: 'checkbox', 
                 readonly: true, 
                 title: 'Only a false (unchecked) value permitted',
-                modifier: inputElement => {
+                modifier: (inputElement, inputCell) => {
                     inputElement.removeAttribute('checked')
                 }, 
                 validator: (value, datatypeName) => {
@@ -304,8 +304,71 @@
                 title: 'Requires a valid UUID of any existing or new record of type', 
                 pattern: window.LiveElement.Scale.Core.uuid4Pattern, 
                 required: true,
-                modifier: inputElement => {
-                    
+                modifier: (inputElement, inputCell, recordType) => {
+                    inputElement.setAttribute('placeholder', `search @id, or type 'new'...`)
+                    inputElement.setAttribute('type', 'search')
+                    inputElement.setAttribute('pattern', `^${window.LiveElement.Scale.Console.IDE.newFlag}|${window.LiveElement.Scale.Core.uuid4Pattern.slice(1,-1)}$`)
+                    var datalistElement = inputCell.querySelector('datalist')
+                    if (!datalistElement) {
+                        var datalistId = `-${Math.floor(Math.random()*1000000000)}`
+                        datalistElement = window.LiveElement.Scale.Core.createElement('datalist', {id: datalistId})
+                        inputCell.appendChild(datalistElement)
+                    }
+                    inputElement.setAttribute('list', datalistElement.getAttribute('id'))
+                    datalistElement.innerHTML = ''
+                    var blankOptions = {[window.LiveElement.Scale.Console.IDE.newFlag]: `create new ${recordType}`.trim()}
+                    window.LiveElement.Scale.Core.buildDataList(datalistElement, [], blankOptions)
+                    inputElement.addEventListener('change', event => {
+                        if (!inputElement.value) {
+                            if (datalistElement) {
+                                window.LiveElement.Scale.Core.buildDataList(datalistElement, [], blankOptions)
+                            }
+                        }
+                    })
+                    inputElement.addEventListener('input', event => {
+                        if (inputElement.value == window.LiveElement.Scale.Console.IDE.newFlag) {
+                            inputElement.value = window.LiveElement.Scale.Core.generateUUID4()
+                            if (datalistElement) {
+                                window.LiveElement.Scale.Core.buildDataList(datalistElement, [], blankOptions)
+                            }
+                            inputElement.dispatchEvent(new window.Event('input'))
+                        } else if (!inputElement.value) {
+                            if (datalistElement) {
+                                window.LiveElement.Scale.Core.buildDataList(datalistElement, [], blankOptions)
+                            }
+                        } else {
+                            window.LiveElement.Scale.Console.System.invokeLambda({
+                                page: 'ide', 
+                                entity_type: 'record', 
+                                heading: 'search',
+                                '@type': recordType,
+                                input_name: '@id', 
+                                search: inputElement.value
+                            }).then(searchResult => {
+                                var result = []
+                                if (searchResult && searchResult.result) {
+                                    if (Array.isArray(searchResult.result)) {
+                                        result = searchResult.result 
+                                    } else if (typeof searchResult.result == 'object') {
+                                        if (Object.values(searchResult.result).every(v => typeof v == 'string')) {
+                                            result = searchResult.result
+                                        } else if (Object.values(searchResult.result).every(v => v && typeof v == 'object')) {
+                                            result = Object.assign({}, ...Object.entries(searchResult.result).map(entry => ({[entry[0]]: entry[1]['@name'] || entry[1]['name'] || entry[0]})))
+                                        }
+                                    }
+                                    window.LiveElement.Scale.Core.buildDataList(datalistElement, result, blankOptions)
+                                }
+                                /*var loadButtonAlreadyDisabled = loadButton.getAttribute('disabled'), 
+                                    resultIncludesValue = Array.isArray($this.result) ? $this.result.includes(searchElement.value) 
+                                        : ($this.result && typeof $this.result == 'object' ? Object.keys($this.result).includes(searchElement.value) : false)
+                                if ((loadButtonAlreadyDisabled && resultIncludesValue) || ($this.allowNew && new window.RegExp($this.allowNew).test(searchElement.value))) {
+                                    loadButton.removeAttribute('disabled')
+                                } else if (!loadButtonAlreadyDisabled && !resultIncludesValue) {
+                                    loadButton.setAttribute('disabled', true)
+                                }*/
+                            })
+                        }
+                    })
                 }, 
                 validator: (value, datatypeName) => {
                     return typeof value == 'object' && value['@type'] && value['@type'] == datatypeName && value['@id'] && new RegExp(window.LiveElement.Scale.Core.uuid4Pattern).test(value['@id'])
@@ -539,8 +602,11 @@
                         fieldValueHint.innerHTML = getTruncatedText(field?fieldValueInput.getAttribute('title')||defaultSmall:defaultSmall, 100, fieldValueHint)
                         fieldValueCell.appendChild(fieldValueHint)
                         fieldRow.appendChild(fieldValueCell)
-                        if (fieldTypeInput.value && typeof ($this.constructor.datatypeElements[fieldTypeInput.value] || {}).modifier == 'function') {
-                            $this.constructor.datatypeElements[fieldTypeInput.value].modifier(fieldValueInput)
+                        if (fieldTypeInput.value) {
+                            var modifierFunction = ($this.constructor.datatypeElements[fieldTypeInput.value] || $this.constructor.datatypeElements.Record).modifier
+                            if (modifierFunction && typeof modifierFunction == 'function') {
+                                modifierFunction(fieldValueInput, fieldValueCell, fieldTypeInput.value)
+                            }
                         }
                         fieldNameCellInput.addEventListener('change', event => {
                             var tr = fieldNameCellInput.closest('tr'), oldName = tr.getAttribute('name')
@@ -593,8 +659,11 @@
                             }
                             fieldValueInput.replaceWith(newFieldValueInput)
                             fieldValueInput = newFieldValueInput
-                            if (fieldTypeInput.value && typeof ($this.constructor.datatypeElements[fieldTypeInput.value] || {}).modifier == 'function') {
-                                $this.constructor.datatypeElements[fieldTypeInput.value].modifier(fieldValueInput)
+                            if (fieldTypeInput.value) {
+                                var modifierFunction = ($this.constructor.datatypeElements[fieldTypeInput.value] || $this.constructor.datatypeElements.Record).modifier
+                                if (modifierFunction && typeof modifierFunction == 'function') {
+                                    modifierFunction(fieldValueInput, fieldValueCell, fieldTypeInput.value)
+                                }
                             }
                         })
                         return fieldRow
