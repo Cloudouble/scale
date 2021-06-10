@@ -9,7 +9,7 @@
     <element-snippet>
 /* CREATE record */
 window.fetch(
-    `${window.LiveElement.Scale.Console.IDE.connectionURL}/record/${window.LiveElement.Scale.Console.IDE.Record.recordElement['@id']}.json`, 
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/record/${window.LiveElement.Scale.Console.IDE.Record.recordElement['@type']}/${window.LiveElement.Scale.Console.IDE.Record.recordElement['@id']}.json`, 
     {
         method: 'PUT', 
         headers: {"Content-Type": 'application/json'}, 
@@ -19,7 +19,7 @@ window.fetch(
 
 /* DELETE record */
 window.fetch(
-    `${window.LiveElement.Scale.Console.IDE.connectionURL}/record/${window.LiveElement.Scale.Console.IDE.Record.recordElement['@id']}.json`, 
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/record/${window.LiveElement.Scale.Console.IDE.Record.recordElement['@type']}/${window.LiveElement.Scale.Console.IDE.Record.recordElement['@id']}.json`, 
     {method: 'DELETE'}
 )
     </element-snippet>
