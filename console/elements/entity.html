@@ -91,11 +91,8 @@
                 }
             }, {once: true})
             if (nameInputElement) {
-                console.log('line 95')
                 nameInputElement.addEventListener('change', event => {
-                    console.log('line 97')
                     if (event.target.value != String($this['@name'])) {
-                        console.log('line 99')
                         $this['@name'] = event.target.value
                         $this.dispatchEvent(new window.Event('change'))
                     }
