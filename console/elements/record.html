@@ -207,12 +207,26 @@
             'Boolean': {
                 type: 'checkbox', 
                 title: 'A true (checked) or false (unchecked) value', 
-                modifier: (inputElement, inputCell) => {
+                modifier: (inputElement, inputCell, datatypeName, $this) => {
                     if (!inputElement.value || inputElement.value === 'false') {
                         inputElement.removeAttribute('checked')
                     } else {
                         inputElement.setAttribute('checked', true)
                     }
+                    inputElement.value = inputElement.checked
+                    var fieldName = inputElement.closest('tr').getAttribute('name')
+                    if (fieldName) {
+                        fieldName = (fieldName in window.HTMLElement.prototype) ? `${window.LiveElement.Scale.Console.IDE.nativePropertyPrefix}${fieldName}` : fieldName
+                        $this[fieldName] = inputElement.checked
+                    }
+                    inputElement.addEventListener('change', event => {
+                        var fieldName = inputElement.closest('tr').getAttribute('name')
+                        if (fieldName) {
+                            fieldName = (fieldName in window.HTMLElement.prototype) ? `${window.LiveElement.Scale.Console.IDE.nativePropertyPrefix}${fieldName}` : fieldName
+                            $this[fieldName] = inputElement.checked
+                        }
+                        inputElement.value = inputElement.checked
+                    })
                 }, 
                 validator: (value, datatypeName) => {
                     return (typeof value == 'boolean') 
@@ -225,8 +239,14 @@
                 readonly: true, 
                 checked: true, 
                 title: 'Only a true (checked) value permitted', 
-                modifier: (inputElement, inputCell) => {
+                modifier: (inputElement, inputCell, datatypeName, $this) => {
                     inputElement.setAttribute('checked', true)
+                    inputElement.value = true
+                    var fieldName = inputElement.closest('tr').getAttribute('name')
+                    if (fieldName) {
+                        fieldName = (fieldName in window.HTMLElement.prototype) ? `${window.LiveElement.Scale.Console.IDE.nativePropertyPrefix}${fieldName}` : fieldName
+                        $this[fieldName] = true
+                    }
                 }, 
                 validator: (value, datatypeName) => {
                     return (typeof value == 'boolean' && value) 
@@ -238,8 +258,14 @@
                 type: 'checkbox', 
                 readonly: true, 
                 title: 'Only a false (unchecked) value permitted',
-                modifier: (inputElement, inputCell) => {
+                modifier: (inputElement, inputCell, datatypeName, $this) => {
                     inputElement.removeAttribute('checked')
+                    inputElement.value = false
+                    var fieldName = inputElement.closest('tr').getAttribute('name')
+                    if (fieldName) {
+                        fieldName = (fieldName in window.HTMLElement.prototype) ? `${window.LiveElement.Scale.Console.IDE.nativePropertyPrefix}${fieldName}` : fieldName
+                        $this[fieldName] = false
+                    }
                 }, 
                 validator: (value, datatypeName) => {
                     return (typeof value == 'boolean' && !value) 
@@ -739,7 +765,7 @@
         
         upload(file) {
             if (file) {
-                var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
+                var $this = this
                 file.text().then(fileText => {
                     var entity = {}
                     try {
