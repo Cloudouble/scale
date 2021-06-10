@@ -12,5 +12,6 @@
     "Feed", 
     "Mask", 
     "Processor", 
-    "Subscription"
+    "Subscription",
+    "RecordType"
 ]

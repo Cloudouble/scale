@@ -1,17 +1,17 @@
 window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="subscription"] element-entitysearch')
 if (window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement) {
     window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchInputElement = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.querySelector('input[name="connection"]')
-    window.LiveElement.Scale.Console.IDE.Subscription.classSearchInputElement = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.querySelector('input[name="class"]')
+    window.LiveElement.Scale.Console.IDE.Subscription.recordtypeSearchInputElement = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.querySelector('input[name="recordtype"]')
     window.LiveElement.Scale.Console.IDE.Subscription.recordSearchInputElement = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.querySelector('input[name="record"]')
     window.LiveElement.Scale.Console.IDE.Subscription.subscriptionSearchInputElement = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.querySelector('input[name="@id"]')
     window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchDatalistElement = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.querySelector(`datalist[id="${window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchInputElement.getAttribute('list')}"]`)
-    window.LiveElement.Scale.Console.IDE.Subscription.classSearchDatalistElement = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.querySelector(`datalist[id="${window.LiveElement.Scale.Console.IDE.Subscription.classSearchInputElement.getAttribute('list')}"]`)
+    window.LiveElement.Scale.Console.IDE.Subscription.recordtypeSearchDatalistElement = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.querySelector(`datalist[id="${window.LiveElement.Scale.Console.IDE.Subscription.recordtypeSearchInputElement.getAttribute('list')}"]`)
     window.LiveElement.Scale.Console.IDE.Subscription.recordSearchDatalistElement = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.querySelector(`datalist[id="${window.LiveElement.Scale.Console.IDE.Subscription.recordSearchInputElement.getAttribute('list')}"]`)
     window.LiveElement.Scale.Console.IDE.Subscription.subscriptionSearchDatalistElement = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.querySelector(`datalist[id="${window.LiveElement.Scale.Console.IDE.Subscription.subscriptionSearchInputElement.getAttribute('list')}"]`)
     window.LiveElement.Scale.Console.IDE.Subscription.entitySearchLoadButton = window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.shadowRoot.querySelector('button[name="load"]')
     window.LiveElement.Scale.Console.IDE.Subscription.toggleLoadButtonDisabled = function() {
         var supportInputsAllValid = window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchInputElement.value && window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchDatalistElement.querySelector(`option[value="${window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchInputElement.value}"]`)
-                && window.LiveElement.Scale.Console.IDE.Subscription.classSearchInputElement.value && window.LiveElement.Scale.Console.IDE.Subscription.classSearchDatalistElement.querySelector(`option[value="${window.LiveElement.Scale.Console.IDE.Subscription.classSearchInputElement.value}"]`)
+                && window.LiveElement.Scale.Console.IDE.Subscription.recordtypeSearchInputElement.value && window.LiveElement.Scale.Console.IDE.Subscription.recordtypeSearchDatalistElement.querySelector(`option[value="${window.LiveElement.Scale.Console.IDE.Subscription.recordtypeSearchInputElement.value}"]`)
                 && window.LiveElement.Scale.Console.IDE.Subscription.recordSearchInputElement.value && window.LiveElement.Scale.Console.IDE.Subscription.recordSearchDatalistElement.querySelector(`option[value="${window.LiveElement.Scale.Console.IDE.Subscription.recordSearchInputElement.value}"]`)
         if ((supportInputsAllValid && window.LiveElement.Scale.Console.IDE.Subscription.subscriptionSearchInputElement.value && window.LiveElement.Scale.Console.IDE.Subscription.subscriptionSearchDatalistElement.querySelector(`option[value="${window.LiveElement.Scale.Console.IDE.Subscription.subscriptionSearchInputElement.value}"]`)) 
                 || (window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.allowNew && new window.RegExp(window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement.allowNew).test(window.LiveElement.Scale.Console.IDE.Subscription.subscriptionSearchInputElement.value))) {
@@ -35,15 +35,15 @@ if (window.LiveElement.Scale.Console.IDE.Subscription.entitySearchElement) {
             window.LiveElement.Scale.Console.IDE.Subscription.toggleLoadButtonDisabled()
         })
     })
-    window.LiveElement.Scale.Core.buildDataList(window.LiveElement.Scale.Console.IDE.Subscription.classSearchDatalistElement, Object.assign({}, ...Object.entries(window.LiveElement.Scale.Console.IDE.classes).map(entry => ({[entry[0]]: entry[1].label}))))
+    window.LiveElement.Scale.Core.buildDataList(window.LiveElement.Scale.Console.IDE.Subscription.recordtypeSearchDatalistElement, Object.assign({}, ...Object.entries(window.LiveElement.Scale.Console.IDE.recordtypes).map(entry => ({[entry[0]]: entry[1].label}))))
     window.LiveElement.Scale.Console.IDE.Subscription.recordSearchInputElement.addEventListener('input', event => {
-        if (window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchInputElement.value && window.LiveElement.Scale.Console.IDE.Subscription.classSearchInputElement.value) {
+        if (window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchInputElement.value && window.LiveElement.Scale.Console.IDE.Subscription.recordtypeSearchInputElement.value) {
             window.LiveElement.Scale.Console.System.invokeLambda({
                 page: 'ide', 
                 entity_type: 'subscription', 
                 heading: 'search',
                 connection: window.LiveElement.Scale.Console.IDE.Subscription.connectionSearchInputElement.value, 
-                'class': window.LiveElement.Scale.Console.IDE.Subscription.classSearchInputElement.value, 
+                'recordtype': window.LiveElement.Scale.Console.IDE.Subscription.recordtypeSearchInputElement.value, 
                 input_name: 'record', 
                 search: window.LiveElement.Scale.Console.IDE.Subscription.recordSearchInputElement.value
             }).then(recordSearchResult => {
@@ -65,7 +65,7 @@ window.LiveElement.Live.processors.IdeSubscriptionEdit = function(input) {
     if (handlerType == 'listener') {
         return {
             connection: (window.LiveElement.Scale.Console.IDE.Subscription.subscriptionElement || {}).connection, 
-            'class': (window.LiveElement.Scale.Console.IDE.Subscription.subscriptionElement || {}).class, 
+            'recordtype': (window.LiveElement.Scale.Console.IDE.Subscription.subscriptionElement || {}).recordtype, 
             record: (window.LiveElement.Scale.Console.IDE.Connection.subscriptionElement || {}).record, 
             '@id': (window.LiveElement.Scale.Console.IDE.Subscription.subscriptionElement || {})['@id']
         }

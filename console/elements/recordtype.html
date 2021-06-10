@@ -23,11 +23,11 @@
 </template>
 <script>
     /* global */
-    class Feed extends window.LiveElement.Element.elements.Entity {
+    class RecordType extends window.LiveElement.Element.elements.Entity {
 
         static __extends = 'Entity'
         
-        static entityType = 'feed'
+        static entityType = 'recordtype'
 
         constructor() {
             super()
@@ -38,8 +38,9 @@
             super.connectedCallback()
             var $this = this
             window.setTimeout(() => {
-                if ($this['@id'] && $this['connection'] && $this['recordtype'] && $this['query']) {
+                if ($this['@id'] && $this['authentication'] && $this['mask']) {
                     $this.shadowRoot.querySelector('button[name="delete"]').removeAttribute('disabled')
+                    $this.shadowRoot.querySelector('input[name="@name"]').setAttribute('readonly', true)
                     $this.dispatchEvent(new window.Event('change'))
                     window.setTimeout(() => {
                         $this.shadowRoot.querySelector('button[name="save"]').setAttribute('disabled', true)
@@ -49,33 +50,21 @@
         }
         
         static get observedAttributes() {
-            return (super.observedAttributes || []).concat('connection', 'recordtype', 'query', 'view')
+            return (super.observedAttributes || []).concat('authentication', 'mask')
         }
         
         static get entityFields() {
             return {...super.entityFields, ...{
-                'connection': {
-                    type: 'text', 
-                    title: 'Must be an existing connection', 
-                    hint: 'Select an existing connection', 
+                'authentication': {
+                    type: 'select', 
+                    title: 'Must be an installed authentication extension', 
+                    hint: 'Select an authentication mode', 
                     required: true
                 }, 
-                'recordtype': {
+                'mask': {
                     type: 'text', 
-                    title: 'Must be a valid record recordtype', 
-                    hint: 'The record recordtype for this feed', 
-                    required: true
-                }, 
-                'query': {
-                    type: 'uuid', 
-                    title: 'Must be a valid query id', 
-                    hint: 'The query for this feed', 
-                    required: true
-                }, 
-                'view': {
-                    type: 'text', 
-                    title: 'Must be a valid view name', 
-                    hint: 'The view to render this feed', 
+                    title: 'Must be a valid mask hash', 
+                    hint: 'The mask for this record type', 
                     required: true
                 }
             }}
@@ -85,13 +74,11 @@
             var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
             var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
             window.fetch(
-                `${window.LiveElement.Scale.Console.IDE.connectionURL}/feed/${$this.recordtype}/${$this.query}/${$this['@id']}.json`, 
+                `${window.LiveElement.Scale.Console.IDE.connectionURL}/system/recordtype/${$this['@id']}.json`, 
                 {
                     method: 'PUT', 
                     headers: {"Content-Type": 'application/json'}, 
-                    body: {
-                        view: $this.view
-                    }
+                    body: `${$this.credentials || {}}`
                 }
             ).then(r => {
                 saveButton.setAttribute('disabled', true)
@@ -105,7 +92,7 @@
             var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
             var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
             window.fetch(
-                `${window.LiveElement.Scale.Console.IDE.connectionURL}/feed/${$this.recordtype}/${$this.query}/${$this['@id']}.json`, 
+                `${window.LiveElement.Scale.Console.IDE.connectionURL}/system/recordtype/${$this['@id']}.json`, 
                 {method: 'DELETE'}
             ).then(r => {
                 deleteButton.setAttribute('disabled', true)
@@ -119,7 +106,7 @@
             
         }
 
-        _setFeedField = function(value, field) {
+        _setRecordTypeField = function(value, field) {
             var $this = this
             if (value) {
                 var inputField = $this.shadowRoot.querySelector(`label[name="${field}"] input[name="${field}"]`)
@@ -130,31 +117,17 @@
             return $this._setField($this, field, value, inputField)
         }
 
-        connection($this, value) {
+        authentication($this, value) {
             var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
             if (editorElement) {
-                return $this._setFeedField(value, 'connection')
+                return $this._setRecordTypeField(value, 'authentication')
             }
         }
         
-        ['recordtype']($this, value) {
+        mask($this, value) {
             var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
             if (editorElement) {
-                return $this._setFeedField(value, 'recordtype')
-            }
-        }
-        
-        query($this, value) {
-            var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
-            if (editorElement) {
-                return $this._setFeedField(value, 'query')
-            }
-        }
-        
-        view($this, value) {
-            var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
-            if (editorElement) {
-                return $this._setField(value, 'view')
+                return $this._setRecordTypeField(value, 'mask')
             }
         }
         

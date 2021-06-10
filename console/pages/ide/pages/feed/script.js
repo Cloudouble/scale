@@ -1,17 +1,17 @@
 window.LiveElement.Scale.Console.IDE.Feed.entitySearchElement = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="feed"] element-entitysearch')
 if (window.LiveElement.Scale.Console.IDE.Feed.entitySearchElement) {
     window.LiveElement.Scale.Console.IDE.Feed.connectionSearchInputElement = window.LiveElement.Scale.Console.IDE.Feed.entitySearchElement.querySelector('input[name="connection"]')
-    window.LiveElement.Scale.Console.IDE.Feed.classSearchInputElement = window.LiveElement.Scale.Console.IDE.Feed.entitySearchElement.querySelector('input[name="class"]')
+    window.LiveElement.Scale.Console.IDE.Feed.recordtypeSearchInputElement = window.LiveElement.Scale.Console.IDE.Feed.entitySearchElement.querySelector('input[name="recordtype"]')
     window.LiveElement.Scale.Console.IDE.Feed.querySearchInputElement = window.LiveElement.Scale.Console.IDE.Feed.entitySearchElement.querySelector('input[name="query"]')
     window.LiveElement.Scale.Console.IDE.Feed.feedSearchInputElement = window.LiveElement.Scale.Console.IDE.Feed.entitySearchElement.querySelector('input[name="@id"]')
     window.LiveElement.Scale.Console.IDE.Feed.connectionSearchDatalistElement = window.LiveElement.Scale.Console.IDE.Feed.entitySearchElement.querySelector(`datalist[id="${window.LiveElement.Scale.Console.IDE.Feed.connectionSearchInputElement.getAttribute('list')}"]`)
-    window.LiveElement.Scale.Console.IDE.Feed.classSearchDatalistElement = window.LiveElement.Scale.Console.IDE.Feed.entitySearchElement.querySelector(`datalist[id="${window.LiveElement.Scale.Console.IDE.Feed.classSearchInputElement.getAttribute('list')}"]`)
+    window.LiveElement.Scale.Console.IDE.Feed.recordtypeSearchDatalistElement = window.LiveElement.Scale.Console.IDE.Feed.entitySearchElement.querySelector(`datalist[id="${window.LiveElement.Scale.Console.IDE.Feed.recordtypeSearchInputElement.getAttribute('list')}"]`)
     window.LiveElement.Scale.Console.IDE.Feed.querySearchDatalistElement = window.LiveElement.Scale.Console.IDE.Feed.entitySearchElement.querySelector(`datalist[id="${window.LiveElement.Scale.Console.IDE.Feed.querySearchInputElement.getAttribute('list')}"]`)
     window.LiveElement.Scale.Console.IDE.Feed.feedSearchDatalistElement = window.LiveElement.Scale.Console.IDE.Feed.entitySearchElement.querySelector(`datalist[id="${window.LiveElement.Scale.Console.IDE.Feed.feedSearchInputElement.getAttribute('list')}"]`)
     window.LiveElement.Scale.Console.IDE.Feed.entitySearchLoadButton = window.LiveElement.Scale.Console.IDE.Feed.entitySearchElement.shadowRoot.querySelector('button[name="load"]')
     window.LiveElement.Scale.Console.IDE.Feed.toggleLoadButtonDisabled = function() {
         var supportInputsAllValid = window.LiveElement.Scale.Console.IDE.Feed.connectionSearchInputElement.value && window.LiveElement.Scale.Console.IDE.Feed.connectionSearchDatalistElement.querySelector(`option[value="${window.LiveElement.Scale.Console.IDE.Feed.connectionSearchInputElement.value}"]`)
-                && window.LiveElement.Scale.Console.IDE.Feed.classSearchInputElement.value && window.LiveElement.Scale.Console.IDE.Feed.classSearchDatalistElement.querySelector(`option[value="${window.LiveElement.Scale.Console.IDE.Feed.classSearchInputElement.value}"]`)
+                && window.LiveElement.Scale.Console.IDE.Feed.recordtypeSearchInputElement.value && window.LiveElement.Scale.Console.IDE.Feed.recordtypeSearchDatalistElement.querySelector(`option[value="${window.LiveElement.Scale.Console.IDE.Feed.recordtypeSearchInputElement.value}"]`)
                 && window.LiveElement.Scale.Console.IDE.Feed.querySearchInputElement.value && window.LiveElement.Scale.Console.IDE.Feed.querySearchDatalistElement.querySelector(`option[value="${window.LiveElement.Scale.Console.IDE.Feed.querySearchInputElement.value}"]`)
         if ((supportInputsAllValid && window.LiveElement.Scale.Console.IDE.Feed.feedSearchInputElement.value && window.LiveElement.Scale.Console.IDE.Feed.feedSearchDatalistElement.querySelector(`option[value="${window.LiveElement.Scale.Console.IDE.Feed.feedSearchInputElement.value}"]`)) 
                 || (window.LiveElement.Scale.Console.IDE.Feed.entitySearchElement.allowNew && new window.RegExp(window.LiveElement.Scale.Console.IDE.Feed.entitySearchElement.allowNew).test(window.LiveElement.Scale.Console.IDE.Feed.feedSearchInputElement.value))) {
@@ -35,15 +35,15 @@ if (window.LiveElement.Scale.Console.IDE.Feed.entitySearchElement) {
             window.LiveElement.Scale.Console.IDE.Feed.toggleLoadButtonDisabled()
         })
     })
-    window.LiveElement.Scale.Core.buildDataList(window.LiveElement.Scale.Console.IDE.Feed.classSearchDatalistElement, Object.assign({}, ...Object.entries(window.LiveElement.Scale.Console.IDE.classes).map(entry => ({[entry[0]]: entry[1].label}))))
+    window.LiveElement.Scale.Core.buildDataList(window.LiveElement.Scale.Console.IDE.Feed.recordtypeSearchDatalistElement, Object.assign({}, ...Object.entries(window.LiveElement.Scale.Console.IDE.recordtypes).map(entry => ({[entry[0]]: entry[1].label}))))
     window.LiveElement.Scale.Console.IDE.Feed.querySearchInputElement.addEventListener('input', event => {
-        if (window.LiveElement.Scale.Console.IDE.Feed.connectionSearchInputElement.value && window.LiveElement.Scale.Console.IDE.Feed.classSearchInputElement.value) {
+        if (window.LiveElement.Scale.Console.IDE.Feed.connectionSearchInputElement.value && window.LiveElement.Scale.Console.IDE.Feed.recordtypeSearchInputElement.value) {
             window.LiveElement.Scale.Console.System.invokeLambda({
                 page: 'ide', 
                 entity_type: 'feed', 
                 heading: 'search',
                 connection: window.LiveElement.Scale.Console.IDE.Feed.connectionSearchInputElement.value, 
-                'class': window.LiveElement.Scale.Console.IDE.Feed.classSearchInputElement.value, 
+                'recordtype': window.LiveElement.Scale.Console.IDE.Feed.recordtypeSearchInputElement.value, 
                 input_name: 'query', 
                 search: window.LiveElement.Scale.Console.IDE.Feed.querySearchInputElement.value
             }).then(querySearchResult => {
@@ -65,7 +65,7 @@ window.LiveElement.Live.processors.IdeFeedEdit = function(input) {
     if (handlerType == 'listener') {
         return {
             connection: (window.LiveElement.Scale.Console.IDE.Feed.feedElement || {}).connection, 
-            'class': (window.LiveElement.Scale.Console.IDE.Feed.feedElement || {}).class, 
+            'recordtype': (window.LiveElement.Scale.Console.IDE.Feed.feedElement || {}).recordtype, 
             query: (window.LiveElement.Scale.Console.IDE.Connection.feedElement || {}).query, 
             '@id': (window.LiveElement.Scale.Console.IDE.Feed.feedElement || {})['@id']
         }

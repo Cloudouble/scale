@@ -38,7 +38,7 @@
             super.connectedCallback()
             var $this = this
             window.setTimeout(() => {
-                if ($this['@id'] && $this['connection'] && $this['class'] && $this['record']) {
+                if ($this['@id'] && $this['connection'] && $this['recordtype'] && $this['record']) {
                     $this.shadowRoot.querySelector('button[name="delete"]').removeAttribute('disabled')
                     $this.dispatchEvent(new window.Event('change'))
                     window.setTimeout(() => {
@@ -49,7 +49,7 @@
         }
         
         static get observedAttributes() {
-            return (super.observedAttributes || []).concat('connection', 'class', 'record', 'view')
+            return (super.observedAttributes || []).concat('connection', 'recordtype', 'record', 'view')
         }
         
         static get entityFields() {
@@ -60,10 +60,10 @@
                     hint: 'Select an existing connection', 
                     required: true
                 }, 
-                'class': {
+                'recordtype': {
                     type: 'text', 
-                    title: 'Must be a valid record class', 
-                    hint: 'The record class for this feed', 
+                    title: 'Must be a valid record recordtype', 
+                    hint: 'The record recordtype for this feed', 
                     required: true
                 }, 
                 'record': {
@@ -85,7 +85,7 @@
             var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
             var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
             window.fetch(
-                `${window.LiveElement.Scale.Console.IDE.connectionURL}/subscription/${$this.class}/${$this.record}/${$this['@id']}.json`, 
+                `${window.LiveElement.Scale.Console.IDE.connectionURL}/subscription/${$this.recordtype}/${$this.record}/${$this['@id']}.json`, 
                 {
                     method: 'PUT', 
                     headers: {"Content-Type": 'application/json'}, 
@@ -105,7 +105,7 @@
             var $this = this, saveButton = $this.shadowRoot.querySelector('button[name="save"]')
             var deleteButton = $this.shadowRoot.querySelector('button[name="delete"]')
             window.fetch(
-                `${window.LiveElement.Scale.Console.IDE.connectionURL}/subscription/${$this.class}/${$this.record}/${$this['@id']}.json`, 
+                `${window.LiveElement.Scale.Console.IDE.connectionURL}/subscription/${$this.recordtype}/${$this.record}/${$this['@id']}.json`, 
                 {method: 'DELETE'}
             ).then(r => {
                 deleteButton.setAttribute('disabled', true)
@@ -137,10 +137,10 @@
             }
         }
         
-        ['class']($this, value) {
+        ['recordtype']($this, value) {
             var editorElement = $this.shadowRoot.querySelector('div[name="editor"]')
             if (editorElement) {
-                return $this._setSubscriptionField(value, 'class')
+                return $this._setSubscriptionField(value, 'recordtype')
             }
         }
         

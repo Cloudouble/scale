@@ -1,0 +1,41 @@
+<h2>RecordType</h2>
+<element-entitysearch entityType="recordtype" historyPath="${@id}" blankOptionText="create new recordtype" live-trigger="loaded:IdeRecordTypeEdit" allowNew>
+    <input name="@id" type="search" placeholder="search @id, or type 'new'..." autocomplete="off" list />
+</element-entitysearch>
+<fieldset name="edit">
+    <h3>Edit</h3>
+    <div class="text-editor-container"></div>
+    <element-snippet>
+/* CREATE recordtype */
+/* create a new recordtype id with window.LiveElement.Scale.Core.generateUUID4 */
+/* the structure of the credentials object will depend on the authentication extension selected */
+window.fetch(
+    `${window.LiveElement.Scale.Console.IDE.systemURL}/recordtype/${window.LiveElement.Scale.Console.IDE.RecordType.recordtypeElement['@id']}/connect.json`, 
+    {
+        method: 'PUT', 
+        headers: {"Content-Type": 'application/json'}, 
+        body: {
+            '${window.LiveElement.Scale.Console.IDE.RecordType.recordtypeElement['authentication']}': {...credentials...}
+        }
+    }
+)
+
+/* DELETE recordtype */
+window.fetch(
+    `${window.LiveElement.Scale.Console.IDE.systemURL}/recordtype/${window.LiveElement.Scale.Console.IDE.RecordType.recordtypeElement['@id']}/connect.json`, 
+    {method: 'DELETE'}
+)
+    </element-snippet>
+</fieldset>
+
+<fieldset name="code">
+    <h3>Code</h3>
+    <label>
+        Websocket URL
+        <input name="websocketUrl" type="url" readonly="readonly" />
+        <element-snippet>
+var websocketURL = `${window.LiveElement.Scale.Console.IDE.systemURL}/recordtype/${window.LiveElement.Scale.Console.IDE.RecordType.recordtypeElement['@id']}/websocket`
+window.LiveElement.Scale.Console.IDE.RecordType.Code.websocket = new WebSocket(websocketURL)
+        </element-snippet>
+    </label>
+</fieldset>

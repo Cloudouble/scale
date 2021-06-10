@@ -33,10 +33,10 @@ window.LiveElement.Scale.Console.IDE.pageElement.querySelectorAll(`:scope > sect
 p.push(window.LiveElement.Scale.Core.waitUntil(() => window.LiveElement.Scale.Console.System && typeof window.LiveElement.Scale.Console.System.invokeLambda == 'function').then(() => {
     return window.LiveElement.Scale.Console.System.invokeLambda({
         page: 'ide', 
-        entity_type: 'classes'
-    }).then(classes => {
-        if (classes && typeof classes == 'object') {
-            window.LiveElement.Scale.Console.IDE.classes = classes
+        entity_type: 'recordtypes'
+    }).then(recordtypes => {
+        if (recordtypes && typeof recordtypes == 'object') {
+            window.LiveElement.Scale.Console.IDE.recordtypes = recordtypes
         }
     })
 }))
@@ -65,8 +65,8 @@ Promise.all(p).then(() => {
             window.LiveElement.Scale.Console.IDE.pageElement.setAttribute('entity-type', button.innerHTML.toLowerCase())
         })
     })
-    window.LiveElement.Scale.Core.buildDataList(document.getElementById('ide--class'), Object.assign({}, ...Object.keys(window.LiveElement.Scale.Console.IDE.classes).sort().map(className => {
-        return {[className]: `${window.LiveElement.Scale.Console.IDE.classes[className].label} [${window.LiveElement.Scale.Console.IDE.classes[className].parents.join('&rarr;')}]`}
+    window.LiveElement.Scale.Core.buildDataList(document.getElementById('ide--recordtype'), Object.assign({}, ...Object.keys(window.LiveElement.Scale.Console.IDE.recordtypes).sort().map(recordtype => {
+        return {[recordtype]: `${window.LiveElement.Scale.Console.IDE.recordtypes[recordtype].label} [${window.LiveElement.Scale.Console.IDE.recordtypes[recordtype].parents.join('&rarr;')}]`}
     })))
 })
 

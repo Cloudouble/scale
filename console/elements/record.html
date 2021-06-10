@@ -128,8 +128,8 @@
     </label>
     <label>
         @type
-        <input name="@type" type="text" autocomplete="off" title="An installed class" />
-        <small>The record class</small>
+        <input name="@type" type="text" autocomplete="off" title="An installed recordtype" />
+        <small>The record recordtype</small>
     </label>
     <template name="OpaqueData"></template>
     <datalist name="properties"></datalist>
@@ -187,8 +187,8 @@
         valueOf() {
             var $this = this, 
                 returnObject = Object.assign({}, ...Object.keys($this.constructor.entityFields).filter(field => $this[field] != undefined).map(field => ({[field]: $this[field]})))
-            if ($this['@type'] && $this.constructor.classDefinitions[$this['@type']]) {
-                var properties = Object.keys($this.constructor.classDefinitions[$this['@type']].properties || {})
+            if ($this['@type'] && $this.constructor.recordtypeDefinitions[$this['@type']]) {
+                var properties = Object.keys($this.constructor.recordtypeDefinitions[$this['@type']].properties || {})
                 properties.forEach(property => {
                     var prefixedProperty = (property in window.HTMLElement.prototype) ? `${window.LiveElement.Scale.Console.IDE.nativePropertyPrefix}${property}` : property
                     if ($this[prefixedProperty] != undefined) {
@@ -433,8 +433,8 @@
             return {...super.entityFields, ...{
                 '@type': {
                     type: 'text', 
-                    title: 'an installed class', 
-                    hint: 'The record class', 
+                    title: 'an installed recordtype', 
+                    hint: 'The record recordtype', 
                     required: true
                 }, 
                 '@description': {
@@ -492,38 +492,38 @@
                 var recordTableBody = document.createElement('tbody')
                 var placeholderRow = document.createElement('tr')
                 placeholderRow.appendChild(window.LiveElement.Scale.Core.createElement('td', {colspan: 3, style: 'text-align: center; padding-top: 2em; padding-bottom: 2em'}, 
-                    `Loading the ${_type} class definition...`))
+                    `Loading the ${_type} recordtype definition...`))
                 recordTableBody.appendChild(placeholderRow)
                 recordTable.appendChild(recordTableBody)
                 editorElement.innerHTML = ''
                 editorElement.appendChild(recordTable)
                 new Promise(function(resolve, reject) {
-                    $this.constructor.classDefinitions = $this.constructor.classDefinitions || {}
-                    if ($this.constructor.classDefinitions[_type]) {
-                        resolve($this.constructor.classDefinitions[_type])
+                    $this.constructor.recordtypeDefinitions = $this.constructor.recordtypeDefinitions || {}
+                    if ($this.constructor.recordtypeDefinitions[_type]) {
+                        resolve($this.constructor.recordtypeDefinitions[_type])
                     } else {
                         window.LiveElement.Scale.Console.System.invokeLambda({
                             page: 'ide', 
                             entity_type: 'record', 
                             heading: 'edit',
-                            input_name: 'class', 
+                            input_name: 'recordtype', 
                             '@type': _type
-                        }).then(classDefinition => {
-                            if (classDefinition && typeof classDefinition == 'object') {
-                                $this.constructor.classDefinitions[_type] = classDefinition
-                                resolve($this.constructor.classDefinitions[_type])
+                        }).then(recordtypeDefinition => {
+                            if (recordtypeDefinition && typeof recordtypeDefinition == 'object') {
+                                $this.constructor.recordtypeDefinitions[_type] = recordtypeDefinition
+                                resolve($this.constructor.recordtypeDefinitions[_type])
                             } else {
-                                reject(classDefinition)
+                                reject(recordtypeDefinition)
                             }
                         })
                     }
-                }).then(classDefinition => {
+                }).then(recordtypeDefinition => {
                     placeholderRow.innerHTML = ''
                     placeholderRow.appendChild(window.LiveElement.Scale.Core.createElement('td', {colspan: 3, style: 'text-align: center; padding-top: 2em; padding-bottom: 2em'}, 
-                        `${_type} class definition loaded. Rendering record...`))
-                    var sortedProperties = Object.keys(classDefinition.properties || {}).sort()
+                        `${_type} recordtype definition loaded. Rendering record...`))
+                    var sortedProperties = Object.keys(recordtypeDefinition.properties || {}).sort()
                     var propertiesDatalist = $this.shadowRoot.querySelector('datalist[name="properties"]')
-                    propertiesDatalist.innerHTML = sortedProperties.map(p => `<option value="${p}">${classDefinition.properties[p].label || ''}</option>`).join('')
+                    propertiesDatalist.innerHTML = sortedProperties.map(p => `<option value="${p}">${recordtypeDefinition.properties[p].label || ''}</option>`).join('')
                     var propertiesDatalistId = propertiesDatalist.getAttribute('id')
                     var getTruncatedText = function(text, limit, setWholeAsTitleForElement) {
                         var words = text.split(' '), counter = 0, whole = true
@@ -592,21 +592,21 @@
                         var deduceTypeFromValue = function(field) {
                             if (field) {
                                 if (makeRowFieldValue == undefined || makeRowFieldValue == null || makeRowFieldValue == '') {
-                                    if (classDefinition.properties[field].types.length == 1) {
-                                        return classDefinition.properties[field].types[0]
+                                    if (recordtypeDefinition.properties[field].types.length == 1) {
+                                        return recordtypeDefinition.properties[field].types[0]
                                     } else {
                                         return null
                                     }
                                 } else if (makeRowFieldValue && typeof makeRowFieldValue == 'object' && makeRowFieldValue['@type']) {
                                     return makeRowFieldValue['@type']
                                 } else {
-                                    if ((classDefinition.properties[field].types||[]).length == 0) {
+                                    if ((recordtypeDefinition.properties[field].types||[]).length == 0) {
                                         return null
-                                    } else if (classDefinition.properties[field].types.length == 1) {
-                                        return classDefinition.properties[field].types[0]
+                                    } else if (recordtypeDefinition.properties[field].types.length == 1) {
+                                        return recordtypeDefinition.properties[field].types[0]
                                     } else {
                                         var deducedType
-                                        classDefinition.properties[field].types.some(t => {
+                                        recordtypeDefinition.properties[field].types.some(t => {
                                             if ($this.constructor.datatypeElements.validator(makeRowFieldValue, t)) {
                                                 deducedType = t
                                                 return true
@@ -622,12 +622,12 @@
                             }
                         }
                         var expandTypeOptions = function(field) {
-                            var datatypeOptions = Object.assign({}, ...classDefinition.properties[field].types.filter(k => $this.constructor.datatypeDefinitions[k]).map(t => ({[t]: (($this.constructor.datatypeDefinitions || {})[t] || {}).label})))
-                            var directClassOptions = Object.assign({}, ...classDefinition.properties[field].types.filter(k => !datatypeOptions[k] && window.LiveElement.Scale.Console.IDE.classes[k]).map(t => ({[t]: window.LiveElement.Scale.Console.IDE.classes[t].label})))
+                            var datatypeOptions = Object.assign({}, ...recordtypeDefinition.properties[field].types.filter(k => $this.constructor.datatypeDefinitions[k]).map(t => ({[t]: (($this.constructor.datatypeDefinitions || {})[t] || {}).label})))
+                            var directClassOptions = Object.assign({}, ...recordtypeDefinition.properties[field].types.filter(k => !datatypeOptions[k] && window.LiveElement.Scale.Console.IDE.recordtypes[k]).map(t => ({[t]: window.LiveElement.Scale.Console.IDE.recordtypes[t].label})))
                             var indirectClassOptions = {}
                             Object.keys(directClassOptions).forEach(directClassName => {
-                                ((window.LiveElement.Scale.Console.IDE.classes[directClassName] || {}).children || []).forEach(indirectClassName => {
-                                    indirectClassOptions[indirectClassName] = ((window.LiveElement.Scale.Console.IDE.classes || {})[indirectClassName] || {}).label
+                                ((window.LiveElement.Scale.Console.IDE.recordtypes[directClassName] || {}).children || []).forEach(indirectClassName => {
+                                    indirectClassOptions[indirectClassName] = ((window.LiveElement.Scale.Console.IDE.recordtypes || {})[indirectClassName] || {}).label
                                 })
                             })
                             var allOptions = {}, allOptionsKeys = []
@@ -650,7 +650,7 @@
                         var fieldNameCellInput = window.LiveElement.Scale.Core.createElement('input', {name: 'field', type: 'search', list: propertiesDatalistId}, field)
                         fieldNameCell.appendChild(fieldNameCellInput)
                         var fieldNameCellHint = window.LiveElement.Scale.Core.createElement('small')
-                        fieldNameCellHint.innerHTML = getTruncatedText(field?classDefinition.properties[field].label||defaultSmall:defaultSmall, 70, fieldNameCellHint)
+                        fieldNameCellHint.innerHTML = getTruncatedText(field?recordtypeDefinition.properties[field].label||defaultSmall:defaultSmall, 70, fieldNameCellHint)
                         fieldNameCell.appendChild(fieldNameCellHint)
                         fieldRow.appendChild(fieldNameCell)
                         var fieldTypeCell = window.LiveElement.Scale.Core.createElement('td', {name: 'datatype'})
@@ -669,7 +669,7 @@
                         }
                         fieldTypeCell.appendChild(fieldTypeInput)
                         fieldTypeCell.appendChild(fieldTypeDatalist)
-                        var fieldTypeHintText = fieldTypeInput.value ? (($this.constructor.datatypeDefinitions || {})[fieldTypeInput.value] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[fieldTypeInput.value] || {}).label || fieldTypeInput.value : defaultSmall
+                        var fieldTypeHintText = fieldTypeInput.value ? (($this.constructor.datatypeDefinitions || {})[fieldTypeInput.value] || {}).label || (window.LiveElement.Scale.Console.IDE.recordtypes[fieldTypeInput.value] || {}).label || fieldTypeInput.value : defaultSmall
                         var fieldTypeHint = window.LiveElement.Scale.Core.createElement('small')
                         fieldTypeHint.innerHTML = getTruncatedText(fieldTypeHintText, 45, fieldTypeHint)
                         fieldTypeCell.appendChild(fieldTypeHint)
@@ -715,7 +715,7 @@
                             }
                         })
                         fieldTypeInput.addEventListener('change', event => {
-                            var fieldTypeHintText = fieldTypeInput.value ? (($this.constructor.datatypeDefinitions || {})[fieldTypeInput.value] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[fieldTypeInput.value] || {}).label || fieldTypeInput.value : defaultSmall
+                            var fieldTypeHintText = fieldTypeInput.value ? (($this.constructor.datatypeDefinitions || {})[fieldTypeInput.value] || {}).label || (window.LiveElement.Scale.Console.IDE.recordtypes[fieldTypeInput.value] || {}).label || fieldTypeInput.value : defaultSmall
                             fieldTypeHint.innerHTML = getTruncatedText(fieldTypeHintText, 45, fieldTypeHint)
                             var newFieldValueInput = createNewValueInput(fieldTypeInput.value)
                             if (fieldTypeInput.value) {

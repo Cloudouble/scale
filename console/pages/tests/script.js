@@ -534,7 +534,7 @@ window.LiveElement.Scale.Console.Tests.testMap = {
             return html_code
         })
     }, 
-    'create-custom-class': function(connection_url, system_access_url, system_root, connection_id) {
+    'create-custom-recordtype': function(connection_url, system_access_url, system_root, connection_id) {
         var novel_type_definition = {
             "label": "Novel",
             "comment": "A book containing a long fictional story.",
@@ -554,7 +554,7 @@ window.LiveElement.Scale.Console.Tests.testMap = {
             }
         }
         return window.fetch(
-            `${connection_url}/system/class/Novel.json`, 
+            `${connection_url}/system/recordtype/Novel.json`, 
             {
                 method: 'PUT', 
                 headers: {
@@ -614,7 +614,7 @@ window.LiveElement.Scale.Console.Tests.testMap = {
             state: 'install', 
             entity_map: {
                 'system': {
-                    'class': {
+                    'recordtype': {
                         'Novella': {
                             "label": "Novella",
                             "comment": "A short novel.",
@@ -673,7 +673,7 @@ window.LiveElement.Scale.Console.Tests.testMap = {
         var snapshot_definition = {
             'directives': {
                 'system': {
-                    'class': ['Novel', 'Novella'],
+                    'recordtype': ['Novel', 'Novella'],
                     'authentication': true
                 }, 
                 'view': 'processor=json'

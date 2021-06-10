@@ -1,7 +1,7 @@
 <h2>Feed</h2>
-<element-entitysearch entityType="feed" historyPath="${connection}/${class}/${query}/${@id}" blankOptionText="create new feed" live-trigger="loaded:IdeFeedEdit" allowNew>
+<element-entitysearch entityType="feed" historyPath="${connection}/${recordtype}/${query}/${@id}" blankOptionText="create new feed" live-trigger="loaded:IdeFeedEdit" allowNew>
     <input name="connection" type="search" placeholder="search connection @id" autocomplete="off" list supporting />
-    <input name="class" type="search" placeholder="search class" autocomplete="off" list supporting />
+    <input name="recordtype" type="search" placeholder="search recordtype" autocomplete="off" list supporting />
     <input name="query" type="search" placeholder="search query" autocomplete="off" list supporting />
     <input name="@id" type="search" placeholder="search @id, or type 'new'..." autocomplete="off" list primary />
 </element-entitysearch>
@@ -11,7 +11,7 @@
     <element-snippet>
 /* CREATE feed */
 window.fetch(
-    `${window.LiveElement.Scale.Console.IDE.connectionURL}/feed/${window.LiveElement.Scale.Console.IDE.Feed.feedElement.class}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement.query}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement['@id']}.json`, 
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/feed/${window.LiveElement.Scale.Console.IDE.Feed.feedElement.recordtype}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement.query}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement['@id']}.json`, 
     {
         method: 'PUT', 
         headers: {"Content-Type": 'application/json'}, 
@@ -24,7 +24,7 @@ window.fetch(
 
 /* DELETE feed */
 window.fetch(
-    `${window.LiveElement.Scale.Console.IDE.connectionURL}/feed/${window.LiveElement.Scale.Console.IDE.Feed.feedElement.class}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement.query}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement['@id']}.json`, 
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/feed/${window.LiveElement.Scale.Console.IDE.Feed.feedElement.recordtype}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement.query}/${window.LiveElement.Scale.Console.IDE.Feed.feedElement['@id']}.json`, 
     {method: 'DELETE'}
 )
     </element-snippet>
