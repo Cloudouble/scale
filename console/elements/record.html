@@ -190,8 +190,9 @@
             if ($this['@type'] && $this.constructor.classDefinitions[$this['@type']]) {
                 var properties = Object.keys($this.constructor.classDefinitions[$this['@type']].properties || {})
                 properties.forEach(property => {
-                    if ($this[property] != undefined) {
-                        returnObject[property] = $this[property]
+                    var prefixedProperty = (property in window.HTMLElement.prototype) ? `${window.LiveElement.Scale.Console.IDE.nativePropertyPrefix}${property}` : property
+                    if ($this[prefixedProperty] != undefined) {
+                        returnObject[property] = $this[prefixedProperty]
                     }
                 })
             }
@@ -325,13 +326,10 @@
                     var jumpButton = document.createElement('element-icon')
                     jumpButton.innerHTML = 'double_arrow'
                     jumpButton.addEventListener('click', event => {
-                        console.log('line 328')
                         var entitySearchElement = window.LiveElement.Scale.Console.IDE.pageElement.querySelector('section[name="record"] element-entitysearch')
                         if (entitySearchElement) {
-                            console.log('line 331')
                             var searchTypeInput = entitySearchElement.querySelector('input[name="@type"]')
                             if (searchTypeInput) {
-                                console.log('line 334')
                                 searchTypeInput.value = recordType
                                 searchTypeInput.dispatchEvent(new window.Event('change'))
                                 var searchIdInput = entitySearchElement.querySelector('input[name="@id"]')
@@ -339,7 +337,6 @@
                                 searchIdInput.dispatchEvent(new window.Event('change'))
                                 var searchButton = entitySearchElement.shadowRoot.querySelector('button[name="load"]')
                                 if (searchButton) {
-                                    console.log('line 342')
                                     searchButton.dispatchEvent(new window.Event('click'))
                                 }
                             }
@@ -513,39 +510,42 @@
                     var makeRow = function(field, makeRowFieldValue) {
                         var setFieldValue = function(fieldName, fieldType, tbody) {
                             if (fieldName) {
-                                var oldValueSerialised = JSON.stringify($this[fieldName] || ''), newValue = Array.from(tbody.querySelectorAll(`tr[name="${fieldName}"] td[name="value"] input[name="value"]`))
-                                        .map(i => i.value).filter(v => v != '')
+                                var prefixedFieldName = (fieldName in window.HTMLElement.prototype) ? `${window.LiveElement.Scale.Console.IDE.nativePropertyPrefix}${fieldName}` : fieldName
+                                var newValue = Array.from(tbody.querySelectorAll(`tr[name="${fieldName}"] td[name="value"] input[name="value"]`)).map(i => i.value).filter(v => v != '')
                                 if (!newValue.length) {
-                                    $this[fieldName] = undefined
+                                    $this[prefixedFieldName] = undefined
                                 } else if (newValue.length == 1) {
                                     if ($this.constructor.datatypeElements[fieldType]) {
-                                        $this[fieldName] = newValue[0]
+                                        $this[prefixedFieldName] = newValue[0]
                                     } else {
                                         if (newValue[0] && typeof newValue[0] == 'object') {
-                                            $this[fieldName] = newValue[0]
+                                            $this[prefixedFieldName] = newValue[0]
                                         } else {
-                                            $this[fieldName] = {'@type': fieldType, '@id': newValue[0]}
+                                            $this[prefixedFieldName] = {'@type': fieldType, '@id': newValue[0]}
                                         }
                                     }
                                 } else {
-                                    $this[fieldName] = newValue
+                                    $this[prefixedFieldName] = newValue
                                     if ($this.constructor.datatypeElements[fieldType]) {
-                                        $this[fieldName] = newValue
+                                        $this[prefixedFieldName] = newValue
                                     } else {
-                                        $this[fieldName] = $this[fieldName].map(v => {
+                                        $this[prefixedFieldName] = $this[prefixedFieldName].map(v => {
                                             return (v && typeof v == 'object') ? v : {'@type': fieldType, '@id': v}
                                         })
                                     }
                                 }
-                                if (oldValueSerialised != JSON.stringify($this[fieldName] || '')) {
-                                    $this.dispatchEvent(new window.Event('change'))
-                                }
+                                $this.dispatchEvent(new window.Event('change'))
                             }
                         }
                         var createNewValueInput = function(fieldType) {
                             var fieldTypeValidation = $this.constructor.datatypeElements[fieldType] || $this.constructor.datatypeElements.Record || {}, 
                                 fieldValueInput = window.LiveElement.Scale.Core.createElement(fieldTypeValidation.tagName || 'input', 
-                                    {...fieldTypeValidation, ...{name: 'value'}}, field?makeRowFieldValue||'':'')
+                                    {...fieldTypeValidation, ...{name: 'value'}})
+                            if (typeof makeRowFieldValue == 'object' && makeRowFieldValue['@id']) {
+                                fieldValueInput.value = makeRowFieldValue['@id']
+                            } else if (typeof makeRowFieldValue != 'object' || (typeof makeRowFieldValue == 'object' && !makeRowFieldValue)) {
+                                fieldValueInput.value = field?makeRowFieldValue||'':''
+                            }
                             if (!fieldType) {
                                 fieldValueInput.setAttribute('type', 'text')
                                 fieldValueInput.removeAttribute('pattern')
@@ -571,6 +571,8 @@
                                     } else {
                                         return null
                                     }
+                                } else if (makeRowFieldValue && typeof makeRowFieldValue == 'object' && makeRowFieldValue['@type']) {
+                                    return makeRowFieldValue['@type']
                                 } else {
                                     if ((classDefinition.properties[field].types||[]).length == 0) {
                                         return null
@@ -634,7 +636,11 @@
                             fieldTypeDatalist.innerHTML = ''
                         }
                         var fieldTypeInput = window.LiveElement.Scale.Core.createElement('input', {name: 'datatype', type: 'search', list: fieldTypeDatalistId})
-                        fieldTypeInput.value = deduceTypeFromValue(field) || ''
+                        if (typeof makeRowFieldValue == 'object' && makeRowFieldValue['@type']) {
+                            fieldTypeInput.value = makeRowFieldValue['@type']
+                        } else {
+                            fieldTypeInput.value = deduceTypeFromValue(field) || ''
+                        }
                         fieldTypeCell.appendChild(fieldTypeInput)
                         fieldTypeCell.appendChild(fieldTypeDatalist)
                         var fieldTypeHintText = fieldTypeInput.value ? (($this.constructor.datatypeDefinitions || {})[fieldTypeInput.value] || {}).label || (window.LiveElement.Scale.Console.IDE.classes[fieldTypeInput.value] || {}).label || fieldTypeInput.value : defaultSmall
@@ -706,22 +712,16 @@
                         return fieldRow
                     }
                     sortedProperties.forEach(field => {
-                        if ($this[field] != undefined) {
+                        var prefixedField = (field in window.HTMLElement.prototype) ? `${window.LiveElement.Scale.Console.IDE.nativePropertyPrefix}${field}` : field
+                        if ($this[prefixedField] != undefined) {
                             if (placeholderRow) {
                                 placeholderRow.remove()
                                 placeholderRow = undefined
                             }
-                            var makeRowforField = function() {
-                                if (Array.isArray($this[field])) {
-                                    $this[field].sort().forEach(v => recordTableBody.appendChild(makeRow(field, v)))
-                                } else {
-                                    recordTableBody.appendChild(makeRow(field, $this[field]))
-                                }
-                            }
-                            if ((!(field in window.HTMLElement.prototype)) || (field in window.HTMLElement.prototype && $this['@type'] 
-                                && (((($this.constructor.classDefinitions[$this['@type']] || {}).properties || {})[field] || {}).types || [])
-                                    .some(t => ($this.constructor.datatypeElements[t] || $this.constructor.datatypeElements.Record).validator($this[field], t)))) {
-                                makeRowforField()
+                            if (Array.isArray($this[prefixedField])) {
+                                $this[prefixedField].sort().forEach(v => recordTableBody.appendChild(makeRow(field, v)))
+                            } else {
+                                recordTableBody.appendChild(makeRow(field, $this[prefixedField]))
                             }
                         }
                     })
@@ -729,6 +729,7 @@
                     if (placeholderRow && typeof placeholderRow.remove == 'function') {
                         placeholderRow.remove()
                     }
+                    $this.dispatchEvent(new window.Event('change'))
                 })
             } else {
                 editorElement.removeAttribute('active')
@@ -748,11 +749,13 @@
                     }
                     Object.keys($this.constructor.entityFields).filter(field => field[0] != '@').sort().forEach(field => {
                         if (field in entity) {
-                            if (String($this[field]) != String(entity[field])) {
-                                $this[field] = entity[field]
+                            var prefixedField = (field in window.HTMLElement.prototype) ? `${window.LiveElement.Scale.Console.IDE.nativePropertyPrefix}${field}` : field
+                            if (String($this[prefixedField]) != String(entity[field])) {
+                                $this[prefixedField] = entity[field]
                             }
                         }
                     })
+                    $this.dispatchEvent(new window.Event('change'))
                 })
             }
         }

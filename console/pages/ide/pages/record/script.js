@@ -18,7 +18,13 @@ window.LiveElement.Live.processors.IdeRecordEdit = function(input) {
             window.LiveElement.Scale.Console.IDE.Record.recordElement = document.createElement('element-record')
             editFieldset.querySelector('h3').after(window.LiveElement.Scale.Console.IDE.Record.recordElement)
             window.LiveElement.Scale.Console.IDE.Record.recordElement.mode = 'editor'
-            Object.assign(window.LiveElement.Scale.Console.IDE.Record.recordElement, input.entity)
+            Object.keys(input.entity).sort().forEach(entityField => {
+                var entityFieldValue = input.entity[entityField]
+                if (entityField in window.HTMLElement.prototype) {
+                    entityField = `${window.LiveElement.Scale.Console.IDE.nativePropertyPrefix}${entityField}`
+                }
+                window.LiveElement.Scale.Console.IDE.Record.recordElement[entityField] = entityFieldValue
+            })
             window.LiveElement.Scale.Console.IDE.Record.recordElement.addEventListener('change', event => {
                 window.LiveElement.Scale.Console.buildSnippets('ide', 'record')
             })

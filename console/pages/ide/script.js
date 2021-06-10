@@ -3,6 +3,7 @@ window.LiveElement.Scale.Console.IDE.pageElement = document.getElementById('ide'
 window.LiveElement.Scale.Console.IDE.systemURL = `${window.localStorage.getItem('system:system_access_url')}${window.localStorage.getItem('system:system_root')}`
 window.LiveElement.Scale.Console.IDE.connectionURL = `${window.LiveElement.Scale.Console.IDE.systemURL}/connection/${window.localStorage.getItem('system:connection_id')}`
 window.LiveElement.Scale.Console.IDE.newFlag = '---new---'
+window.LiveElement.Scale.Console.IDE.nativePropertyPrefix = '_X_'
 
 window.LiveElement.Scale.Console.IDE.cleanEditorEntity = function(editor, context, targetKey) {
     var cleanRecord = Object.assign({}, ...Array.from(editor.querySelectorAll('tr[name]')).filter(tr => {
