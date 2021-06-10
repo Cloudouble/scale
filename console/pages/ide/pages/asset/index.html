@@ -9,7 +9,7 @@
 /* SAVE asset */
 /* NOTE: body => window.btoa('your plain text or raw binary body') */
 window.fetch(
-    `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${window.LiveElement.Scale.Console.IDE.Asset.assetElement.path}.json`, 
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/system/asset/${window.LiveElement.Scale.Console.IDE.Asset.assetElement.path}.json`, 
     {
         method: 'PUT', 
         headers: {'Content-Type': `${window.LiveElement.Scale.Console.IDE.Asset.assetElement.contenttype}`}, 
@@ -19,7 +19,7 @@ window.fetch(
             
 /* DELETE asset */
 window.fetch(
-    `${window.LiveElement.Scale.Console.IDE.connectionURL}/asset/${window.LiveElement.Scale.Console.IDE.Asset.assetElement.path}.json`, 
+    `${window.LiveElement.Scale.Console.IDE.connectionURL}/system/asset/${window.LiveElement.Scale.Console.IDE.Asset.assetElement.path}.json`, 
     {
         method: 'DELETE'
     }

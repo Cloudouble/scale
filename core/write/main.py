@@ -41,11 +41,11 @@ def main(event, context):
                     pass
         elif entity_type in ['asset', 'static', 'error'] and event.get('path'):
             if entity_type == 'asset': 
-                object_path = '{data_root}/asset/{path}'.format(data_root=env['data_root'], path=event['path'])
+                object_path = '{data_root}/system/asset/{path}'.format(data_root=env['data_root'], path=event['path'])
             elif entity_type == 'static':
                 object_path = event['path']
             elif entity_type == 'error':
-                object_path = '{data_root}/error/{path}.html'.format(data_root=env['data_root'], path=event['path'])
+                object_path = '{data_root}/system/error/{path}.html'.format(data_root=env['data_root'], path=event['path'])
                 if object_path.endswith('.html.html'):
                     object_path = object_path.replace('.html.html', '.html')
             the_object = bucket.Object(object_path)

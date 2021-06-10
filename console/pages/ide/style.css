@@ -1,4 +1,4 @@
-#ide:not([entity-type]) > section[name="record"] {
+#ide:not([entity-type]) > section[name="asset"] {
     display: block;
 }
 #ide div[name="sidebar"] {
