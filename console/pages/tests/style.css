@@ -67,7 +67,7 @@
 #tests tr.code-snippet details summary {
     cursor: pointer;
 }
-#tests tr.code-snippet details code, code.confirmation {
+#tests tr.code-snippet details code, label[name="confirmation"] code {
     white-space: pre;
     max-width: calc(100% - 20px);
     max-height: unset;
@@ -76,11 +76,11 @@
     color: white;
 }
 
-#tests table td code.result {
+#tests table td label[name="result"] code {
     background-color: lightgrey;
     min-height: 40px;
 }
-#tests table td code.confirmation {
+#tests table td label[name="confirmation"] code {
     min-height: 80px;
     max-height: 300px;
     overflow: auto;
