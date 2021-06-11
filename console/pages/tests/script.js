@@ -175,10 +175,9 @@ function(connection_url, system_access_url, system_root, connection_id) {
     'create-view': {
         runner: 
 function(connection_url, system_access_url, system_root, connection_id) {
-    var view_id = window.LiveElement.Scale.Core.generateUUID4()
-    var view = {processor: 'json', content_type: 'application/json', suffix: 'json'}
+    var view = {processor: 'json', content_type: 'application/json'}
     return window.fetch(
-        `${connection_url}/view/${view_id}.json`, 
+        `${connection_url}/system/view/json.json`, 
         {
             method: 'PUT', 
             headers: {
@@ -187,7 +186,7 @@ function(connection_url, system_access_url, system_root, connection_id) {
             body: JSON.stringify(view)
         }
     ).then(r => {
-        return view_id
+        return 'json'
     })
 },
         title: 'Create "json" view', 
