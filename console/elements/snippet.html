@@ -26,7 +26,6 @@
     class Snippet extends window.LiveElement.Element.elements.HTMLElement {
 
         static __extends = 'HTMLElement'
-        static __properties = ['built', 'mode']
 
         constructor() {
             super()
@@ -35,7 +34,7 @@
         }
 
         static get observedAttributes() {
-            return (super.observedAttributes || []).concat(...this.__properties)
+            return (super.observedAttributes || []).concat('built', 'mode', 'open', 'summary')
         }
         
         static aceOptions = {
@@ -73,6 +72,20 @@
             $this.editor.setValue(newValue)
             $this.appendChild(codeElement)
             $this.setAttribute('built', true)
+        }
+        
+        open($this, value) {
+            if (value) {
+                $this.shadowRoot.querySelector('details').setAttribute('open', true)
+            } else {
+                $this.shadowRoot.querySelector('details').removeAttribute('open')
+            }
+            return value
+        }
+        
+        summary($this, value) {
+            $this.shadowRoot.querySelector('summary').innerHTML = value ? value : ''
+            return value
         }
         
     }

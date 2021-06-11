@@ -1,12 +1,27 @@
 #tests table th[scope="col"] {
     font-size: 120%;
+    padding-bottom: 1em;
 }
 
 #tests table {
     border-collapse: collapse;
+    width: 99%;
+}
+#tests table tr[name] th {
+    width: 30%;
+    min-width: 300px;
+    max-width: 500px;
+}
+#tests table tr[name] td {
+    min-width: 600px;
+    width: auto;
 }
 #tests table td, #tests table th[scope="row"] {
     border-top: 1px solid var(--palette--color-chrome);
+}
+#tests table tr.snippet td {
+    border-top: none;
+    padding-bottom: 5em;
 }
 #tests table td label:not([status]) {
     display: none;
