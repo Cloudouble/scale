@@ -190,16 +190,15 @@ function(connection_url, system_access_url, system_root, connection_id) {
     })
 },
         title: 'Create "json" view', 
-        resultLabel: 'View ID', 
+        resultLabel: 'View Handle', 
         confirmationLabel: 'View Object'
     }, 
     'create-query': {
         runner: 
 function(connection_url, system_access_url, system_root, connection_id) {
-    var query_id = window.LiveElement.Scale.Core.generateUUID4()
-    var query = {processor: 'books', vector: ['numberOfPages'], options: {pagesFilter: true}}
+    var query = {processor: 'books', vector: ['numberOfPages'], options: {pagesFilter: true}, recordtypes: ['Book']}
     return window.fetch(
-        `${connection_url}/query/Book/${query_id}.json`, 
+        `${connection_url}/system/query/totalpages.json`, 
         {
             method: 'PUT', 
             headers: {
@@ -208,11 +207,11 @@ function(connection_url, system_access_url, system_root, connection_id) {
             body: JSON.stringify(query)
         }
     ).then(r => {
-        return query_id
+        return 'totalpages'
     })
 },
         title: 'Create "totalPages" Query', 
-        resultLabel: 'Query ID', 
+        resultLabel: 'Query Handle', 
         confirmationLabel: 'Query Object'
     }, 
     'create-record-post': {
