@@ -421,16 +421,15 @@ function(connection_url, system_access_url, system_root, connection_id) {
                 var message = {}
                 try {
                     message = JSON.parse(event.data)
-                    if (tr.querySelector('time[name="process"]').innerHTML == '...') {
+                    if (message.tunnel_id) {
                         tr.querySelector('time[name="process"]').innerHTML = Math.round(window.performance.now() - now)
+                        tr.querySelector('label[name="confirmation"] div').innerHTML =  `<element-snippet open="true", summary="Tunnel ID">${message.tunnel_id}</element-snippet>`
+                        tr.querySelector('label[name="confirmation"]').setAttribute('status', 'success')
+                        tr.querySelector('label[name="result"]').setAttribute('status', 'success')
                     }
-                    if (tr.querySelector('label[name="confirmation"] code').innerHTML == '---confirming---') {
-                        tr.querySelector('label[name="confirmation"] code').innerHTML = message.tunnel_id
-                    }
-                    tr.querySelector('label[name="confirmation"]').setAttribute('status', 'success')
                 } catch(e) {
                     tr.querySelector('time[name="process"]').innerHTML = ' ---error--- '
-                    tr.querySelector('label[name="confirmation"] code').innerHTML = ' ---error--- '
+                    tr.querySelector('label[name="confirmation"] div').innerHTML = `<element-snippet open="true", summary="Tunnel ID">---error---</element-snippet>`
                     tr.querySelector('label[name="confirmation"]').setAttribute('status', 'error')
                 }
             })
@@ -452,16 +451,12 @@ function(connection_url, system_access_url, system_root, connection_id) {
         var tr = document.querySelector('#tests table tr[name="send-tunnel"]')
         tr.setAttribute('now', window.performance.now())
         var receiveMessage = function(event) {
-            if (tr.querySelector('time[name="process"]').innerHTML == '...') {
-                tr.querySelector('time[name="process"]').innerHTML = Math.round(window.performance.now() - tr.getAttribute('now'))
-            }
-            if (tr.querySelector('label[name="confirmation"] code').innerHTML == '---confirming---') {
-                tr.querySelector('label[name="confirmation"] code').innerHTML = event.data
-            }
+            tr.querySelector('time[name="process"]').innerHTML = Math.round(window.performance.now() - tr.getAttribute('now'))
+            tr.querySelector('label[name="confirmation"] code').innerHTML = event.data
             tr.querySelector('label[name="confirmation"]').setAttribute('status', 'success')
             window.LiveElement.Scale.Console.Tests.tunnel.removeEventListener('message', receiveMessage)
         }
-        var tunnel_key = document.querySelector('#tests table tr[name="create-tunnel"] code.confirmation').innerHTML
+        var tunnel_key = document.querySelector('#tests table tr[name="create-tunnel"] label[name="confirmation"] code').innerHTML
         window.fetch(`${system_access_url}${system_root}/tunnel/${tunnel_key}`, {
             method: 'PUT', 
             body: JSON.stringify(data)
