@@ -38,6 +38,12 @@ window.LiveElement.Scale.Console.Tests.runTest = function(tr, test) {
                     : `<element-snippet open="true", summary="${confirmationLabelSummary}">${processResult.confirmation}</element-snippet>`
                 confirmationLabel.setAttribute('status', 'success')
                 window.localStorage.setItem(`tests:${testName}:confirmation`, JSON.stringify(processResult.confirmation, null, 4))
+            } else {
+                tr.querySelector('time').innerHTML = `${Math.round(window.performance.now() - start)}ms`
+                resultLabel.setAttribute('status', 'error')
+                tr.querySelector('time[name="process"]').innerHTML = ' ---error--- '
+                confirmationLabel.querySelector('div').innerHTML = `<element-snippet open="true", summary="${confirmationLabelSummary}">---error---</element-snippet>`
+                confirmationLabel.setAttribute('status', 'error')
             }
         })
         return result
@@ -309,10 +315,9 @@ function(connection_url, system_access_url, system_root, connection_id) {
     'create-bookreadonly-mask': {
         runner: 
 function(connection_url, system_access_url, system_root, connection_id) {
-    var mask_id = window.LiveElement.Scale.Core.generateUUID4()
     var mask = {record: {GET: {Book: "*"}}}
     return window.fetch(
-        `${connection_url}/mask/${mask_id}.json`, 
+        `${connection_url}/system/mask/bookreadonly.json`, 
         {
             method: 'PUT', 
             headers: {
@@ -321,10 +326,10 @@ function(connection_url, system_access_url, system_root, connection_id) {
             body: JSON.stringify(mask)
         }
     ).then(r => {
-        return mask_id
+        return 'bookreadonly'
     })
 }, 
-        title: 'Create "Books-Read-Only" Mask', 
+        title: 'Create "Book Read Only" Mask', 
         resultLabel: 'Mask ID', 
         confirmationLabel: 'Mask Object'
     }, 
@@ -375,7 +380,7 @@ function(connection_url, system_access_url, system_root, connection_id) {
 }, 
         title: 'Create "Book-Read-Only" Connection', 
         resultLabel: 'Connection ID', 
-        confirmationLAbel: 'Connection Object'
+        confirmationLabel: 'Connection Object'
     }, 
     'delete-bookreadonly-connection': {
         runner: 
