@@ -1,46 +1,48 @@
-_/system/
-_/system/acceptor/{path}
-_/system/asset/{path}
-_/system/authentication/{name}.json
-_/system/configuration/{name}.json
-_/system/daemon/{name}.json
-_/system/datatype/{name}.json
-_/system/element/{name}.html
-_/system/error/{code}.html
-_/system/environment/{name}.html
-_/system/exporter/{name}.json
-_/system/importer/{name}.json
-_/system/mask/{name}.json
-_/system/package/{name}.json
-_/system/packager/{name}.json
-_/system/policy/{name}.json
-_/system/processor/{name}.json
-_/system/publisher/{name}.json
-_/system/query/{name}.json
-_/system/recordtype/{name}.json
-_/system/render/{name}.json
-_/system/replicator/{name}.json
-_/system/schedule/{name}.json
-_/system/schema/{name}.json
-_/system/usertype/{name}.json
-_/system/view/{name}.json
+_/core/
+_/core/api/{name}.json                  - access gateways
+_/core/application/{name}.json          - PWA apps hosted on public directories
+_/core/asset/{path}                     - blob data used by the system (not public)
+_/core/authentication/{name}.json       - user gateways 
+_/core/configuration/{name}.json        - core system configurations
+_/core/curator/{name}.json              - scheduled or on-demand processes that do clean up
+_/core/datatype/{name}.json             - definitions of datatypes that fields can validate against
+_/core/element/{name}.html              - HTML elements for rendering datatypes as per https://github.com/Cloudouble/element and https://github.com/Cloudouble/schema
+_/core/error/{code}.html                - HTML error pages
+_/core/environment/{name}.json          - environment contexts which are passed to processors as the `env` variable
+_/core/exporter/{name}.json             - scheduled or on-demand processes that export some or all of the current system state (core, scratchpad, time, archive, record, user, output)
+_/core/field/{name}.json                - definitions of fields that records can have
+_/core/importer/{name}.json             - processes that respond to matching import files and process them into state updates (core, scratchpad, time, archive, record, user, output)
+_/core/mask/{name}.json                 - maps of permissions that are applied to users, matched as a result of successful authentication
+_/core/package/{name}.json              - bundles of features to add functionality to the system
+_/core/packager/{name}.json             - scheduled or on-demand processes that build packages from the system
+_/core/platform/{name}.json             - adapters for running the system on various underlaying hosting technology stacks (e.g. aws, azure, baremetal)
+_/core/policy/{name}.json               - security policies to define levels of system access that are applied to processors
+_/core/processor/{name}.json            - executable code that performs tasks within the system, used by other system features
+_/core/query/{name}.json                - processes that create pre-compiled result sets from records
+_/core/reactor/{name}.json              - processes that react to system changes
+_/core/recordtype/{name}.json           - definitions of all the types of records that are allowed on the system 
+_/core/render/{name}.json               - javascript rendering definitions as per https://github.com/Cloudouble/schema
+_/core/schedule/{name}.json             - definitions of regular event triggers that can be used to make processes happen automatically
+_/core/schema/{name}.json               - namespaced collections of record types
+_/core/usertype/{name}.json             - definitions of different kinds of third-parties and how they interact with the system
+_/core/view/{name}.json                 - definitions that are used to render records and query results into output for users to consume
 
 
-_/scratchpad/  (all values are for current state)
-_/scratchpad/value/{hash}/{field}.json (records having this field value) 
-_/scratchpad/query/{name}.json  (matching records)
-_/scratchpad/field/{name}/query.json  (list queries watching this field)
-_/scratchpad/field/{name}/record.json  (records containing this field)
-_/scratchpad/listener/query/{query}/{usertype}.json ($usertype listening query)
-_/scratchpad/listener/record/{record}/{usertype}.json ($usertype listening record)
-_/scratchpad/listener/export/{name}/{usertype}.json ($usertype listening export)
-_/scratchpad/listener/view/{name}/{$usertype}.json ($usertype listening view)
-_/scratchpad/asset/{hash}/view.json (views depending on asset)
-_/scratchpad/asset/{hash}/publisher.json (publishers depending on asset)
+_/scratchpad/                                           - all values are for current state
+_/scratchpad/value/{hash}/{field}.json                  - records having this field value 
+_/scratchpad/query/{name}.json                          - matching records
+_/scratchpad/field/{name}/query.json                    - list queries watching this field
+_/scratchpad/field/{name}/record.json                   - records containing this field
+_/scratchpad/listener/query/{query}/{usertype}.json     - $usertype listening query
+_/scratchpad/listener/record/{record}/{usertype}.json   - $usertype listening record
+_/scratchpad/listener/export/{name}/{usertype}.json     - $usertype listening export
+_/scratchpad/listener/view/{name}/{usertype}.json       - $usertype listening view
+_/scratchpad/asset/{hash}/view.json                     - views depending on asset
+_/scratchpad/asset/{hash}/publisher.json                - publishers depending on asset
 
 
-_/time/  (all values are timestamp when corresponding scratchpad last changed)
-_/time/system/*
+_/time/                                 - all values are timestamps of when corresponding scratchpad last changed
+_/time/core/*
 _/time/scratchpad/*
 _/time/record/*
 _/time/import/*
@@ -48,8 +50,8 @@ _/time/user/*
 _/time/output/*
 
 
-_/archive/ (stores values as at {time} timestamp, append .{time} to object path)
-_/archive/system/*.{time}
+_/archive/                              - stores values as at {time} timestamp, append .{time} to object path
+_/archive/core/*.{time}
 _/archive/scratchpad/*.{time}
 _/archive/record/*.{time}
 _/archive/import/*.{time}
@@ -57,26 +59,56 @@ _/archive/user/*.{time}
 _/archive/output/*.{time}
 
 
-_/request/
+_/request/                              - apis write to here
 _/request/{uuid}.json
 
 
-_/record/
+_/record/                               - the actual data being managed by the system
 _/record/{uuid}.json
 
 
-_/import/
+_/import/                               - receive import files here
 _/import/{key}.{format}
 
 
-_/user/
-_/user/{usertype}/{id}/connect.json ($usertype => channel|connection|daemon)
-_/user/{usertype}/{id}/listener/query/{query}/{name}.json {view, ...view overrides}
-_/user/{usertype}/{id}/listener/record/{record}/{name}.json {view, ...view overrides}
-_/user/{usertype}/{id}/listener/export/{export}/{name}.json {view, ...view overrides}
+_/user/                                                         
+_/user/{usertype}/{id}/connect.json                             
+_/user/{usertype}/{id}/listener/query/{query}/{name}.json       - {view, ...view overrides}
+_/user/{usertype}/{id}/listener/record/{record}/{name}.json     - {view, ...view overrides}
+_/user/{usertype}/{id}/listener/export/{export}/{name}.json     - {view, ...view overrides}
 
 
-_/output/
-_/output/query/{query}/{$usertype}/{uuid}/{listener}.{view}
-_/output/record/{record}/{$usertype}/{uuid}/{listener}.{view}
-_/output/export/{export}/{$usertype}/{uuid}/{listener}.{view}
+_/output/                                                       - the data readable by users
+_/output/query/{query}/{usertype}/{uuid}/{listener}.{view}      
+_/output/record/{record}/{usertype}/{uuid}/{listener}.{view}
+_/output/export/{export}/{usertype}/{uuid}/{listener}.{view}
+
+---
+
+Core comes installed as standard with: 
+api: https-aws-cloudfront, websocket-aws-apigateway
+application: console
+authentication: sudo, email-code, password, sms-code, key, public
+configuration: current, development
+curator: request, archive, import, user, output
+datatype: Boolean, Date, DateTime, Number, Text, Time
+error: 400, 401, 403, 404, 410, 500
+environment: local, global
+exporter: csv, json, zip
+importer: csv, json, zip
+mask: sudo, administrator, user, readonly
+package: core
+packager: core
+policy: core, reactor, trusted, semitrusted, untrusted
+processor: all processors from the core package
+query: math, list, filter
+schedule: second, minute, hour, day, week, month, year
+schema: see below 
+usertype:  channel, connection, daemon, publisher, replicator, repository, tunnel
+view: csv, html, json, jsonld, microdata, xml, yaml, zip
+
+Built-in schema version: get latest release number from https://schema.org/version/latest, then use versioned feed for current-https as at https://raw.githubusercontent.com/schemaorg/schemaorg/main/data/releases/12.0/schemaorg-current-https.jsonld
+
+Processor Naming: 
+
+$namespace-$package-$name
