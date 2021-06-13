@@ -76,27 +76,8 @@
 #tests tr.code-snippet td {
     border-top: none;
 }
-#tests tr.code-snippet details {
-    margin-bottom: 2em;
-}
-#tests tr.code-snippet details summary {
-    cursor: pointer;
-}
-#tests tr.code-snippet details code, label[name="confirmation"] code {
-    white-space: pre;
-    max-width: calc(100% - 20px);
-    max-height: unset;
-    overflow-x: auto;
-    background-color: darkgrey;
-    color: white;
-}
 
-#tests table td label[name="result"] code {
+#tests table td label[name="result"] input[name="result"] {
     background-color: lightgrey;
-    min-height: 40px;
-}
-#tests table td label[name="confirmation"] code {
-    min-height: 80px;
-    max-height: 300px;
-    overflow: auto;
+    width: 99%;
 }

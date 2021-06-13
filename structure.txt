@@ -1,0 +1,82 @@
+_/system/
+_/system/acceptor/{path}
+_/system/asset/{path}
+_/system/authentication/{name}.json
+_/system/configuration/{name}.json
+_/system/daemon/{name}.json
+_/system/datatype/{name}.json
+_/system/element/{name}.html
+_/system/error/{code}.html
+_/system/environment/{name}.html
+_/system/exporter/{name}.json
+_/system/importer/{name}.json
+_/system/mask/{name}.json
+_/system/package/{name}.json
+_/system/packager/{name}.json
+_/system/policy/{name}.json
+_/system/processor/{name}.json
+_/system/publisher/{name}.json
+_/system/query/{name}.json
+_/system/recordtype/{name}.json
+_/system/render/{name}.json
+_/system/replicator/{name}.json
+_/system/schedule/{name}.json
+_/system/schema/{name}.json
+_/system/usertype/{name}.json
+_/system/view/{name}.json
+
+
+_/scratchpad/  (all values are for current state)
+_/scratchpad/value/{hash}/{field}.json (records having this field value) 
+_/scratchpad/query/{name}.json  (matching records)
+_/scratchpad/field/{name}/query.json  (list queries watching this field)
+_/scratchpad/field/{name}/record.json  (records containing this field)
+_/scratchpad/listener/query/{query}/{usertype}.json ($usertype listening query)
+_/scratchpad/listener/record/{record}/{usertype}.json ($usertype listening record)
+_/scratchpad/listener/export/{name}/{usertype}.json ($usertype listening export)
+_/scratchpad/listener/view/{name}/{$usertype}.json ($usertype listening view)
+_/scratchpad/asset/{hash}/view.json (views depending on asset)
+_/scratchpad/asset/{hash}/publisher.json (publishers depending on asset)
+
+
+_/time/  (all values are timestamp when corresponding scratchpad last changed)
+_/time/system/*
+_/time/scratchpad/*
+_/time/record/*
+_/time/import/*
+_/time/user/*
+_/time/output/*
+
+
+_/archive/ (stores values as at {time} timestamp, append .{time} to object path)
+_/archive/system/*.{time}
+_/archive/scratchpad/*.{time}
+_/archive/record/*.{time}
+_/archive/import/*.{time}
+_/archive/user/*.{time}
+_/archive/output/*.{time}
+
+
+_/request/
+_/request/{uuid}.json
+
+
+_/record/
+_/record/{uuid}.json
+
+
+_/import/
+_/import/{key}.{format}
+
+
+_/user/
+_/user/{usertype}/{id}/connect.json ($usertype => channel|connection|daemon)
+_/user/{usertype}/{id}/listener/query/{query}/{name}.json {view, ...view overrides}
+_/user/{usertype}/{id}/listener/record/{record}/{name}.json {view, ...view overrides}
+_/user/{usertype}/{id}/listener/export/{export}/{name}.json {view, ...view overrides}
+
+
+_/output/
+_/output/query/{query}/{$usertype}/{uuid}/{listener}.{view}
+_/output/record/{record}/{$usertype}/{uuid}/{listener}.{view}
+_/output/export/{export}/{$usertype}/{uuid}/{listener}.{view}

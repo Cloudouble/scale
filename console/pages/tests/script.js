@@ -6,7 +6,7 @@ window.LiveElement.Scale.Console.Tests.runTest = function(tr, test) {
     window.localStorage.removeItem(`tests:${testName}:result`)
     var resultLabel = tr.querySelector(':scope > td > label[name="result"]'), confirmationLabel = tr.querySelector(':scope > td > label[name="confirmation"]')
     resultLabel.setAttribute('status', 'pending')
-    resultLabel.querySelector('code').innerHTML = '---running---'
+    resultLabel.querySelector('input[name="result"]').value = '---running---'
     confirmationLabel.querySelector('div').innerHTML = `<element-snippet open="true", summary="${confirmationLabelSummary}">---waiting---</element-snippet>`
     confirmationLabel.setAttribute('status', 'pending')
     var start = window.performance.now()
@@ -31,14 +31,17 @@ window.LiveElement.Scale.Console.Tests.runTest = function(tr, test) {
             context: testContext, 
             result: result, 
         }).then(processResult => {
-            if (!(processResult && typeof processResult == 'object' && processResult.confirmation === false)) {
+            if (processResult && !processResult.timing && processResult.confirmation === true) {
+                resultLabel.setAttribute('status', 'success')
+                confirmationLabel.setAttribute('status', 'success')
+            } else if (!(processResult && typeof processResult == 'object' && processResult.confirmation === false)) {
                 tr.querySelector('time[name="process"]').innerHTML = processResult && typeof processResult == 'object' && typeof processResult.timing == 'number' ? processResult.timing : ' ---error--- '
                 confirmationLabel.querySelector('div').innerHTML = processResult && typeof processResult == 'object' && processResult.confirmation && typeof processResult.confirmation == 'object' 
                     ? `<element-snippet open="true", summary="${confirmationLabelSummary}">${JSON.stringify(processResult.confirmation, null, 4)}</element-snippet>` 
                     : `<element-snippet open="true", summary="${confirmationLabelSummary}">${processResult.confirmation}</element-snippet>`
                 confirmationLabel.setAttribute('status', 'success')
                 window.localStorage.setItem(`tests:${testName}:confirmation`, JSON.stringify(processResult.confirmation, null, 4))
-            } else {
+            }else {
                 tr.querySelector('time').innerHTML = `${Math.round(window.performance.now() - start)}ms`
                 resultLabel.setAttribute('status', 'error')
                 tr.querySelector('time[name="process"]').innerHTML = ' ---error--- '
@@ -65,19 +68,19 @@ window.setTimeout(() => {
             `${entry[1].title}<div><i>${entry[0]}</i><button>Run</button><time name="request">0</time><time name="process">0</time></div>`)
         testTh.querySelector('button').addEventListener('click', event => {
             window.LiveElement.Scale.Console.Tests.runTest(testTr, entry[1].runner).then(result => {
-                testTr.querySelector('label[name="result"] code').innerHTML = result
+                testTr.querySelector('label[name="result"] input[name="result"]').value = result
             }).catch(e => {
-                testTr.querySelector('label[name="result"] code').innerHTML = e
+                testTr.querySelector('label[name="result"] input[name="result"]').value = e
             })
         })
         testTr.appendChild(testTh)
         var testTd = document.createElement('td')
-        testTd.innerHTML = `<label name="result">${entry[1].resultLabel}<code></code></label><label name="confirmation"><div></div></label>`
+        testTd.innerHTML = `<label name="result">${entry[1].resultLabel}<input name="result" readonly /></label><label name="confirmation"><div></div></label>`
         testTr.appendChild(testTd)
         var resultStorageKey = `tests:${entry[0]}:result`, confirmationStorageKey = `tests:${entry[0]}:confirmation`
         if (window.localStorage.getItem(resultStorageKey)) {
             testTd.querySelector('label[name="result"]').setAttribute('status', 'success')
-            testTd.querySelector('label[name="result"] code').innerHTML = window.localStorage.getItem(resultStorageKey)
+            testTd.querySelector('label[name="result"] input[name="result"]').value = window.localStorage.getItem(resultStorageKey)
         }
         if (window.localStorage.getItem(confirmationStorageKey)) {
             testTd.querySelector('label[name="confirmation"]').setAttribute('status', 'success')
@@ -419,20 +422,24 @@ function(connection_url, system_access_url, system_root, connection_id) {
             var tr = document.querySelector('#tests table tr[name="create-tunnel"]')
             window.LiveElement.Scale.Console.Tests.tunnel.addEventListener('message', event => {
                 var message = {}
-                try {
-                    message = JSON.parse(event.data)
-                    if (message.tunnel_id) {
-                        tr.querySelector('time[name="process"]').innerHTML = Math.round(window.performance.now() - now)
-                        tr.querySelector('label[name="confirmation"] div').innerHTML =  `<element-snippet open="true", summary="Tunnel ID">${message.tunnel_id}</element-snippet>`
-                        tr.querySelector('label[name="confirmation"]').setAttribute('status', 'success')
-                        tr.querySelector('label[name="result"]').setAttribute('status', 'success')
+                if (event && event.data) {
+                    try {
+                        message = JSON.parse(event.data)
+                        if (message.tunnel_id) {
+                            tr.querySelector('time[name="process"]').innerHTML = Math.round(window.performance.now() - now)
+                            tr.querySelector('label[name="confirmation"] div').innerHTML =  `<element-snippet open="true", summary="Tunnel ID">${message.tunnel_id}</element-snippet>`
+                            window.localStorage.setItem(`tests:create-tunnel:confirmation`, JSON.stringify(message.tunnel_id, null, 4))
+                            tr.querySelector('label[name="confirmation"]').setAttribute('status', 'success')
+                            tr.querySelector('label[name="result"]').setAttribute('status', 'success')
+                        }
+                    } catch(e) {
+                        tr.querySelector('time[name="process"]').innerHTML = ' ---error--- '
+                        tr.querySelector('label[name="confirmation"] div').innerHTML = `<element-snippet open="true", summary="Tunnel ID">---error---</element-snippet>`
+                        tr.querySelector('label[name="confirmation"]').setAttribute('status', 'error')
                     }
-                } catch(e) {
-                    tr.querySelector('time[name="process"]').innerHTML = ' ---error--- '
-                    tr.querySelector('label[name="confirmation"] div').innerHTML = `<element-snippet open="true", summary="Tunnel ID">---error---</element-snippet>`
-                    tr.querySelector('label[name="confirmation"]').setAttribute('status', 'error')
                 }
             })
+            window.localStorage.setItem(`tests:create-tunnel:result`, JSON.stringify(tunnelUrl, null, 4))
             return tunnelUrl
         } catch (e) {
             return e
@@ -452,16 +459,23 @@ function(connection_url, system_access_url, system_root, connection_id) {
         tr.setAttribute('now', window.performance.now())
         var receiveMessage = function(event) {
             tr.querySelector('time[name="process"]').innerHTML = Math.round(window.performance.now() - tr.getAttribute('now'))
-            tr.querySelector('label[name="confirmation"] code').innerHTML = event.data
+            tr.querySelector('label[name="confirmation"] div').innerHTML = `<element-snippet open="true", summary="Tunnel ID">${event.data}</element-snippet>`
             tr.querySelector('label[name="confirmation"]').setAttribute('status', 'success')
             window.LiveElement.Scale.Console.Tests.tunnel.removeEventListener('message', receiveMessage)
         }
-        var tunnel_key = document.querySelector('#tests table tr[name="create-tunnel"] label[name="confirmation"] code').innerHTML
-        window.fetch(`${system_access_url}${system_root}/tunnel/${tunnel_key}`, {
-            method: 'PUT', 
-            body: JSON.stringify(data)
-        })
-        window.LiveElement.Scale.Console.Tests.tunnel.addEventListener('message', receiveMessage)
+        var tunnel_key
+        try {
+            tunnel_key = JSON.parse(window.localStorage.getItem(`tests:create-tunnel:confirmation`))
+        } catch(e) {
+            tunnel_key = undefined
+        }
+        if (tunnel_key) {
+            window.fetch(`${system_access_url}${system_root}/tunnel/${tunnel_key}`, {
+                method: 'PUT', 
+                body: JSON.stringify(data)
+            })
+            window.LiveElement.Scale.Console.Tests.tunnel.addEventListener('message', receiveMessage)
+        }
     }
     return JSON.stringify(data, null, 4)
 }, 
@@ -507,6 +521,15 @@ function(connection_url, system_access_url, system_root, connection_id) {
         var channelReceiveUrl = `${system_access_url.replace('https:', 'wss:')}${system_root}/channel/${channel_id}/${receiveKey}`
         try {
             window.LiveElement.Scale.Console.Tests.channel = new WebSocket(channelReceiveUrl)
+            window.LiveElement.Scale.Console.Tests.channel.addEventListener('open', function() {
+                var tr = document.querySelector('#tests table tr[name="subscribe-channel"]')
+                tr.setAttribute('now', window.performance.now())
+                tr.querySelector('time[name="process"]').innerHTML = Math.round(window.performance.now() - tr.getAttribute('now'))
+                tr.querySelector('label[name="confirmation"] div').innerHTML = `<element-snippet open="true", summary="Subscribed">${window.LiveElement.Scale.Console.Tests.channel.readyState}</element-snippet>`
+                tr.querySelector('label[name="confirmation"]').setAttribute('status', 'success')
+                window.localStorage.setItem('tests:subscribe-channel:confirmation', JSON.stringify(window.LiveElement.Scale.Console.Tests.channel.readyState))
+            })
+            window.localStorage.setItem('tests:subscribe-channel:result', JSON.stringify(channelReceiveUrl))
             return channelReceiveUrl
         } catch (e) {
             return e
@@ -515,7 +538,7 @@ function(connection_url, system_access_url, system_root, connection_id) {
 }, 
         title: 'Subscribe To A Channel', 
         resultLabel: 'Channel Receive URL', 
-        confirmationLabel: 'Channel Object'
+        confirmationLabel: 'Subscribed'
     }, 
     'send-channel': {
         runner: 
@@ -527,13 +550,13 @@ function(connection_url, system_access_url, system_root, connection_id) {
         var sendKey = channel_object.sendKey
         var tr = document.querySelector('#tests table tr[name="send-channel"]')
         tr.setAttribute('now', window.performance.now())
+        window.LiveElement.Scale.Console.Tests.channel.addEventListener('message', receiveMessage)
         var receiveMessage = function(event) {
+            console.log('line 555', event)
             if (tr.querySelector('time[name="process"]').innerHTML == '...') {
                 tr.querySelector('time[name="process"]').innerHTML = Math.round(window.performance.now() - tr.getAttribute('now'))
             }
-            if (tr.querySelector('label[name="confirmation"] code').innerHTML == '---confirming---') {
-                tr.querySelector('label[name="confirmation"] code').innerHTML = event.data
-            }
+            tr.querySelector('label[name="confirmation"] div').innerHTML = `<element-snippet open="true", summary="Data Received">${event.data}</element-snippet>`
             tr.querySelector('label[name="confirmation"]').setAttribute('status', 'success')
             window.LiveElement.Scale.Console.Tests.channel.removeEventListener('message', receiveMessage)
         }
@@ -541,7 +564,6 @@ function(connection_url, system_access_url, system_root, connection_id) {
             method: 'POST', 
             body: JSON.stringify(data)
         })
-        window.LiveElement.Scale.Console.Tests.channel.addEventListener('message', receiveMessage)
     }
     return JSON.stringify(data, null, 4)
 }, 
