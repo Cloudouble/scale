@@ -1,18 +1,21 @@
-_/core/
-_/core/api/{name}.json                  - access gateways
+{root}/{partition}/{path}
+
+
+Core Partition: the objects that run the system
+{root}/core/{scope}/{module}.{json|html|js}
+
 _/core/application/{name}.json          - PWA apps hosted on public directories
-_/core/asset/{path}                     - blob data used by the system (not public)
-_/core/authentication/{name}.json       - user gateways 
-_/core/configuration/{name}.json        - core system configurations
+_/core/asset/{name}.json                - blob data used by the system (not public), stored as base64 encoded string in the 'body' property of the object
+_/core/authentication/{name}.json       - connection gateways 
 _/core/curator/{name}.json              - scheduled or on-demand processes that do clean up
 _/core/datatype/{name}.json             - definitions of datatypes that fields can validate against
 _/core/element/{name}.html              - HTML elements for rendering datatypes as per https://github.com/Cloudouble/element and https://github.com/Cloudouble/schema
 _/core/error/{code}.html                - HTML error pages
-_/core/environment/{name}.json          - environment contexts which are passed to processors as the `env` variable
-_/core/exporter/{name}.json             - scheduled or on-demand processes that export some or all of the current system state (core, scratchpad, time, archive, record, user, output)
+_/core/environment/{name}.json          - core system contexts which are passed to processors as the `env` variable {root: '_', namespace: 'liveelement', @name: {name}}
+_/core/exporter/{name}.json             - scheduled or on-demand processes that export some or all of the current system state (core, scratchpad, time, archive, record, connection, output)
 _/core/field/{name}.json                - definitions of fields that records can have
-_/core/importer/{name}.json             - processes that respond to matching import files and process them into state updates (core, scratchpad, time, archive, record, user, output)
-_/core/mask/{name}.json                 - maps of permissions that are applied to users, matched as a result of successful authentication
+_/core/importer/{name}.json             - processes that respond to matching import files and process them into state updates (core, scratchpad, time, archive, record, connection, output)
+_/core/mask/{name}.json                 - maps of permissions that are applied to connections, matched as a result of successful authentication
 _/core/package/{name}.json              - bundles of features to add functionality to the system
 _/core/packager/{name}.json             - scheduled or on-demand processes that build packages from the system
 _/core/platform/{name}.json             - adapters for running the system on various underlaying hosting technology stacks (e.g. aws, azure, baremetal)
@@ -21,94 +24,189 @@ _/core/processor/{name}.json            - executable code that performs tasks wi
 _/core/query/{name}.json                - processes that create pre-compiled result sets from records
 _/core/reactor/{name}.json              - processes that react to system changes
 _/core/recordtype/{name}.json           - definitions of all the types of records that are allowed on the system 
-_/core/render/{name}.json               - javascript rendering definitions as per https://github.com/Cloudouble/schema
+_/core/render/{name}.js                 - javascript rendering definitions as per https://github.com/Cloudouble/schema
 _/core/schedule/{name}.json             - definitions of regular event triggers that can be used to make processes happen automatically
 _/core/schema/{name}.json               - namespaced collections of record types
-_/core/usertype/{name}.json             - definitions of different kinds of third-parties and how they interact with the system
-_/core/view/{name}.json                 - definitions that are used to render records and query results into output for users to consume
+_/core/connectiontype/{name}.json       - definitions of different kinds of third-parties and how they interact with the system
+_/core/validator/{name}.json            - definitions that are used to validate object types
+_/core/view/{name}.json                 - definitions that are used to render records and query results into output for connections to consume
 
 
-_/scratchpad/                                           - all values are for current state
-_/scratchpad/value/{hash}/{field}.json                  - records having this field value 
-_/scratchpad/query/{name}.json                          - matching records
-_/scratchpad/field/{name}/query.json                    - list queries watching this field
-_/scratchpad/field/{name}/record.json                   - records containing this field
-_/scratchpad/listener/query/{query}/{usertype}.json     - $usertype listening query
-_/scratchpad/listener/record/{record}/{usertype}.json   - $usertype listening record
-_/scratchpad/listener/export/{name}/{usertype}.json     - $usertype listening export
-_/scratchpad/listener/view/{name}/{usertype}.json       - $usertype listening view
-_/scratchpad/asset/{hash}/view.json                     - views depending on asset
-_/scratchpad/asset/{hash}/publisher.json                - publishers depending on asset
+
+ScratchPad Partition: intermediate objects written to and read only by the system
+{root}/scratchpad/{path}.json
+
+_/scratchpad/value/{hash}/{field}.json                          - list records having this field value 
+_/scratchpad/query/{name}.json                                  - list matching records
+_/scratchpad/field/{name}/query.json                            - list queries watching this field
+_/scratchpad/field/{name}/record.json                           - list records containing this field
+_/scratchpad/listener/query/{query}/{connectiontype}.json       - list $connectiontype listening query
+_/scratchpad/listener/record/{record}/{connectiontype}.json     - list $connectiontype listening record
+_/scratchpad/listener/export/{name}/{connectiontype}.json       - list $connectiontype listening export
+_/scratchpad/listener/view/{name}/{connectiontype}.json         - list $connectiontype listening view
+_/scratchpad/asset/{hash}/view.json                             - list views depending on asset
 
 
-_/time/                                 - all values are timestamps of when corresponding scratchpad last changed
-_/time/core/*
-_/time/scratchpad/*
-_/time/record/*
-_/time/import/*
-_/time/user/*
-_/time/output/*
+
+LastModified Partition: object which record when other corresponding objects on other partitions were last modified, all values are a single timestamp
+{root}/lastmodified/{partition}/{path}.json
+
+_/lastmodified/core/*
+_/lastmodified/scratchpad/*
+_/lastmodified/record/*
+_/lastmodified/import/*
+_/lastmodified/connection/*
+_/lastmodified/output/*
 
 
-_/archive/                              - stores values as at {time} timestamp, append .{time} to object path
+
+Archive Partition: stores a copy of the target object as at {time}, with .{time} appended to the target object path
+{root}/lastmodified/{partition}/{path}.{time}
+
 _/archive/core/*.{time}
 _/archive/scratchpad/*.{time}
 _/archive/record/*.{time}
 _/archive/import/*.{time}
-_/archive/user/*.{time}
+_/archive/connection/*.{time}
 _/archive/output/*.{time}
 
 
-_/request/                              - apis write to here
+
+Request Partition: Connect platforms write request objects here with a requested change to the system
+{root}/request/{uuid}.json
+
 _/request/{uuid}.json
 
 
-_/record/                               - the actual data being managed by the system
+
+Record Partition: the actual structured data being managed by the system
+{root}/record/{uuid}.json
+
 _/record/{uuid}.json
 
 
-_/import/                               - receive import files here
+
+Import Partition: bulk object writes received in archival formats  
+{root}/import/{key}.{format} ({key} is a secret key of an installed importer)
+
 _/import/{key}.{format}
 
 
-_/user/                                                         
-_/user/{usertype}/{id}/connect.json                             
-_/user/{usertype}/{id}/listener/query/{query}/{name}.json       - {view, ...view overrides}
-_/user/{usertype}/{id}/listener/record/{record}/{name}.json     - {view, ...view overrides}
-_/user/{usertype}/{id}/listener/export/{export}/{name}.json     - {view, ...view overrides}
+
+Connection Partition: objects defining third-party connections to the system that may read or write data
+{root}/connection/{connectiontype}/{identifier}/{path}.json
+
+_/connection/{connectiontype}/{identifier}/connect.json
+_/connection/{connectiontype}/{identifier}/listen.json {{object type}: { {object identifier}: "{view}" }}
 
 
-_/output/                                                       - the data readable by users
-_/output/query/{query}/{usertype}/{uuid}/{listener}.{view}      
-_/output/record/{record}/{usertype}/{uuid}/{listener}.{view}
-_/output/export/{export}/{usertype}/{uuid}/{listener}.{view}
+
+Output Partition: objects that are compiled from records, query results or exports, being made accessible to connections
+{root}/output/{source object type}/{source object identifier}/{connectiontype}/{connection identifier}/{listener name}.{view name}
+
+_/output/query/{query}/{connectiontype}/{uuid}/{listener}.{view}      
+_/output/record/{record}/{connectiontype}/{uuid}/{listener}.{view}
+_/output/export/{export}/{connectiontype}/{uuid}/{listener}.{view}
 
 ---
 
 Core comes installed as standard with: 
-api: https-aws-cloudfront, websocket-aws-apigateway
 application: console
 authentication: sudo, email-code, password, sms-code, key, public
 configuration: current, development
-curator: request, archive, import, user, output
+curator: request, archive, import, connection, output
 datatype: Boolean, Date, DateTime, Number, Text, Time
-error: 400, 401, 403, 404, 410, 500
+error: 400, 401, 403, 404, 405, 410, 413, 414, 415, 500, 501, 502, 503
 environment: local, global
 exporter: csv, json, zip
 importer: csv, json, zip
-mask: sudo, administrator, user, readonly
+mask: sudo, administrator, connection, readonly
 package: core
 packager: core
+platform: https-aws-cloudfront, websocket-aws-apigateway
 policy: core, reactor, trusted, semitrusted, untrusted
 processor: all processors from the core package
 query: math, list, filter
 schedule: second, minute, hour, day, week, month, year
 schema: see below 
-usertype:  channel, connection, daemon, publisher, replicator, repository, tunnel
+connectiontype:  channel, connection, daemon, publisher, replicator, repository, tunnel
 view: csv, html, json, jsonld, microdata, xml, yaml, zip
 
 Built-in schema version: get latest release number from https://schema.org/version/latest, then use versioned feed for current-https as at https://raw.githubusercontent.com/schemaorg/schemaorg/main/data/releases/12.0/schemaorg-current-https.jsonld
 
+
 Processor Naming: 
 
-$namespace-$package-$name
+$namespace-$package--$name
+$namespace-$package-$scope-$name
+
+
+Core Processors:
+
+
+
+
+Process Flow: 
+
+1: A request comes in via a Connect platform, writes a request to _/request
+
+2: $namespace-core-reactor-request reacts to the new object, 
+    - sync calls $namespace-core--validator(object type, object identifier) to validate according to it's object type (definition in _/core/validator/{object_type}.json)
+    - sync calls $namespace-core--mask(connection identifier, object identifier) to mask according to the connection @mask (_/core/mask/{_/connection/.../connect.json['@mask']}.json)
+    - async calls $namespace-core--write(object identifier, object data)
+    
+3: $namespace-core--write(object identifier, object data) write the masked object to the Store platform in core|record|import|connection
+    - also takes care of the corresponding updates to the _/lastmodified and _/archive partitions
+
+4: $namespace-core-reactor-{connection|core|import|record} reacts to the new/updated/delete object in it's partition
+    - $namespace-core-reactor-connection
+        - when it's the connect.json object:
+            - if object contains no @mask property and has a valid authentication module name as a field with an object (credentials) as its value, 
+                then sync calls $namespace-core--authentication(authentication module name, credentials) which returns @mask and @name
+                    then writes the integrated result back to the connect.json object
+        - when it's the listen.json object: 
+            - updates scratchpad values for ../query/{query}/{connectiontype}.json, ../record/{record}/{connectiontype}.json
+                ../export/{name}/{connectiontype}.json and ../view/{name}/{connectiontype}.json
+            
+    - $namespace-core-reactor-core-*
+        - $namespace-core-reactor-core-asset uses ../asset/{hash}/view.json to find affected views and 
+            for each affected view async calls $namespace-core--view(view name) 
+        - $namespace-core-reactor-core-view updates scratchpad values for ../asset/{hash}/view.json 
+        - $namespace-core-reactor-core-query udpates scratchpad values for ../field/{name}/query.json 
+        
+    - $namespace-core-reactor-import checks _/core/importer/* for an importer with the given key and async calls it (import identifier)
+        - the importer's processor writes its output as _/request/* objects only, with the connection being inherited from the original connection
+            
+    - $namespace-core-reactor-record => updates scratchpad values for ../value/{hash}/{field}.json and ../field/{name}/record.json
+        and also async calls $namespace-core--record(record uuid)
+        
+4: $namespace-core--record(record uuid) uses _/scratchpad/listener/record/{record}/{connectiontype}.json to find affected listeners
+    - for each affected listener async calls $namespace-core--output("record", record uuid, connection identifier, listener name)
+
+5: $namespace-core-reactor-value reacts to _/scratchpad/value/{hash}/{field}.json
+    - uses _/scratchpad/field/{name}/query.json to get affected queries
+    - for each affected query async calls $namespace-core--query(query name, record uuid)
+
+6: $namespace-core--query(query name, record uuid) writes to _/scratchpad/query/{name}.json
+
+7: $namespace-core-reactor-query reacts to _/scratchpad/query/{name}.json and uses _/scratchpad/listener/query/{query}/{connectiontype}.json to find affected listeners
+    - for each affected listener async calls $namespace-core--output("query", query name, connection identifier, listener name)
+
+9: $namespace-core--output(object type, object identifier, connection identifier, listener name)
+    - retrieves connection connect.json and listen.json objects
+    - if connection and listener name exists:
+        - retrieve object itself (queries retreive batches of up to 1000 records)
+        - retrieve view object
+        - sync call the view processor 
+        - write the result to the relevant path in the _/output partition
+
+--
+
+A: $namespace-core--view(view name) when given a view name uses _/scratchpad/listener/view/{name}/{connectiontype}.json to find affected connections
+    - for each affected connection uses its listen.json object to find the relevent target objects
+        - for each target object async calls $namespace-core--output(object type, object identifier, connection id, listener name)
+
+B: $namespace-core--authentication(authentication module name, credentials) sync calls the given authentication module(credentials)
+    - if module returns True then return the relevant @mask and @name values
+    - if module returns False then return empty @mask and @name values
+ 
