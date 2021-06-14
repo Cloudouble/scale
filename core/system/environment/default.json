@@ -1,0 +1,9 @@
+{
+    "name": "default",  
+    "compute": "aws-lambda",  
+    "connect": "aws-cloudfront",  
+    "namespace": "'liveelement", 
+    "root": "_",  
+    "store": "aws-s3"
+}
+

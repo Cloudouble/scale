@@ -1,35 +1,38 @@
 {root}/{partition}/{path}
 
 
-Core Partition: the objects that run the system
-{root}/core/{scope}/{module}.{json|html|js}
+System Partition: the objects that run the system
+{root}/system/{scope}/{package}/{module}.{json|html|js}     - all packages have the same potential directory structure as core
 
-_/core/application/{name}.json          - PWA apps hosted on public directories
-_/core/asset/{name}.json                - blob data used by the system (not public), stored as base64 encoded string in the 'body' property of the object
-_/core/authentication/{name}.json       - connection gateways 
-_/core/curator/{name}.json              - scheduled or on-demand processes that do clean up
-_/core/datatype/{name}.json             - definitions of datatypes that fields can validate against
-_/core/element/{name}.html              - HTML elements for rendering datatypes as per https://github.com/Cloudouble/element and https://github.com/Cloudouble/schema
-_/core/error/{code}.html                - HTML error pages
-_/core/environment/{name}.json          - core system contexts which are passed to processors as the `env` variable {root: '_', namespace: 'liveelement', @name: {name}}
-_/core/exporter/{name}.json             - scheduled or on-demand processes that export some or all of the current system state (core, scratchpad, time, archive, record, connection, output)
-_/core/field/{name}.json                - definitions of fields that records can have
-_/core/importer/{name}.json             - processes that respond to matching import files and process them into state updates (core, scratchpad, time, archive, record, connection, output)
-_/core/mask/{name}.json                 - maps of permissions that are applied to connections, matched as a result of successful authentication
-_/core/package/{name}.json              - bundles of features to add functionality to the system
-_/core/packager/{name}.json             - scheduled or on-demand processes that build packages from the system
-_/core/platform/{name}.json             - adapters for running the system on various underlaying hosting technology stacks (e.g. aws, azure, baremetal)
-_/core/policy/{name}.json               - security policies to define levels of system access that are applied to processors
-_/core/processor/{name}.json            - executable code that performs tasks within the system, used by other system features
-_/core/query/{name}.json                - processes that create pre-compiled result sets from records
-_/core/reactor/{name}.json              - processes that react to system changes
-_/core/recordtype/{name}.json           - definitions of all the types of records that are allowed on the system 
-_/core/render/{name}.js                 - javascript rendering definitions as per https://github.com/Cloudouble/schema
-_/core/schedule/{name}.json             - definitions of regular event triggers that can be used to make processes happen automatically
-_/core/schema/{name}.json               - namespaced collections of record types
-_/core/connectiontype/{name}.json       - definitions of different kinds of third-parties and how they interact with the system
-_/core/validator/{name}.json            - definitions that are used to validate object types
-_/core/view/{name}.json                 - definitions that are used to render records and query results into output for connections to consume
+_/system/application/core/{name}.json           - PWA apps hosted on public directories
+_/system/asset/core/{name}.json                 - blob data used by the system (not public), stored as base64 encoded string in the 'body' property of the object
+_/system/authentication/core/{name}.json        - connection gateways 
+_/system/compute/core/{name}.json               - adapters for running the compute system on third-party technology stacks (e.g. aws, azure, baremetal)
+_/system/connect/core/{name}.json               - adapters for running the connet system on third-party technology stacks (e.g. aws, azure, baremetal)
+_/system/curator/core/{name}.json               - scheduled or on-demand processes that do clean up
+_/system/datatype/core/{name}.json              - definitions of datatypes that fields can validate against
+_/system/element/core/{name}.json               - HTML elements for rendering datatypes as per https://github.com/Cloudouble/element and https://github.com/Cloudouble/schema
+_/system/error/core/{code}.json                 - HTML error pages
+_/system/environment/core/{name}.json           - core system contexts which are passed to processors as the `env` variable {root: '_', namespace: 'liveelement', @name: {name}}
+_/system/exporter/core/{name}.json              - scheduled or on-demand processes that export some or all of the current system state (core, scratchpad, time, archive, record, connection, output)
+_/system/field/core/{name}.json                 - definitions of fields that records can have
+_/system/importer/core/{name}.json              - processes that respond to matching import files and process them into state updates (core, scratchpad, time, archive, record, connection, output)
+_/system/mask/core/{name}.json                  - maps of permissions that are applied to connections, matched as a result of successful authentication
+_/system/namespace/core/{name}.json             - definitions of separate databases that can be powered by this system
+_/system/package/core/index.json                - bundles of features to add functionality to the system
+_/system/packager/core/{name}.json              - scheduled or on-demand processes that build packages from the system
+_/system/policy/core/{name}.json                - security policies to define levels of system access that are applied to processors
+_/system/processor/core/{name}.json             - executable code that performs tasks within the system, used by other system features
+_/system/query/core/{name}.json                 - processes that create pre-compiled result sets from records
+_/system/reacter/core/{name}.json               - processes that react to system changes
+_/system/recordtype/core/{name}.json            - definitions of all the types of records that are allowed on the system 
+_/system/render/core/{name}.json                - javascript rendering definitions as per https://github.com/Cloudouble/schema
+_/system/schedule/core/{name}.json              - definitions of regular event triggers that can be used to make processes happen automatically
+_/system/schema/core/{name}.json                - namespaced collections of record types
+_/system/store/core/{name}.json                 - adapters for running the store system on third-party technology stacks (e.g. aws, azure, baremetal)
+_/system/connectiontype/core/{name}.json        - definitions of different kinds of third-parties and how they interact with the system
+_/system/validator/core/{name}.json             - definitions that are used to validate object types
+_/system/view/core/{name}.json                  - definitions that are used to render records and query results into output for connections to consume
 
 
 
@@ -49,10 +52,11 @@ _/scratchpad/asset/{hash}/view.json                             - list views dep
 
 
 LastModified Partition: object which record when other corresponding objects on other partitions were last modified, all values are a single timestamp
-{root}/lastmodified/{partition}/{path}.json
+{root}/lastmodified/{partition}/{path}
 
 _/lastmodified/core/*
 _/lastmodified/scratchpad/*
+_/lastmodified/blob/*
 _/lastmodified/record/*
 _/lastmodified/import/*
 _/lastmodified/connection/*
@@ -65,6 +69,7 @@ Archive Partition: stores a copy of the target object as at {time}, with .{time}
 
 _/archive/core/*.{time}
 _/archive/scratchpad/*.{time}
+_/archive/blob/*.{time}
 _/archive/record/*.{time}
 _/archive/import/*.{time}
 _/archive/connection/*.{time}
@@ -76,6 +81,13 @@ Request Partition: Connect platforms write request objects here with a requested
 {root}/request/{uuid}.json
 
 _/request/{uuid}.json
+
+
+
+Blob Partition: Connect platforms write blob objects here as a large / unstructured file storage facility
+{root}/blob/{path}
+
+_/blob/{path}
 
 
 
@@ -124,7 +136,7 @@ mask: sudo, administrator, connection, readonly
 package: core
 packager: core
 platform: https-aws-cloudfront, websocket-aws-apigateway
-policy: core, reactor, trusted, semitrusted, untrusted
+policy: core, reacter, trusted, semitrusted, untrusted
 processor: all processors from the core package
 query: math, list, filter
 schedule: second, minute, hour, day, week, month, year
@@ -143,23 +155,43 @@ $namespace-$package-$scope-$name
 
 Core Processors:
 
-
-
+* core-reacter-request(path, operation) # path => standardised to part after root e.g. request/uuid.json
+* core-validator-*(object_type, object_identifier, object_live)
+    * core-validator-core(scope, module, live)
+    * core-validator-record(record_uuid, live)
+    * core-validator-import(path, body, content_type, encoding)
+    * core-validator-connection(connection_type, connection_identifier, trailer, live)
+* core-mask(connection_type, connection_identifier, operation, path, live)
+* core-store(object_identifier, object_data)
+* core-reacter-connection(path, operation)
+* core-reacter-core-asset(path, operation)
+* core-reacter-core-view(path, operation)
+* core-reacter-core-query(path, operation)
+* core-reacter-import(path, operation)
+* core-reacter-record(path, operation)
+* core-record(record_uuid)
+* core-reacter-scratchpad-value(path, operation)
+* core-query(query_name, record_uuid)
+* core-reacter-scratchpad-query(path, operation)
+* core-output(object_type, object_identifier, connection_identifier, listener_name)
+* core-view(view_name)
+* core-authentication(authentication_module_name, credentials_object)
 
 Process Flow: 
 
-1: A request comes in via a Connect platform, writes a request to _/request
+1: A request comes in via a Connect platform, writes a request to _/request   {operation, path, body, content_type, encoding, connection_type, connection_identifier}
 
-2: $namespace-core-reactor-request reacts to the new object, 
-    - sync calls $namespace-core--validator(object type, object identifier) to validate according to it's object type (definition in _/core/validator/{object_type}.json)
-    - sync calls $namespace-core--mask(connection identifier, object identifier) to mask according to the connection @mask (_/core/mask/{_/connection/.../connect.json['@mask']}.json)
-    - async calls $namespace-core--write(object identifier, object data)
+
+2: $namespace-core-reacter-request reacts to the new object, 
+    - sync calls $namespace-core-validator-*(object_type, object_identifier, object_live) to validate according to it's object type (definition in _/system/validator/{object_type}.json)
+    - sync calls $namespace-core-mask(connection_type, connection_identifier, object_type, object_identifier, object_live) to mask according to the connection @mask (_/system/mask/{_/connection/.../connect.json['@mask']}.json)
+    - async calls $namespace-core-store(object identifier, object data)
     
-3: $namespace-core--write(object identifier, object data) write the masked object to the Store platform in core|record|import|connection
+3: $namespace-core-store(object identifier, object data) write the masked object to the Store platform in core|record|import|connection
     - also takes care of the corresponding updates to the _/lastmodified and _/archive partitions
 
-4: $namespace-core-reactor-{connection|core|import|record} reacts to the new/updated/delete object in it's partition
-    - $namespace-core-reactor-connection
+4: $namespace-core-reacter-{connection|core|import|record} reacts to the new/updated/delete object in it's partition
+    - $namespace-core-reacter-connection
         - when it's the connect.json object:
             - if object contains no @mask property and has a valid authentication module name as a field with an object (credentials) as its value, 
                 then sync calls $namespace-core--authentication(authentication module name, credentials) which returns @mask and @name
@@ -168,31 +200,31 @@ Process Flow:
             - updates scratchpad values for ../query/{query}/{connectiontype}.json, ../record/{record}/{connectiontype}.json
                 ../export/{name}/{connectiontype}.json and ../view/{name}/{connectiontype}.json
             
-    - $namespace-core-reactor-core-*
-        - $namespace-core-reactor-core-asset uses ../asset/{hash}/view.json to find affected views and 
+    - $namespace-core-reacter-core-*
+        - $namespace-core-reacter-core-asset uses ../asset/{hash}/view.json to find affected views and 
             for each affected view async calls $namespace-core--view(view name) 
-        - $namespace-core-reactor-core-view updates scratchpad values for ../asset/{hash}/view.json 
-        - $namespace-core-reactor-core-query udpates scratchpad values for ../field/{name}/query.json 
+        - $namespace-core-reacter-core-view updates scratchpad values for ../asset/{hash}/view.json 
+        - $namespace-core-reacter-core-query udpates scratchpad values for ../field/{name}/query.json 
         
-    - $namespace-core-reactor-import checks _/core/importer/* for an importer with the given key and async calls it (import identifier)
+    - $namespace-core-reacter-import checks _/system/importer/* for an importer with the given key and async calls it (import identifier)
         - the importer's processor writes its output as _/request/* objects only, with the connection being inherited from the original connection
             
-    - $namespace-core-reactor-record => updates scratchpad values for ../value/{hash}/{field}.json and ../field/{name}/record.json
-        and also async calls $namespace-core--record(record uuid)
+    - $namespace-core-reacter-record => updates scratchpad values for ../value/{hash}/{field}.json and ../field/{name}/record.json
+        and also async calls $namespace-core-record(record uuid)
         
-4: $namespace-core--record(record uuid) uses _/scratchpad/listener/record/{record}/{connectiontype}.json to find affected listeners
-    - for each affected listener async calls $namespace-core--output("record", record uuid, connection identifier, listener name)
+4: $namespace-core-record(record uuid) uses _/scratchpad/listener/record/{record}/{connectiontype}.json to find affected listeners
+    - for each affected listener async calls $namespace-core-output("record", record uuid, connection identifier, listener name)
 
-5: $namespace-core-reactor-value reacts to _/scratchpad/value/{hash}/{field}.json
+5: $namespace-core-reacter-scratchpad-value reacts to _/scratchpad/value/{hash}/{field}.json
     - uses _/scratchpad/field/{name}/query.json to get affected queries
     - for each affected query async calls $namespace-core--query(query name, record uuid)
 
-6: $namespace-core--query(query name, record uuid) writes to _/scratchpad/query/{name}.json
+6: $namespace-core-query(query name, record uuid) writes to _/scratchpad/query/{name}.json
 
-7: $namespace-core-reactor-query reacts to _/scratchpad/query/{name}.json and uses _/scratchpad/listener/query/{query}/{connectiontype}.json to find affected listeners
+7: $namespace-core-reacter-scratchpad-query reacts to _/scratchpad/query/{name}.json and uses _/scratchpad/listener/query/{query}/{connectiontype}.json to find affected listeners
     - for each affected listener async calls $namespace-core--output("query", query name, connection identifier, listener name)
 
-9: $namespace-core--output(object type, object identifier, connection identifier, listener name)
+9: $namespace-core-output(object type, object identifier, connection identifier, listener name)
     - retrieves connection connect.json and listen.json objects
     - if connection and listener name exists:
         - retrieve object itself (queries retreive batches of up to 1000 records)
@@ -202,11 +234,11 @@ Process Flow:
 
 --
 
-A: $namespace-core--view(view name) when given a view name uses _/scratchpad/listener/view/{name}/{connectiontype}.json to find affected connections
+A: $namespace-core-view(view name) when given a view name uses _/scratchpad/listener/view/{name}/{connectiontype}.json to find affected connections
     - for each affected connection uses its listen.json object to find the relevent target objects
         - for each target object async calls $namespace-core--output(object type, object identifier, connection id, listener name)
 
-B: $namespace-core--authentication(authentication module name, credentials) sync calls the given authentication module(credentials)
+B: $namespace-core-authentication(authentication module name, credentials) sync calls the given authentication module(credentials)
     - if module returns True then return the relevant @mask and @name values
     - if module returns False then return empty @mask and @name values
  

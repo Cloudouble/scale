@@ -1,0 +1,14 @@
+{
+    "@name": "default", 
+    "partition": {
+        "scratchpad": "scratchpad", 
+        "lastmodified": "lastmodified", 
+        "archive": "/_/archive", 
+        "request": "request", 
+        "blob": "blob", 
+        "record": "aws-s3:scale.liveelement.net/_/record", 
+        "import": "aws-s3:scale.liveelement.net/_/import", 
+        "connection": "/_/connection", 
+        "output": "aws-s3:scale.liveelement.net/_/output"
+    }
+}
