@@ -20,7 +20,7 @@
 			"sh:nodeKind": "sh:Literal"
 		},
 		{
-			"sh:path": "live-element-core:property/package",
+			"sh:path": "live-element-core:property/partOfPackage",
 			"sh:name": "Package", 
 			"sh:description": "The package that this is part of.", 
 			"sh:order": "2", 
@@ -30,7 +30,7 @@
 			"sh:nodeKind": "sh:IRI"
 		},
 		{
-			"sh:path": "live-element-core:property/processor",
+			"sh:path": "live-element-core:property/associatedProcessor",
 			"sh:name": "Processor", 
 			"sh:description": "The processor associated with this", 
 			"sh:order": "3", 

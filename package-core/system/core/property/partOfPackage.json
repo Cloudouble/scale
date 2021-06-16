@@ -1,0 +1,9 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:property/partOfPackage",
+    "@type": "rdf:Property",
+    "rdfs:comment": "The package that includes this unit.",
+    "rdfs:label": "Package",
+    "schema:domainIncludes": "live-element-core:shape/unit",
+    "schema:rangeIncludes": "live-element-core:class/package"
+}
