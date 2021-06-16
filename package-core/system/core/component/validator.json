@@ -1,7 +1,13 @@
 {
-    "@context": "context/core",
+    "@context": "context/default",
     "@id": "live-element-core:component/validator",
     "@type": "live-element-core:class/component",
     "rdfs:comment": "Responsible for ensuring the all data stored is valid according to its type.",
     "rdfs:label": "Validator",
+    "schema:identifier": "validator", 
+    "schema:version": "1",
+    "schema:documentation": "https://live-element.net/reference/scale/core/component/validator", 
+    "schema:mainEntityOfPage": "https://live-element.net/learn/scale/core/component/validator", 
+    "package": "live-element:scale/core", 
+    "processor": "live-element-core:processor/validator"
 }

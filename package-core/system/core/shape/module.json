@@ -1,5 +1,5 @@
 {
-    "@context": "context/core",
+    "@context": "context/default",
 	"@id" : "live-element-core:shape/module",
 	"@type": "sh:NodeShape", 
 	"rdfs:subClassOf" : "live-element-core:shape/unit",
