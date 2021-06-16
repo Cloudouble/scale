@@ -2,6 +2,7 @@ import environment, compute, store
 
 
 def main(event, context):
+    #(path, operation)
     path = event.get('path')
     operation = event.get('operation')
     retval = None

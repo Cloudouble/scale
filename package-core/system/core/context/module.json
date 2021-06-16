@@ -1,0 +1,13 @@
+{
+    "@context": {
+        "scale": "https://live-element.net/reference/scale/"
+        "system": "https://live-element.net/reference/scale/system/", 
+        "module": "https://live-element.net/reference/scale/system/module/", 
+        "sh": "https://www.w3.org/ns/shacl#", 
+        "rdf": "https://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "rdfs": "https://www.w3.org/2000/01/rdf-schema#",
+        "foaf": "http://xmlns.com/foaf/spec/#term_", 
+        "schema": "https://schema.org/",
+        "xsd": "https://www.w3.org/2001/XMLSchema#"
+    }
+}
