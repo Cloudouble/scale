@@ -1,0 +1,7 @@
+{
+    "@context": "context/core",
+    "@id": "live-element-core:component/compiler",
+    "@type": "live-element-core:class/component",
+    "rdfs:comment": "Responsible for compiling views to the output partition.",
+    "rdfs:label": "Compiler",
+}

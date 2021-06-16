@@ -1,0 +1,7 @@
+{
+    "@context": "context/core",
+    "@id": "live-element-core:component/computor",
+    "@type": "live-element-core:class/component",
+    "rdfs:comment": "Responsible for running the processors.",
+    "rdfs:label": "Computor",
+}

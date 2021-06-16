@@ -1,0 +1,8 @@
+{
+    "@context": "context/core",
+    "@id": "live-element-core:class/component",
+    "@type": "rdfs:Class",
+    "rdfs:comment": "An sub-system which is responsible for a specified system task.",
+    "rdfs:label": "Component",
+    "rdfs:subClassOf": "schema:WebAPI"
+}

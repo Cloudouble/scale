@@ -1,0 +1,103 @@
+{
+    "@context": "context/core",
+	"@id" : "live-element-core:shape/module",
+	"@type" : "sh:NodeShape",
+	"sh:targetClass" : "live-element-core:class/module",
+	"sh:message": "This is not a valid module.", 
+	"sh:severity": "sh:Violation", 
+	"sh:closed" : true,
+	"sh:ignoredProperties": ["rdfs:subClassOf", "rdfs:label", "rdfs:comment"], 
+	"sh:property": [
+		{
+			"sh:path": "schema:identifier",
+			"sh:name": "Identifier", 
+			"sh:description": "The system identifier of this module, unique within its containing unit.", 
+			"sh:order": "0", 
+			"sh:minCount": 1,
+			"sh:maxCount": 1,
+			"sh:datatype": "schema:Text",
+			"sh:pattern": "^[a-z][a-z0-9\\-]+[a-z0-9]$",
+			"sh:nodeKind": "sh:Literal"
+		},
+		{
+			"sh:path": "live-element-core:property/component",
+			"sh:name": "Component", 
+			"sh:description": "The component that this module functions within.", 
+			"sh:order": "1", 
+			"sh:minCount": 1,
+			"sh:maxCount": 1,
+			"sh:class": "class/component", 
+			"sh:nodeKind": "sh:IRI"
+		},
+		{
+			"sh:path": "live-element-core:property/package",
+			"sh:name": "Package", 
+			"sh:description": "The package that this module is part of.", 
+			"sh:order": "2", 
+			"sh:minCount": 1,
+			"sh:maxCount": 1,
+			"sh:class": "class/package", 
+			"sh:nodeKind": "sh:IRI"
+		},
+		{
+			"sh:path": "live-element-core:property/processor",
+			"sh:name": "Processor", 
+			"sh:description": "The processor associated with this module", 
+			"sh:order": "3", 
+			"sh:minCount": 0,
+			"sh:maxCount": 1,
+			"sh:class": "class/processor", 
+			"sh:nodeKind": "sh:IRI"
+		}, 
+		{
+			"sh:path": "schema:version",
+			"sh:name": "Version", 
+			"sh:description": "The current version of this module", 
+			"sh:order": "4", 
+			"sh:minCount": 0,
+			"sh:maxCount": 1,
+			"sh:datatype": "schema:Text",
+			"sh:nodeKind": "sh:Literal"
+		}, 
+		{
+			"sh:path": "schema:name",
+			"sh:name": "Name", 
+			"sh:description": "The human-readable name for this module.", 
+			"sh:order": "5", 
+			"sh:minCount": 0,
+			"sh:maxCount": 1,
+			"sh:datatype": "schema:Text",
+			"sh:nodeKind": "sh:Literal"
+		},
+		{
+			"sh:path": "schema:description",
+			"sh:name": "Description", 
+			"sh:description": "The detailed description of this module.", 
+			"sh:order": "6", 
+			"sh:minCount": 0,
+			"sh:maxCount": 1,
+			"sh:datatype": "schema:Text",
+			"sh:nodeKind": "sh:Literal"
+		},
+		{
+			"sh:path": "schema:documentation",
+			"sh:name": "Reference", 
+			"sh:description": "The canonical reference documentation for this module.", 
+			"sh:order": "7", 
+			"sh:minCount": 0,
+			"sh:maxCount": 1,
+			"sh:datatype": "schema:URL",
+			"sh:nodeKind": "sh:IRI"
+		},
+		{
+			"sh:path": "schema:mainEntityOfPage",
+			"sh:name": "Learn", 
+			"sh:description": "Further learning resources for this module.", 
+			"sh:order": "8", 
+			"sh:minCount": 0,
+			"sh:maxCount": 1,
+			"sh:datatype": "schema:URL",
+			"sh:nodeKind": "sh:IRI"
+		}
+    ]
+}

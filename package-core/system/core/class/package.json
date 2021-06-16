@@ -1,0 +1,8 @@
+{
+    "@context": "context/core",
+    "@id": "live-element-core:class/package",
+    "@type": "rdfs:Class",
+    "rdfs:comment": "",
+    "rdfs:label": "Package",
+    "rdfs:subClassOf": "schema:WebAPI"
+}

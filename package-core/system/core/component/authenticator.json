@@ -1,0 +1,7 @@
+{
+    "@context": "context/core",
+    "@id": "live-element-core:component/authenticator",
+    "@type": "live-element-core:class/component",
+    "rdfs:comment": "Responsible for connection authentication and authorisation.",
+    "rdfs:label": "Authenticator",
+}

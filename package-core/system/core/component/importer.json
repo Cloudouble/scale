@@ -1,0 +1,7 @@
+{
+    "@context": "context/core",
+    "@id": "live-element-core:component/importer",
+    "@type": "live-element-core:class/component",
+    "rdfs:comment": "Responsible for managing the bulk import to new data records.",
+    "rdfs:label": "Importer",
+}

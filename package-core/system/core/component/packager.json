@@ -1,0 +1,7 @@
+{
+    "@context": "context/core",
+    "@id": "live-element-core:component/packager",
+    "@type": "live-element-core:class/component",
+    "rdfs:comment": "Responsible for creating packages.",
+    "rdfs:label": "Packager",
+}

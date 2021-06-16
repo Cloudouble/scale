@@ -1,0 +1,7 @@
+{
+    "@context": "context/core",
+    "@id": "live-element-core:unit/connector",
+    "@type": "live-element-core:class/component",
+    "rdfs:comment": "Responsible for managing and routing incoming connection requrest in to valid request objects.",
+    "rdfs:label": "Connector",
+}

@@ -1,0 +1,7 @@
+{
+    "@context": "context/core",
+    "@id": "live-element-core:component/exporter",
+    "@type": "live-element-core:class/component",
+    "rdfs:comment": "Responsible for managing the bulk collation and output of records for transfer out of the system.",
+    "rdfs:label": "Exporter",
+}

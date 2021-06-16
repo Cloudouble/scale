@@ -1,0 +1,7 @@
+{
+    "@context": "context/core",
+    "@id": "live-element-core:component/curator",
+    "@type": "live-element-core:class/component",
+    "rdfs:comment": "Responsible for keeping the system in good order..",
+    "rdfs:label": "Curator",
+}

@@ -1,0 +1,7 @@
+{
+    "@context": "context/core",
+    "@id": "live-element-core:component/storer",
+    "@type": "live-element-core:class/component",
+    "rdfs:comment": "Responsible for reading and writing data to the partitions.",
+    "rdfs:label": "Storer",
+}

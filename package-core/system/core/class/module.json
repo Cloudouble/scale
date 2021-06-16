@@ -1,0 +1,8 @@
+{
+    "@context": "context/core",
+    "@id": "live-element-core:class/module",
+    "@type": "rdfs:Class",
+    "rdfs:comment": "A single moving part within a functional system component.",
+    "rdfs:label": "Module",
+    "rdfs:subClassOf": "schema:WebAPI"
+}

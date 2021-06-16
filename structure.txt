@@ -4,33 +4,33 @@
 System Partition: the objects that run the system
 {root}/system/{scope}/{package}/{module}.{json|html|js}     - all packages have the same potential directory structure as core
 
-_/system/core/application/{name}.json           - PWA apps hosted on public directories
+*_/system/core/application/{name}.json           - PWA apps hosted on public directories
 _/system/core/authentication/{name}.json        - connection gateways 
 _/system/core/compute/{name}.json               - adapters for running the compute system on third-party technology stacks (e.g. aws, azure, baremetal)
 _/system/core/connect/{name}.json               - adapters for running the connet system on third-party technology stacks (e.g. aws, azure, baremetal)
 _/system/core/curator/{name}.json               - scheduled or on-demand processes that do clean up
-_/system/core/datatype/{name}.json              - definitions of datatypes that fields can validate against
-_/system/core/element/{name}.json               - HTML elements for rendering datatypes as per https://github.com/Cloudouble/element and https://github.com/Cloudouble/schema
+*_/system/core/datatype/{name}.json              - definitions of datatypes that fields can validate against
+*_/system/core/element/{name}.json               - HTML elements for rendering datatypes as per https://github.com/Cloudouble/element and https://github.com/Cloudouble/schema
 _/system/core/error/core/{code}.json                 - HTML error pages
-_/system/core/environment/{name}.json           - core system contexts which are passed to processors as the `env` variable {root: '_', namespace: 'liveelement', @name: {name}}
+*_/system/core/environment/{name}.json           - core system contexts which are passed to processors as the `env` variable {root: '_', namespace: 'liveelement', @name: {name}}
 _/system/core/exporter/{name}.json              - scheduled or on-demand processes that export some or all of the current system state (core, scratchpad, time, archive, record, connection, output)
-_/system/core/field/{name}.json                 - definitions of fields that records can have
+*_/system/core/recordfield/{name}.json                 - definitions of fields that records can have
 _/system/core/importer/{name}.json              - processes that respond to matching import files and process them into state updates (core, scratchpad, time, archive, record, connection, output)
-_/system/core/mask/{name}.json                  - maps of permissions that are applied to connections, matched as a result of successful authentication
-_/system/core/namespace/{name}.json             - definitions of separate databases that can be powered by this system
-_/system/core/package/core/index.json                - bundles of features to add functionality to the system
+*_/system/core/mask/{name}.json                  - maps of permissions that are applied to connections, matched as a result of successful authentication
+*_/system/core/namespace/{name}.json             - definitions of separate databases that can be powered by this system
+*_/system/core/package/core/index.json                - bundles of features to add functionality to the system
 _/system/core/packager/{name}.json              - scheduled or on-demand processes that build packages from the system
-_/system/core/policy/{name}.json                - security policies to define levels of system access that are applied to processors
-_/system/core/processor/{name}.json             - executable code that performs tasks within the system, used by other system features
-_/system/core/query/{name}.json                 - processes that create pre-compiled result sets from records
-_/system/core/reacter/{name}.json               - processes that react to system changes
-_/system/core/recordtype/{name}.json            - definitions of all the types of records that are allowed on the system 
-_/system/core/render/{name}.json                - javascript rendering definitions as per https://github.com/Cloudouble/schema
-_/system/core/schedule/{name}.json              - definitions of regular event triggers that can be used to make processes happen automatically
-_/system/core/schema/{name}.json                - namespaced collections of record types
+*_/system/core/policy/{name}.json                - security policies to define levels of system access that are applied to processors
+*_/system/core/processor/{name}.json             - executable code that performs tasks within the system, used by other system features
+*_/system/core/query/{name}.json                 - processes that create pre-compiled result sets from records
+*_/system/core/reacter/{name}.json               - processes that react to system changes
+*_/system/core/recordtype/{name}.json            - definitions of all the types of records that are allowed on the system 
+*_/system/core/render/{name}.json                - javascript rendering definitions as per https://github.com/Cloudouble/schema
+*_/system/core/schedule/{name}.json              - definitions of regular event triggers that can be used to make processes happen automatically
+*_/system/core/schema/{name}.json                - namespaced collections of record types
 _/system/core/store/{name}.json                 - adapters for running the store system on third-party technology stacks (e.g. aws, azure, baremetal)
-_/system/core/connectiontype/{name}.json        - definitions of different kinds of third-parties and how they interact with the system
-_/system/core/validator/{name}.json             - definitions that are used to validate object types
+*_/system/core/connectiontype/{name}.json        - definitions of different kinds of third-parties and how they interact with the system
+_/system/core/shape/{name}.json             - definitions that are used to validate object types
 _/system/core/view/{name}.json                  - definitions that are used to render records and query results into output for connections to consume
 
 
