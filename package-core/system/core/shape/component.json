@@ -1,0 +1,8 @@
+{
+    "@context": "context/core",
+	"@id" : "live-element-core:shape/component",
+	"@type": "sh:NodeShape", 
+	"rdfs:subClassOf" : "live-element-core:shape/unit",
+	"sh:targetClass" : "live-element-core:class/component",
+	"sh:message": "This is not a valid component."
+}

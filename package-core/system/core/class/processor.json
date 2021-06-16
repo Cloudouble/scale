@@ -1,8 +1,0 @@
-{
-    "@context": "context/core",
-    "@id": "live-element-core:class/processor",
-    "@type": "rdfs:Class",
-    "rdfs:comment": "",
-    "rdfs:label": "Processor",
-    "rdfs:subClassOf": "schema:WebAPI"
-}

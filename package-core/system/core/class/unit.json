@@ -1,0 +1,8 @@
+{
+    "@context": "context/core",
+    "@id": "live-element-core:class/unit",
+    "@type": "rdfs:Class",
+    "rdfs:comment": "A single moving part within a package.",
+    "rdfs:label": "Unit",
+    "rdfs:subClassOf": "schema:WebAPI"
+}
