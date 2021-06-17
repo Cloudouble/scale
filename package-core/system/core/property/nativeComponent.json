@@ -1,9 +1,0 @@
-{
-    "@context": "context/default",
-	"@id" : "live-element-core:property/nativeComponent",
-    "@type": "rdf:Property",
-    "rdfs:comment": "The component that this module is an instrinsic part of.",
-    "rdfs:label": "Component",
-    "schema:domainIncludes": "live-element-core:shape/module",
-    "schema:rangeIncludes": "live-element-core:class/component"
-}

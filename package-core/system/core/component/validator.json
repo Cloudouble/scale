@@ -1,7 +1,7 @@
 {
     "@context": "context/default",
     "@id": "live-element-core:component/validator",
-    "@type": "live-element-core:class/component",
+    "@type": "live-element-core:class/Component",
     "rdfs:comment": "Responsible for ensuring the all data stored is valid according to its type.",
     "rdfs:label": "Validator",
     "schema:identifier": "validator", 

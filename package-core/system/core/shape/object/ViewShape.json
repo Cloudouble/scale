@@ -1,0 +1,66 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:shape/ViewShape",
+	"@type": "sh:NodeShape", 
+	"rdfs:subClassOf" : "live-element-core:shape/UnitShape",
+	"sh:targetClass" : "live-element-core:class/View",
+	"sh:message": "This is not a valid view.", 
+	"sh:property": [
+		{
+			"sh:path": "schema:codeRepository",
+			"sh:name": "Code Source", 
+			"sh:description": "The code for deployment.", 
+			"sh:order": "0", 
+			"sh:minCount": 1,
+			"sh:maxCount": 1,
+			"sh:datatype": "schema:URL",
+			"sh:nodeKind": "sh:IRI"
+		}, 
+		{
+			"sh:path": "schema:runtimePlatform",
+			"sh:name": "Runtime", 
+			"sh:description": "The deployment runtime.", 
+			"sh:order": "1", 
+			"sh:minCount": 1,
+			"sh:maxCount": 1,
+			"sh:datatype": "schema:Text",
+			"sh:nodeKind": "sh:Literal"
+		},
+		{
+			"sh:path": "schema:processorInputDefaults",
+			"sh:name": "Processor Input Defaults", 
+			"sh:description": "Default input values for the processor.", 
+			"sh:order": "2", 
+			"sh:minCount": 0,
+			"sh:maxCount": 1,
+			"sh:datatype": "schema:StructuredValue",
+			"sh:nodeKind": "sh:IRI"
+		}, 
+		{
+			"sh:path": "schema:processorOutputDefaults",
+			"sh:name": "Processor Output Defaults", 
+			"sh:description": "Default output values for the processor.", 
+			"sh:order": "3", 
+			"sh:minCount": 0,
+			"sh:maxCount": 1,
+			"sh:datatype": "schema:StructuredValue",
+			"sh:nodeKind": "sh:IRI"
+		}
+    ]
+}
+
+
+{
+	processor='', 
+	?options={}, 
+	?assets={alias: assetpath}, 
+	?field_name='', 
+	?content_type='', 
+	?suffix='', 
+	?expires=0, 
+	?sort_field='', 
+	?sort_direction='', 
+	?min_index=0, 
+	?max_index=0, 
+	priority
+}

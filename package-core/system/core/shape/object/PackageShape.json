@@ -1,0 +1,8 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:shape/PackageShape",
+	"@type": "sh:NodeShape", 
+	"rdfs:subClassOf" : "live-element-core:shape/UnitShape",
+	"sh:targetClass" : "live-element-core:class/Package",
+	"sh:message": "This is not a valid package."
+}

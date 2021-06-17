@@ -1,8 +1,8 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:shape/unit",
+	"@id" : "live-element-core:shape/UnitShape",
 	"@type" : "sh:NodeShape",
-	"sh:targetClass" : "live-element-core:class/unit",
+	"sh:targetClass" : "live-element-core:class/Unit",
 	"sh:message": "This is not a valid package unit.", 
 	"sh:severity": "sh:Violation", 
 	"sh:closed" : true,
@@ -26,7 +26,7 @@
 			"sh:order": "2", 
 			"sh:minCount": 1,
 			"sh:maxCount": 1,
-			"sh:class": "class/package", 
+			"sh:class": "class/Package", 
 			"sh:nodeKind": "sh:IRI"
 		},
 		{
@@ -36,7 +36,7 @@
 			"sh:order": "3", 
 			"sh:minCount": 0,
 			"sh:maxCount": 1,
-			"sh:class": "class/processor", 
+			"sh:class": "class/Processor", 
 			"sh:nodeKind": "sh:IRI"
 		}, 
 		{

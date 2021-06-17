@@ -1,0 +1,8 @@
+{
+    "@context": "context/core",
+    "@id": "live-element-core:class/View",
+    "@type": "rdfs:Class",
+    "rdfs:comment": "A set of instructions for the compiler to use when creating output.",
+    "rdfs:label": "View",
+    "rdfs:subClassOf": "live-element-core:class/Module"
+}

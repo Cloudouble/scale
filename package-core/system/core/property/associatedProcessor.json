@@ -3,7 +3,7 @@
 	"@id" : "live-element-core:property/associatedProcessor",
     "@type": "rdf:Property",
     "rdfs:comment": "The processor associated with this obejct.",
-    "rdfs:label": "Processor",
-    "schema:domainIncludes": "live-element-core:shape/unit",
-    "schema:rangeIncludes": "live-element-core:class/processor"
+    "rdfs:label": "associatedProcessor",
+    "schema:domainIncludes": "live-element-core:class/Unit",
+    "schema:rangeIncludes": "live-element-core:class/Processor"
 }

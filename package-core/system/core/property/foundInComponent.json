@@ -1,0 +1,9 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:property/foundInComponent",
+    "@type": "rdf:Property",
+    "rdfs:comment": "The component that this module is an instrinsic part of.",
+    "rdfs:label": "foundInComponent",
+    "schema:domainIncludes": "live-element-core:class/Module",
+    "schema:rangeIncludes": "live-element-core:class/Component"
+}

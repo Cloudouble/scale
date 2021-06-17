@@ -1,0 +1,50 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:shape/ProcessorShape",
+	"@type": "sh:NodeShape", 
+	"rdfs:subClassOf" : "live-element-core:shape/UnitShape",
+	"sh:targetClass" : "live-element-core:class/Processor",
+	"sh:message": "This is not a valid processor.", 
+	"sh:property": [
+		{
+			"sh:path": "schema:codeRepository",
+			"sh:name": "Code Source", 
+			"sh:description": "The code for deployment.", 
+			"sh:order": "0", 
+			"sh:minCount": 1,
+			"sh:maxCount": 1,
+			"sh:datatype": "schema:URL",
+			"sh:nodeKind": "sh:IRI"
+		}, 
+		{
+			"sh:path": "schema:runtimePlatform",
+			"sh:name": "Runtime", 
+			"sh:description": "The deployment runtime.", 
+			"sh:order": "1", 
+			"sh:minCount": 1,
+			"sh:maxCount": 1,
+			"sh:datatype": "schema:Text",
+			"sh:nodeKind": "sh:Literal"
+		}, 
+		{
+			"sh:path": "schema:inputShape",
+			"sh:name": "Input Shape", 
+			"sh:description": "The validation shape required for a valid input.", 
+			"sh:order": "2", 
+			"sh:minCount": 1,
+			"sh:maxCount": 1,
+			"sh:datatype": "sh:NodeShape",
+			"sh:nodeKind": "sh:IRI"
+		}, 
+		{
+			"sh:path": "schema:outputShape",
+			"sh:name": "Output Shape", 
+			"sh:description": "The validation shape required for a valid output.", 
+			"sh:order": "3", 
+			"sh:minCount": 1,
+			"sh:maxCount": 1,
+			"sh:datatype": "sh:NodeShape",
+			"sh:nodeKind": "sh:IRI"
+		}
+    ]
+}
