@@ -4,4 +4,12 @@
     "@type": "live-element-core:class/component",
     "rdfs:comment": "Responsible for compiling views to the output partition.",
     "rdfs:label": "Compiler",
+	"live-element-core:property/partOfPackage": "live-element-scale:core", 
+	"live-element-core:property/associatedProcessor": "live-element-core:processor/compiler", 
+	"schema:version": 1, 
+    "schema:documentation": "live-element-reference:component/compiler", 
+    "live-element-core:property/learnMore": "live-element-learn:component/compiler", 
+	"live-element-core:property/processorInputDefaults": {}, 
+	"live-element-core:property/processorOutputDefaults": {}, 
+	"live-element-core:property/isActive": true
 }

@@ -1,0 +1,14 @@
+{
+    "@context": "context/default",
+    "@id": "live-element-core:processor/compiler",
+    "@type": "live-element-core:class/processor",
+    "rdfs:comment": "Processes view compilation operations.",
+    "rdfs:label": "Compiler",
+    "schema:identifier": "compiler", 
+    "schema:version": "1",
+    "schema:documentation": "live-element-reference:processor/compiler", 
+    "live-element-core:property/learnMore": "live-element-learn:processor/compiler", 
+    "schema:codeRepository": "//blob/core/processor/compiler", 
+    "schema:runtimePlatform": "python3.8"
+    "package": "live-element:scale/core", 
+}

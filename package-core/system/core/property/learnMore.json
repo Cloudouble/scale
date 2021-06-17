@@ -1,0 +1,10 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:property/learnMore",
+    "@type": "rdf:Property",
+    "rdfs:comment": "Further learning resources.",
+    "rdfs:label": "learnMore",
+    "rdfs:subPropertyOf": "schema:mainEntityOfPage", 
+    "schema:domainIncludes": "live-element-core:class/Unit",
+    "schema:rangeIncludes": "schema:URL"
+}

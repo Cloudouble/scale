@@ -1,0 +1,15 @@
+{
+    "@context": "context/core",
+    "@id": "live-element-core:component/indexer",
+    "@type": "live-element-core:class/component",
+    "rdfs:comment": "Responsible for querying record to create result sets.",
+    "rdfs:label": "Indexer",
+	"live-element-core:property/partOfPackage": "live-element-scale:core", 
+	"live-element-core:property/associatedProcessor": "live-element-core:processor/indexer", 
+	"schema:version": 1, 
+    "schema:documentation": "live-element-reference:component/indexer", 
+    "live-element-core:property/learnMore": "live-element-learn:component/indexer", 
+	"live-element-core:property/processorInputDefaults": {}, 
+	"live-element-core:property/processorOutputDefaults": {}, 
+	"live-element-core:property/isActive": true
+}

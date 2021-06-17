@@ -1,0 +1,9 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:property/reactToType",
+    "@type": "rdf:Property",
+    "rdfs:comment": "The record type or types which trigger running the query.",
+    "rdfs:label": "reactToType",
+    "schema:domainIncludes": ["live-element-core:class/Query"],
+    "schema:rangeIncludes": "schema:Text"
+}
