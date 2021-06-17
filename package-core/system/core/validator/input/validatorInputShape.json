@@ -1,0 +1,9 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:validator/input/validatorInputShape",
+	"@type": "sh:NodeShape", 
+	"sh:message": "Used to validate the input into the validator processor."
+	"sh:severity": "sh:Violation", 
+	"sh:closed" : true,
+	"sh:property": []
+}

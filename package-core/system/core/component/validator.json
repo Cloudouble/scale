@@ -6,8 +6,11 @@
     "rdfs:label": "Validator",
     "schema:identifier": "validator", 
     "schema:version": "1",
-    "schema:documentation": "https://live-element.net/reference/scale/core/component/validator", 
-    "schema:mainEntityOfPage": "https://live-element.net/learn/scale/core/component/validator", 
-    "package": "live-element:scale/core", 
-    "processor": "live-element-core:processor/validator"
+    "schema:documentation": "live-element-reference:component/validator", 
+    "live-element-core:property/learnMore": "live-element-learn:component/validator", 
+    "live-element-core:property/partOfPackage": "live-element:scale/core", 
+    "live-element-core:property/associatedProcessor": "live-element-core:processor/validator"
+    "live-element-core:property/homeDirectory": "live-element-core:validator"
+    "live-element-core:property/expectedModuleType": ["sh:NodeShape", "sh:PropertyShape"], 
+	"live-element-core:property/isActive": true
 }

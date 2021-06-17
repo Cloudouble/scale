@@ -11,5 +11,7 @@
     "live-element-core:property/learnMore": "live-element-learn:component/compiler", 
 	"live-element-core:property/processorInputDefaults": {}, 
 	"live-element-core:property/processorOutputDefaults": {}, 
-	"live-element-core:property/isActive": true
+	"live-element-core:property/isActive": true, 
+    "live-element-core:property/homeDirectory": "live-element-core:compiler"
+    "live-element-core:property/expectedModuleType": "live-element-core:class/View"
 }

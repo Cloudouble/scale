@@ -11,4 +11,6 @@
     "schema:codeRepository": "//blob/core/processor/validator", 
     "schema:runtimePlatform": "python3.8"
     "package": "live-element:scale/core", 
+	"live-element-core:property/inputStructure": "live-element-core:validator/input/jsonInputShape", 
+	"live-element-core:property/outputStructure": "live-element-core:validator/output/jsonOutputShape"
 }

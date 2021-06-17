@@ -1,0 +1,9 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:validator/input/compilerOutputShape",
+	"@type": "sh:NodeShape", 
+	"sh:message": "Used to validate the output from the compiler processor."
+	"sh:severity": "sh:Violation", 
+	"sh:closed" : true,
+	"sh:property": []
+}

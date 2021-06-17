@@ -5,4 +5,8 @@
 	"rdfs:subClassOf" : "live-element-core:shape/UnitShape",
 	"sh:targetClass" : "live-element-core:class/Component",
 	"sh:message": "This is not a valid component."
+	"sh:property": [
+		"live-element-core:shape/property/expectedModuleTypeShape", 
+		"live-element-core:shape/property/homeDirectoryShape"
+    ]
 }

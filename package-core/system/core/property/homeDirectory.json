@@ -1,0 +1,10 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:property/homeDirectory",
+    "@type": "rdf:Property",
+    "rdfs:comment": "The directory where the modules for this component are generally found.",
+    "rdfs:label": "homeDirectory",
+    "rdfs:subPropertyOf": "schema:isPartOf", 
+    "schema:domainIncludes": "live-element-core:class/Component",
+    "schema:rangeIncludes": "shema:URL"
+}

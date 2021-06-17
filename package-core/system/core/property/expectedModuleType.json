@@ -1,0 +1,9 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:property/expectedModuleType",
+    "@type": "rdf:Property",
+    "rdfs:comment": "The type of module that is expected to be found in this component.",
+    "rdfs:label": "expectedModuleType",
+    "schema:domainIncludes": "live-element-core:class/Component",
+    "schema:rangeIncludes": "rdfs:Class"
+}

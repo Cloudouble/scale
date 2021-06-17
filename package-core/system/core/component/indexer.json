@@ -11,5 +11,7 @@
     "live-element-core:property/learnMore": "live-element-learn:component/indexer", 
 	"live-element-core:property/processorInputDefaults": {}, 
 	"live-element-core:property/processorOutputDefaults": {}, 
-	"live-element-core:property/isActive": true
+	"live-element-core:property/isActive": true, 
+    "live-element-core:property/homeDirectory": "live-element-core:indexer"
+    "live-element-core:property/expectedModuleType": "live-element-core:class/Query"
 }
