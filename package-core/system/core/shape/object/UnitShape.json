@@ -1,6 +1,6 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:shape/UnitShape",
+	"@id" : "live-element-core:shape/object/UnitShape",
 	"@type" : "sh:NodeShape",
 	"sh:targetClass" : "live-element-core:class/Unit",
 	"sh:message": "This is not a valid package unit.", 
@@ -8,86 +8,13 @@
 	"sh:closed" : true,
 	"sh:ignoredProperties": ["rdfs:subClassOf", "rdfs:label", "rdfs:comment"], 
 	"sh:property": [
-		{
-			"sh:path": "schema:identifier",
-			"sh:name": "Identifier", 
-			"sh:description": "The system identifier.", 
-			"sh:order": "0", 
-			"sh:minCount": 1,
-			"sh:maxCount": 1,
-			"sh:datatype": "schema:Text",
-			"sh:pattern": "^[a-z][a-z0-9\\-]+[a-z0-9]$",
-			"sh:nodeKind": "sh:Literal"
-		},
-		{
-			"sh:path": "live-element-core:property/partOfPackage",
-			"sh:name": "Package", 
-			"sh:description": "The package that this is part of.", 
-			"sh:order": "2", 
-			"sh:minCount": 1,
-			"sh:maxCount": 1,
-			"sh:class": "class/Package", 
-			"sh:nodeKind": "sh:IRI"
-		},
-		{
-			"sh:path": "live-element-core:property/associatedProcessor",
-			"sh:name": "Processor", 
-			"sh:description": "The processor associated with this", 
-			"sh:order": "3", 
-			"sh:minCount": 0,
-			"sh:maxCount": 1,
-			"sh:class": "class/Processor", 
-			"sh:nodeKind": "sh:IRI"
-		}, 
-		{
-			"sh:path": "schema:version",
-			"sh:name": "Version", 
-			"sh:description": "Current version", 
-			"sh:order": "4", 
-			"sh:minCount": 0,
-			"sh:maxCount": 1,
-			"sh:datatype": "schema:Text",
-			"sh:nodeKind": "sh:Literal"
-		}, 
-		{
-			"sh:path": "schema:name",
-			"sh:name": "Name", 
-			"sh:description": "Human-readable name", 
-			"sh:order": "5", 
-			"sh:minCount": 0,
-			"sh:maxCount": 1,
-			"sh:datatype": "schema:Text",
-			"sh:nodeKind": "sh:Literal"
-		},
-		{
-			"sh:path": "schema:description",
-			"sh:name": "Description", 
-			"sh:description": "Detailed description", 
-			"sh:order": "6", 
-			"sh:minCount": 0,
-			"sh:maxCount": 1,
-			"sh:datatype": "schema:Text",
-			"sh:nodeKind": "sh:Literal"
-		},
-		{
-			"sh:path": "schema:documentation",
-			"sh:name": "Reference", 
-			"sh:description": "Reference documentation", 
-			"sh:order": "7", 
-			"sh:minCount": 0,
-			"sh:maxCount": 1,
-			"sh:datatype": "schema:URL",
-			"sh:nodeKind": "sh:IRI"
-		},
-		{
-			"sh:path": "schema:mainEntityOfPage",
-			"sh:name": "Learn", 
-			"sh:description": "Further learning resources", 
-			"sh:order": "8", 
-			"sh:minCount": 0,
-			"sh:maxCount": 1,
-			"sh:datatype": "schema:URL",
-			"sh:nodeKind": "sh:IRI"
-		}
+		"live-element-core:shape/property/identifierShape", 
+		"live-element-core:shape/property/partOfPackageShape", 
+		"live-element-core:shape/property/associatedProcessorShape", 
+		"live-element-core:shape/property/versionShape", 
+		"live-element-core:shape/property/nameShape", 
+		"live-element-core:shape/property/descriptionShape", 
+		"live-element-core:shape/property/documentationShape", 
+		"live-element-core:shape/property/mainEntityOfPageShape"
     ]
 }

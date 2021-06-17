@@ -1,9 +1,9 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:property/inputShape",
+	"@id" : "live-element-core:property/inputStructure",
     "@type": "rdf:Property",
     "rdfs:comment": "The validation shape required for a valid input.",
-    "rdfs:label": "inputShape",
+    "rdfs:label": "inputStructure",
     "schema:domainIncludes": "live-element-core:class/Processor",
     "schema:rangeIncludes": "sh:NodeShape"
 }

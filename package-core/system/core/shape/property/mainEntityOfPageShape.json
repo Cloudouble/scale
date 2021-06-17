@@ -1,0 +1,13 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:shape/property/mainEntityOfPageShape",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "schema:mainEntityOfPage",
+	"sh:name": "Learn", 
+	"sh:description": "Further learning resources", 
+	"sh:order": "8", 
+	"sh:minCount": 0,
+	"sh:maxCount": 1,
+	"sh:datatype": "schema:URL",
+	"sh:nodeKind": "sh:IRI"
+}

@@ -1,0 +1,13 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:shape/property/documentationShape",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "schema:documentation",
+	"sh:name": "Reference", 
+	"sh:description": "Reference documentation", 
+	"sh:order": "7", 
+	"sh:minCount": 0,
+	"sh:maxCount": 1,
+	"sh:datatype": "schema:URL",
+	"sh:nodeKind": "sh:IRI"
+}

@@ -1,9 +1,9 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:property/outputShape",
+	"@id" : "live-element-core:property/outputStructure",
     "@type": "rdf:Property",
     "rdfs:comment": "The validation shape required for a valid output.",
-    "rdfs:label": "outputShape",
+    "rdfs:label": "outputStructure",
     "schema:domainIncludes": "live-element-core:class/Processor",
     "schema:rangeIncludes": "sh:NodeShape"
 }

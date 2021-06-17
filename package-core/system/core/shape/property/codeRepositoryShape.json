@@ -1,0 +1,13 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:shape/property/codeRepositoryShape",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "schema:codeRepository",
+	"sh:name": "Code Source", 
+	"sh:description": "The code for deployment.", 
+	"sh:order": "0", 
+	"sh:minCount": 1,
+	"sh:maxCount": 1,
+	"sh:datatype": "schema:URL",
+	"sh:nodeKind": "sh:IRI"
+},

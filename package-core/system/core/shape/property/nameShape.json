@@ -1,0 +1,13 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:shape/property/nameShape",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "schema:name",
+	"sh:name": "Name", 
+	"sh:description": "Human-readable name", 
+	"sh:order": "5", 
+	"sh:minCount": 0,
+	"sh:maxCount": 1,
+	"sh:datatype": "schema:Text",
+	"sh:nodeKind": "sh:Literal"
+},

@@ -1,0 +1,13 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:shape/property/versionShape",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "schema:version",
+	"sh:name": "Version", 
+	"sh:description": "Current version", 
+	"sh:order": "4", 
+	"sh:minCount": 0,
+	"sh:maxCount": 1,
+	"sh:datatype": "schema:Text",
+	"sh:nodeKind": "sh:Literal"
+},

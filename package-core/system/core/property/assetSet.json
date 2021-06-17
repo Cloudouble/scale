@@ -1,0 +1,9 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:property/assetSet",
+    "@type": "rdf:Property",
+    "rdfs:comment": "A set of assets.",
+    "rdfs:label": "assetSet",
+    "schema:domainIncludes": ["live-element-core:class/View"],
+    "schema:rangeIncludes": "schema:StructuredValue"
+}

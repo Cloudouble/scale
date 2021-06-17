@@ -1,0 +1,9 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:property/processorOutputDefaults",
+    "@type": "rdf:Property",
+    "rdfs:comment": "The default values with which to backfill the output from a processor.",
+    "rdfs:label": "processorOutputDefaults",
+    "schema:domainIncludes": ["live-element-core:class/View"],
+    "schema:rangeIncludes": "schema:StructuredValue"
+}

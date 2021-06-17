@@ -1,0 +1,13 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:shape/property/foundInComponentShape",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "live-element-core:property/foundInComponent",
+	"sh:name": "Component", 
+	"sh:description": "The component that this is found within.", 
+	"sh:order": "1", 
+	"sh:minCount": 1,
+	"sh:maxCount": 1,
+	"sh:class": "class/Component", 
+	"sh:nodeKind": "sh:IRI"
+},

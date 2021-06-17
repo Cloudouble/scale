@@ -1,0 +1,12 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:shape/property/partOfPackageShape",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "live-element-core:property/partOfPackage",
+	"sh:name": "partOfPackage", 
+	"sh:description": "The package that this is part of.", 
+	"sh:minCount": 1,
+	"sh:maxCount": 1,
+	"sh:class": "class/Package", 
+	"sh:nodeKind": "sh:IRI"
+},

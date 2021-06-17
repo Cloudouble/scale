@@ -1,0 +1,12 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:shape/property/associatedProcessorShape",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "live-element-core:property/associatedProcessor",
+	"sh:name": "associatedProcessor", 
+	"sh:description": "The processor associated with this.", 
+	"sh:minCount": 0,
+	"sh:maxCount": 1,
+	"sh:class": "class/Processor", 
+	"sh:nodeKind": "sh:IRI"
+},

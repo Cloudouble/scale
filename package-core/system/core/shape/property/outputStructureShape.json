@@ -1,0 +1,13 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:shape/property/outputStructureShape",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "live-element-core:property/outputStructure",
+	"sh:name": "Output Shape", 
+	"sh:description": "The validation shape required for a valid output.", 
+	"sh:order": "3", 
+	"sh:minCount": 1,
+	"sh:maxCount": 1,
+	"sh:datatype": "sh:NodeShape",
+	"sh:nodeKind": "sh:IRI"
+},
