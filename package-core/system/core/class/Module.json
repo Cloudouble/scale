@@ -1,8 +1,8 @@
 {
     "@context": "context/core",
-    "@id": "live-element-core:class/module",
+    "@id": "class:Module",
     "@type": "rdfs:Class",
-    "rdfs:comment": "A single moving part within a functional system component.",
-    "rdfs:label": "Module",
-    "rdfs:subClassOf": "live-element-core:class/unit"
+    "subClassOf": "class:Unit", 
+    "label": "Module",
+    "comment": "A single moving part within a functional system component."
 }

@@ -1,8 +1,8 @@
 {
     "@context": "context/core",
-    "@id": "live-element-core:class/Component",
+    "@id": "class:Component",
     "@type": "rdfs:Class",
-    "rdfs:comment": "An sub-system which is responsible for a specified system task.",
-    "rdfs:label": "Component",
-    "rdfs:subClassOf": "live-element-core:class/Unit"
+    "subClassOf": "class:Unit", 
+    "label": "Component",
+    "comment": "An sub-system which is responsible for a specified system task."
 }

@@ -1,8 +1,8 @@
 {
     "@context": "context/core",
-    "@id": "live-element-core:class/package",
+    "@id": "class:Package",
     "@type": "rdfs:Class",
-    "rdfs:comment": "A set of components and modules from a single vendor which provides a defined set of features.",
-    "rdfs:label": "Package",
-    "rdfs:subClassOf": "live-element-core:class/unit"
+    "subClassOf": "class:Unit", 
+    "label": "Package", 
+    "comment": "A set of components and modules from a single vendor which provides a defined set of features."
 }

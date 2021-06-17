@@ -1,8 +1,8 @@
 {
     "@context": "context/core",
-    "@id": "live-element-core:class/Query",
+    "@id": "class:Query",
     "@type": "rdfs:Class",
-    "rdfs:comment": "A set of instructions for the indexer to use when creating result sets.",
-    "rdfs:label": "Query",
-    "rdfs:subClassOf": "live-element-core:class/Module"
+    "subClassOf": "class:Module", 
+    "label": "Query",
+    "comment": "A set of instructions for the indexer to use when creating result sets."
 }

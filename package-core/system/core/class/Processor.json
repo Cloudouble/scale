@@ -1,8 +1,8 @@
 {
     "@context": "context/core",
-    "@id": "live-element-core:class/processor",
+    "@id": "class:Processor",
     "@type": "rdfs:Class",
-    "rdfs:comment": "A single executable chunk of code to perform dynamic system tasks.",
-    "rdfs:label": "Processor",
-    "rdfs:subClassOf": "live-element-core:class/module"
+    "subClassOf": "class:Module", 
+    "label": "Processor",
+    "comment": "A single executable chunk of code to perform dynamic system tasks."
 }

@@ -1,14 +1,54 @@
 {
     "@context": {
+        
         "@vocab": "https://live-element.net/reference/scale/core/property/", 
-        "live-element-reference": "https://live-element.net/reference/scale/core/", 
-        "live-element-learn": "https://live-element.net/learn/scale/core/", 
-        "live-element-core": "https://live-element.net/reference/scale/core/", 
-        "sh": "https://www.w3.org/ns/shacl#", 
-        "rdf": "https://www.w3.org/1999/02/22-rdf-syntax-ns#",
-        "rdfs": "https://www.w3.org/2000/01/rdf-schema#",
-        "foaf": "http://xmlns.com/foaf/spec/#term_", 
-        "schema": "https://schema.org/",
-        "xsd": "https://www.w3.org/2001/XMLSchema#"
+        
+        "subClassOf": "rdfs:subClassOf", 
+        "label": "rdfs:label", 
+        "comment": "refs:comment", 
+        "documentation": "schema:documentation", 
+        "learnMore": "property:learnMore", 
+
+        "class": {
+            "@id": "https://live-element.net/reference/scale/core/class/", 
+            "@prefix": true
+        }, 
+        "core": {
+            "@id": "https://live-element.net/reference/scale/core/", 
+            "@prefix": true
+        }, 
+        
+        "reference": {
+            "@id": "https://live-element.net/reference/", 
+            "@prefix": true
+        }, 
+        "learn": {
+            "@id": "https://live-element.net/learn/", 
+            "@prefix": true
+        }, 
+        "sh": {
+            "@id": "https://www.w3.org/ns/shacl#", 
+            "@prefix": true
+        }, 
+        "rdf": {
+            "@id": "https://www.w3.org/1999/02/22-rdf-syntax-ns#", 
+            "@prefix": true
+        },
+        "rdfs": {
+            "@id": "https://www.w3.org/2000/01/rdf-schema#", 
+            "@prefix": true
+        },
+        "foaf": {
+            "@id": "http://xmlns.com/foaf/spec/#term_", 
+            "@prefix": true
+        }, 
+        "schema": {
+            "@id": "https://schema.org/", 
+            "@prefix": true
+        },
+        "xsd": {
+            "@id": "https://www.w3.org/2001/XMLSchema#", 
+            "@prefix": true
+        }
     }
 }
