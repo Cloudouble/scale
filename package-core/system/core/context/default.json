@@ -1,7 +1,8 @@
 {
     "@context": {
         "@vocab": "https://live-element.net/reference/scale/core/property/", 
-        "live-element": "https://live-element.net/reference/", 
+        "live-element-reference": "https://live-element.net/reference/scale/core/", 
+        "live-element-learn": "https://live-element.net/learn/scale/core/", 
         "live-element-core": "https://live-element.net/reference/scale/core/", 
         "sh": "https://www.w3.org/ns/shacl#", 
         "rdf": "https://www.w3.org/1999/02/22-rdf-syntax-ns#",

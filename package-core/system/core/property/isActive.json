@@ -1,0 +1,9 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:property/isActive",
+    "@type": "rdf:Property",
+    "rdfs:comment": "True if this object is active",
+    "rdfs:label": "isActive",
+    "schema:domainIncludes": ["live-element-core:class/View"],
+    "schema:rangeIncludes": "schema:Boolean"
+}

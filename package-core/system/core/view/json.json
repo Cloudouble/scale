@@ -1,0 +1,20 @@
+{
+    "@context": "context/core",
+    "@id": "live-element-core:view/json",
+    "@type": "live-element-core:class/View",
+    "rdfs:comment": "Compiles views as JSON objects.",
+    "rdfs:label": "JSON",
+	"schema:identifier": "json", 
+	"live-element-core:property/partOfPackage": "live-element-scale:core", 
+	"live-element-core:property/associatedProcessor": "live-element-core:processor/json", 
+	"schema:version": 1, 
+	"schema:name": "JSON", 
+	"schema:description": "JSON view compiler", 
+    "schema:documentation": "live-element-reference:view/json", 
+    "schema:mainEntityOfPage": "live-element-learn:view/json", 
+	"schema:contentType": "application/json", 
+	"live-element-core:property/processorInputDefaults": {}, 
+	"live-element-core:property/processorOutputDefaults": {}, 
+	"live-element-core:property/filenameExtension": "json", 
+	"live-element-core:property/isActive": true
+}

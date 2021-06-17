@@ -4,6 +4,7 @@
     "@type": "rdf:Property",
     "rdfs:comment": "The package that includes this unit.",
     "rdfs:label": "partOfPackage",
+    "rdfs:subPropertyOf": "schema:isPartOf", 
     "schema:domainIncludes": "live-element-core:class/Unit",
     "schema:rangeIncludes": "live-element-core:class/Package"
 }

@@ -2,7 +2,7 @@
     "@context": "context/default",
 	"@id" : "live-element-core:shape/ViewShape",
 	"@type": "sh:NodeShape", 
-	"rdfs:subClassOf" : "live-element-core:shape/UnitShape",
+	"rdfs:subClassOf" : "live-element-core:shape/ModuleShape",
 	"sh:targetClass" : "live-element-core:class/View",
 	"sh:message": "This is not a valid view.", 
 	"sh:property": [
@@ -16,6 +16,11 @@
 		"live-element-core:shape/property/itemListOrderShape", 
 		"live-element-core:shape/property/startFromIndexInclusiveShape", 
 		"live-element-core:shape/property/numberOfItemsShape"
-		"live-element-core:shape/property/positionShape"
+		"live-element-core:shape/property/positionShape", 
+		"live-element-core:shape/property/isActiveShape", 
+		{
+			"@id": "live-element-core:shape/property/foundInComponentShape", 
+			"sh:defaultValue": "live-element-core:component/compiler"
+		}
     ]
 }
