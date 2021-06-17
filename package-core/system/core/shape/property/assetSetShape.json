@@ -1,0 +1,11 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:shape/property/assetSetShape",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "live-element-core:property/assetSet",
+	"sh:name": "Asset Set", 
+	"sh:description": "Assets to be used by the view.", 
+	"sh:order": "2", 
+	"sh:datatype": "schema:StructuredValue",
+	"sh:nodeKind": "sh:IRI"
+}

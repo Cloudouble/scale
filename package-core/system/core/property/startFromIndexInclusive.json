@@ -1,0 +1,9 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:property/startFromIndexInclusive",
+    "@type": "rdf:Property",
+    "rdfs:comment": "The result index to start processing results from, inclusive.",
+    "rdfs:label": "startFromIndexInclusive",
+    "schema:domainIncludes": ["live-element-core:class/View"],
+    "schema:rangeIncludes": "schema:Number"
+}

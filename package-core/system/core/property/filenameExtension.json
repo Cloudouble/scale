@@ -1,0 +1,9 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:property/filenameExtension",
+    "@type": "rdf:Property",
+    "rdfs:comment": "The extension after the . in the file name or output path.",
+    "rdfs:label": "filenameExtension",
+    "schema:domainIncludes": ["live-element-core:class/View"],
+    "schema:rangeIncludes": "schema:Text"
+}

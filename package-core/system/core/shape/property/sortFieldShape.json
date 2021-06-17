@@ -1,0 +1,11 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:shape/property/sortFieldShape",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "live-element-core:property/sortField",
+	"sh:name": "Sort Field", 
+	"sh:description": "The record field to use for sorting.", 
+	"sh:order": "2", 
+	"sh:datatype": "schema:Text",
+	"sh:nodeKind": "sh:Literal"
+}

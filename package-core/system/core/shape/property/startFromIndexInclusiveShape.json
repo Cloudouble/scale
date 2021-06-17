@@ -1,0 +1,9 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:shape/property/startFromIndexInclusiveShape",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "live-element-core:property/startFromIndexInclusive",
+	"sh:order": "2", 
+	"sh:datatype": "schema:Number",
+	"sh:nodeKind": "sh:Literal"
+}

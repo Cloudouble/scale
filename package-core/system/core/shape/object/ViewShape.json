@@ -6,46 +6,16 @@
 	"sh:targetClass" : "live-element-core:class/View",
 	"sh:message": "This is not a valid view.", 
 	"sh:property": [
-		{
-			"sh:path": "schema:processorInputDefaults",
-			"sh:name": "Processor Input Defaults", 
-			"sh:description": "Default input values for the processor.", 
-			"sh:order": "0", 
-			"sh:minCount": 0,
-			"sh:maxCount": 1,
-			"sh:datatype": "schema:StructuredValue",
-			"sh:nodeKind": "sh:IRI"
-		}, 
-		{
-			"sh:path": "schema:processorOutputDefaults",
-			"sh:name": "Processor Output Defaults", 
-			"sh:description": "Default output values for the processor.", 
-			"sh:order": "1", 
-			"sh:minCount": 0,
-			"sh:maxCount": 1,
-			"sh:datatype": "schema:StructuredValue",
-			"sh:nodeKind": "sh:IRI"
-		}, 
-		{
-			"sh:path": "schema:assetSet",
-			"sh:name": "Asset Set", 
-			"sh:description": "Assets to be used by the view.", 
-			"sh:order": "2", 
-			"sh:datatype": "schema:StructuredValue",
-			"sh:nodeKind": "sh:IRI"
-		}
+		"live-element-core:shape/property/processorInputDefaultsShape", 
+		"live-element-core:shape/property/processorOutputDefaultsShape", 
+		"live-element-core:shape/property/assetSetShape", 
+		"live-element-core:shape/property/contentTypeShape", 
+		"live-element-core:property/filenameExtensionShape", 
+		"live-element-core:shape/property/expiresShape", 
+		"live-element-core:shape/property/sortFieldShape", 
+		"live-element-core:shape/property/itemListOrderShape", 
+		"live-element-core:shape/property/startFromIndexInclusiveShape", 
+		"live-element-core:shape/property/numberOfItemsShape"
+		"live-element-core:shape/property/positionShape"
     ]
-}
-
-
-{
-	?field_name='', 
-	?content_type='', 
-	?suffix='', 
-	?expires=0, 
-	?sort_field='', 
-	?sort_direction='', 
-	?min_index=0, 
-	?max_index=0, 
-	priority
 }
