@@ -1,0 +1,13 @@
+{
+    "@context": "context/core",
+    "@id": "core:storer/blobPartition",
+    "@type": "core:class/Partition",
+    "partOfPackage": "reference:scale/core"
+    "label": "blobPartition",
+    "comment": "The partition used for large and unstructured file storage.", 
+    "documentation": "reference:scale/core/storer/blobPartition", 
+    "learnMore": "learn:scale/core/storer/blobPartition", 
+    "associatedAdaptor": "core:storer/awsS3", 
+    "associatedAdaptorConfiguration": "value/blobPartitionAwsS3Configuration", 
+    "isActive": true
+}

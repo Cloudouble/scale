@@ -1,0 +1,13 @@
+{
+    "@context": "context/core",
+    "@id": "core:storer/requestPartition",
+    "@type": "core:class/Partition",
+    "partOfPackage": "reference:scale/core"
+    "label": "requestPartition",
+    "comment": "The partition used for write request objects to.", 
+    "documentation": "reference:scale/core/storer/requestPartition", 
+    "learnMore": "learn:scale/core/storer/requestPartition", 
+    "associatedAdaptor": "core:storer/awsS3", 
+    "associatedAdaptorConfiguration": "value/requestPartitionAwsS3Configuration", 
+    "isActive": true
+}

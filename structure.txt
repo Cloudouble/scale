@@ -97,13 +97,6 @@ _/record/{uuid}.json
 
 
 
-Import Partition: bulk object writes received in archival formats  
-{root}/import/{key}.{format} ({key} is a secret key of an installed importer)
-
-_/import/{key}.{format}
-
-
-
 Connection Partition: objects defining third-party connections to the system that may read or write data
 {root}/connection/{connectiontype}/{identifier}/{path}.json
 

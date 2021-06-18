@@ -1,0 +1,12 @@
+{
+    "@context": "context/default",
+    "@id": "core:property/partitionMap",
+    "@type": "rdf:Property",
+    "partOfPackage": "reference:scale/core"
+    "label": "partitionMap",
+    "comment": "The map of partition names to partition objects.", 
+    "documentation": "reference:scale/core/property/partitionMap", 
+    "learnMore": "learn:scale/core/property/partitionMap", 
+    "schema:domainIncludes": ["core:class/StorerComponent"],
+    "schema:rangeIncludes": "schema:StructuredValue"
+}

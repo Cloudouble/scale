@@ -1,0 +1,13 @@
+{
+    "@context": "context/core",
+    "@id": "core:storer/outputPartition",
+    "@type": "core:class/Partition",
+    "partOfPackage": "reference:scale/core"
+    "label": "outputPartition",
+    "comment": "The partition used for objects that are compiled from records, query results or exports, being made accessible to connections.", 
+    "documentation": "reference:scale/core/storer/outputPartition", 
+    "learnMore": "learn:scale/core/storer/outputPartition", 
+    "associatedAdaptor": "core:storer/awsS3", 
+    "associatedAdaptorConfiguration": "value/outputPartitionAwsS3Configuration", 
+    "isActive": true
+}

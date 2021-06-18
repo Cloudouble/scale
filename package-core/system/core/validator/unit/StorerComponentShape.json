@@ -1,0 +1,11 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/unit/StorerComponentShape",
+	"@type": "sh:NodeShape", 
+	"rdfs:subClassOf" : "core:validator/unit/ComponentShape",
+	"sh:targetClass" : "core:class/StorerComponent",
+	"sh:message": "This is not a valid storer component."
+	"sh:property": [
+		"core:validator/property/partitionMap"
+    ]
+}
