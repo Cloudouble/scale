@@ -1,9 +1,12 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:property/reactToType",
+    "@id": "core:property/reactToType",
     "@type": "rdf:Property",
-    "rdfs:comment": "The record type or types which trigger running the query.",
-    "rdfs:label": "reactToType",
-    "schema:domainIncludes": ["live-element-core:class/Query"],
+    "partOfPackage": "reference:scale/core"
+    "label": "reactToType",
+    "comment": "The record type or types which trigger running the query.", 
+    "documentation": "reference:scale/core/property/reactToType", 
+    "learnMore": "learn:scale/core/property/reactToType", 
+    "schema:domainIncludes": ["core:class/Query"],
     "schema:rangeIncludes": "schema:Text"
 }

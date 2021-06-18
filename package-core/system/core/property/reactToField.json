@@ -1,9 +1,12 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:property/reactToField",
+    "@id": "core:property/reactToField",
     "@type": "rdf:Property",
-    "rdfs:comment": "The record field or fields which trigger running the query.",
-    "rdfs:label": "reactToField",
-    "schema:domainIncludes": ["live-element-core:class/Query"],
+    "partOfPackage": "reference:scale/core"
+    "label": "reactToField",
+    "comment": "The record field or fields which trigger running the query.", 
+    "documentation": "reference:scale/core/property/reactToField", 
+    "learnMore": "learn:scale/core/property/reactToField", 
+    "schema:domainIncludes": ["core:class/Query"],
     "schema:rangeIncludes": "schema:Text"
 }

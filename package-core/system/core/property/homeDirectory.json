@@ -1,10 +1,12 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:property/homeDirectory",
+    "@id": "core:property/homeDirectory",
     "@type": "rdf:Property",
-    "rdfs:comment": "The directory where the modules for this component are generally found.",
-    "rdfs:label": "homeDirectory",
-    "rdfs:subPropertyOf": "schema:isPartOf", 
-    "schema:domainIncludes": "live-element-core:class/Component",
-    "schema:rangeIncludes": "shema:URL"
+    "partOfPackage": "reference:scale/core"
+    "label": "homeDirectory",
+    "comment": "The directory where the modules for this component should be found.", 
+    "documentation": "reference:scale/core/property/homeDirectory", 
+    "learnMore": "learn:scale/core/property/homeDirectory", 
+    "schema:domainIncludes": ["core:class/Component"],
+    "schema:rangeIncludes": "schema:URL"
 }

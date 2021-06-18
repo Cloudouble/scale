@@ -1,9 +1,12 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:property/processorOutputDefaults",
+    "@id": "core:property/processorOutputDefaults",
     "@type": "rdf:Property",
-    "rdfs:comment": "The default values with which to backfill the output from a processor.",
-    "rdfs:label": "processorOutputDefaults",
-    "schema:domainIncludes": ["live-element-core:class/View"],
+    "partOfPackage": "reference:scale/core"
+    "label": "processorOutputDefaults",
+    "comment": "The default values with which to backfill the output from a processor.", 
+    "documentation": "reference:scale/core/property/processorOutputDefaults", 
+    "learnMore": "learn:scale/core/property/processorOutputDefaults", 
+    "schema:domainIncludes": ["core:class/View"],
     "schema:rangeIncludes": "schema:StructuredValue"
 }

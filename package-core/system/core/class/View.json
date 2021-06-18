@@ -1,8 +1,9 @@
 {
     "@context": "context/core",
-    "@id": "class:View",
+    "@id": "core:class/View",
     "@type": "rdfs:Class",
-    "subClassOf": "class:Module", 
+    "partOfPackage": "reference:scale/core"
+    "subClassOf": "core:class/Module", 
     "label": "View",
     "comment": "A set of instructions for the compiler to use when creating output."
     "documentation": "reference:scale/core/class/View", 

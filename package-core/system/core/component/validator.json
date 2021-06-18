@@ -1,16 +1,15 @@
 {
     "@context": "context/default",
-    "@id": "live-element-core:component/validator",
-    "@type": "live-element-core:class/Component",
-    "rdfs:comment": "Responsible for ensuring the all data stored is valid according to its type.",
-    "rdfs:label": "Validator",
-    "schema:identifier": "validator", 
-    "schema:version": "1",
-    "schema:documentation": "live-element-reference:component/validator", 
-    "live-element-core:property/learnMore": "live-element-learn:component/validator", 
-    "live-element-core:property/partOfPackage": "live-element:scale/core", 
-    "live-element-core:property/associatedProcessor": "live-element-core:processor/validator"
-    "live-element-core:property/homeDirectory": "live-element-core:validator"
-    "live-element-core:property/expectedModuleType": ["sh:NodeShape", "sh:PropertyShape"], 
-	"live-element-core:property/isActive": true
+    "@id": "core:component/validator",
+    "@type": "core:class/Component",
+    "partOfPackage": "reference:scale/core"
+    "label": "Validator",
+    "comment": "Responsible for ensuring the all data stored is valid according to its type.",
+    "documentation": "reference:scale/core/component/Validator", 
+    "learnMore": "learn:scale/core/component/Validator", 
+	"associatedProcessor": "core:computor/validator", 
+	"version": 1, 
+	"isActive": true, 
+    "core:property/homeDirectory": "validator"
+    "core:property/expectedModuleType": ["sh:NodeShape", "sh:PropertyShape"]
 }

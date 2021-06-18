@@ -1,9 +1,12 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:property/sortField",
+    "@id": "core:property/sortField",
     "@type": "rdf:Property",
-    "rdfs:comment": "The record field to use for sorting.",
-    "rdfs:label": "sortField",
-    "schema:domainIncludes": ["live-element-core:class/View"],
+    "partOfPackage": "reference:scale/core"
+    "label": "sortField",
+    "comment": "The record field to use for sorting.", 
+    "documentation": "reference:scale/core/property/sortField", 
+    "learnMore": "learn:scale/core/property/sortField", 
+    "schema:domainIncludes": ["core:class/View"],
     "schema:rangeIncludes": "schema:Text"
 }

@@ -1,7 +1,15 @@
 {
-    "@context": "context/core",
-    "@id": "live-element-core:component/authenticator",
-    "@type": "live-element-core:class/component",
-    "rdfs:comment": "Responsible for connection authentication and authorisation.",
-    "rdfs:label": "Authenticator",
+    "@context": "context/default",
+    "@id": "core:component/authenticator",
+    "@type": "core:class/Component",
+    "partOfPackage": "reference:scale/core"
+    "label": "Authenticator",
+    "comment": "Responsible for connection authentication and authorisation.",
+    "documentation": "reference:scale/core/component/Authenticator", 
+    "learnMore": "learn:scale/core/component/Authenticator", 
+	"associatedProcessor": "core:computor/authenticator", 
+	"version": 1, 
+	"isActive": true, 
+    "core:property/homeDirectory": "authenticator", 
+    "core:property/expectedModuleType": []
 }

@@ -1,8 +1,11 @@
 {
     "@context": "context/core",
-    "@id": "class:Module",
+    "@id": "core:class/Module",
     "@type": "rdfs:Class",
-    "subClassOf": "class:Unit", 
+    "partOfPackage": "reference:scale/core"
+    "subClassOf": "core:class/Unit", 
     "label": "Module",
-    "comment": "A single moving part within a functional system component."
+    "comment": "A single moving part within a functional system component.", 
+    "documentation": "reference:scale/core/class/Module", 
+    "learnMore": "learn:scale/core/class/Module"
 }

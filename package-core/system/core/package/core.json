@@ -1,0 +1,13 @@
+{
+    "@context": "context/default", 
+    "@id": "reference:scale/core", 
+    "@type": "core:class/Package", 
+    "label": "core",
+    "comment": "The package that contains all core system components and modules for a minimal standard installation.",
+    "documentation": "reference:scale/core", 
+    "learnMore": "learn:scale/core", 
+	"version": 1, 
+	"isActive": true
+}
+
+

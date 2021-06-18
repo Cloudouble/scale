@@ -1,9 +1,12 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:property/processorInputDefaults",
+    "@id": "core:property/processorInputDefaults",
     "@type": "rdf:Property",
-    "rdfs:comment": "The default values to pass into a processor.",
-    "rdfs:label": "processorInputDefaults",
-    "schema:domainIncludes": ["live-element-core:class/View"],
+    "partOfPackage": "reference:scale/core"
+    "label": "processorInputDefaults",
+    "comment": "The default values into a processor.", 
+    "documentation": "reference:scale/core/property/processorInputDefaults", 
+    "learnMore": "learn:scale/core/property/processorInputDefaults", 
+    "schema:domainIncludes": ["core:class/View"],
     "schema:rangeIncludes": "schema:StructuredValue"
 }

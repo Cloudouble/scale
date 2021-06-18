@@ -1,0 +1,16 @@
+{
+    "@context": "context/default",
+    "@id": "core:computor/indexer",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core"
+    "label": "indexer",
+    "comment": "Processes query indexing operations.",
+    "documentation": "reference:scale/core/computor/indexer", 
+    "learnMore": "learn:scale/core/computor/indexer", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/processor/indexer", 
+    "schema:runtimePlatform": "python3.8", 
+	"core:property/inputStructure": "core:validator/input/indexerInputShape", 
+	"core:property/outputStructure": "core:validator/output/indexerOutputShape"
+}

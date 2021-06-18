@@ -1,9 +1,12 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:property/isActive",
+    "@id": "core:property/isActive",
     "@type": "rdf:Property",
-    "rdfs:comment": "True if this object is active",
-    "rdfs:label": "isActive",
-    "schema:domainIncludes": ["live-element-core:class/View"],
+    "partOfPackage": "reference:scale/core"
+    "label": "isActive",
+    "comment": "True if this is active.", 
+    "documentation": "reference:scale/core/property/isActive", 
+    "learnMore": "learn:scale/core/property/isActive", 
+    "schema:domainIncludes": ["core:class/Unit"],
     "schema:rangeIncludes": "schema:Boolean"
 }

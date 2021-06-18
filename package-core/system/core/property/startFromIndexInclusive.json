@@ -1,9 +1,12 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:property/startFromIndexInclusive",
+    "@id": "core:property/startFromIndexInclusive",
     "@type": "rdf:Property",
-    "rdfs:comment": "The result index to start processing results from, inclusive.",
-    "rdfs:label": "startFromIndexInclusive",
-    "schema:domainIncludes": ["live-element-core:class/View"],
+    "partOfPackage": "reference:scale/core"
+    "label": "startFromIndexInclusive",
+    "comment": "The result index to start processing result from, inclusive.", 
+    "documentation": "reference:scale/core/property/startFromIndexInclusive", 
+    "learnMore": "learn:scale/core/property/startFromIndexInclusive", 
+    "schema:domainIncludes": ["core:class/View"],
     "schema:rangeIncludes": "schema:Number"
 }

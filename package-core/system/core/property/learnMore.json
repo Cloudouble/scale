@@ -1,10 +1,13 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:property/learnMore",
+    "@id": "core:property/learnMore",
     "@type": "rdf:Property",
-    "rdfs:comment": "Further learning resources.",
-    "rdfs:label": "learnMore",
-    "rdfs:subPropertyOf": "schema:mainEntityOfPage", 
-    "schema:domainIncludes": "live-element-core:class/Unit",
+    "partOfPackage": "reference:scale/core"
+    "subPropertyOf": "schema:mainEntityOfPage", 
+    "label": "learnMore",
+    "comment": "Further learning resources.", 
+    "documentation": "reference:scale/core/property/learnMore", 
+    "learnMore": "learn:scale/core/property/learnMore", 
+    "schema:domainIncludes": ["core:class/Unit"],
     "schema:rangeIncludes": "schema:URL"
 }

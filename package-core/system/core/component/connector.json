@@ -1,7 +1,15 @@
 {
-    "@context": "context/core",
-    "@id": "live-element-core:unit/connector",
-    "@type": "live-element-core:class/component",
-    "rdfs:comment": "Responsible for managing and routing incoming connection requrest in to valid request objects.",
-    "rdfs:label": "Connector",
+    "@context": "context/default",
+    "@id": "core:component/connector",
+    "@type": "core:class/Component",
+    "partOfPackage": "reference:scale/core"
+    "label": "Connector",
+    "comment": "Responsible for managing and routing incoming connection requests in to valid request objects.",
+    "documentation": "reference:scale/core/component/Connector", 
+    "learnMore": "learn:scale/core/component/Connector", 
+	"associatedProcessor": "core:computor/connector", 
+	"version": 1, 
+	"isActive": true, 
+    "core:property/homeDirectory": "connector", 
+    "core:property/expectedModuleType": []
 }

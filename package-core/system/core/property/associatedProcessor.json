@@ -1,9 +1,12 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:property/associatedProcessor",
+    "@id": "core:property/associatedProcessor",
     "@type": "rdf:Property",
-    "rdfs:comment": "The processor associated with this obejct.",
-    "rdfs:label": "associatedProcessor",
-    "schema:domainIncludes": "live-element-core:class/Unit",
-    "schema:rangeIncludes": "live-element-core:class/Processor"
+    "partOfPackage": "reference:scale/core", 
+    "label": "associatedProcessor",
+    "comment": "The processor associated with this.", 
+    "documentation": "reference:scale/core/property/associatedProcessor", 
+    "learnMore": "learn:scale/core/property/associatedProcessor", 
+    "schema:domainIncludes": ["core:class/Unit"],
+    "schema:rangeIncludes": "core:class/Processor"
 }

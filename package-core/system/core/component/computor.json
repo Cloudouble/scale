@@ -1,7 +1,15 @@
 {
-    "@context": "context/core",
-    "@id": "live-element-core:component/computor",
-    "@type": "live-element-core:class/component",
-    "rdfs:comment": "Responsible for running the processors.",
-    "rdfs:label": "Computor",
+    "@context": "context/default",
+    "@id": "core:component/computor",
+    "@type": "core:class/Component",
+    "partOfPackage": "reference:scale/core"
+    "label": "Computor",
+    "comment": "Responsible for running the processors.",
+    "documentation": "reference:scale/core/component/Computor", 
+    "learnMore": "learn:scale/core/component/Computor", 
+	"associatedProcessor": "core:computor/computor", 
+	"version": 1, 
+	"isActive": true, 
+    "core:property/homeDirectory": "computor", 
+    "core:property/expectedModuleType": ["core:class/Processor"]
 }

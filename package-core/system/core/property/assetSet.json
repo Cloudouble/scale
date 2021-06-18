@@ -1,9 +1,12 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:property/assetSet",
+    "@id": "core:property/assetSet",
     "@type": "rdf:Property",
-    "rdfs:comment": "A set of assets.",
-    "rdfs:label": "assetSet",
-    "schema:domainIncludes": ["live-element-core:class/View"],
+    "partOfPackage": "reference:scale/core", 
+    "label": "assetSet",
+    "comment": "A set of assets.", 
+    "documentation": "reference:scale/core/property/assetSet", 
+    "learnMore": "learn:scale/core/property/assetSet", 
+    "schema:domainIncludes": ["core:class/View"],
     "schema:rangeIncludes": "schema:StructuredValue"
 }

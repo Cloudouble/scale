@@ -1,7 +1,15 @@
 {
-    "@context": "context/core",
-    "@id": "live-element-core:component/importer",
-    "@type": "live-element-core:class/component",
-    "rdfs:comment": "Responsible for managing the bulk import to new data records.",
-    "rdfs:label": "Importer",
+    "@context": "context/default",
+    "@id": "core:component/importer",
+    "@type": "core:class/Component",
+    "partOfPackage": "reference:scale/core"
+    "label": "Importer",
+    "comment": "Responsible for managing the bulk import of new data records.",
+    "documentation": "reference:scale/core/component/Importer", 
+    "learnMore": "learn:scale/core/component/Importer", 
+	"associatedProcessor": "core:computor/importer", 
+	"version": 1, 
+	"isActive": true, 
+    "core:property/homeDirectory": "importer", 
+    "core:property/expectedModuleType": []
 }

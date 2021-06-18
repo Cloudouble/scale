@@ -1,9 +1,12 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:property/outputStructure",
+    "@id": "core:property/outputStructure",
     "@type": "rdf:Property",
-    "rdfs:comment": "The validation shape required for a valid output.",
-    "rdfs:label": "outputStructure",
-    "schema:domainIncludes": "live-element-core:class/Processor",
+    "partOfPackage": "reference:scale/core"
+    "label": "outputStructure",
+    "comment": "The validation shape required for a valid output.", 
+    "documentation": "reference:scale/core/property/outputStructure", 
+    "learnMore": "learn:scale/core/property/outputStructure", 
+    "schema:domainIncludes": ["core:class/Processor"],
     "schema:rangeIncludes": "sh:NodeShape"
 }

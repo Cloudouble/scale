@@ -1,8 +1,11 @@
 {
     "@context": "context/core",
-    "@id": "class:Processor",
+    "@id": "core:class/Processor",
     "@type": "rdfs:Class",
-    "subClassOf": "class:Module", 
+    "partOfPackage": "reference:scale/core"
+    "subClassOf": "core:class/Module", 
     "label": "Processor",
-    "comment": "A single executable chunk of code to perform dynamic system tasks."
+    "comment": "A single executable chunk of code to perform dynamic system tasks.", 
+    "documentation": "reference:scale/core/class/Processor", 
+    "learnMore": "learn:scale/core/class/Processor"
 }

@@ -1,7 +1,15 @@
 {
-    "@context": "context/core",
-    "@id": "live-element-core:component/curator",
-    "@type": "live-element-core:class/component",
-    "rdfs:comment": "Responsible for keeping the system in good order..",
-    "rdfs:label": "Curator",
+    "@context": "context/default",
+    "@id": "core:component/curator",
+    "@type": "core:class/Component",
+    "partOfPackage": "reference:scale/core"
+    "label": "Curator",
+    "comment": "Responsible for keeping the system in good order.",
+    "documentation": "reference:scale/core/component/Curator", 
+    "learnMore": "learn:scale/core/component/Curator", 
+	"associatedProcessor": "core:computor/curator", 
+	"version": 1, 
+	"isActive": true, 
+    "core:property/homeDirectory": "curator", 
+    "core:property/expectedModuleType": []
 }

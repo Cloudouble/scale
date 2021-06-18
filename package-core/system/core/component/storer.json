@@ -1,7 +1,16 @@
 {
-    "@context": "context/core",
-    "@id": "live-element-core:component/storer",
-    "@type": "live-element-core:class/component",
-    "rdfs:comment": "Responsible for reading and writing data to the partitions.",
-    "rdfs:label": "Storer",
+    "@context": "context/default",
+    "@id": "core:component/storer",
+    "@type": "core:class/Component",
+    "partOfPackage": "reference:scale/core"
+    "label": "Storer",
+    "comment": "Responsible for reading writing data to the partitions.",
+    "documentation": "reference:scale/core/component/Storer", 
+    "learnMore": "learn:scale/core/component/Storer", 
+	"associatedProcessor": "core:computor/storer", 
+	"version": 1, 
+	"isActive": true, 
+    "core:property/homeDirectory": "storer"
+    "core:property/expectedModuleType": []
 }
+

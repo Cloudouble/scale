@@ -1,0 +1,16 @@
+{
+    "@context": "context/default",
+    "@id": "core:computor/json",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core"
+    "label": "JSON",
+    "comment": "Processes json rendering.",
+    "documentation": "reference:scale/core/computor/json", 
+    "learnMore": "learn:scale/core/computor/json", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/processor/json", 
+    "schema:runtimePlatform": "python3.8", 
+	"core:property/inputStructure": "core:validator/input/jsonInputShape", 
+	"core:property/outputStructure": "core:validator/output/jsonOutputShape"
+}

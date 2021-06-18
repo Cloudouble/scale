@@ -1,9 +1,12 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:property/filenameExtension",
+    "@id": "core:property/filenameExtension",
     "@type": "rdf:Property",
-    "rdfs:comment": "The extension after the . in the file name or output path.",
-    "rdfs:label": "filenameExtension",
-    "schema:domainIncludes": ["live-element-core:class/View"],
+    "partOfPackage": "reference:scale/core", 
+    "label": "filenameExtension",
+    "comment": "The extension after the . in the file name or output path.", 
+    "documentation": "reference:scale/core/property/filenameExtension", 
+    "learnMore": "learn:scale/core/property/filenameExtension", 
+    "schema:domainIncludes": ["core:class/View"],
     "schema:rangeIncludes": "schema:Text"
 }

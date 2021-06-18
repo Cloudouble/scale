@@ -1,17 +1,15 @@
 {
-    "@context": "context/core",
-    "@id": "live-element-core:component/compiler",
-    "@type": "live-element-core:class/component",
-    "rdfs:comment": "Responsible for compiling views to the output partition.",
-    "rdfs:label": "Compiler",
-	"live-element-core:property/partOfPackage": "live-element-scale:core", 
-	"live-element-core:property/associatedProcessor": "live-element-core:processor/compiler", 
-	"schema:version": 1, 
-    "schema:documentation": "live-element-reference:component/compiler", 
-    "live-element-core:property/learnMore": "live-element-learn:component/compiler", 
-	"live-element-core:property/processorInputDefaults": {}, 
-	"live-element-core:property/processorOutputDefaults": {}, 
-	"live-element-core:property/isActive": true, 
-    "live-element-core:property/homeDirectory": "live-element-core:compiler"
-    "live-element-core:property/expectedModuleType": "live-element-core:class/View"
+    "@context": "context/default",
+    "@id": "core:component/compiler",
+    "@type": "core:class/Component",
+    "partOfPackage": "reference:scale/core"
+    "label": "Compiler",
+    "comment": "Responsible for compiling views to the output partitions.",
+    "documentation": "reference:scale/core/component/Compiler", 
+    "learnMore": "learn:scale/core/component/Compiler", 
+	"associatedProcessor": "core:computor/compiler", 
+	"version": 1, 
+	"isActive": true, 
+    "core:property/homeDirectory": "compiler", 
+    "core:property/expectedModuleType": ["core:class/View"]
 }

@@ -1,9 +1,12 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:property/expectedModuleType",
+    "@id": "core:property/expectedModuleType",
     "@type": "rdf:Property",
-    "rdfs:comment": "The type of module that is expected to be found in this component.",
-    "rdfs:label": "expectedModuleType",
-    "schema:domainIncludes": "live-element-core:class/Component",
+    "partOfPackage": "reference:scale/core", 
+    "label": "expectedModuleType",
+    "comment": "The type of module that is expected to be found in this component.", 
+    "documentation": "reference:scale/core/property/expectedModuleType", 
+    "learnMore": "learn:scale/core/property/expectedModuleType", 
+    "schema:domainIncludes": ["core:class/Component"],
     "schema:rangeIncludes": "rdfs:Class"
 }

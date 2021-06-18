@@ -1,10 +1,12 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:property/partOfPackage",
+    "@id": "core:property/partOfPackage",
     "@type": "rdf:Property",
-    "rdfs:comment": "The package that includes this unit.",
-    "rdfs:label": "partOfPackage",
-    "rdfs:subPropertyOf": "schema:isPartOf", 
-    "schema:domainIncludes": "live-element-core:class/Unit",
-    "schema:rangeIncludes": "live-element-core:class/Package"
+    "partOfPackage": "reference:scale/core"
+    "label": "partOfPackage",
+    "comment": "The package that includes this.", 
+    "documentation": "reference:scale/core/property/partOfPackage", 
+    "learnMore": "learn:scale/core/property/partOfPackage", 
+    "schema:domainIncludes": ["core:class/Unit"],
+    "schema:rangeIncludes": "core:class/Package"
 }

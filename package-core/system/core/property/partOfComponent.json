@@ -1,0 +1,13 @@
+{
+    "@context": "context/default",
+    "@id": "core:property/partOfComponent",
+    "@type": "rdf:Property",
+    "subPropertyOf": "schema:isPartOf", 
+    "partOfPackage": "reference:scale/core", 
+    "label": "partOfComponent",
+    "comment": "The component that this module is a part of.", 
+    "documentation": "reference:scale/core/property/partOfComponent", 
+    "learnMore": "learn:scale/core/property/partOfComponent", 
+    "schema:domainIncludes": ["core:class/Module"],
+    "schema:rangeIncludes": "core:class/Component"
+}

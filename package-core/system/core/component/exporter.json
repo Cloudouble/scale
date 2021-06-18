@@ -1,7 +1,15 @@
 {
-    "@context": "context/core",
-    "@id": "live-element-core:component/exporter",
-    "@type": "live-element-core:class/component",
-    "rdfs:comment": "Responsible for managing the bulk collation and output of records for transfer out of the system.",
-    "rdfs:label": "Exporter",
+    "@context": "context/default",
+    "@id": "core:component/exporter",
+    "@type": "core:class/Component",
+    "partOfPackage": "reference:scale/core"
+    "label": "Exporter",
+    "comment": "Responsible for managing the bulk bulk collation and output of recordsfor transfer out of the system.",
+    "documentation": "reference:scale/core/component/Exporter", 
+    "learnMore": "learn:scale/core/component/Exporter", 
+	"associatedProcessor": "core:computor/exporter", 
+	"version": 1, 
+	"isActive": true, 
+    "core:property/homeDirectory": "exporter", 
+    "core:property/expectedModuleType": []
 }

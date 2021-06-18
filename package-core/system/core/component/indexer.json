@@ -1,17 +1,15 @@
 {
-    "@context": "context/core",
-    "@id": "live-element-core:component/indexer",
-    "@type": "live-element-core:class/component",
-    "rdfs:comment": "Responsible for querying record to create result sets.",
-    "rdfs:label": "Indexer",
-	"live-element-core:property/partOfPackage": "live-element-scale:core", 
-	"live-element-core:property/associatedProcessor": "live-element-core:processor/indexer", 
-	"schema:version": 1, 
-    "schema:documentation": "live-element-reference:component/indexer", 
-    "live-element-core:property/learnMore": "live-element-learn:component/indexer", 
-	"live-element-core:property/processorInputDefaults": {}, 
-	"live-element-core:property/processorOutputDefaults": {}, 
-	"live-element-core:property/isActive": true, 
-    "live-element-core:property/homeDirectory": "live-element-core:indexer"
-    "live-element-core:property/expectedModuleType": "live-element-core:class/Query"
+    "@context": "context/default",
+    "@id": "core:component/indexer",
+    "@type": "core:class/Component",
+    "partOfPackage": "reference:scale/core"
+    "label": "Indexer",
+    "comment": "Responsible for querying records to create result sets.",
+    "documentation": "reference:scale/core/component/Indexer", 
+    "learnMore": "learn:scale/core/component/Indexer", 
+	"associatedProcessor": "core:computor/indexer", 
+	"version": 1, 
+	"isActive": true, 
+    "core:property/homeDirectory": "indexer"
+    "core:property/expectedModuleType": ["core:class/Query"]
 }

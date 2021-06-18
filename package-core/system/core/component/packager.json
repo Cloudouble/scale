@@ -1,7 +1,15 @@
 {
-    "@context": "context/core",
-    "@id": "live-element-core:component/packager",
-    "@type": "live-element-core:class/component",
-    "rdfs:comment": "Responsible for creating packages.",
-    "rdfs:label": "Packager",
+    "@context": "context/default",
+    "@id": "core:component/packager",
+    "@type": "core:class/Component",
+    "partOfPackage": "reference:scale/core"
+    "label": "Packager",
+    "comment": "Responsible for creating packages.",
+    "documentation": "reference:scale/core/component/Packager", 
+    "learnMore": "learn:scale/core/component/Packager", 
+	"associatedProcessor": "core:computor/packager", 
+	"version": 1, 
+	"isActive": true, 
+    "core:property/homeDirectory": "packager"
+    "core:property/expectedModuleType": []
 }
