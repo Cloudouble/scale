@@ -10,7 +10,10 @@
 	"associatedProcessor": "core:computor/storer", 
 	"version": 1, 
 	"isActive": true, 
-    "core:property/homeDirectory": "storer"
-    "core:property/expectedModuleType": []
+    "core:property/homeDirectory": "storer", 
+    "core:property/expectedModuleType": [], 
+	"containsModule": [
+	    
+    ]
 }
 

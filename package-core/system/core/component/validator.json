@@ -10,6 +10,8 @@
 	"associatedProcessor": "core:computor/validator", 
 	"version": 1, 
 	"isActive": true, 
-    "core:property/homeDirectory": "validator"
-    "core:property/expectedModuleType": ["sh:NodeShape", "sh:PropertyShape"]
+    "core:property/homeDirectory": "validator", 
+    "core:property/expectedModuleType": ["sh:NodeShape", "sh:PropertyShape"], 
+	"containsModule": [
+    ]
 }

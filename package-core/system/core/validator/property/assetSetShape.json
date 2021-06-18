@@ -1,8 +1,8 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:shape/property/assetSetShape",
+	"@id" : "core:validator/property/assetSetShape",
 	"@type" : "sh:PropertyShape",
-	"sh:path": "live-element-core:property/assetSet",
+	"sh:path": "core:property/assetSet",
 	"sh:name": "Asset Set", 
 	"sh:description": "Assets to be used by the view.", 
 	"sh:order": "2", 

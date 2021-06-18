@@ -1,8 +1,8 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:shape/property/processorOutputDefaultsShape",
+	"@id" : "core:validator/property/processorOutputDefaultsShape",
 	"@type" : "sh:PropertyShape",
-	"sh:path": "live-element-core:property/processorOutputDefaults",
+	"sh:path": "core:property/processorOutputDefaults",
 	"sh:name": "Processor Output Defaults", 
 	"sh:description": "Default output values for the processor.", 
 	"sh:order": "1", 

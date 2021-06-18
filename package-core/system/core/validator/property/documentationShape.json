@@ -1,6 +1,6 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:shape/property/documentationShape",
+	"@id" : "core:validator/property/documentationShape",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "schema:documentation",
 	"sh:name": "Reference", 

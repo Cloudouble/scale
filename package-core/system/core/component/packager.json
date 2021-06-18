@@ -10,6 +10,9 @@
 	"associatedProcessor": "core:computor/packager", 
 	"version": 1, 
 	"isActive": true, 
-    "core:property/homeDirectory": "packager"
-    "core:property/expectedModuleType": []
+    "core:property/homeDirectory": "packager", 
+    "core:property/expectedModuleType": [], 
+	"containsModule": [
+	    
+    ]
 }

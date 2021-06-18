@@ -1,0 +1,16 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/unit/QueryShape",
+	"@type": "sh:NodeShape", 
+	"rdfs:subClassOf" : "core:validator/unit/ModuleShape",
+	"sh:targetClass" : "core:class/Query",
+	"sh:message": "This is not a valid query.", 
+	"sh:property": [
+		"core:validator/property/reactToFieldShape", 
+		"core:validator/property/reactToTypeShape", 
+		{
+			"@id": "core:validator/property/partOfComponentShape", 
+			"sh:defaultValue": "core:component/indexer"
+		}
+    ]
+}

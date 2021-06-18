@@ -1,0 +1,24 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/unit/UnitShape",
+	"@type" : "sh:NodeShape",
+	"sh:targetClass" : "core:class/Unit",
+	"sh:message": "This is not a valid package unit.", 
+	"sh:severity": "sh:Violation", 
+	"sh:closed" : true,
+	"sh:ignoredProperties": ["rdfs:subClassOf", "rdfs:label", "rdfs:comment"], 
+	"sh:property": [
+		"core:validator/property/identifierShape", 
+		"core:validator/property/partOfPackageShape", 
+		"core:validator/property/associatedProcessorShape", 
+		"core:validator/property/processorInputDefaultsShape", 
+		"core:validator/property/processorOutputDefaultsShape", 
+		"core:validator/property/versionShape", 
+		"core:validator/property/nameShape", 
+		"core:validator/property/descriptionShape", 
+		"core:validator/property/documentationShape", 
+		"core:validator/property/learnMoreShape", 
+		"core:validator/property/isActiveShape", 
+		"core:validator/property/expiresShape"
+    ]
+}

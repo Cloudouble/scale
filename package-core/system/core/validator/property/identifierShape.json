@@ -1,6 +1,6 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:shape/property/identifierShape",
+	"@id" : "core:validator/property/identifierShape",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "schema:identifier",
 	"sh:name": "Identifier", 

@@ -1,8 +1,8 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:shape/property/learnMoreShape",
+	"@id" : "core:validator/property/learnMoreShape",
 	"@type" : "sh:PropertyShape",
-	"sh:path": "live-element-core:property/learnMore",
+	"sh:path": "core:property/learnMore",
 	"sh:order": "8", 
 	"sh:minCount": 0,
 	"sh:maxCount": 1,

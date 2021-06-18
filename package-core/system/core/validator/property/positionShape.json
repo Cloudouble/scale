@@ -1,6 +1,6 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:shape/property/positionShape",
+	"@id" : "core:validator/property/positionShape",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "schema:position",
 	"sh:name": "Position", 

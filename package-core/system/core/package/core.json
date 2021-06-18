@@ -7,7 +7,20 @@
     "documentation": "reference:scale/core", 
     "learnMore": "learn:scale/core", 
 	"version": 1, 
-	"isActive": true
+	"isActive": true, 
+	"containsComponent": [
+	    "core:component/authenticator", 
+	    "core:component/compiler", 
+	    "core:component/computor", 
+	    "core:component/connector", 
+	    "core:component/curator", 
+	    "core:component/exporter", 
+	    "core:component/importer", 
+	    "core:component/indexer", 
+	    "core:component/packager", 
+	    "core:component/storer", 
+	    "core:component/validator" 
+    ]
 }
 
 

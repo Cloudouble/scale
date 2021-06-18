@@ -1,8 +1,8 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:shape/property/reactToTypeShape",
+	"@id" : "core:validator/property/reactToTypeShape",
 	"@type" : "sh:PropertyShape",
-	"sh:path": "live-element-core:property/reactToType",
+	"sh:path": "core:property/reactToType",
 	"sh:name": "React to Type", 
 	"sh:description": "The record type or types which trigger running the query.", 
 	"sh:order": "2", 

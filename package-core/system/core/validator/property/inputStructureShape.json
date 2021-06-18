@@ -1,8 +1,8 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:shape/property/inputStructureShape",
+	"@id" : "core:validator/property/inputStructureShape",
 	"@type" : "sh:PropertyShape",
-	"sh:path": "live-element-core:property/inputStructure",
+	"sh:path": "core:property/inputStructure",
 	"sh:name": "Input Shape", 
 	"sh:description": "The validation shape required for a valid input.", 
 	"sh:order": "2", 

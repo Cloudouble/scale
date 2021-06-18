@@ -1,8 +1,8 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:shape/property/partOfPackageShape",
+	"@id" : "core:validator/property/partOfPackageShape",
 	"@type" : "sh:PropertyShape",
-	"sh:path": "live-element-core:property/partOfPackage",
+	"sh:path": "core:property/partOfPackage",
 	"sh:name": "partOfPackage", 
 	"sh:description": "The package that this is part of.", 
 	"sh:minCount": 1,

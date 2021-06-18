@@ -1,6 +1,6 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:shape/property/codeRepositoryShape",
+	"@id" : "core:validator/property/codeRepositoryShape",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "schema:codeRepository",
 	"sh:name": "Code Source", 

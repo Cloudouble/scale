@@ -1,0 +1,11 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/unit/ModuleShape",
+	"@type": "sh:NodeShape", 
+	"rdfs:subClassOf" : "core:validator/unit/UnitShape",
+	"sh:targetClass" : "core:class/Module",
+	"sh:message": "This is not a valid module.", 
+	"sh:property": [
+		"core:validator/property/partOfComponentShape"
+    ]
+}

@@ -1,6 +1,6 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:validator/input/jsonInputShape",
+	"@id" : "core:validator/input/jsonInputShape",
 	"@type": "sh:NodeShape", 
 	"sh:message": "Used to validate the input into the JSON processor."
 	"sh:severity": "sh:Violation", 

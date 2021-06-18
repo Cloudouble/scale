@@ -1,8 +1,8 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:shape/property/processorInputDefaultsShape",
+	"@id" : "core:validator/property/processorInputDefaultsShape",
 	"@type" : "sh:PropertyShape",
-	"sh:path": "live-element-core:property/processorInputDefaults",
+	"sh:path": "core:property/processorInputDefaults",
 	"sh:name": "Processor Input Defaults", 
 	"sh:description": "Default input values for the processor.", 
 	"sh:order": "0", 

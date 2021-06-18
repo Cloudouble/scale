@@ -10,6 +10,9 @@
 	"associatedProcessor": "core:computor/indexer", 
 	"version": 1, 
 	"isActive": true, 
-    "core:property/homeDirectory": "indexer"
-    "core:property/expectedModuleType": ["core:class/Query"]
+    "core:property/homeDirectory": "indexer", 
+    "core:property/expectedModuleType": ["core:class/Query"], 
+	"containsModule": [
+	    
+    ]
 }

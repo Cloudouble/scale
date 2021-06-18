@@ -1,8 +1,8 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:shape/property/filenameExtensionShape",
+	"@id" : "core:validator/property/filenameExtensionShape",
 	"@type" : "sh:PropertyShape",
-	"sh:path": "live-element-core:property/filenameExtension",
+	"sh:path": "core:property/filenameExtension",
 	"sh:name": "Filename Extension", 
 	"sh:description": "The extension after the . in the file name or output path.", 
 	"sh:order": "2", 

@@ -11,5 +11,8 @@
 	"version": 1, 
 	"isActive": true, 
     "core:property/homeDirectory": "compiler", 
-    "core:property/expectedModuleType": ["core:class/View"]
+    "core:property/expectedModuleType": ["core:class/View"], 
+	"containsModule": [
+        "core:compiler/json"
+    ]
 }

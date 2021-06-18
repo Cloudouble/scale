@@ -2,6 +2,7 @@
     "@context": "context/default",
     "@id": "core:property/partOfPackage",
     "@type": "rdf:Property",
+    "subPropertyOf": "schema:isPartOf", 
     "partOfPackage": "reference:scale/core"
     "label": "partOfPackage",
     "comment": "The package that includes this.", 

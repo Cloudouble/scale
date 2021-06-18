@@ -1,6 +1,6 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:validator/input/compilerInputShape",
+	"@id" : "core:validator/input/compilerInputShape",
 	"@type": "sh:NodeShape", 
 	"sh:message": "Used to validate the input into the compiler processor."
 	"sh:severity": "sh:Violation", 

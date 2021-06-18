@@ -11,5 +11,8 @@
 	"version": 1, 
 	"isActive": true, 
     "core:property/homeDirectory": "curator", 
-    "core:property/expectedModuleType": []
+    "core:property/expectedModuleType": [] , 
+	"containsModule": [
+	    
+    ]
 }

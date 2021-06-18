@@ -1,8 +1,8 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:shape/property/foundInComponentShape",
+	"@id" : "core:validator/property/partOfComponentShape",
 	"@type" : "sh:PropertyShape",
-	"sh:path": "live-element-core:property/foundInComponent",
+	"sh:path": "core:property/partOfComponent",
 	"sh:name": "Component", 
 	"sh:description": "The component that this is found within.", 
 	"sh:order": "1", 

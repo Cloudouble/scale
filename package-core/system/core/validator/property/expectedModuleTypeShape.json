@@ -1,8 +1,8 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:shape/property/expectedModuleTypeShape",
+	"@id" : "core:validator/property/expectedModuleTypeShape",
 	"@type" : "sh:PropertyShape",
-	"sh:path": "live-element-core:property/expectedModuleType",
+	"sh:path": "core:property/expectedModuleType",
 	"sh:order": "1", 
 	"sh:minCount": 1,
 	"sh:maxCount": 1,

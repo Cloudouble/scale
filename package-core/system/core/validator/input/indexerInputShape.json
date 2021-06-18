@@ -1,6 +1,6 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:validator/input/indexerInputShape",
+	"@id" : "core:validator/input/indexerInputShape",
 	"@type": "sh:NodeShape", 
 	"sh:message": "Used to validate the input into the indexer processor."
 	"sh:severity": "sh:Violation", 

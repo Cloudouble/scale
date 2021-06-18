@@ -1,8 +1,8 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:shape/property/isActiveShape",
+	"@id" : "core:validator/property/isActiveShape",
 	"@type" : "sh:PropertyShape",
-	"sh:path": "live-element-core:property/isActive",
+	"sh:path": "core:property/isActive",
 	"sh:order": "2", 
 	"sh:datatype": "schema:Boolean",
 	"sh:nodeKind": "sh:Literal"

@@ -1,0 +1,14 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/unit/ProcessorShape",
+	"@type": "sh:NodeShape", 
+	"rdfs:subClassOf" : "core:validator/unit/UnitShape",
+	"sh:targetClass" : "core:class/Processor",
+	"sh:message": "This is not a valid processor.", 
+	"sh:property": [
+		"core:validator/property/codeRepositoryShape", 
+		"core:validator/property/runtimePlatformShape", 
+		"core:validator/property/inputStructureShape", 
+		"core:validator/property/outputStructureShape"
+    ]
+}

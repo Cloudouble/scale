@@ -1,8 +1,8 @@
 {
     "@context": "context/default",
-	"@id" : "live-element-core:shape/property/associatedProcessorShape",
+	"@id" : "core:validator/property/associatedProcessorShape",
 	"@type" : "sh:PropertyShape",
-	"sh:path": "live-element-core:property/associatedProcessor",
+	"sh:path": "core:property/associatedProcessor",
 	"sh:name": "associatedProcessor", 
 	"sh:description": "The processor associated with this.", 
 	"sh:minCount": 0,
