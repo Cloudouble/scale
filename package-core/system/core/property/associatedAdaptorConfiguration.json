@@ -1,0 +1,12 @@
+{
+    "@context": "context/default",
+    "@id": "core:property/associatedAdaptorConfiguration",
+    "@type": "rdf:Property",
+    "partOfPackage": "reference:scale/core"
+    "label": "associatedAdaptorConfiguration",
+    "comment": "The configuration values into the associatedAdaptor on this unit.", 
+    "documentation": "reference:scale/core/property/associatedAdaptorConfiguration", 
+    "learnMore": "learn:scale/core/property/associatedAdaptorConfiguration", 
+    "schema:domainIncludes": ["core:class/Partition"],
+    "schema:rangeIncludes": "schema:StructuredValue"
+}

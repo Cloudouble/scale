@@ -11,7 +11,5 @@
 	"version": 1, 
 	"isActive": true, 
     "core:property/homeDirectory": "validator", 
-    "core:property/expectedModuleType": ["sh:NodeShape", "sh:PropertyShape"], 
-	"containsModule": [
-    ]
+    "core:property/expectedModuleType": ["sh:NodeShape", "sh:PropertyShape"]
 }

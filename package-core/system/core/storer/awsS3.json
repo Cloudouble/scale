@@ -1,0 +1,18 @@
+{
+    "@context": "context/core",
+    "@id": "core:storer/awsS3",
+    "@type": "core:class/StorageAdaptor",
+    "partOfPackage": "reference:scale/core"
+    "label": "awsS3",
+    "comment": "The storage adaptor used with mounting a partion on AWS S3.", 
+    "documentation": "reference:scale/core/storer/awsS3", 
+    "learnMore": "learn:scale/core/storer/awsS3", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/storer/awsS3", 
+    "schema:runtimePlatform": "python3.8", 
+    "core:property/partOfComponent": "core:component/storer"
+	"core:property/inputStructure": "validator/input/awsS3InputShape", 
+	"core:property/outputStructure": "validator/output/awsS3OutputShape", 
+	"core:property/configurationStructure": "validator/configuration/awsS3ConfigurationShape"
+}

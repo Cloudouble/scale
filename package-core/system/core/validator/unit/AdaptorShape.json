@@ -1,0 +1,11 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/unit/AdaptorShape",
+	"@type": "sh:NodeShape", 
+	"rdfs:subClassOf" : "core:validator/unit/ProcessorShape",
+	"sh:targetClass" : "core:class/Adaptor",
+	"sh:message": "This is not a valid adaptor.", 
+	"sh:property": [
+		"core:validator/property/configurationStructure", 
+    ]
+}

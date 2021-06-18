@@ -1,0 +1,12 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/property/associatedAdaptorShape",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "core:property/associatedAdaptor",
+	"sh:name": "associatedAdaptor", 
+	"sh:description": "The adaptor associated with this.", 
+	"sh:minCount": 1,
+	"sh:maxCount": 1,
+	"sh:class": "class/Adaptor", 
+	"sh:nodeKind": "sh:IRI"
+}

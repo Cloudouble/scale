@@ -11,9 +11,9 @@
 	"version": 1, 
 	"isActive": true, 
     "core:property/homeDirectory": "storer", 
-    "core:property/expectedModuleType": [], 
-	"containsModule": [
-	    
+    "core:property/expectedModuleType": [
+        "core:class/Partition", 
+        "core:class/StorageAdaptor"
     ]
 }
 

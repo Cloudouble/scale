@@ -1,0 +1,13 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/property/configurationStructureShape",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "core:property/configurationStructure",
+	"sh:name": "configuration Shape", 
+	"sh:description": "The shape required for a valid configuration.", 
+	"sh:order": "2", 
+	"sh:minCount": 1,
+	"sh:maxCount": 1,
+	"sh:datatype": "sh:NodeShape",
+	"sh:nodeKind": "sh:IRI"
+}

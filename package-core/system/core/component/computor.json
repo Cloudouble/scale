@@ -11,11 +11,5 @@
 	"version": 1, 
 	"isActive": true, 
     "core:property/homeDirectory": "computor", 
-    "core:property/expectedModuleType": ["core:class/Processor"], 
-	"containsModule": [
-        "core:computor/compiler", 
-        "core:computor/indexer", 
-        "core:computor/json", 
-        "core:computor/validator"
-    ]
+    "core:property/expectedModuleType": ["core:class/Processor"]
 }

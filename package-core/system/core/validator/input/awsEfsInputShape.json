@@ -1,0 +1,9 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/input/awsEfsInputShape",
+	"@type": "sh:NodeShape", 
+	"sh:message": "Used to validate the input into the AWS EFS adaptor."
+	"sh:severity": "sh:Violation", 
+	"sh:closed" : true,
+	"sh:property": []
+}

@@ -1,0 +1,18 @@
+{
+    "@context": "context/core",
+    "@id": "core:storer/awsEFS",
+    "@type": "core:class/StorageAdaptor",
+    "partOfPackage": "reference:scale/core"
+    "label": "awsEFS",
+    "comment": "The storage adaptor used with mounting a partion on AWS EFS.", 
+    "documentation": "reference:scale/core/storer/awsEFS", 
+    "learnMore": "learn:scale/core/storer/awsEFS", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/storer/awsEFS", 
+    "schema:runtimePlatform": "python3.8", 
+    "core:property/partOfComponent": "core:component/storer"
+	"core:property/inputStructure": "validator/input/awsEfsInputShape", 
+	"core:property/outputStructure": "validator/output/awsEfsOutputShape", 
+	"core:property/configurationStructure": "validator/configuration/awsEfsConfigurationShape"
+}

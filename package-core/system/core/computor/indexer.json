@@ -12,5 +12,6 @@
     "schema:codeRepository": "//blob/core/processor/indexer", 
     "schema:runtimePlatform": "python3.8", 
 	"core:property/inputStructure": "core:validator/input/indexerInputShape", 
-	"core:property/outputStructure": "core:validator/output/indexerOutputShape"
+	"core:property/outputStructure": "core:validator/output/indexerOutputShape", 
+    "core:property/partOfComponent": "core:component/computor"
 }

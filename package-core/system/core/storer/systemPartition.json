@@ -1,0 +1,13 @@
+{
+    "@context": "context/core",
+    "@id": "core:storer/systemPartition",
+    "@type": "core:class/Partition",
+    "partOfPackage": "reference:scale/core"
+    "label": "systemPartition",
+    "comment": "The partition used for storing the system definition files that describe how the system runs.", 
+    "documentation": "reference:scale/core/storer/systemPartition", 
+    "learnMore": "learn:scale/core/storer/systemPartition", 
+    "associatedAdaptor": "core:storer/awsEFS", 
+    "associatedAdaptorConfiguration": "value/systemPartitionAwsEfsConfiguration", 
+    "isActive": true
+}

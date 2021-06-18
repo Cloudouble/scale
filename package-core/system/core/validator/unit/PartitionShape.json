@@ -1,0 +1,12 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/unit/PartitionShape",
+	"@type": "sh:NodeShape", 
+	"rdfs:subClassOf" : "core:validator/unit/ModuleShape",
+	"sh:targetClass" : "core:class/Partition",
+	"sh:message": "This is not a valid partition.", 
+	"sh:property": [
+		"core:validator/property/associatedAdaptor", 
+		"core:validator/property/associatedAdaptorConfiguration"
+    ]
+}

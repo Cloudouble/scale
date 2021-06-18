@@ -11,8 +11,5 @@
 	"version": 1, 
 	"isActive": true, 
     "core:property/homeDirectory": "indexer", 
-    "core:property/expectedModuleType": ["core:class/Query"], 
-	"containsModule": [
-	    
-    ]
+    "core:property/expectedModuleType": ["core:class/Query"]
 }

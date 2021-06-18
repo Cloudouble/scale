@@ -1,0 +1,9 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:validator/output/awsEfsOutputShape",
+	"@type": "sh:NodeShape", 
+	"sh:message": "Used to validate the output from the AWS EFS adaptor."
+	"sh:severity": "sh:Violation", 
+	"sh:closed" : true,
+	"sh:property": []
+}

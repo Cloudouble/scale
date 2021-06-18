@@ -11,8 +11,5 @@
 	"version": 1, 
 	"isActive": true, 
     "core:property/homeDirectory": "connector", 
-    "core:property/expectedModuleType": [], 
-	"containsModule": [
-	    
-    ]
+    "core:property/expectedModuleType": []
 }

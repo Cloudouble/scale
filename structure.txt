@@ -34,27 +34,6 @@ _/system/core/shape/{name}.json             - definitions that are used to valid
 _/system/core/view/{name}.json                  - definitions that are used to render records and query results into output for connections to consume
 
 
-application
-datatype
-element
-error
-environment
-field
-mask
-namespace
-package
-policy
-processor
-query
-reacter
-recordtype
-render
-schedule
-schema
-connectiontype
-view
-
-
 
 ScratchPad Partition: intermediate objects written to and read only by the system
 {root}/scratchpad/{path}.json

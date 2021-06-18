@@ -12,5 +12,6 @@
     "schema:codeRepository": "//blob/core/computor/compiler", 
     "schema:runtimePlatform": "python3.8", 
 	"core:property/inputStructure": "validator/input/compilerInputShape", 
-	"core:property/outputStructure": "validator/output/compilerOutputShape"
+	"core:property/outputStructure": "validator/output/compilerOutputShape", 
+    "core:property/partOfComponent": "core:component/computor"
 }

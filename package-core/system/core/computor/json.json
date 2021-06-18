@@ -12,5 +12,6 @@
     "schema:codeRepository": "//blob/core/processor/json", 
     "schema:runtimePlatform": "python3.8", 
 	"core:property/inputStructure": "core:validator/input/jsonInputShape", 
-	"core:property/outputStructure": "core:validator/output/jsonOutputShape"
+	"core:property/outputStructure": "core:validator/output/jsonOutputShape", 
+    "core:property/partOfComponent": "core:component/computor"
 }

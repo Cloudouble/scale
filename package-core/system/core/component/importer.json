@@ -11,8 +11,5 @@
 	"version": 1, 
 	"isActive": true, 
     "core:property/homeDirectory": "importer", 
-    "core:property/expectedModuleType": [], 
-	"containsModule": [
-	    
-    ]
+    "core:property/expectedModuleType": []
 }
