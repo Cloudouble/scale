@@ -113,8 +113,8 @@ _/output/record/{record}/{connectiontype}/{uuid}/{listener}.{view}
 _/output/export/{export}/{connectiontype}/{uuid}/{listener}.{view}
 
 ---
-
-Core comes installed as standard with: 
+**********************************************
+*** Core comes installed as standard with: *** 
 application: console
 authentication: sudo, email-code, password, sms-code, key, public
 configuration: current, development
@@ -138,6 +138,7 @@ view: csv, html, json, jsonld, microdata, xml, yaml, zip
 
 Built-in schema version: get latest release number from https://schema.org/version/latest, then use versioned feed for current-https as at https://raw.githubusercontent.com/schemaorg/schemaorg/main/data/releases/12.0/schemaorg-current-https.jsonld
 
+**********************************************
 
 Processor Naming: 
 
