@@ -15,4 +15,7 @@
         "core:class/Queue", 
         "core:class/EventBusAdaptor"
     ],
-    "core:property/eventStructure": "validator/input/eventbusEventStructure"
+    "core:property/eventStructure": "validator/input/eventbusEventStructure", 
+    "core:property/listenerStructure": "validator/input/eventbusListenerStructure"
+    "core:property/listenerMap": "validator/input/eventbusListenerMap"
+}

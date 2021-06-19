@@ -6,6 +6,8 @@
 	"sh:targetClass" : "core:class/EventBusComponent",
 	"sh:message": "This is not a valid event bus component."
 	"sh:property": [
-		"core:validator/property/eventStructure"
+		"core:validator/property/eventStructure", 
+		"core:validator/property/listenerStructure", 
+		"core:validator/property/listenerMap"
     ]
 }

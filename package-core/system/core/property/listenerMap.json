@@ -1,0 +1,12 @@
+{
+    "@context": "context/default",
+    "@id": "core:property/listenerMap",
+    "@type": "rdf:Property",
+    "partOfPackage": "reference:scale/core"
+    "label": "listenerMap",
+    "comment": "The map of listener event types to listening units.", 
+    "documentation": "reference:scale/core/property/listenerMap", 
+    "learnMore": "learn:scale/core/property/listenerMap", 
+    "schema:domainIncludes": ["core:class/EventBusComponent"],
+    "schema:rangeIncludes": "schema:StructuredValue"
+}

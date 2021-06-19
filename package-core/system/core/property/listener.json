@@ -1,0 +1,12 @@
+{
+    "@context": "context/default",
+    "@id": "core:property/listener",
+    "@type": "rdf:Property",
+    "partOfPackage": "reference:scale/core"
+    "label": "listener",
+    "comment": "Maps events that this unit will react to over to their processor actions.", 
+    "documentation": "reference:scale/core/property/listener", 
+    "learnMore": "learn:scale/core/property/listener", 
+    "schema:domainIncludes": ["core:class/Unit"],
+    "schema:rangeIncludes": "schema:StructuredValue"
+}

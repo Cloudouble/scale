@@ -1,0 +1,13 @@
+{
+    "@context": "context/default",
+    "@id": "core:property/listenerStructure",
+    "@type": "rdf:Property",
+    "subPropertyOf": "core:property/listenerStructure", 
+    "partOfPackage": "reference:scale/core"
+    "label": "listenerStructure",
+    "comment": "The structure of a listener.", 
+    "documentation": "reference:scale/core/property/listenerStructure", 
+    "learnMore": "learn:scale/core/property/listenerStructure", 
+    "schema:domainIncludes": ["core:class/EventBus"],
+    "schema:rangeIncludes": "sh:NodeShape"
+}

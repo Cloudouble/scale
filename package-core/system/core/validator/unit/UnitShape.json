@@ -19,6 +19,7 @@
 		"core:validator/property/documentationShape", 
 		"core:validator/property/learnMoreShape", 
 		"core:validator/property/isActiveShape", 
-		"core:validator/property/expiresShape"
+		"core:validator/property/expiresShape", 
+		"core:validator/property/listenerShape"
     ]
 }
