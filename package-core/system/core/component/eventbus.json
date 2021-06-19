@@ -1,0 +1,18 @@
+{
+    "@context": "context/default",
+    "@id": "core:component/eventbus",
+    "@type": "core:class/EventBusComponent",
+    "partOfPackage": "reference:scale/core"
+    "label": "EventBus",
+    "comment": "Responsible for managing system events.",
+    "documentation": "reference:scale/core/component/EventBus", 
+    "learnMore": "learn:scale/core/component/EventBus", 
+	"associatedProcessor": "core:computor/eventbus", 
+	"version": 1, 
+	"isActive": true, 
+    "core:property/homeDirectory": "eventbus", 
+    "core:property/expectedModuleType": [
+        "core:class/Queue", 
+        "core:class/EventBusAdaptor"
+    ],
+    "core:property/eventStructure": "validator/input/eventbusEventStructure"

@@ -5,7 +5,7 @@
     "partOfPackage": "reference:scale/core"
     "subClassOf": "core:class/Processor", 
     "label": "Adaptor",
-    "comment": "A processor which handles the task of translating commands to a specific underlying platform.", 
+    "comment": "A processor which handles the task of translating commands to a specific underlying platform, deployed everywhere.", 
     "documentation": "reference:scale/core/class/Adaptor", 
     "learnMore": "learn:scale/core/class/Adaptor"
 }

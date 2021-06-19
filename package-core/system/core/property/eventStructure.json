@@ -1,0 +1,13 @@
+{
+    "@context": "context/default",
+    "@id": "core:property/eventStructure",
+    "@type": "rdf:Property",
+    "subPropertyOf": "core:property/inputStructure", 
+    "partOfPackage": "reference:scale/core"
+    "label": "eventStructure",
+    "comment": "The structure of an event.", 
+    "documentation": "reference:scale/core/property/eventStructure", 
+    "learnMore": "learn:scale/core/property/eventStructure", 
+    "schema:domainIncludes": ["core:class/EventBus"],
+    "schema:rangeIncludes": "sh:NodeShape"
+}

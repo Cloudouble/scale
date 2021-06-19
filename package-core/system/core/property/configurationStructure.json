@@ -8,5 +8,5 @@
     "documentation": "reference:scale/core/property/configurationStructure", 
     "learnMore": "learn:scale/core/property/configurationStructure", 
     "schema:domainIncludes": ["core:class/Adaptor"],
-    "schema:rangeIncludes": "schema:StructuredValue"
+    "schema:rangeIncludes": "sh:NodeShape"
 }

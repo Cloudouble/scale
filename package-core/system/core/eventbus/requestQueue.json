@@ -1,0 +1,13 @@
+{
+    "@context": "context/core",
+    "@id": "core:storer/requestQueue",
+    "@type": "core:class/Queue",
+    "partOfPackage": "reference:scale/core"
+    "label": "requestQueue",
+    "comment": "The queue used for notifications regarding incoming requests.", 
+    "documentation": "reference:scale/core/storer/requestQueue", 
+    "learnMore": "learn:scale/core/storer/requestQueue", 
+    "associatedAdaptor": "core:eventbus/awsSQS", 
+    "associatedAdaptorConfiguration": "value/requestQueueAwsSQSConfiguration", 
+    "isActive": true
+}

@@ -1,0 +1,11 @@
+{
+    "@context": "context/core",
+    "@id": "core:class/Queue",
+    "@type": "rdfs:Class",
+    "partOfPackage": "reference:scale/core"
+    "subClassOf": "core:class/Module", 
+    "label": "Queue",
+    "comment": "A single eventbus queue.", 
+    "documentation": "reference:scale/core/class/Queue", 
+    "learnMore": "learn:scale/core/class/Queue"
+}
