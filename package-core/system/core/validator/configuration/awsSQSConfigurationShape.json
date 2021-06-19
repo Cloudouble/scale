@@ -1,0 +1,9 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/configuration/awsSQSConfigurationShape",
+	"@type": "sh:NodeShape", 
+	"sh:message": "Used to validate the configuration of an AWS SQS queue."
+	"sh:severity": "sh:Violation", 
+	"sh:closed" : true,
+	"sh:property": []
+}

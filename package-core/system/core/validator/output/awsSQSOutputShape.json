@@ -1,0 +1,9 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:validator/output/awsSQSOutputShape",
+	"@type": "sh:NodeShape", 
+	"sh:message": "Used to validate the output from the AWS SQS adaptor."
+	"sh:severity": "sh:Violation", 
+	"sh:closed" : true,
+	"sh:property": []
+}
