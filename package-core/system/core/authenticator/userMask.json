@@ -1,0 +1,11 @@
+{
+    "@context": "context/core",
+    "@id": "core:authenticator/userMask",
+    "@type": "core:class/Mask",
+    "partOfPackage": "reference:scale/core"
+    "label": "userMask",
+    "comment": "The mask for allowing connections to be general users that can read and write to records but not affect the system settings.", 
+    "documentation": "reference:scale/core/authenticator/userMask", 
+    "learnMore": "learn:scale/core/authenticator/userMask", 
+    "isActive": true
+}

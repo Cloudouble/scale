@@ -1,0 +1,11 @@
+{
+    "@context": "context/core",
+    "@id": "core:authenticator/readonlyMask",
+    "@type": "core:class/Mask",
+    "partOfPackage": "reference:scale/core"
+    "label": "readonlyMask",
+    "comment": "The mask for allowing connections to be only able to read records.", 
+    "documentation": "reference:scale/core/authenticator/readonlyMask", 
+    "learnMore": "learn:scale/core/authenticator/readonlyMask", 
+    "isActive": true
+}

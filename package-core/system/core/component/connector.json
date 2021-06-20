@@ -12,6 +12,6 @@
 	"isActive": true, 
     "core:property/homeDirectory": "connector", 
     "core:property/expectedModuleType": [
-        
+        "core:class/ConnectionType"
     ]
 }
