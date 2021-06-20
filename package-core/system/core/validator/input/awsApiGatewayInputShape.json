@@ -1,0 +1,9 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/input/awsApiGatewayInputShape",
+	"@type": "sh:NodeShape", 
+	"sh:message": "Used to validate the input into the AWS API Gateway adaptor."
+	"sh:severity": "sh:Violation", 
+	"sh:closed" : true,
+	"sh:property": []
+}

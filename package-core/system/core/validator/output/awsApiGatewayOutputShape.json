@@ -1,0 +1,9 @@
+{
+    "@context": "context/default",
+	"@id" : "live-element-core:validator/output/awsApiGatewayOutputShape",
+	"@type": "sh:NodeShape", 
+	"sh:message": "Used to validate the output from the AWS API Gateway adaptor."
+	"sh:severity": "sh:Violation", 
+	"sh:closed" : true,
+	"sh:property": []
+}

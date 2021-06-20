@@ -1,0 +1,13 @@
+{
+    "@context": "context/core",
+    "@id": "core:storer/websocketDefault",
+    "@type": "core:class/Module",
+    "partOfPackage": "reference:scale/core"
+    "label": "websocketDefault",
+    "comment": "The default configuration for handling websocket connections.", 
+    "documentation": "reference:scale/core/connector/websocketDefault", 
+    "learnMore": "learn:scale/core/connector/websocketDefault", 
+    "associatedAdaptor": "core:eventbus/awsApiGateway", 
+    "associatedAdaptorConfiguration": "value/websocketDefaultAwsApiGatewayConfiguration", 
+    "isActive": true
+}

@@ -274,3 +274,19 @@ view/{name}.json                  - definitions that are used to render records 
 Adaptors:
 
 Adaptors are processors which are deployed in every region of the system 
+
+
+
+
+Connectors:
+
+HTTPS: 
+    configuration is a map of paths to methods to partitions/processors
+    adapter is cloudfront
+    
+websocket: 
+    configuration is a map of paths
+    adapter is apigateway
+    
+
+

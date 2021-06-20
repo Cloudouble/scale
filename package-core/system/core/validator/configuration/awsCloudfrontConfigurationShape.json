@@ -1,0 +1,9 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/configuration/awsCloudfrontConfigurationShape",
+	"@type": "sh:NodeShape", 
+	"sh:message": "Used to validate the configuration of an AWS Cloudfront connector."
+	"sh:severity": "sh:Violation", 
+	"sh:closed" : true,
+	"sh:property": []
+}

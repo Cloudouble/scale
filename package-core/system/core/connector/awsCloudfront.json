@@ -1,0 +1,18 @@
+{
+    "@context": "context/core",
+    "@id": "core:storer/awsCloudfront",
+    "@type": "core:class/Adaptor",
+    "partOfPackage": "reference:scale/core"
+    "label": "awsCloudfront",
+    "comment": "The connector adaptor used with AWS Cloudfront.", 
+    "documentation": "reference:scale/core/connector/awsCloudfront", 
+    "learnMore": "learn:scale/core/connector/awsCloudfront", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/connector/awsCloudfront", 
+    "schema:runtimePlatform": "python3.8", 
+    "core:property/partOfComponent": "core:component/connector"
+	"core:property/inputStructure": "validator/input/awsCloudfrontInputShape", 
+	"core:property/outputStructure": "validator/output/awsCloudfrontOutputShape", 
+	"core:property/configurationStructure": "validator/configuration/awsCloudfrontConfigurationShape"
+}
