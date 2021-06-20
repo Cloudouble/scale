@@ -1,0 +1,17 @@
+{
+    "@context": "context/default",
+    "@id": "core:exporter/jsonProcessor",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core"
+    "label": "jsonProcessor",
+    "comment": "Processes json exports.",
+    "documentation": "reference:scale/core/exporter/jsonProcessor", 
+    "learnMore": "learn:scale/core/exporter/jsonProcessor", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/exporter/jsonProcessor", 
+    "schema:runtimePlatform": "python3.8", 
+	"core:property/inputStructure": "core:validator/input/jsonInputShape", 
+	"core:property/outputStructure": "core:validator/output/jsonOutputShape", 
+    "core:property/partOfComponent": "core:component/exporter"
+}

@@ -1,17 +1,17 @@
 {
     "@context": "context/default",
-    "@id": "core:computor/json",
+    "@id": "core:compiler/jsonProcessor",
     "@type": "core:class/Processor",
     "partOfPackage": "reference:scale/core"
-    "label": "JSON",
+    "label": "jsonProcessor",
     "comment": "Processes json rendering.",
-    "documentation": "reference:scale/core/computor/json", 
-    "learnMore": "learn:scale/core/computor/json", 
+    "documentation": "reference:scale/core/compiler/jsonProcessor", 
+    "learnMore": "learn:scale/core/compiler/jsonProcessor", 
 	"version": 1, 
 	"isActive": true, 
-    "schema:codeRepository": "//blob/core/processor/json", 
+    "schema:codeRepository": "//blob/core/compiler/jsonProcessor", 
     "schema:runtimePlatform": "python3.8", 
 	"core:property/inputStructure": "core:validator/input/jsonInputShape", 
 	"core:property/outputStructure": "core:validator/output/jsonOutputShape", 
-    "core:property/partOfComponent": "core:component/computor"
+    "core:property/partOfComponent": "core:component/compiler"
 }

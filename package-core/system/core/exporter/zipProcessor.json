@@ -1,0 +1,17 @@
+{
+    "@context": "context/default",
+    "@id": "core:exporter/zipProcessor",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core"
+    "label": "zipProcessor",
+    "comment": "Processes zip exports.",
+    "documentation": "reference:scale/core/exporter/zipProcessor", 
+    "learnMore": "learn:scale/core/exporter/zipProcessor", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/exporter/zipProcessor", 
+    "schema:runtimePlatform": "python3.8", 
+	"core:property/inputStructure": "core:validator/input/zipInputShape", 
+	"core:property/outputStructure": "core:validator/output/zipOutputShape", 
+    "core:property/partOfComponent": "core:component/exporter"
+}

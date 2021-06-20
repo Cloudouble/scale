@@ -1,0 +1,18 @@
+{
+    "@context": "context/core",
+    "@id": "core:exporter/csv",
+    "@type": "core:class/ExportFormat",
+    "partOfPackage": "reference:scale/core"
+    "label": "CSV",
+    "comment": "Compiles export jobs as CSV output.",
+    "documentation": "reference:scale/core/exporter/csv", 
+    "learnMore": "learn:scale/core/exporter/csv"
+	"associatedProcessor": "core:exporter/csvProcessor", 
+	"version": 1, 
+	"isActive": true, 
+	"schema:contentType": "application/json", 
+	"core:property/processorInputDefaults": {}, 
+	"core:property/processorOutputDefaults": {}, 
+	"core:property/filenameExtension": "csv", 
+    "core:property/partOfComponent": "core:component/exporter"
+}

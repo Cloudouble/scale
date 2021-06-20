@@ -1,0 +1,11 @@
+{
+    "@context": "context/core",
+    "@id": "core:class/ExportFormat",
+    "@type": "rdfs:Class",
+    "partOfPackage": "reference:scale/core"
+    "subClassOf": "core:class/View", 
+    "label": "ExportFormat",
+    "comment": "A processor which performs the export into a specified format.", 
+    "documentation": "reference:scale/core/class/ExportFormat", 
+    "learnMore": "learn:scale/core/class/ExportFormat"
+}

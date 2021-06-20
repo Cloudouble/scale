@@ -1,0 +1,14 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/unit/ExportFormatShape",
+	"@type": "sh:NodeShape", 
+	"rdfs:subClassOf" : "core:validator/unit/ViewShape",
+	"sh:targetClass" : "core:class/View",
+	"sh:message": "This is not a valid view.", 
+	"sh:property": [
+		{
+			"@id": "core:validator/property/partOfComponentShape", 
+			"sh:defaultValue": "core:component/exporter"
+		}
+    ]
+}
