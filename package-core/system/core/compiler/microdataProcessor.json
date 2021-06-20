@@ -1,0 +1,17 @@
+{
+    "@context": "context/default",
+    "@id": "core:compiler/microdataProcessor",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core"
+    "label": "jsonmicrodataProcessor",
+    "comment": "Processes microdata rendering.",
+    "documentation": "reference:scale/core/compiler/microdataProcessor", 
+    "learnMore": "learn:scale/core/compiler/microdataProcessor", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/compiler/microdataProcessor", 
+    "schema:runtimePlatform": "python3.8", 
+	"core:property/inputStructure": "core:validator/input/microdataInputShape", 
+	"core:property/outputStructure": "core:validator/output/microdataOutputShape", 
+    "core:property/partOfComponent": "core:component/compiler"
+}

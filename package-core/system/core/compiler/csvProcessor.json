@@ -1,0 +1,17 @@
+{
+    "@context": "context/default",
+    "@id": "core:compiler/csvProcessor",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core"
+    "label": "jsoncsvProcessor",
+    "comment": "Processes csv rendering.",
+    "documentation": "reference:scale/core/compiler/csvProcessor", 
+    "learnMore": "learn:scale/core/compiler/csvProcessor", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/compiler/csvProcessor", 
+    "schema:runtimePlatform": "python3.8", 
+	"core:property/inputStructure": "core:validator/input/csvInputShape", 
+	"core:property/outputStructure": "core:validator/output/csvOutputShape", 
+    "core:property/partOfComponent": "core:component/compiler"
+}

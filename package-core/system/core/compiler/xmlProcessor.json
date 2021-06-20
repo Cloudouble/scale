@@ -1,0 +1,17 @@
+{
+    "@context": "context/default",
+    "@id": "core:compiler/xmlProcessor",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core"
+    "label": "jsonxmlProcessor",
+    "comment": "Processes xml rendering.",
+    "documentation": "reference:scale/core/compiler/xmlProcessor", 
+    "learnMore": "learn:scale/core/compiler/xmlProcessor", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/compiler/xmlProcessor", 
+    "schema:runtimePlatform": "python3.8", 
+	"core:property/inputStructure": "core:validator/input/xmlInputShape", 
+	"core:property/outputStructure": "core:validator/output/xmlOutputShape", 
+    "core:property/partOfComponent": "core:component/compiler"
+}

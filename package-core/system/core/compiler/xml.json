@@ -1,0 +1,18 @@
+{
+    "@context": "context/core",
+    "@id": "core:compiler/xml",
+    "@type": "core:class/View",
+    "partOfPackage": "reference:scale/core"
+    "label": "HTML",
+    "comment": "Compiles views as xml output.",
+    "documentation": "reference:scale/core/compiler/xml", 
+    "learnMore": "learn:scale/core/compiler/xml"
+	"associatedProcessor": "core:compiler/xmlProcessor", 
+	"version": 1, 
+	"isActive": true, 
+	"schema:contentType": "text/xml", 
+	"core:property/processorInputDefaults": {}, 
+	"core:property/processorOutputDefaults": {}, 
+	"core:property/filenameExtension": "xml", 
+    "core:property/partOfComponent": "core:component/compiler"
+}

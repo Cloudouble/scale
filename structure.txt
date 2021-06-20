@@ -129,10 +129,10 @@ platform: https-aws-cloudfront, websocket-aws-apigateway
 ??? policy: core, reacter, trusted, semitrusted, untrusted  ???
 processor: all processors from the core package
 query: math, list, filter
-schedule: second, minute, hour, day, week, month, year
+??? schedule: second, minute, hour, day, week, month, year
 schema: see below 
 connectiontype:  channel, user, daemon, publisher, replicator, repository, tunnel
-view: csv, html, json, jsonld, microdata, xml, yaml, zip
+view: csv, html, json, jsonld, microdata, xml, yaml
 
 Built-in schema version: get latest release number from https://schema.org/version/latest, then use versioned feed for current-https as at https://raw.githubusercontent.com/schemaorg/schemaorg/main/data/releases/12.0/schemaorg-current-https.jsonld
 

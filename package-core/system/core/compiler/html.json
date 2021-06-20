@@ -1,0 +1,18 @@
+{
+    "@context": "context/core",
+    "@id": "core:compiler/html",
+    "@type": "core:class/View",
+    "partOfPackage": "reference:scale/core"
+    "label": "HTML",
+    "comment": "Compiles views as html output.",
+    "documentation": "reference:scale/core/compiler/html", 
+    "learnMore": "learn:scale/core/compiler/html"
+	"associatedProcessor": "core:compiler/htmlProcessor", 
+	"version": 1, 
+	"isActive": true, 
+	"schema:contentType": "text/html", 
+	"core:property/processorInputDefaults": {}, 
+	"core:property/processorOutputDefaults": {}, 
+	"core:property/filenameExtension": "html", 
+    "core:property/partOfComponent": "core:component/compiler"
+}

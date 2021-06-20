@@ -1,0 +1,18 @@
+{
+    "@context": "context/core",
+    "@id": "core:compiler/yaml",
+    "@type": "core:class/View",
+    "partOfPackage": "reference:scale/core"
+    "label": "HTML",
+    "comment": "Compiles views as yaml output.",
+    "documentation": "reference:scale/core/compiler/yaml", 
+    "learnMore": "learn:scale/core/compiler/yaml"
+	"associatedProcessor": "core:compiler/yamlProcessor", 
+	"version": 1, 
+	"isActive": true, 
+	"schema:contentType": "text/yaml", 
+	"core:property/processorInputDefaults": {}, 
+	"core:property/processorOutputDefaults": {}, 
+	"core:property/filenameExtension": "yaml", 
+    "core:property/partOfComponent": "core:component/compiler"
+}

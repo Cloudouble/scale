@@ -1,0 +1,17 @@
+{
+    "@context": "context/default",
+    "@id": "core:compiler/yamlProcessor",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core"
+    "label": "jsonyamlProcessor",
+    "comment": "Processes yaml rendering.",
+    "documentation": "reference:scale/core/compiler/yamlProcessor", 
+    "learnMore": "learn:scale/core/compiler/yamlProcessor", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/compiler/yamlProcessor", 
+    "schema:runtimePlatform": "python3.8", 
+	"core:property/inputStructure": "core:validator/input/yamlInputShape", 
+	"core:property/outputStructure": "core:validator/output/yamlOutputShape", 
+    "core:property/partOfComponent": "core:component/compiler"
+}
