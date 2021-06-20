@@ -117,11 +117,9 @@ _/output/export/{export}/{connectiontype}/{uuid}/{listener}.{view}
 *** Core comes installed as standard with: *** 
 application: console
 authentication: sudo, email-code, password, sms-code, key, public
-configuration: current, development
-curator: request, archive, import, connection, output
+curator: request, archive, connection, output
 datatype: Boolean, Date, DateTime, Number, Text, Time
 error: 400, 401, 403, 404, 405, 410, 413, 414, 415, 500, 501, 502, 503
-environment: local, global
 exporter: csv, json, zip
 importer: csv, json, zip
 mask: sudo, administrator, connection, readonly

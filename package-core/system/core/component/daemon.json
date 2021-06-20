@@ -1,0 +1,17 @@
+{
+    "@context": "context/default",
+    "@id": "core:component/daemon",
+    "@type": "core:class/Component",
+    "partOfPackage": "reference:scale/core"
+    "label": "Daemon",
+    "comment": "Responsible for managing automatic scheduled tasks.",
+    "documentation": "reference:scale/core/component/Daemon", 
+    "learnMore": "learn:scale/core/component/Daemon", 
+	"associatedProcessor": "core:computor/daemon", 
+	"version": 1, 
+	"isActive": true, 
+    "core:property/homeDirectory": "daemon", 
+    "core:property/expectedModuleType": [
+        "core:class/Daemon"
+    ]
+}

@@ -1,0 +1,15 @@
+{
+    "@context": "context/default",
+    "@id": "core:curator/connection",
+    "@type": "core:class/Curator",
+    "partOfPackage": "reference:scale/core", 
+    "core:property/partOfComponent": "core:component/curator"
+    "label": "connection",
+    "comment": "Curates the connection partition.",
+    "documentation": "reference:scale/core/curator/connection", 
+    "learnMore": "learn:scale/core/curator/connection", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/curator/connection", 
+    "schema:runtimePlatform": "python3.8"
+}

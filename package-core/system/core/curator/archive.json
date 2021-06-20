@@ -1,0 +1,15 @@
+{
+    "@context": "context/default",
+    "@id": "core:curator/archive",
+    "@type": "core:class/Curator",
+    "partOfPackage": "reference:scale/core", 
+    "core:property/partOfComponent": "core:component/curator"
+    "label": "archive",
+    "comment": "Curates the archive partition.",
+    "documentation": "reference:scale/core/curator/archive", 
+    "learnMore": "learn:scale/core/curator/archive", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/curator/archive", 
+    "schema:runtimePlatform": "python3.8"
+}

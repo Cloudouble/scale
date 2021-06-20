@@ -1,0 +1,15 @@
+{
+    "@context": "context/default",
+    "@id": "core:curator/request",
+    "@type": "core:class/Curator",
+    "partOfPackage": "reference:scale/core", 
+    "core:property/partOfComponent": "core:component/curator"
+    "label": "request",
+    "comment": "Curates the request partition.",
+    "documentation": "reference:scale/core/curator/request", 
+    "learnMore": "learn:scale/core/curator/request", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/curator/request", 
+    "schema:runtimePlatform": "python3.8"
+}

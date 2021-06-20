@@ -1,0 +1,11 @@
+{
+    "@context": "context/core",
+    "@id": "core:class/Daemon",
+    "@type": "rdfs:Class",
+    "partOfPackage": "reference:scale/core"
+    "subClassOf": "core:class/Processor", 
+    "label": "Daemon",
+    "comment": "A processor which performs scheduled automatic system tasks.", 
+    "documentation": "reference:scale/core/class/Daemon", 
+    "learnMore": "learn:scale/core/class/Daemon"
+}

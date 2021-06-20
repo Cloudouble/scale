@@ -8,7 +8,9 @@
         "documentation": "schema:documentation", 
         "learnMore": "core:property/learnMore", 
         "partOfPackage": "core:property/partOfPackage",
+        "partOfComponent": "core:property/partOfComponent", 
         "associatedProcessor": "core:property/associatedProcessor", 
+        "associatedAdaptor": "core:property/associatedAdaptor", 
         "version": "schema:version", 
         "isActive": "core:property/isActive"
 
