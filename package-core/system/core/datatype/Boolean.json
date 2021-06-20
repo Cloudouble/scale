@@ -1,0 +1,9 @@
+{
+    "@id": "schema:Boolean",
+    "@type": [
+        "rdfs:Class",
+        "schema:DataType"
+    ],
+    "rdfs:comment": "Boolean: True or False.",
+    "rdfs:label": "Boolean"
+}
