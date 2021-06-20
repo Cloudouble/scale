@@ -1,0 +1,12 @@
+{
+    "@context": "context/core",
+    "@id": "core:authenticator/daemonConnectionType",
+    "@type": "core:class/ConnectionType",
+    "partOfPackage": "reference:scale/core"
+    "label": "daemonConnectionType",
+    "comment": "The user type for connections that are used by internal system daemons.", 
+    "documentation": "reference:scale/core/authenticator/daemonConnectionType", 
+    "learnMore": "learn:scale/core/authenticator/daemonConnectionType", 
+    "associatedProcessor": "core:authenticator/daemonConnectionType", 
+    "isActive": true
+}

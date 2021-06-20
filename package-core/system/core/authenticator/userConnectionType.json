@@ -1,0 +1,12 @@
+{
+    "@context": "context/core",
+    "@id": "core:authenticator/userConnectionType",
+    "@type": "core:class/ConnectionType",
+    "partOfPackage": "reference:scale/core"
+    "label": "userConnectionType",
+    "comment": "The user type for connections that are coming from end user devices, assumed to be authenticed to one individual human user.", 
+    "documentation": "reference:scale/core/authenticator/userConnectionType", 
+    "learnMore": "learn:scale/core/authenticator/userConnectionType", 
+    "associatedProcessor": "core:authenticator/userConnectionType", 
+    "isActive": true
+}

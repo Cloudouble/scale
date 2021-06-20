@@ -1,0 +1,12 @@
+{
+    "@context": "context/core",
+    "@id": "core:authenticator/channelConnectionType",
+    "@type": "core:class/ConnectionType",
+    "partOfPackage": "reference:scale/core"
+    "label": "channelConnectionType",
+    "comment": "The user type for connections that are coming via channels.", 
+    "documentation": "reference:scale/core/authenticator/channelConnectionType", 
+    "learnMore": "learn:scale/core/authenticator/channelConnectionType", 
+    "associatedProcessor": "core:authenticator/channelConnectionType", 
+    "isActive": true
+}

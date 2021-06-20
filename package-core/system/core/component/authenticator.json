@@ -12,7 +12,8 @@
 	"isActive": true, 
     "core:property/homeDirectory": "authenticator", 
     "core:property/expectedModuleType": [
-        "core:class/Processor"
-        "core:class/AuthenticationGateway"
+        "core:class/Processor", 
+        "core:class/AuthenticationGateway", 
+        "core:class/ConnectionType"
     ]
 }

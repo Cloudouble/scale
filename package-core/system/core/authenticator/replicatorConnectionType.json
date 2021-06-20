@@ -1,0 +1,12 @@
+{
+    "@context": "context/core",
+    "@id": "core:authenticator/replicatorConnectionType",
+    "@type": "core:class/ConnectionType",
+    "partOfPackage": "reference:scale/core"
+    "label": "replicatorConnectionType",
+    "comment": "The user type for connections that are coming from data base peers for replication purposes.", 
+    "documentation": "reference:scale/core/authenticator/replicatorConnectionType", 
+    "learnMore": "learn:scale/core/authenticator/replicatorConnectionType", 
+    "associatedProcessor": "core:authenticator/replicatorConnectionType", 
+    "isActive": true
+}
