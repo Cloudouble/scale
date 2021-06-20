@@ -1,0 +1,15 @@
+{
+    "@context": "context/default",
+    "@id": "core:authenticator/sudoGatewayProcessor",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core", 
+    "label": "sudoGatewayProcessor",
+    "comment": "Processes sudo authenticator operations.",
+    "documentation": "reference:scale/core/authenticator/sudoGatewayProcessor", 
+    "learnMore": "learn:scale/core/authenticator/sudoGatewayProcessor", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/authenticator/sudoGatewayProcessor", 
+    "schema:runtimePlatform": "python3.8", 
+    "core:property/partOfComponent": "core:component/authenticator"
+}

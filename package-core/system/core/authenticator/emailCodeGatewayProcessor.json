@@ -1,0 +1,15 @@
+{
+    "@context": "context/default",
+    "@id": "core:authenticator/emailCodeGatewayProcessor",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core", 
+    "label": "emailCodeGatewayProcessor",
+    "comment": "Processes email code authenticator operations.",
+    "documentation": "reference:scale/core/authenticator/emailCodeGatewayProcessor", 
+    "learnMore": "learn:scale/core/authenticator/emailCodeGatewayProcessor", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/authenticator/emailCodeGatewayProcessor", 
+    "schema:runtimePlatform": "python3.8", 
+    "core:property/partOfComponent": "core:component/authenticator"
+}

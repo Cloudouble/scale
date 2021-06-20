@@ -1,0 +1,17 @@
+{
+    "@context": "context/default",
+    "@id": "core:component/application",
+    "@type": "core:class/Component",
+    "partOfPackage": "reference:scale/core"
+    "label": "Application",
+    "comment": "Responsible for managing end user applications.",
+    "documentation": "reference:scale/core/component/Application", 
+    "learnMore": "learn:scale/core/component/Application", 
+	"associatedProcessor": "core:computor/application", 
+	"version": 1, 
+	"isActive": true, 
+    "core:property/homeDirectory": "application", 
+    "core:property/expectedModuleType": [
+        "core:class/Application"
+    ]
+}

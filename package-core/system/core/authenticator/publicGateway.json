@@ -1,0 +1,12 @@
+{
+    "@context": "context/core",
+    "@id": "core:authenticator/publicGateway",
+    "@type": "core:class/AuthenticationGateway",
+    "partOfPackage": "reference:scale/core"
+    "label": "publicGateway",
+    "comment": "The gateway for authenticating public (no access to protected resources) connections.", 
+    "documentation": "reference:scale/core/authenticator/publicGateway", 
+    "learnMore": "learn:scale/core/authenticator/publicGateway", 
+    "associatedProcessor": "core:authenticator/publicGatewayProcessor"
+    "isActive": true
+}

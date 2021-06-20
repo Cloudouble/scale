@@ -1,0 +1,11 @@
+{
+    "@context": "context/core",
+    "@id": "core:class/AuthenticationGateway",
+    "@type": "rdfs:Class",
+    "partOfPackage": "reference:scale/core"
+    "subClassOf": "core:class/Unit", 
+    "label": "AuthenticationGateway",
+    "comment": "A process for authenticating and authorising connections.", 
+    "documentation": "reference:scale/core/class/AuthenticationGateway", 
+    "learnMore": "learn:scale/core/class/AuthenticationGateway"
+}

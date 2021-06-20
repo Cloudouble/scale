@@ -1,0 +1,12 @@
+{
+    "@context": "context/core",
+    "@id": "core:authenticator/smsCodeGateway",
+    "@type": "core:class/AuthenticationGateway",
+    "partOfPackage": "reference:scale/core"
+    "label": "smsCodeGateway",
+    "comment": "The gateway for authenticating connections via one-time sms code.", 
+    "documentation": "reference:scale/core/authenticator/smsCodeGateway", 
+    "learnMore": "learn:scale/core/authenticator/smsCodeGateway", 
+    "associatedProcessor": "core:authenticator/smsCodeGatewayProcessor"
+    "isActive": true
+}

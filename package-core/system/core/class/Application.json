@@ -1,0 +1,11 @@
+{
+    "@context": "context/core",
+    "@id": "core:class/Application",
+    "@type": "rdfs:Class",
+    "partOfPackage": "reference:scale/core"
+    "subClassOf": "core:class/Unit", 
+    "label": "Application",
+    "comment": "A single end user interface that can stand alone as a PWA.", 
+    "documentation": "reference:scale/core/class/Application", 
+    "learnMore": "learn:scale/core/class/Application"
+}

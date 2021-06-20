@@ -1,0 +1,15 @@
+{
+    "@context": "context/default",
+    "@id": "core:authenticator/keyGatewayProcessor",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core", 
+    "label": "keyGatewayProcessor",
+    "comment": "Processes api key authenticator operations.",
+    "documentation": "reference:scale/core/authenticator/keyGatewayProcessor", 
+    "learnMore": "learn:scale/core/authenticator/keyGatewayProcessor", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/authenticator/keyGatewayProcessor", 
+    "schema:runtimePlatform": "python3.8", 
+    "core:property/partOfComponent": "core:component/authenticator"
+}

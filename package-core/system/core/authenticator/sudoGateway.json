@@ -1,0 +1,12 @@
+{
+    "@context": "context/core",
+    "@id": "core:authenticator/sudoGateway",
+    "@type": "core:class/AuthenticationGateway",
+    "partOfPackage": "reference:scale/core"
+    "label": "sudoGateway",
+    "comment": "The gateway for authenticating sudo (superuser) connections.", 
+    "documentation": "reference:scale/core/authenticator/sudoGateway", 
+    "learnMore": "learn:scale/core/authenticator/sudoGateway", 
+    "associatedProcessor": "core:authenticator/sudoGatewayProcessor"
+    "isActive": true
+}

@@ -1,0 +1,15 @@
+{
+    "@context": "context/default",
+    "@id": "core:authenticator/publicGatewayProcessor",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core", 
+    "label": "publicGatewayProcessor",
+    "comment": "Processes public authenticator operations.",
+    "documentation": "reference:scale/core/authenticator/publicGatewayProcessor", 
+    "learnMore": "learn:scale/core/authenticator/publicGatewayProcessor", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/authenticator/publicGatewayProcessor", 
+    "schema:runtimePlatform": "python3.8", 
+    "core:property/partOfComponent": "core:component/authenticator"
+}

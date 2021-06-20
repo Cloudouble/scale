@@ -1,0 +1,12 @@
+{
+    "@context": "context/core",
+    "@id": "core:authenticator/keyGateway",
+    "@type": "core:class/AuthenticationGateway",
+    "partOfPackage": "reference:scale/core"
+    "label": "keyGateway",
+    "comment": "The gateway for authenticating connections via api key.", 
+    "documentation": "reference:scale/core/authenticator/keyGateway", 
+    "learnMore": "learn:scale/core/authenticator/keyGateway", 
+    "associatedProcessor": "core:authenticator/keyGatewayProcessor"
+    "isActive": true
+}

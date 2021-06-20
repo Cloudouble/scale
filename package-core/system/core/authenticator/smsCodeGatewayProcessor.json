@@ -1,0 +1,15 @@
+{
+    "@context": "context/default",
+    "@id": "core:authenticator/smsCodeGatewayProcessor",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core", 
+    "label": "smsCodeGatewayProcessor",
+    "comment": "Processes sms code authenticator operations.",
+    "documentation": "reference:scale/core/authenticator/smsCodeGatewayProcessor", 
+    "learnMore": "learn:scale/core/authenticator/smsCodeGatewayProcessor", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/authenticator/smsCodeGatewayProcessor", 
+    "schema:runtimePlatform": "python3.8", 
+    "core:property/partOfComponent": "core:component/authenticator"
+}
