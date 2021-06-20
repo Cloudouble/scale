@@ -1,0 +1,17 @@
+{
+    "@context": "context/default",
+    "@id": "core:computor/application",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core", 
+    "label": "application",
+    "comment": "Processes application deployment, update and removal tasks.",
+    "documentation": "reference:scale/core/computor/application", 
+    "learnMore": "learn:scale/core/computor/application", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/computor/application", 
+    "schema:runtimePlatform": "python3.8", 
+	"core:property/inputStructure": "validator/input/applicationInputShape", 
+	"core:property/outputStructure": "validator/output/applicationOutputShape", 
+    "core:property/partOfComponent": "core:component/computor"
+}

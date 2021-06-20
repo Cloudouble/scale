@@ -1,6 +1,5 @@
 {
     "@context": {
-        
         "subClassOf": "rdfs:subClassOf", 
         "subPropertyOf": "rdfs:subPropertyOf", 
         "label": "rdfs:label", 
@@ -13,12 +12,10 @@
         "associatedAdaptor": "core:property/associatedAdaptor", 
         "version": "schema:version", 
         "isActive": "core:property/isActive"
-
         "core": {
             "@id": "https://live-element.net/reference/scale/core/", 
             "@prefix": true
         }, 
-        
         "reference": {
             "@id": "https://live-element.net/reference/", 
             "@prefix": true
