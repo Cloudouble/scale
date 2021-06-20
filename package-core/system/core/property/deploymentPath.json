@@ -1,0 +1,12 @@
+{
+    "@context": "context/default",
+    "@id": "core:property/deploymentPath",
+    "@type": "rdf:Property",
+    "partOfPackage": "reference:scale/core"
+    "label": "deploymentPath",
+    "comment": "The path where this unit is deployed.", 
+    "documentation": "reference:scale/core/property/deploymentPath", 
+    "learnMore": "learn:scale/core/property/deploymentPath", 
+    "schema:domainIncludes": ["core:class/Module"],
+    "schema:rangeIncludes": "schema:URL"
+}

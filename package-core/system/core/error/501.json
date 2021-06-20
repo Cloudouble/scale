@@ -1,0 +1,14 @@
+{
+    "@context": "context/core",
+    "@id": "core:error/501",
+    "@type": "core:class/Error",
+    "partOfPackage": "reference:scale/core", 
+    "core:property/partOfComponent": "core:component/error", 
+    "label": "501",
+    "comment": "The page for the HTTP error 501.", 
+    "documentation": "reference:scale/core/error/501", 
+    "learnMore": "learn:scale/core/error/501", 
+    "isActive": true, 
+    "schema:codeRepository": "//blob/core/error/501", 
+    "core:property/deploymentPath": "//output/501"
+}

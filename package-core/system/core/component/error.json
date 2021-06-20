@@ -1,0 +1,17 @@
+{
+    "@context": "context/default",
+    "@id": "core:component/error",
+    "@type": "core:class/Component",
+    "partOfPackage": "reference:scale/core"
+    "label": "Error",
+    "comment": "Responsible for managing end user HTTP error messages.",
+    "documentation": "reference:scale/core/component/Error", 
+    "learnMore": "learn:scale/core/component/Error", 
+	"associatedProcessor": "core:computor/error", 
+	"version": 1, 
+	"isActive": true, 
+    "core:property/homeDirectory": "error", 
+    "core:property/expectedModuleType": [
+        "core:class/Error"
+    ]
+}

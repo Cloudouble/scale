@@ -1,0 +1,14 @@
+{
+    "@context": "context/core",
+    "@id": "core:error/404",
+    "@type": "core:class/Error",
+    "partOfPackage": "reference:scale/core", 
+    "core:property/partOfComponent": "core:component/error", 
+    "label": "404",
+    "comment": "The page for the HTTP error 404.", 
+    "documentation": "reference:scale/core/error/404", 
+    "learnMore": "learn:scale/core/error/404", 
+    "isActive": true, 
+    "schema:codeRepository": "//blob/core/error/404", 
+    "core:property/deploymentPath": "//output/404"
+}

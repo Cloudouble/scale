@@ -1,0 +1,14 @@
+{
+    "@context": "context/core",
+    "@id": "core:error/405",
+    "@type": "core:class/Error",
+    "partOfPackage": "reference:scale/core", 
+    "core:property/partOfComponent": "core:component/error", 
+    "label": "405",
+    "comment": "The page for the HTTP error 405.", 
+    "documentation": "reference:scale/core/error/405", 
+    "learnMore": "learn:scale/core/error/405", 
+    "isActive": true, 
+    "schema:codeRepository": "//blob/core/error/405", 
+    "core:property/deploymentPath": "//output/405"
+}

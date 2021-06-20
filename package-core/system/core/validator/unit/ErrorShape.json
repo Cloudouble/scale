@@ -1,0 +1,12 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/unit/ErrorShape",
+	"@type": "sh:NodeShape", 
+	"rdfs:subClassOf" : "core:validator/unit/UnitShape",
+	"sh:targetClass" : "core:class/Error",
+	"sh:message": "This is not a valid error.", 
+	"sh:property": [
+		"core:validator/property/codeRepository", 
+		"core:validator/property/deploymentPath"
+    ]
+}

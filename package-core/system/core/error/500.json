@@ -1,0 +1,14 @@
+{
+    "@context": "context/core",
+    "@id": "core:error/500",
+    "@type": "core:class/Error",
+    "partOfPackage": "reference:scale/core", 
+    "core:property/partOfComponent": "core:component/error", 
+    "label": "500",
+    "comment": "The page for the HTTP error 500.", 
+    "documentation": "reference:scale/core/error/500", 
+    "learnMore": "learn:scale/core/error/500", 
+    "isActive": true, 
+    "schema:codeRepository": "//blob/core/error/500", 
+    "core:property/deploymentPath": "//output/500"
+}

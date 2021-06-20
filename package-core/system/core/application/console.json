@@ -1,7 +1,7 @@
 {
     "@context": "context/core",
     "@id": "core:application/console",
-    "@type": "core:class/Module",
+    "@type": "core:class/Application",
     "partOfPackage": "reference:scale/core", 
     "core:property/partOfComponent": "core:component/application", 
     "label": "console",
@@ -10,5 +10,5 @@
     "learnMore": "learn:scale/core/application/console", 
     "isActive": true, 
     "schema:codeRepository": "//blob/core/application/console", 
-    "core:property/homeDirectory": "//output/~console"
+    "core:property/deploymentPath": "//output/~console"
 }

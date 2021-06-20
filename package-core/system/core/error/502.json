@@ -1,0 +1,14 @@
+{
+    "@context": "context/core",
+    "@id": "core:error/502",
+    "@type": "core:class/Error",
+    "partOfPackage": "reference:scale/core", 
+    "core:property/partOfComponent": "core:component/error", 
+    "label": "502",
+    "comment": "The page for the HTTP error 502.", 
+    "documentation": "reference:scale/core/error/502", 
+    "learnMore": "learn:scale/core/error/502", 
+    "isActive": true, 
+    "schema:codeRepository": "//blob/core/error/502", 
+    "core:property/deploymentPath": "//output/502"
+}

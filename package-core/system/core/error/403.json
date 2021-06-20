@@ -1,0 +1,14 @@
+{
+    "@context": "context/core",
+    "@id": "core:error/403",
+    "@type": "core:class/Error",
+    "partOfPackage": "reference:scale/core", 
+    "core:property/partOfComponent": "core:component/error", 
+    "label": "403",
+    "comment": "The page for the HTTP error 403.", 
+    "documentation": "reference:scale/core/error/403", 
+    "learnMore": "learn:scale/core/error/403", 
+    "isActive": true, 
+    "schema:codeRepository": "//blob/core/error/403", 
+    "core:property/deploymentPath": "//output/403"
+}

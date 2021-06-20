@@ -1,0 +1,12 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/unit/ApplicationShape",
+	"@type": "sh:NodeShape", 
+	"rdfs:subClassOf" : "core:validator/unit/UnitShape",
+	"sh:targetClass" : "core:class/Application",
+	"sh:message": "This is not a valid application.", 
+	"sh:property": [
+		"core:validator/property/codeRepository", 
+		"core:validator/property/deploymentPath"
+    ]
+}

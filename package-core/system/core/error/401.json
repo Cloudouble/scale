@@ -1,0 +1,14 @@
+{
+    "@context": "context/core",
+    "@id": "core:error/401",
+    "@type": "core:class/Error",
+    "partOfPackage": "reference:scale/core", 
+    "core:property/partOfComponent": "core:component/error", 
+    "label": "401",
+    "comment": "The page for the HTTP error 401.", 
+    "documentation": "reference:scale/core/error/401", 
+    "learnMore": "learn:scale/core/error/401", 
+    "isActive": true, 
+    "schema:codeRepository": "//blob/core/error/401", 
+    "core:property/deploymentPath": "//output/401"
+}

@@ -1,0 +1,14 @@
+{
+    "@context": "context/core",
+    "@id": "core:error/415",
+    "@type": "core:class/Error",
+    "partOfPackage": "reference:scale/core", 
+    "core:property/partOfComponent": "core:component/error", 
+    "label": "415",
+    "comment": "The page for the HTTP error 415.", 
+    "documentation": "reference:scale/core/error/415", 
+    "learnMore": "learn:scale/core/error/415", 
+    "isActive": true, 
+    "schema:codeRepository": "//blob/core/error/415", 
+    "core:property/deploymentPath": "//output/415"
+}
