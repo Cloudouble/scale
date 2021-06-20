@@ -1,0 +1,17 @@
+{
+    "@context": "context/default",
+    "@id": "core:indexer/filterProcessor",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core"
+    "label": "filterProcessor",
+    "comment": "Processes filter-based queries.",
+    "documentation": "reference:scale/core/indexer/filterProcessor", 
+    "learnMore": "learn:scale/core/indexer/filterProcessor", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/indexer/filterProcessor", 
+    "schema:runtimePlatform": "python3.8", 
+	"core:property/inputStructure": "core:validator/input/filterInputShape", 
+	"core:property/outputStructure": "core:validator/output/filterOutputShape", 
+    "core:property/partOfComponent": "core:component/indexer"
+}

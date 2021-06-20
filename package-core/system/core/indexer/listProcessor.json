@@ -1,0 +1,17 @@
+{
+    "@context": "context/default",
+    "@id": "core:indexer/listProcessor",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core"
+    "label": "listProcessor",
+    "comment": "Processes list-based queries.",
+    "documentation": "reference:scale/core/indexer/listProcessor", 
+    "learnMore": "learn:scale/core/indexer/listProcessor", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/indexer/listProcessor", 
+    "schema:runtimePlatform": "python3.8", 
+	"core:property/inputStructure": "core:validator/input/listInputShape", 
+	"core:property/outputStructure": "core:validator/output/listOutputShape", 
+    "core:property/partOfComponent": "core:component/indexer"
+}

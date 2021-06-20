@@ -1,0 +1,14 @@
+{
+    "@context": "context/core",
+    "@id": "core:indexer/filter",
+    "@type": "core:class/Query",
+    "partOfPackage": "reference:scale/core"
+    "label": "Math",
+    "comment": "Enables the creation of result sets based on various basic filter operations.",
+    "documentation": "reference:scale/core/indexer/filter", 
+    "learnMore": "learn:scale/core/indexer/filter"
+	"associatedProcessor": "core:indexer/filterProcessor", 
+	"version": 1, 
+	"isActive": true, 
+    "core:property/partOfComponent": "core:component/indexer"
+}

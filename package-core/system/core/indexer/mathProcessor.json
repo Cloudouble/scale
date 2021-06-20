@@ -1,0 +1,17 @@
+{
+    "@context": "context/default",
+    "@id": "core:indexer/mathProcessor",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core"
+    "label": "mathProcessor",
+    "comment": "Processes math-based queries.",
+    "documentation": "reference:scale/core/indexer/mathProcessor", 
+    "learnMore": "learn:scale/core/indexer/mathProcessor", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/indexer/mathProcessor", 
+    "schema:runtimePlatform": "python3.8", 
+	"core:property/inputStructure": "core:validator/input/mathInputShape", 
+	"core:property/outputStructure": "core:validator/output/mathOutputShape", 
+    "core:property/partOfComponent": "core:component/indexer"
+}

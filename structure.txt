@@ -126,7 +126,7 @@ mask: sudo, administrator, connection, readonly
 package: core
 packager: core
 platform: https-aws-cloudfront, websocket-aws-apigateway
-policy: core, reacter, trusted, semitrusted, untrusted
+??? policy: core, reacter, trusted, semitrusted, untrusted  ???
 processor: all processors from the core package
 query: math, list, filter
 schedule: second, minute, hour, day, week, month, year

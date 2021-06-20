@@ -1,0 +1,14 @@
+{
+    "@context": "context/core",
+    "@id": "core:indexer/math",
+    "@type": "core:class/Query",
+    "partOfPackage": "reference:scale/core"
+    "label": "Math",
+    "comment": "Enables the creation of result sets based on various basic math operations.",
+    "documentation": "reference:scale/core/indexer/math", 
+    "learnMore": "learn:scale/core/indexer/math"
+	"associatedProcessor": "core:indexer/mathProcessor", 
+	"version": 1, 
+	"isActive": true, 
+    "core:property/partOfComponent": "core:component/indexer"
+}
