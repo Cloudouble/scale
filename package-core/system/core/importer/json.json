@@ -1,0 +1,18 @@
+{
+    "@context": "context/core",
+    "@id": "core:importer/json",
+    "@type": "core:class/ImportFormat",
+    "partOfPackage": "reference:scale/core"
+    "label": "JSON",
+    "comment": "Reads import jobs from JSON files.",
+    "documentation": "reference:scale/core/importer/json", 
+    "learnMore": "learn:scale/core/importer/json"
+	"associatedProcessor": "core:importer/jsonProcessor", 
+	"version": 1, 
+	"isActive": true, 
+	"schema:contentType": "application/json", 
+	"core:property/processorInputDefaults": {}, 
+	"core:property/processorOutputDefaults": {}, 
+	"core:property/filenameExtension": "json", 
+    "core:property/partOfComponent": "core:component/importer"
+}

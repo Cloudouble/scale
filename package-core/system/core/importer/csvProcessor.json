@@ -1,0 +1,17 @@
+{
+    "@context": "context/default",
+    "@id": "core:importer/csvProcessor",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core"
+    "label": "csvProcessor",
+    "comment": "Processes csv imports.",
+    "documentation": "reference:scale/core/importer/csvProcessor", 
+    "learnMore": "learn:scale/core/importer/csvProcessor", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/importer/csvProcessor", 
+    "schema:runtimePlatform": "python3.8", 
+	"core:property/inputStructure": "core:validator/input/csvInputShape", 
+	"core:property/outputStructure": "core:validator/output/csvOutputShape", 
+    "core:property/partOfComponent": "core:component/importer"
+}

@@ -1,0 +1,18 @@
+{
+    "@context": "context/core",
+    "@id": "core:importer/zip",
+    "@type": "core:class/ImportFormat",
+    "partOfPackage": "reference:scale/core"
+    "label": "ZIP",
+    "comment": "Reads import jobs from ZIP files.",
+    "documentation": "reference:scale/core/importer/zip", 
+    "learnMore": "learn:scale/core/importer/zip"
+	"associatedProcessor": "core:importer/zipProcessor", 
+	"version": 1, 
+	"isActive": true, 
+	"schema:contentType": "application/zip", 
+	"core:property/processorInputDefaults": {}, 
+	"core:property/processorOutputDefaults": {}, 
+	"core:property/filenameExtension": "zip", 
+    "core:property/partOfComponent": "core:component/importer"
+}

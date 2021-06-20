@@ -1,0 +1,17 @@
+{
+    "@context": "context/default",
+    "@id": "core:importer/jsonProcessor",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core"
+    "label": "jsonProcessor",
+    "comment": "Processes json imports.",
+    "documentation": "reference:scale/core/importer/jsonProcessor", 
+    "learnMore": "learn:scale/core/importer/jsonProcessor", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/importer/jsonProcessor", 
+    "schema:runtimePlatform": "python3.8", 
+	"core:property/inputStructure": "core:validator/input/jsonInputShape", 
+	"core:property/outputStructure": "core:validator/output/jsonOutputShape", 
+    "core:property/partOfComponent": "core:component/importer"
+}

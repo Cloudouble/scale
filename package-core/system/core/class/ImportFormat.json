@@ -1,0 +1,11 @@
+{
+    "@context": "context/core",
+    "@id": "core:class/ImportFormat",
+    "@type": "rdfs:Class",
+    "partOfPackage": "reference:scale/core"
+    "subClassOf": "core:class/View", 
+    "label": "ImportFormat",
+    "comment": "A processor which performs the import from a specified format.", 
+    "documentation": "reference:scale/core/class/ImportFormat", 
+    "learnMore": "learn:scale/core/class/ImportFormat"
+}
