@@ -1,0 +1,16 @@
+{
+    "@context": "context/core",
+    "@id": "core:connect/connectortype/awsCloudfront",
+    "@type": "core:class/ConnectorType",
+    "partOfPackage": "reference:scale/core"
+    "label": "awsCloudfront",
+    "comment": "The connector type for handling incoming https and websocket connections via AWS Cloudfront.", 
+    "documentation": "reference:scale/core/connect/connectortype/awsCloudfront", 
+    "learnMore": "learn:scale/core/connect/connectortype/awsCloudfront", 
+    "isActive": true, 
+	"core:validator/property/codeRepository": "blob:core/connect/connectortype/awsCloudfront", 
+	"core:validator/property/runtimePlatform": "python3.8", 
+	"core:validator/property/inputStructure": null, 
+	"core:validator/property/outputStructure": null, 
+	"core:validator/property/configurationStructure": "validator/configuration/awsCloudfront" 
+}

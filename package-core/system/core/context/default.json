@@ -12,6 +12,7 @@
         "associatedAdaptor": "core:property/associatedAdaptor", 
         "version": "schema:version", 
         "isActive": "core:property/isActive"
+        "blob": "//blob/", 
         "core": {
             "@id": "https://live-element.net/reference/scale/core/", 
             "@prefix": true

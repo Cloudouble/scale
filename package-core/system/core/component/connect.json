@@ -12,7 +12,12 @@
 	"isActive": true, 
     "core:property/homeDirectory": "connect", 
     "core:property/expectedModuleType": [
-        "core:class/ConnectionType"
+        "core:class/Adapter", 
+        "core:class/ConnectorType", 
+        "core:class/ConnectionType", 
         "core:class/Connector"
     ]
 }
+
+
+

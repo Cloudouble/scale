@@ -1,0 +1,13 @@
+{
+    "@context": "context/core",
+    "@id": "core:storer/httpsDefaultConnector",
+    "@type": "core:class/Connector",
+    "partOfPackage": "reference:scale/core"
+    "label": "httpsDefaultConnector",
+    "comment": "The default connector for handling incoming https connections.", 
+    "documentation": "reference:scale/core/connect/httpsDefaultConnector", 
+    "learnMore": "learn:scale/core/connect/httpsDefaultConnector", 
+    "associatedAdaptor": "core:connect/connectortype/awsCloudfront", 
+    "associatedAdaptorConfiguration": "value/configuration/httpsDefaultConnector", 
+    "isActive": true
+}
