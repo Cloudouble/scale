@@ -3,7 +3,7 @@
     "@id": "core:application/console",
     "@type": "core:class/Application",
     "partOfPackage": "reference:scale/core", 
-    "core:property/partOfComponent": "core:component/application", 
+    "partOfComponent": "core:component/application", 
     "label": "console",
     "comment": "The core console for managing the system.", 
     "documentation": "reference:scale/core/application/console", 

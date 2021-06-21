@@ -11,7 +11,6 @@
 	"isActive": true, 
     "schema:codeRepository": "//blob/core/computor/application", 
     "schema:runtimePlatform": "python3.8", 
-	"core:property/inputStructure": "validator/input/applicationInputShape", 
-	"core:property/outputStructure": "validator/output/applicationOutputShape", 
-    "core:property/partOfComponent": "core:component/computor"
+	"core:property/inputStructure": "validator/input/componentProcessorInput", 
+    "core:property/partOfComponent": ["core:component/application", "core:component/computor"]
 }

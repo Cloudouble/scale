@@ -1,0 +1,16 @@
+{
+    "@context": "context/default",
+    "@id": "core:computor/storer",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core"
+    "label": "storer",
+    "comment": "Processes storer operations.",
+    "documentation": "reference:scale/core/computor/storer", 
+    "learnMore": "learn:scale/core/computor/storer", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/computor/storer", 
+    "schema:runtimePlatform": "python3.8", 
+	"core:property/inputStructure": "validator/input/componentProcessorInput", 
+    "core:property/partOfComponent": ["core:component/storer", "core:component/computor"]
+}

@@ -1,0 +1,11 @@
+{
+    "@context": "context/core",
+    "@id": "core:class/ConnectorType",
+    "@type": "rdfs:Class",
+    "partOfPackage": "reference:scale/core"
+    "subClassOf": "core:class/Unit", 
+    "label": "ConnectorType",
+    "comment": "A type of source of incoming connections.", 
+    "documentation": "reference:scale/core/class/ConnectorType", 
+    "learnMore": "learn:scale/core/class/ConnectorType"
+}

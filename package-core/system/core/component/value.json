@@ -1,0 +1,17 @@
+{
+    "@context": "context/default",
+    "@id": "core:component/value",
+    "@type": "core:class/Component",
+    "partOfPackage": "reference:scale/core"
+    "label": "Value",
+    "comment": "Responsible for managing stored system environment, configuration, maps and reference values.",
+    "documentation": "reference:scale/core/component/Value", 
+    "learnMore": "learn:scale/core/component/Value", 
+	"associatedProcessor": "core:computor/value", 
+	"version": 1, 
+	"isActive": true, 
+    "core:property/homeDirectory": "value", 
+    "core:property/expectedModuleType": [
+        "schema:StructuredValue", 
+    ]
+}

@@ -1,0 +1,10 @@
+[
+    "create", 
+    "read", 
+    "update", 
+    "delete", 
+    "copy", 
+    "list", 
+    "deploy", 
+    "remove"
+]

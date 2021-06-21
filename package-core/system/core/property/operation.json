@@ -1,0 +1,12 @@
+{
+    "@context": "context/default",
+    "@id": "core:property/operation",
+    "@type": "rdf:Property",
+    "partOfPackage": "reference:scale/core", 
+    "label": "operation",
+    "comment": "The system operation.", 
+    "documentation": "reference:scale/core/property/operation", 
+    "learnMore": "learn:scale/core/property/operation", 
+    "schema:domainIncludes": ["core:class/Unit"],
+    "schema:rangeIncludes": "schema:Text"
+}

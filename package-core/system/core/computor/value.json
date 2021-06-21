@@ -1,0 +1,16 @@
+{
+    "@context": "context/default",
+    "@id": "core:computor/value",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core"
+    "label": "value",
+    "comment": "Processor for the Value component.",
+    "documentation": "reference:scale/core/computor/value", 
+    "learnMore": "learn:scale/core/computor/value", 
+	"version": 1, 
+	"isActive": true, 
+    "schema:codeRepository": "//blob/core/computor/value", 
+    "schema:runtimePlatform": "python3.8", 
+	"core:property/inputStructure": "validator/input/componentProcessorInput", 
+    "core:property/partOfComponent": ["core:component/value", "core:component/computor"]
+}

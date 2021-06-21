@@ -1,0 +1,14 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/input/componentProcessorInput",
+	"@type": "sh:NodeShape", 
+	"sh:message": "Used to validate the input into a component processor."
+	"sh:severity": "sh:Violation", 
+	"sh:closed" : true,
+	"sh:property": [
+		"core:property/operation", 
+		"core:property/partOfPackage", 
+		"core:property/partOfComponent", 
+		"core:property/moduleObject"
+	]
+}
