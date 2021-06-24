@@ -8,6 +8,8 @@
     "documentation": "reference:scale/core/connect/httpsDefaultConnector", 
     "learnMore": "learn:scale/core/connect/httpsDefaultConnector", 
     "associatedAdaptor": "core:connect/connectortype/httpsAwsCloudfront", 
-    "associatedAdaptorConfiguration": "value/configuration/httpsDefaultConnector", 
+    "associatedAdaptorConfiguration": {
+        
+    }, 
     "isActive": true
 }

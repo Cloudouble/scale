@@ -2,10 +2,7 @@ import liveelement
 import json, boto3
 
 def main(packageObject, componentObject, moduleObject, operation):
-    adaptorConfiguration = liveelement.run('core.storer', {
-        'operation': 'read', 
-        'source': moduleObject['https://live-element.net/reference/scale/core/property/associatedAdaptorConfiguration']
-    }, 'sync') if operation in ['create', 'update', 'delete'] else {}
+    adaptorConfiguration = moduleObject['https://live-element.net/reference/scale/core/property/associatedAdaptorConfiguration']  if operation in ['create', 'update', 'delete'] else {}
     if operation in ['create', 'update'] and adaptorConfiguration and adaptorConfiguration.get('CloudFront') and adaptorConfiguration['CloudFront'].get('DistributionConfig'):
         cloudfront_client = boto3.client('cloudfront')
         if operation == 'update' and adaptorConfiguration['CloudFront'].get('Id'):

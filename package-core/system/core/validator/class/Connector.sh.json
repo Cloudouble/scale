@@ -1,8 +1,8 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/unit/Connector",
+	"@id" : "core:validator/class/Connector",
 	"@type": "sh:NodeShape", 
-	"rdfs:subClassOf" : "core:validator/unit/Unit",
+	"rdfs:subClassOf" : "core:validator/class/Unit",
 	"sh:targetClass" : "core:class/Connector",
 	"sh:message": "This is not a valid connector.", 
 	"sh:property": [

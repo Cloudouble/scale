@@ -9,7 +9,7 @@
     "learnMore": "learn:scale/core/connector/awsCloudfront", 
 	"version": 1, 
 	"isActive": true, 
-    "schema:codeRepository": "//blob/core/connector/awsCloudfront", 
+    "schema:codeRepository": "//blob/core/connect/awsCloudfront", 
     "schema:runtimePlatform": "python3.8", 
     "core:property/partOfComponent": "core:component/connector"
 	"core:property/inputStructure": "validator/input/awsCloudfrontInputShape", 
