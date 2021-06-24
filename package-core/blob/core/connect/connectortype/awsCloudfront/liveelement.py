@@ -1,6 +1,6 @@
-import eventbus
-
-environment = {}
+environment = {
+    'eventbus': {}
+}
 
 package = {}
 
@@ -13,3 +13,6 @@ module = {
         '_': 'ap-southeast-2.request.scale.live-element.net'
     }
 }
+
+def run(processor_address, processor_input, synchronous=None, silent=None):
+    return {} if synchronous else None
