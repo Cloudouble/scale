@@ -7,7 +7,7 @@
     "comment": "The default connector for handling incoming https connections.", 
     "documentation": "reference:scale/core/connect/httpsDefaultConnector", 
     "learnMore": "learn:scale/core/connect/httpsDefaultConnector", 
-    "associatedAdaptor": "core:connect/connectortype/awsCloudfront", 
+    "associatedAdaptor": "core:connect/connectortype/httpsAwsCloudfront", 
     "associatedAdaptorConfiguration": "value/configuration/httpsDefaultConnector", 
     "isActive": true
 }

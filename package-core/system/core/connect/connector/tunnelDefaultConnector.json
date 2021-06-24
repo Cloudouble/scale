@@ -1,0 +1,13 @@
+{
+    "@context": "context/core",
+    "@id": "core:storer/tunnelDefaultConnector",
+    "@type": "core:class/Connector",
+    "partOfPackage": "reference:scale/core"
+    "label": "tunnelDefaultConnector",
+    "comment": "The default connector for handling tunnel connections.", 
+    "documentation": "reference:scale/core/connect/tunnelDefaultConnector", 
+    "learnMore": "learn:scale/core/connect/tunnelDefaultConnector", 
+    "associatedAdaptor": "core:connect/connectortype/tunnelAwsCloudfront", 
+    "associatedAdaptorConfiguration": "value/configuration/tunnelDefaultConnector", 
+    "isActive": true
+}
