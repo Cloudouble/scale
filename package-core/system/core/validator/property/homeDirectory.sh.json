@@ -1,8 +1,9 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/homeDirectoryShape",
+	"@id" : "core:validator/property/homeDirectory",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "core:property/homeDirectory",
+	"sh:order": 14, 
 	"sh:minCount": 1,
 	"sh:maxCount": 1,
 	"sh:nodeKind": "sh:IRI"

@@ -1,12 +1,12 @@
 {
     "@context": "context/default",
-    "@id": "core:property/reactToType",
+    "@id": "core:property/listenToType",
     "@type": "rdf:Property",
     "partOfPackage": "reference:scale/core"
-    "label": "reactToType",
+    "label": "listenToType",
     "comment": "The record type or types which trigger running the query.", 
-    "documentation": "reference:scale/core/property/reactToType", 
-    "learnMore": "learn:scale/core/property/reactToType", 
+    "documentation": "reference:scale/core/property/listenToType", 
+    "learnMore": "learn:scale/core/property/listenToType", 
     "schema:domainIncludes": ["core:class/Query"],
     "schema:rangeIncludes": "schema:Text"
 }

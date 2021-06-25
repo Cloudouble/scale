@@ -1,8 +1,10 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/unit/PackageShape",
+	"@id" : "core:validator/class/Package",
 	"@type": "sh:NodeShape", 
-	"rdfs:subClassOf" : "core:validator/unit/UnitShape",
+	"rdfs:subClassOf" : "core:validator/class/Unit",
 	"sh:targetClass" : "core:class/Package",
 	"sh:message": "This is not a valid package."
+	"sh:property": [
+	]
 }

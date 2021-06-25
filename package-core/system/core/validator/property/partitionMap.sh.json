@@ -1,11 +1,11 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/partitionMapShape",
+	"@id" : "core:validator/property/partitionMap",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "core:property/partitionMap",
 	"sh:name": "partition map", 
 	"sh:description": "The map of active partitions in the system.", 
-	"sh:order": "2", 
+	"sh:order": 23, 
 	"sh:minCount": 1,
 	"sh:maxCount": 1,
 	"sh:datatype": "schema:StructuredValue",

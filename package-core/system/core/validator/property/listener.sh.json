@@ -1,11 +1,11 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/listenerShape",
+	"@id" : "core:validator/property/listener",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "core:property/listener",
 	"sh:name": "Listener", 
 	"sh:description": "Maps events that this unit will listen on to processor actions.", 
-	"sh:order": "1", 
+	"sh:order": 19, 
 	"sh:minCount": 0,
 	"sh:maxCount": 1,
 	"sh:datatype": "schema:StructuredValue",

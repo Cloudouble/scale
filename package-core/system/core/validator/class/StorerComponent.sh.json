@@ -1,8 +1,8 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/unit/StorerComponentShape",
+	"@id" : "core:validator/class/StorerComponent",
 	"@type": "sh:NodeShape", 
-	"rdfs:subClassOf" : "core:validator/unit/ComponentShape",
+	"rdfs:subClassOf" : "core:validator/class/Component",
 	"sh:targetClass" : "core:class/StorerComponent",
 	"sh:message": "This is not a valid storer component."
 	"sh:property": [

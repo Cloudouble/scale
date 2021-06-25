@@ -1,10 +1,11 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/associatedProcessorShape",
+	"@id" : "core:validator/property/associatedProcessor",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "core:property/associatedProcessor",
 	"sh:name": "associatedProcessor", 
 	"sh:description": "The processor associated with this.", 
+	"sh:order": 2,
 	"sh:minCount": 0,
 	"sh:maxCount": 1,
 	"sh:class": "class/Processor", 

@@ -1,12 +1,12 @@
 {
     "@context": "context/default",
-    "@id": "core:property/inputStructure",
+    "@id": "core:property/inputShape",
     "@type": "rdf:Property",
     "partOfPackage": "reference:scale/core"
-    "label": "inputStructure",
+    "label": "inputShape",
     "comment": "The validation shape required for a valid input.", 
-    "documentation": "reference:scale/core/property/inputStructure", 
-    "learnMore": "learn:scale/core/property/inputStructure", 
+    "documentation": "reference:scale/core/property/inputShape", 
+    "learnMore": "learn:scale/core/property/inputShape", 
     "schema:domainIncludes": ["core:class/Processor"],
     "schema:rangeIncludes": "sh:NodeShape"
 }

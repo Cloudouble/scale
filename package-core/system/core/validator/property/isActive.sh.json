@@ -1,9 +1,9 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/isActiveShape",
+	"@id" : "core:validator/property/isActive",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "core:property/isActive",
-	"sh:order": "2", 
+	"sh:order": 16, 
 	"sh:datatype": "schema:Boolean",
 	"sh:nodeKind": "sh:Literal"
 }

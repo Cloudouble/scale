@@ -1,8 +1,9 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/deploymentPathShape",
+	"@id" : "core:validator/property/deploymentPath",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "core:property/deploymentPath",
+	"sh:order": 9, 
 	"sh:minCount": 1,
 	"sh:maxCount": 1,
 	"sh:nodeKind": "sh:IRI"

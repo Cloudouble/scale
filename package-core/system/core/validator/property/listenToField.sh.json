@@ -1,11 +1,11 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/reactToFieldShape",
+	"@id" : "core:validator/property/listentToField",
 	"@type" : "sh:PropertyShape",
-	"sh:path": "core:property/reactToField",
-	"sh:name": "React to Field", 
+	"sh:path": "core:property/listenToField",
+	"sh:name": "Listen to Field", 
 	"sh:description": "The record field or fields which trigger running the query.", 
-	"sh:order": "2", 
+	"sh:order": 27, 
 	"sh:datatype": "schema:Text",
 	"sh:nodeKind": "sh:Literal"
 }

@@ -1,11 +1,11 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/positionShape",
+	"@id" : "core:validator/property/position",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "schema:position",
 	"sh:name": "Position", 
 	"sh:description": "The position or priority of this item.", 
-	"sh:order": "5", 
+	"sh:order": 26, 
 	"sh:minCount": 0,
 	"sh:maxCount": 1,
 	"sh:datatype": "schema:Integer",

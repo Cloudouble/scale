@@ -1,9 +1,9 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/learnMoreShape",
+	"@id" : "core:validator/property/learnMore",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "core:property/learnMore",
-	"sh:order": "8", 
+	"sh:order": 18, 
 	"sh:minCount": 0,
 	"sh:maxCount": 1,
 	"sh:datatype": "schema:URL",

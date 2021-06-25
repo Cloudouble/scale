@@ -1,9 +1,9 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/startFromIndexInclusiveShape",
+	"@id" : "core:validator/property/startFromIndexInclusive",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "core:property/startFromIndexInclusive",
-	"sh:order": "2", 
+	"sh:order": 31, 
 	"sh:datatype": "schema:Number",
 	"sh:nodeKind": "sh:Literal"
 }

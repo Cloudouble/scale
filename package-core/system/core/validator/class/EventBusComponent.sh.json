@@ -1,13 +1,11 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/unit/EventBusComponentShape",
+	"@id" : "core:validator/class/EventBusComponent",
 	"@type": "sh:NodeShape", 
-	"rdfs:subClassOf" : "core:validator/unit/ComponentShape",
+	"rdfs:subClassOf" : "core:validator/class/Component",
 	"sh:targetClass" : "core:class/EventBusComponent",
 	"sh:message": "This is not a valid event bus component."
 	"sh:property": [
-		"core:validator/property/eventStructure", 
-		"core:validator/property/listenerStructure", 
 		"core:validator/property/listenerMap"
     ]
 }

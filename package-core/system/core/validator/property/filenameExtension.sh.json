@@ -1,11 +1,11 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/filenameExtensionShape",
+	"@id" : "core:validator/property/filenameExtension",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "core:property/filenameExtension",
 	"sh:name": "Filename Extension", 
 	"sh:description": "The extension after the . in the file name or output path.", 
-	"sh:order": "2", 
+	"sh:order": 13, 
 	"sh:datatype": "schema:Text",
 	"sh:nodeKind": "sh:Literal"
 }

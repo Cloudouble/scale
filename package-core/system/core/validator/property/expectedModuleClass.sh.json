@@ -1,9 +1,9 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/expectedModuleTypeShape",
+	"@id" : "core:validator/property/expectedModuleClass",
 	"@type" : "sh:PropertyShape",
-	"sh:path": "core:property/expectedModuleType",
-	"sh:order": "1", 
+	"sh:path": "core:property/expectedModuleClass",
+	"sh:order": 11, 
 	"sh:minCount": 1,
 	"sh:maxCount": 1,
 	"sh:class": "rdfs:Class", 

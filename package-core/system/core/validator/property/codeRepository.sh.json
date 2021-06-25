@@ -1,11 +1,11 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/codeRepositoryShape",
+	"@id" : "core:validator/property/codeRepository",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "schema:codeRepository",
 	"sh:name": "Code Source", 
 	"sh:description": "The code for deployment.", 
-	"sh:order": "0", 
+	"sh:order": 6, 
 	"sh:minCount": 1,
 	"sh:maxCount": 1,
 	"sh:datatype": "schema:URL",

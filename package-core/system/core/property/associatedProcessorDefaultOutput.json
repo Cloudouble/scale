@@ -1,0 +1,12 @@
+{
+    "@context": "context/default",
+    "@id": "core:property/associatedProcessorDefaultOutput",
+    "@type": "rdf:Property",
+    "partOfPackage": "reference:scale/core"
+    "label": "associatedProcessorDefaultOutput",
+    "comment": "The default values with which to backfill the output from a processor.", 
+    "documentation": "reference:scale/core/property/associatedProcessorDefaultOutput", 
+    "learnMore": "learn:scale/core/property/associatedProcessorDefaultOutput", 
+    "schema:domainIncludes": ["core:class/Unit"],
+    "schema:rangeIncludes": "schema:StructuredValue"
+}

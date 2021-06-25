@@ -1,11 +1,11 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/versionShape",
+	"@id" : "core:validator/property/version",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "schema:version",
 	"sh:name": "Version", 
 	"sh:description": "Current version", 
-	"sh:order": "4", 
+	"sh:order": 32, 
 	"sh:minCount": 0,
 	"sh:maxCount": 1,
 	"sh:datatype": "schema:Text",

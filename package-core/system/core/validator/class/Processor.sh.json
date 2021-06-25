@@ -8,7 +8,8 @@
 	"sh:property": [
 		"core:validator/property/codeRepository", 
 		"core:validator/property/runtimePlatform", 
-		"core:validator/property/inputStructure", 
-		"core:validator/property/outputStructure"
+		"core:validator/property/configurationShape", 
+		"core:validator/property/inputShape", 
+		"core:validator/property/outputShape"
     ]
 }

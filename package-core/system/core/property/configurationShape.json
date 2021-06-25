@@ -1,0 +1,12 @@
+{
+    "@context": "context/default",
+    "@id": "core:property/configurationShape",
+    "@type": "rdf:Property",
+    "partOfPackage": "reference:scale/core"
+    "label": "configurationShape",
+    "comment": "The configuration of an adaptor.", 
+    "documentation": "reference:scale/core/property/configurationShape", 
+    "learnMore": "learn:scale/core/property/configurationShape", 
+    "schema:domainIncludes": ["core:class/Processor"],
+    "schema:rangeIncludes": "sh:NodeShape"
+}

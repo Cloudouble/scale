@@ -1,0 +1,12 @@
+{
+    "@context": "context/default",
+    "@id": "core:property/associatedProcessorDefaultInput",
+    "@type": "rdf:Property",
+    "partOfPackage": "reference:scale/core"
+    "label": "associatedProcessorDefaultInput",
+    "comment": "The default values into a processor.", 
+    "documentation": "reference:scale/core/property/associatedProcessorDefaultInput", 
+    "learnMore": "learn:scale/core/property/associatedProcessorDefaultInput", 
+    "schema:domainIncludes": ["core:class/Unit"],
+    "schema:rangeIncludes": "schema:StructuredValue"
+}

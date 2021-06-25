@@ -1,21 +1,21 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/unit/ViewShape",
+	"@id" : "core:validator/class/View",
 	"@type": "sh:NodeShape", 
-	"rdfs:subClassOf" : "core:validator/unit/ModuleShape",
+	"rdfs:subClassOf" : "core:validator/class/Module",
 	"sh:targetClass" : "core:class/View",
 	"sh:message": "This is not a valid view.", 
 	"sh:property": [
-		"core:validator/property/assetSetShape", 
-		"core:validator/property/contentTypeShape", 
-		"core:validator/property/filenameExtensionShape", 
-		"core:validator/property/sortFieldShape", 
-		"core:validator/property/itemListOrderShape", 
-		"core:validator/property/startFromIndexInclusiveShape", 
-		"core:validator/property/numberOfItemsShape"
-		"core:validator/property/positionShape"
+		"core:validator/property/assetSet", 
+		"core:validator/property/contentType", 
+		"core:validator/property/filenameExtension", 
+		"core:validator/property/sortField", 
+		"core:validator/property/itemListOrder", 
+		"core:validator/property/startFromIndexInclusive", 
+		"core:validator/property/numberOfItems"
+		"core:validator/property/position"
 		{
-			"@id": "core:validator/property/partOfComponentShape", 
+			"@id": "core:validator/property/partOfComponent", 
 			"sh:defaultValue": "core:component/compiler"
 		}
     ]

@@ -1,0 +1,13 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/property/associatedProcessorConfiguration",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "core:property/associatedProcessorConfiguration",
+	"sh:name": "Processor Input Defaults", 
+	"sh:description": "Default input values for the processor.", 
+	"sh:order": 3, 
+	"sh:minCount": 0,
+	"sh:maxCount": 1,
+	"sh:datatype": "schema:StructuredValue",
+	"sh:nodeKind": "sh:IRI"
+}

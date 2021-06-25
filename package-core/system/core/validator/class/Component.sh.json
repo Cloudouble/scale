@@ -1,12 +1,12 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/unit/ComponentShape",
+	"@id" : "core:validator/class/Component",
 	"@type": "sh:NodeShape", 
-	"rdfs:subClassOf" : "core:validator/unit/UnitShape",
+	"rdfs:subClassOf" : "core:validator/class/Unit",
 	"sh:targetClass" : "core:class/Component",
 	"sh:message": "This is not a valid component."
 	"sh:property": [
-		"core:validator/property/expectedModuleTypeShape", 
-		"core:validator/property/homeDirectoryShape"
+		"core:validator/property/expectedModuleClass", 
+		"core:validator/property/homeDirectory"
     ]
 }

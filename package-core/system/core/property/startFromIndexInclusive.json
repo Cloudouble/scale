@@ -4,7 +4,7 @@
     "@type": "rdf:Property",
     "partOfPackage": "reference:scale/core"
     "label": "startFromIndexInclusive",
-    "comment": "The result index to start processing result from, inclusive.", 
+    "comment": "The inclusive result index to start processing result from.", 
     "documentation": "reference:scale/core/property/startFromIndexInclusive", 
     "learnMore": "learn:scale/core/property/startFromIndexInclusive", 
     "schema:domainIncludes": ["core:class/View"],

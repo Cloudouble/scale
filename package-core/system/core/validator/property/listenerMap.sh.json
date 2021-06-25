@@ -1,11 +1,11 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/listenerMapShape",
+	"@id" : "core:validator/property/listenerMap",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "core:property/listenerMap",
 	"sh:name": "listener map", 
 	"sh:description": "The map of active listeners in the system.", 
-	"sh:order": "2", 
+	"sh:order": 20, 
 	"sh:minCount": 1,
 	"sh:maxCount": 1,
 	"sh:datatype": "schema:StructuredValue",

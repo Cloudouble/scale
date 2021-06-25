@@ -1,11 +1,11 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/itemListOrderShape",
+	"@id" : "core:validator/property/itemListOrder",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "schema:itemListOrder",
 	"sh:name": "List Order", 
 	"sh:description": "The sort direction.", 
-	"sh:order": "0", 
+	"sh:order": 17, 
 	"sh:minCount": 1,
 	"sh:maxCount": 1,
 	"sh:datatype": "schema:Text",

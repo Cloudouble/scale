@@ -1,6 +1,6 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/unit/UnitShape",
+	"@id" : "core:validator/class/Unit",
 	"@type" : "sh:NodeShape",
 	"sh:targetClass" : "core:class/Unit",
 	"sh:message": "This is not a valid package unit.", 
@@ -8,18 +8,16 @@
 	"sh:closed" : true,
 	"sh:ignoredProperties": ["rdfs:subClassOf", "rdfs:label", "rdfs:comment"], 
 	"sh:property": [
-		"core:validator/property/identifierShape", 
-		"core:validator/property/partOfPackageShape", 
-		"core:validator/property/associatedProcessorShape", 
-		"core:validator/property/processorInputDefaultsShape", 
-		"core:validator/property/processorOutputDefaultsShape", 
-		"core:validator/property/versionShape", 
-		"core:validator/property/nameShape", 
-		"core:validator/property/descriptionShape", 
-		"core:validator/property/documentationShape", 
-		"core:validator/property/learnMoreShape", 
-		"core:validator/property/isActiveShape", 
-		"core:validator/property/expiresShape", 
-		"core:validator/property/listenerShape"
+		"core:validator/property/partOfPackage", 
+		"core:validator/property/associatedProcessor", 
+		"core:validator/property/associatedProcessorConfiguration", 
+		"core:validator/property/associatedProcessorDefaultInput", 
+		"core:validator/property/associatedProcessorDefaultOutput", 
+		"core:validator/property/version", 
+		"core:validator/property/documentation", 
+		"core:validator/property/learnMore", 
+		"core:validator/property/isActive", 
+		"core:validator/property/expires", 
+		"core:validator/property/listener"
     ]
 }

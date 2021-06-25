@@ -1,12 +1,12 @@
 {
     "@context": "context/default",
-    "@id": "core:property/reactToField",
+    "@id": "core:property/listenToField",
     "@type": "rdf:Property",
     "partOfPackage": "reference:scale/core"
-    "label": "reactToField",
+    "label": "listenToField",
     "comment": "The record field or fields which trigger running the query.", 
-    "documentation": "reference:scale/core/property/reactToField", 
-    "learnMore": "learn:scale/core/property/reactToField", 
+    "documentation": "reference:scale/core/property/listenToField", 
+    "learnMore": "learn:scale/core/property/listenToField", 
     "schema:domainIncludes": ["core:class/Query"],
     "schema:rangeIncludes": "schema:Text"
 }

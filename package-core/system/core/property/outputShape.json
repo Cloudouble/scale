@@ -1,12 +1,12 @@
 {
     "@context": "context/default",
-    "@id": "core:property/outputStructure",
+    "@id": "core:property/outputShape",
     "@type": "rdf:Property",
     "partOfPackage": "reference:scale/core"
-    "label": "outputStructure",
+    "label": "outputShape",
     "comment": "The validation shape required for a valid output.", 
-    "documentation": "reference:scale/core/property/outputStructure", 
-    "learnMore": "learn:scale/core/property/outputStructure", 
+    "documentation": "reference:scale/core/property/outputShape", 
+    "learnMore": "learn:scale/core/property/outputShape", 
     "schema:domainIncludes": ["core:class/Processor"],
     "schema:rangeIncludes": "sh:NodeShape"
 }

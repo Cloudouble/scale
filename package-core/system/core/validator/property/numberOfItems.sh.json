@@ -1,11 +1,11 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/numberOfItemsShape",
+	"@id" : "core:validator/property/numberOfItems",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "schema:numberOfItems",
 	"sh:name": "Number of Items", 
 	"sh:description": "The number of items to compile.", 
-	"sh:order": "5", 
+	"sh:order": 21, 
 	"sh:minCount": 0,
 	"sh:maxCount": 1,
 	"sh:datatype": "schema:Integer",

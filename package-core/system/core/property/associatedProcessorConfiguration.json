@@ -1,0 +1,12 @@
+{
+    "@context": "context/default",
+    "@id": "core:property/associatedProcessorConfiguration",
+    "@type": "rdf:Property",
+    "partOfPackage": "reference:scale/core"
+    "label": "associatedProcessorConfiguration",
+    "comment": "The configuration values into the associatedProcessor on this unit.", 
+    "documentation": "reference:scale/core/property/associatedProcessorConfiguration", 
+    "learnMore": "learn:scale/core/property/associatedProcessorConfiguration", 
+    "schema:domainIncludes": ["core:class/Unit"],
+    "schema:rangeIncludes": "schema:StructuredValue"
+}

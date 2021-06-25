@@ -1,11 +1,11 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/contentTypeShape",
+	"@id" : "core:validator/property/contentType",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "schema:contentType",
 	"sh:name": "Name", 
 	"sh:description": "Human-readable name", 
-	"sh:order": "5", 
+	"sh:order": 8, 
 	"sh:minCount": 0,
 	"sh:maxCount": 1,
 	"sh:datatype": "schema:Text",

@@ -1,11 +1,11 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/sortFieldShape",
+	"@id" : "core:validator/property/sortField",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "core:property/sortField",
 	"sh:name": "Sort Field", 
 	"sh:description": "The record field to use for sorting.", 
-	"sh:order": "2", 
+	"sh:order": 30, 
 	"sh:datatype": "schema:Text",
 	"sh:nodeKind": "sh:Literal"
 }

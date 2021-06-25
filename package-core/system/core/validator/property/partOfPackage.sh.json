@@ -1,10 +1,11 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/property/partOfPackageShape",
+	"@id" : "core:validator/property/partOfPackage",
 	"@type" : "sh:PropertyShape",
 	"sh:path": "core:property/partOfPackage",
 	"sh:name": "partOfPackage", 
 	"sh:description": "The package that this is part of.", 
+	"sh:order": 25, 
 	"sh:minCount": 1,
 	"sh:maxCount": 1,
 	"sh:class": "class/Package", 

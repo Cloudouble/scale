@@ -1,16 +1,28 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/unit/QueryShape",
+	"@id" : "core:validator/class/Query",
 	"@type": "sh:NodeShape", 
-	"rdfs:subClassOf" : "core:validator/unit/ModuleShape",
+	"rdfs:subClassOf" : "core:validator/class/Processor",
 	"sh:targetClass" : "core:class/Query",
 	"sh:message": "This is not a valid query.", 
 	"sh:property": [
-		"core:validator/property/reactToFieldShape", 
-		"core:validator/property/reactToTypeShape", 
+		"core:validator/property/reactToField", 
+		"core:validator/property/reactToType", 
 		{
-			"@id": "core:validator/property/partOfComponentShape", 
+			"@id": "core:validator/property/partOfComponent", 
 			"sh:defaultValue": "core:component/indexer"
+		}, 
+		{
+			"@id": "core:validator/property/configurationShape", 
+			"sh:defaultValue": "value/queryConfigurationShape"
+		}, 
+		{
+			"@id": "core:validator/property/inputShape", 
+			"sh:defaultValue": "value/queryInputShape"
+		}, 
+		{
+			"@id": "core:validator/property/outputShape", 
+			"sh:defaultValue": "value/queryOutputShape"
 		}
     ]
 }
