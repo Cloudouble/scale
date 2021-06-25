@@ -1,14 +1,15 @@
 import liveelement
 
-def main(packageObject, componentObject, moduleObject, operation):
+def main(package, component, module, processorConfiguration, processorInput):
+    operation = processorInput.get('operation', 'read')
     if operation in ['create', 'update']:
         liveelement.run('core.storer', {
             'operation': 'copy', 
-            'source': moduleObject['https://schema.org/codeRepository'], 
-            'target': moduleObject['https://live-element.net/reference/scale/core/property/deploymentPath']
+            'source': module['https://schema.org/codeRepository'], 
+            'target': module['https://live-element.net/reference/scale/core/property/deploymentPath']
         })
     elif operation == 'delete':
         liveelement.run('core.storer', {
             'operation': 'delete', 
-            'target': moduleObject['https://live-element.net/reference/scale/core/property/deploymentPath']
+            'target': module['https://live-element.net/reference/scale/core/property/deploymentPath']
         })

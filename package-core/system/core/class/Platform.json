@@ -1,0 +1,11 @@
+{
+    "@context": "context/core",
+    "@id": "core:class/Platform",
+    "@type": "rdfs:Class",
+    "partOfPackage": "reference:scale/core"
+    "subClassOf": "core:class/Module", 
+    "label": "Platform",
+    "comment": "An underlaying hosting instrastructure.", 
+    "documentation": "reference:scale/core/class/Platform", 
+    "learnMore": "learn:scale/core/class/Platform"
+}

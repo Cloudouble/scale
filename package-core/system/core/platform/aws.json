@@ -1,0 +1,13 @@
+{
+    "@context": "context/default",
+    "@id": "core:platform/aws",
+    "@type": "core:class/Platform",
+    "partOfPackage": "reference:scale/core", 
+    "core:property/partOfComponent": "core:component/platform", 
+    "label": "aws",
+    "comment": "Delegates processors to AWS infrastructure.",
+    "documentation": "reference:scale/core/platform/aws", 
+    "learnMore": "learn:scale/core/platform/aws", 
+	"version": 1, 
+	"isActive": true
+}
