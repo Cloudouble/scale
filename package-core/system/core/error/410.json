@@ -9,6 +9,7 @@
     "documentation": "reference:scale/core/error/410", 
     "learnMore": "learn:scale/core/error/410", 
     "isActive": true, 
-    "schema:codeRepository": "//blob/core/error/410", 
-    "core:property/deploymentPath": "//output/410"
+    "schema:codeRepository": "blob:error/410", 
+    "core:property/deploymentPath": "output:error/410", 
+    "version": 0
 }

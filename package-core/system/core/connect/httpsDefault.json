@@ -1,0 +1,14 @@
+{
+    "@context": "context/core",
+    "@id": "core:connect/httpsDefault",
+    "@type": "core:class/Connector",
+    "partOfPackage": "reference:scale/core"
+    "label": "httpsDefault",
+    "comment": "The default connector for handling incoming https connections.", 
+    "documentation": "reference:scale/core/connect/httpsDefault", 
+    "learnMore": "learn:scale/core/connect/httpsDefault", 
+    "associatedProcessor": "computor:httpsAwsCloudfront", 
+    "associatedProcessorConfiguration": "value/configuration/connect/httpsDefault", 
+    "isActive": true, 
+    "version": 0
+}

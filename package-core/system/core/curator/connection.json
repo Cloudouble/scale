@@ -8,8 +8,8 @@
     "comment": "Curates the connection partition.",
     "documentation": "reference:scale/core/curator/connection", 
     "learnMore": "learn:scale/core/curator/connection", 
-	"version": 1, 
+    "associatedProcessor": "computor:curatorConnection", 
+    "associatedProcessorConfiguration": "value/configuration/curator/connection", 
 	"isActive": true, 
-    "schema:codeRepository": "//blob/core/curator/connection", 
-    "schema:runtimePlatform": "python3.8"
+	"version": 0
 }

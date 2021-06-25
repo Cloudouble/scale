@@ -9,6 +9,7 @@
     "documentation": "reference:scale/core/error/403", 
     "learnMore": "learn:scale/core/error/403", 
     "isActive": true, 
-    "schema:codeRepository": "//blob/core/error/403", 
-    "core:property/deploymentPath": "//output/403"
+    "schema:codeRepository": "blob:error/403", 
+    "core:property/deploymentPath": "output:error/403", 
+    "version": 0
 }

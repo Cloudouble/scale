@@ -9,6 +9,7 @@
     "documentation": "reference:scale/core/error/414", 
     "learnMore": "learn:scale/core/error/414", 
     "isActive": true, 
-    "schema:codeRepository": "//blob/core/error/414", 
-    "core:property/deploymentPath": "//output/414"
+    "schema:codeRepository": "blob:error/414", 
+    "core:property/deploymentPath": "output:error/414", 
+    "version": 0
 }

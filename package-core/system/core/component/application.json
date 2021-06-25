@@ -7,7 +7,7 @@
     "comment": "Responsible for managing end user applications.",
     "documentation": "reference:scale/core/component/Application", 
     "learnMore": "learn:scale/core/component/Application", 
-	"associatedProcessor": "core:computor/application", 
+	"associatedProcessor": "processor:application", 
 	"version": 1, 
 	"isActive": true, 
     "core:property/homeDirectory": "application", 

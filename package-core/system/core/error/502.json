@@ -9,6 +9,7 @@
     "documentation": "reference:scale/core/error/502", 
     "learnMore": "learn:scale/core/error/502", 
     "isActive": true, 
-    "schema:codeRepository": "//blob/core/error/502", 
-    "core:property/deploymentPath": "//output/502"
+    "schema:codeRepository": "blob:error/502", 
+    "core:property/deploymentPath": "output:error/502", 
+    "version": 0
 }

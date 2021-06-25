@@ -9,6 +9,7 @@
     "documentation": "reference:scale/core/error/415", 
     "learnMore": "learn:scale/core/error/415", 
     "isActive": true, 
-    "schema:codeRepository": "//blob/core/error/415", 
-    "core:property/deploymentPath": "//output/415"
+    "schema:codeRepository": "blob:error/415", 
+    "core:property/deploymentPath": "output:error/415", 
+    "version": 0
 }

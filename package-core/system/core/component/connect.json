@@ -7,17 +7,13 @@
     "comment": "Responsible for managing and routing incoming connection requests in to valid request objects.",
     "documentation": "reference:scale/core/component/Connect", 
     "learnMore": "learn:scale/core/component/Connect", 
-	"associatedProcessor": "core:computor/connect", 
+	"associatedProcessor": "computor:connect", 
 	"version": 1, 
 	"isActive": true, 
     "core:property/homeDirectory": "connect", 
     "core:property/expectedModuleType": [
-        "core:class/Adapter", 
-        "core:class/ConnectorType", 
-        "core:class/ConnectionType", 
         "core:class/Connector"
     ]
 }
-
 
 

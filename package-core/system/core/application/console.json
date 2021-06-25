@@ -2,13 +2,13 @@
     "@context": "context/core",
     "@id": "core:application/console",
     "@type": "core:class/Application",
-    "partOfPackage": "reference:scale/core", 
     "partOfComponent": "core:component/application", 
     "label": "console",
     "comment": "The core console for managing the system.", 
     "documentation": "reference:scale/core/application/console", 
     "learnMore": "learn:scale/core/application/console", 
+    "schema:codeRepository": "blob:core/application/console", 
+    "property:deploymentPath": "output:~console", 
     "isActive": true, 
-    "schema:codeRepository": "//blob/core/application/console", 
-    "core:property/deploymentPath": "//output/~console"
+    "version": 0
 }

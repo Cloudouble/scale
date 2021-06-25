@@ -9,6 +9,7 @@
     "documentation": "reference:scale/core/error/501", 
     "learnMore": "learn:scale/core/error/501", 
     "isActive": true, 
-    "schema:codeRepository": "//blob/core/error/501", 
-    "core:property/deploymentPath": "//output/501"
+    "schema:codeRepository": "blob:error/501", 
+    "core:property/deploymentPath": "output:error/501", 
+    "version": 0
 }

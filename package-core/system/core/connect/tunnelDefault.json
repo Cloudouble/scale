@@ -1,0 +1,14 @@
+{
+    "@context": "context/core",
+    "@id": "core:connect/tunnelDefault",
+    "@type": "core:class/Connector",
+    "partOfPackage": "reference:scale/core"
+    "label": "tunnelDefault",
+    "comment": "The default connector for handling tunnel connections.", 
+    "documentation": "reference:scale/core/connect/tunnelDefault", 
+    "learnMore": "learn:scale/core/connect/tunnelDefault", 
+    "associatedProcessor": ["computor:httpsAwsCloudfront", "computor:httpsAwsApiGateway"], 
+    "associatedProcessorConfiguration": "value/configuration/connect/tunnelDefault", 
+    "isActive": true, 
+    "version": 0
+}

@@ -9,6 +9,7 @@
     "documentation": "reference:scale/core/error/400", 
     "learnMore": "learn:scale/core/error/400", 
     "isActive": true, 
-    "schema:codeRepository": "//blob/core/error/400", 
-    "core:property/deploymentPath": "//output/400"
+    "schema:codeRepository": "blob:error/400", 
+    "core:property/deploymentPath": "output:error/400", 
+    "version": 0
 }

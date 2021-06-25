@@ -9,6 +9,7 @@
     "documentation": "reference:scale/core/error/404", 
     "learnMore": "learn:scale/core/error/404", 
     "isActive": true, 
-    "schema:codeRepository": "//blob/core/error/404", 
-    "core:property/deploymentPath": "//output/404"
+    "schema:codeRepository": "blob:error/404", 
+    "core:property/deploymentPath": "output:error/404", 
+    "version": 0
 }

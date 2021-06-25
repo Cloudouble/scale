@@ -9,6 +9,7 @@
     "documentation": "reference:scale/core/error/405", 
     "learnMore": "learn:scale/core/error/405", 
     "isActive": true, 
-    "schema:codeRepository": "//blob/core/error/405", 
-    "core:property/deploymentPath": "//output/405"
+    "schema:codeRepository": "blob:error/405", 
+    "core:property/deploymentPath": "output:error/405", 
+    "version": 0
 }

@@ -9,6 +9,7 @@
     "documentation": "reference:scale/core/error/401", 
     "learnMore": "learn:scale/core/error/401", 
     "isActive": true, 
-    "schema:codeRepository": "//blob/core/error/401", 
-    "core:property/deploymentPath": "//output/401"
+    "schema:codeRepository": "blob:error/401", 
+    "core:property/deploymentPath": "output:error/401", 
+    "version": 0
 }

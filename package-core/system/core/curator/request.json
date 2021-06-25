@@ -8,8 +8,8 @@
     "comment": "Curates the request partition.",
     "documentation": "reference:scale/core/curator/request", 
     "learnMore": "learn:scale/core/curator/request", 
-	"version": 1, 
+    "associatedProcessor": "computor:curatorRequest", 
+    "associatedProcessorConfiguration": "value/configuration/curator/request", 
 	"isActive": true, 
-    "schema:codeRepository": "//blob/core/curator/request", 
-    "schema:runtimePlatform": "python3.8"
+	"version": 0
 }

@@ -9,6 +9,7 @@
     "documentation": "reference:scale/core/error/503", 
     "learnMore": "learn:scale/core/error/503", 
     "isActive": true, 
-    "schema:codeRepository": "//blob/core/error/503", 
-    "core:property/deploymentPath": "//output/503"
+    "schema:codeRepository": "blob:error/503", 
+    "core:property/deploymentPath": "output:error/503", 
+    "version": 0
 }

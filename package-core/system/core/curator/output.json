@@ -8,8 +8,8 @@
     "comment": "Curates the output partition.",
     "documentation": "reference:scale/core/curator/output", 
     "learnMore": "learn:scale/core/curator/output", 
-	"version": 1, 
+    "associatedProcessor": "computor:curatorOutput", 
+    "associatedProcessorConfiguration": "value/configuration/curator/output", 
 	"isActive": true, 
-    "schema:codeRepository": "//blob/core/curator/output", 
-    "schema:runtimePlatform": "python3.8"
+	"version": 0
 }

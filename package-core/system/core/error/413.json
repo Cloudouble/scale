@@ -9,6 +9,7 @@
     "documentation": "reference:scale/core/error/413", 
     "learnMore": "learn:scale/core/error/413", 
     "isActive": true, 
-    "schema:codeRepository": "//blob/core/error/413", 
-    "core:property/deploymentPath": "//output/413"
+    "schema:codeRepository": "blob:error/413", 
+    "core:property/deploymentPath": "output:error/413", 
+    "version": 0
 }
