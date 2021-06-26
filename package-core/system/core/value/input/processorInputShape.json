@@ -1,0 +1,58 @@
+{
+    "@context": "context/default",
+	"@id" : "core:value/input/processorInputShape",
+	"@type": "sh:NodeShape", 
+	"sh:message": "This is not a valid processor input.", 
+	"sh:property": [
+        {
+        	"sh:path": "package",
+        	"sh:name": "Package Object", 
+        	"sh:description": "The package object of the target module.", 
+        	"sh:order": 0, 
+        	"sh:minCount": 1,
+        	"sh:maxCount": 1,
+        	"sh:class": "class/Package", 
+        	"sh:nodeKind": "sh:Literal"
+        },
+        {
+        	"sh:path": "component",
+        	"sh:name": "Component Object", 
+        	"sh:description": "The component object of the target module.", 
+        	"sh:order": 1, 
+        	"sh:minCount": 1,
+        	"sh:maxCount": 1,
+        	"sh:class": "class/Component", 
+        	"sh:nodeKind": "sh:Literal"
+        },
+        {
+        	"sh:path": "module",
+        	"sh:name": "Module Object", 
+        	"sh:description": "The module object of the target module.", 
+        	"sh:order": 2, 
+        	"sh:minCount": 1,
+        	"sh:maxCount": 1,
+        	"sh:class": "class/Module", 
+        	"sh:nodeKind": "sh:Literal"
+        },
+        {
+        	"sh:path": "configuration",
+        	"sh:name": "Configuration Object", 
+        	"sh:description": "The configuration object of the processor associated with the target module.", 
+        	"sh:order": 3, 
+        	"sh:minCount": 0,
+        	"sh:maxCount": 1,
+        	"sh:class": "schema:StructuredValue", 
+        	"sh:nodeKind": "sh:Literal"
+        },
+        {
+        	"sh:path": "inputObject",
+        	"sh:name": "Input Object", 
+        	"sh:description": "The input object for this execution of the processor.", 
+        	"sh:order": 4, 
+        	"sh:minCount": 0,
+        	"sh:maxCount": 1,
+        	"sh:class": "schema:StructuredValue", 
+        	"sh:nodeKind": "sh:Literal"
+        }
+    ]
+}

@@ -8,6 +8,8 @@
     "comment": "Delegates processors to AWS infrastructure.",
     "documentation": "reference:scale/core/platform/aws", 
     "learnMore": "learn:scale/core/platform/aws", 
-	"version": 1, 
+    "associatedProcessor": "computor:aws", 
+    "associatedProcessorConfiguration": "value/configuration/platform/aws", 
+	"version": 0, 
 	"isActive": true
 }

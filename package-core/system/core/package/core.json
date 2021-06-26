@@ -6,21 +6,10 @@
     "comment": "The package that contains all core system components and modules for a minimal standard installation.",
     "documentation": "reference:scale/core", 
     "learnMore": "learn:scale/core", 
-	"version": 1, 
-	"isActive": true, 
-	"containsComponent": [
-	    "core:component/authenticator", 
-	    "core:component/compiler", 
-	    "core:component/computor", 
-	    "core:component/connector", 
-	    "core:component/curator", 
-	    "core:component/exporter", 
-	    "core:component/importer", 
-	    "core:component/indexer", 
-	    "core:component/packager", 
-	    "core:component/storer", 
-	    "core:component/validator" 
-    ]
+    "associatedProcessor": "computor:core", 
+    "associatedProcessorConfiguration": "value/configuration/package/core", 
+    "isActive": true, 
+    "version": 0
 }
 
 

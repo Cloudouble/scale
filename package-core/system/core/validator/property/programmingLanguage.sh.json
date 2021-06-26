@@ -1,0 +1,13 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/property/programmingLanguage",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "schema:programmingLanguage",
+	"sh:name": "Programming Language", 
+	"sh:description": "The programming language.", 
+	"sh:order": 29, 
+	"sh:minCount": 1,
+	"sh:maxCount": 1,
+	"sh:datatype": "schema:Text",
+	"sh:nodeKind": "sh:Literal"
+}

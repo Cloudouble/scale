@@ -1,0 +1,13 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/property/targetProduct",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "schema:targetProduct",
+	"sh:name": "Target Product", 
+	"sh:description": "The platform or infrastructure product that this is designed to be run on.", 
+	"sh:order": 29, 
+	"sh:minCount": 1,
+	"sh:maxCount": 1,
+	"sh:datatype": "schema:Text",
+	"sh:nodeKind": "sh:Literal"
+}

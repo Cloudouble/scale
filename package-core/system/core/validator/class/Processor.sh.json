@@ -7,9 +7,17 @@
 	"sh:message": "This is not a valid processor.", 
 	"sh:property": [
 		"core:validator/property/codeRepository", 
+		"core:validator/property/programmingLanguage", 
 		"core:validator/property/runtimePlatform", 
+		"core:validator/property/targetProduct", 
 		"core:validator/property/configurationShape", 
-		"core:validator/property/inputShape", 
-		"core:validator/property/outputShape"
+		{
+			"@id": "core:validator/property/inputShape", 
+			"defaultValue": "value/input/processorInputShape"
+		}, 
+		{
+			"@id": "core:validator/property/outputShape", 
+			"defaultValue": "value/output/processorOutputShape"
+		}
     ]
 }
