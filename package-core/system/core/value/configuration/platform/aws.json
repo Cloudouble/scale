@@ -1,3 +1,5 @@
 {
-    "processorNamespace": "liveelement"
+    "processorNamespace": "liveelement", 
+    "systemBucket": "scale.live-element.net", 
+    "systemRoot": "_/system/"
 }

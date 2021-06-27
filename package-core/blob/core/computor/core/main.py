@@ -22,7 +22,7 @@ def get_object_via_prefixed_address(address, module, package_name):
     return processor
     
 
-def run(module_address, processor_input, event={}, synchronous=None):
+def main(module_address, processor_input, event={}, synchronous=None):
     processor_result = None
     package_name, component_name, module_name = (module_address.lower().split('.') + ['', '', ''])[:3]
     if package_name and component_name and module_name:
@@ -39,7 +39,7 @@ def run(module_address, processor_input, event={}, synchronous=None):
                             if 'associatedProcessorConfiguration' in module:
                                 configuration = get_object_via_prefixed_address(module['associatedProcessorConfiguration'], module, package_name)
                             processor_result = platform.invoke(
-                                '{}-{}-{}'.format(configuration['processorNamespace'], package_name, processor['@id'].split('/')[-1]), 
+                                '{}-{}'.format(package_name, processor['@id'].split('/')[-1]), 
                                 {
                                     'package': package, 
                                     'component': component, 
@@ -48,14 +48,19 @@ def run(module_address, processor_input, event={}, synchronous=None):
                                     'inputObject': processor_input
                                 }, 
                                 synchronous)
-                            if event and type(event) is dict and all([type(v) is dict for v in event.values()]):
-                                queue = module.get('eventbusQueue')
-                                if not queue:
-                                    queue = component.get('eventbusQueue')
-                                if not queue:
-                                    queue = package.get('eventbusQueue')
-                                if not queue:
-                                    queue = 'default'
-                                for event_type, event_detail in event.items():
-                                    platform.send(queue, module_address, event_type, event_detail)
+                            if event:
+                                if not type(event) is list:
+                                    event = [event]
+                                for event_detail in event:
+                                    if event_detail and type(event_detail) is dict:
+                                        event_type = event_detail.pop('type', None)
+                                        if event_type:
+                                            queue = event_detail.pop('queue', module.get('eventbusQueue'))
+                                            if not queue:
+                                                queue = component.get('eventbusQueue')
+                                            if not queue:
+                                                queue = package.get('eventbusQueue')
+                                            if not queue:
+                                                queue = 'default'
+                                            platform.send(queue, module_address, event_type, event_detail)
     return processor_result if synchronous else None

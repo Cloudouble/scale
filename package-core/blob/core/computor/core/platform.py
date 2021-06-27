@@ -1,3 +1,6 @@
+#dummy file only, ignore!
+
+import configuration
 import boto3, json
 
 
