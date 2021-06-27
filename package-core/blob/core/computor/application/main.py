@@ -11,7 +11,7 @@ def main(package, component, module, configuration, inputObject):
             if len(code_repository_split) == 4:
                 liveelement.run_processor('core.storer.{}'.format(partition), {
                     'operation': 'copy', 
-                    'source': code_repository_split[3], 
+                    'path': code_repository_split[3], 
                     'target': deployment_path
                 })
     elif operation == 'delete':
@@ -22,5 +22,5 @@ def main(package, component, module, configuration, inputObject):
                 partition = deployment_path_split[2]
                 liveelement.run_processor('core.storer.{}'.format(partition), {
                     'operation': 'delete', 
-                    'target': deployment_path_split[3]
+                    'path': deployment_path_split[3]
                 })
