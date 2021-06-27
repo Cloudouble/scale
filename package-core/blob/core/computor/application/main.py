@@ -1,15 +1,23 @@
 import liveelement
 
-def main(package, component, module, processorConfiguration, processorInput):
-    operation = processorInput.get('operation', 'read')
+def main(package, component, module, configuration, inputObject):
+    operation = inputObject.get('operation', 'read')
     if operation in ['create', 'update']:
-        liveelement.run('core.storer', {
-            'operation': 'copy', 
-            'source': module['https://schema.org/codeRepository'], 
-            'target': module['https://live-element.net/reference/scale/core/property/deploymentPath']
-        })
+        code_repository = module.get('https://schema.org/codeRepository')
+        deployment_path = module.get('https://live-element.net/reference/scale/core/property/deploymentPath')
+        if code_repository and deployment_path:
+            liveelement.run_processor('core.storer.system'.format(), {
+                'operation': 'copy', 
+                'source': code_repository, 
+                'target': deployment_path
+            })
     elif operation == 'delete':
-        liveelement.run('core.storer', {
-            'operation': 'delete', 
-            'target': module['https://live-element.net/reference/scale/core/property/deploymentPath']
-        })
+        deployment_path = module.get('https://live-element.net/reference/scale/core/property/deploymentPath')
+        if deployment_path:
+            deployment_path_split = deployment_path.split('/', 3)
+            if len(deployment_path_split) == 4:
+                partition = deployment_path_split[2]
+                liveelement.run_processor('core.storer.{}'.format(partition), {
+                    'operation': 'delete', 
+                    'target': deployment_path_split[3]
+                })
