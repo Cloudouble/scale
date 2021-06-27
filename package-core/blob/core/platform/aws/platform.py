@@ -5,9 +5,9 @@ def get(path):
     return {}
 
 
-def invoke(path):
+def invoke(function_name, payload, synchronous=False):
     return {}
 
 
-def send(path):
+def send(queue, module_address, event_type, event_detail):
     return {}
