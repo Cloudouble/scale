@@ -1,7 +1,12 @@
 {
     "@context": {
-        "blob": "//blob/core/", 
-        "output": "//output/core/", 
+        "blob~": "//blob/core/", 
+        "output~": "//output/core/", 
+        "system~": "//system/core/", 
+        "blob!": "//blob/", 
+        "output!": "//output/", 
+        "system!": "//system/", 
+
         "subClassOf": "rdfs:subClassOf", 
         "subPropertyOf": "rdfs:subPropertyOf", 
         "label": "rdfs:label", 

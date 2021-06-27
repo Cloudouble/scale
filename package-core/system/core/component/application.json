@@ -7,10 +7,10 @@
     "comment": "Responsible for managing end user applications.",
     "documentation": "reference:scale/core/component/Application", 
     "learnMore": "learn:scale/core/component/Application", 
-	"associatedProcessor": "processor:application", 
+	"associatedProcessor": "system~:computor/application", 
 	"version": 1, 
 	"isActive": true, 
-    "core:property/homeDirectory": "application", 
+    "core:property/homeDirectory": "system~:application", 
     "core:property/expectedModuleType": [
         "core:class/Application"
     ]

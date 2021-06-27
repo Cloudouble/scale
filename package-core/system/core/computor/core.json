@@ -5,7 +5,7 @@
     "partOfPackage": "reference:scale/core", 
     "core:property/partOfComponent": "core:component/package", 
     "label": "core",
-    "comment": "Bootstraps core processes, a special processor included within all other processors.",
+    "comment": "Bootstraps core processes, a special processor called by all other processors.",
     "documentation": "reference:scale/core/computor/core", 
     "learnMore": "learn:scale/core/computor/core", 
 	"version": 0, 
