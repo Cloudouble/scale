@@ -1,13 +1,15 @@
-import boto3, json
-
-configuration = {'processorNamespace': 'liveeleement'}
+import boto3, json, configuration
 
 def run(module_address, processor_input, synchronous=None, silent=None):
-    lambda_client = boto3.client('lambda')
-    result = lambda_client.invoke(
-        FunctionName='{namespace}-{address}'.format(namespace=configuration['processorNamespace'], address=module_address.replace('.', '-').lower()), 
+    result = boto3.client('lambda').invoke(
+        FunctionName='{namespace}-core'.format(namespace=configuration['processorNamespace']), 
         InvocationType='RequestResponse' if synchronous else 'Event', 
-        Payload=bytes(json.dumps(processor_input), 'utf-8')
+        Payload=bytes(json.dumps({
+            'module_address': module_address, 
+            'processor_input': processor_input, 
+            'synchronous': synchronous, 
+            'silent': silent
+        }), 'utf-8')
     )
     return json.loads(result['Payload'].read().decode('utf-8')) if synchronous else None
 
