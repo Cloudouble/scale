@@ -70,33 +70,20 @@ def main(package, component, module, configuration, inputObject, contexts):
         except:
             return []
     elif operation == 'mount':
-        pass
+        try:
+            bucket_location_result = s3_client.get_bucket_location(Bucket=configuration['Bucket'])
+        except:
+            bucket_location_result = None
+        if bucket_location_result and bucket_location_result['LocationConstraint'] == configuration.get('CreateBucketConfiguration', {}).get('LocationConstraint'):
+            pass
+        elif configuration.get('CreateBucketConfiguration', {}).get('LocationConstraint') and bucket_location_result:
+            return None
+        else:
+            s3_client.create_bucket(
+                Bucket=configuration['Bucket'], 
+                ACL='private', 
+                CreateBucketConfiguration=configuration.get('CreateBucketConfiguration', {'LocationConstraint': 'us-east-1'})
+            )
     elif operation == 'unmount':
         pass
         
-        
-        
-
-        
-
-    
-    adaptorConfiguration = moduleObject['https://live-element.net/reference/scale/core/property/associatedAdaptorConfiguration']  if operation in ['create', 'update', 'delete'] else {}
-    if operation in ['create', 'update'] and adaptorConfiguration and adaptorConfiguration.get('CloudFront') and adaptorConfiguration['CloudFront'].get('DistributionConfig'):
-        cloudfront_client = boto3.client('cloudfront')
-        if operation == 'update' and adaptorConfiguration['CloudFront'].get('Id'):
-            cloudfront_client.update_distribution(DistributionConfig=adaptorConfiguration['CloudFront']['DistributionConfig'], Id=adaptorConfiguration['CloudFront']['Id'])
-        elif operation == 'create' and not adaptorConfiguration['CloudFront'].get('Id'):
-            adaptorConfiguration['Cloudront']['Id'] = cloudfront_client.create_distribution(DistributionConfig=adaptorConfiguration['CloudFront']['DistributionConfig'])['Distribution']['Id']
-            liveelement.run('core.storer', {
-                'operation': 'update', 
-                'source': adaptorConfiguration, 
-                'target': moduleObject['https://live-element.net/reference/scale/core/property/associatedAdaptorConfiguration'], 
-            }, False, 'silent')
-    elif operation == 'delete' and adaptorConfiguration.get('CloudFront', {}).get('Id'):
-        cloudfront_client.delete_distribution(Id=adaptorConfiguration['Id'])
-        del adaptorConfiguration['CloudFront']['Id']
-        liveelement.run('core.storer', {
-            'operation': 'update', 
-            'source': adaptorConfiguration, 
-            'target': moduleObject['https://live-element.net/reference/scale/core/property/associatedAdaptorConfiguration'], 
-        }, False, 'silent')
