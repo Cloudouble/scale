@@ -5,13 +5,13 @@
     "partOfPackage": "reference:scale/core"
     "label": "awsApiGateway",
     "comment": "The connector adaptor used with AWS API Gateway.", 
-    "documentation": "reference:scale/core/connector/awsApiGateway", 
-    "learnMore": "learn:scale/core/connector/awsApiGateway", 
+    "documentation": "reference:scale/core/connect/awsApiGateway", 
+    "learnMore": "learn:scale/core/connect/awsApiGateway", 
 	"version": 1, 
 	"isActive": true, 
-    "schema:codeRepository": "//blob/core/connector/awsApiGateway", 
+    "schema:codeRepository": "//blob/core/connect/awsApiGateway", 
     "schema:runtimePlatform": "python3.8", 
-    "core:property/partOfComponent": "core:component/connector"
+    "core:property/partOfComponent": "core:component/connect"
 	"core:property/inputStructure": "validator/input/awsApiGatewayInputShape", 
 	"core:property/outputStructure": "validator/output/awsApiGatewayOutputShape", 
 	"core:property/configurationStructure": "validator/configuration/awsApiGatewayConfigurationShape"

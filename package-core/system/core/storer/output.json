@@ -1,0 +1,15 @@
+{
+    "@context": "context/core",
+    "@id": "core:storer/output",
+    "@type": "core:class/Partition",
+    "partOfPackage": "core:package/core", 
+    "partOfComponent": "core:component/storer", 
+    "eventbusQueue": "core:eventbus/system", 
+    "label": "output",
+    "comment": "The partition used for objects that are compiled from records, query results or exports, being made accessible to connections.", 
+    "documentation": "reference:scale/core/storer/output", 
+    "learnMore": "learn:scale/core/storer/output", 
+    "associatedProcessor": "core:computor/awsS3", 
+    "associatedProcessorConfiguration": "value/configuration/storer/output", 
+    "isActive": true
+}

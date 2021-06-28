@@ -1,6 +1,6 @@
 {
     "@context": "context/default",
-	"@id" : "core:validator/configuration/awsS3ConfigurationShape",
+	"@id" : "core:validator/configuration/awsS3",
 	"@type": "sh:NodeShape", 
 	"sh:message": "Used to validate the configuration of an AWS S3 partition."
 	"sh:severity": "sh:Violation", 

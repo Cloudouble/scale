@@ -1,0 +1,15 @@
+{
+    "@context": "context/core",
+    "@id": "core:storer/blob",
+    "@type": "core:class/Partition",
+    "partOfPackage": "core:package/core", 
+    "partOfComponent": "core:component/storer", 
+    "eventbusQueue": "core:eventbus/system", 
+    "label": "blob",
+    "comment": "The partition used for large and unstructured file storage.", 
+    "documentation": "reference:scale/core/storer/blob", 
+    "learnMore": "learn:scale/core/storer/blob", 
+    "associatedProcessor": "core:computor/awsS3", 
+    "associatedProcessorConfiguration": "value/configuration/storer/blob", 
+    "isActive": true
+}
