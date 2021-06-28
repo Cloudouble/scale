@@ -1,0 +1,14 @@
+{
+    "@context": "context/core",
+    "@id": "core:eventbus/system",
+    "@type": "core:class/Queue",
+    "partOfPackage": "reference:scale/core"
+    "label": "system",
+    "comment": "The queue used for notifications regarding changes to the system.", 
+    "documentation": "reference:scale/core/eventbus/system", 
+    "learnMore": "learn:scale/core/eventbus/system", 
+    "associatedProcessor": "computor:queueAwsSQS", 
+    "associatedProcessorConfiguration": "value/configuration/eventbus/system", 
+    "isActive": true, 
+    "version": 0
+}

@@ -6,29 +6,9 @@
         "blob!": "//blob/", 
         "output!": "//output/", 
         "system!": "//system/", 
-
-        "subClassOf": "rdfs:subClassOf", 
-        "subPropertyOf": "rdfs:subPropertyOf", 
-        "label": "rdfs:label", 
-        "comment": "refs:comment", 
-        "documentation": "schema:documentation", 
-        "learnMore": "core:property/learnMore", 
-        "partOfPackage": "core:property/partOfPackage",
-        "partOfComponent": "core:property/partOfComponent", 
-        "associatedProcessor": "core:property/associatedProcessor", 
-        "associatedAdaptor": "core:property/associatedAdaptor", 
-        "version": "schema:version", 
-        "isActive": "core:property/isActive"
+        
         "core": {
             "@id": "https://live-element.net/reference/scale/core/", 
-            "@prefix": true
-        }, 
-        "property": {
-            "@id": "https://live-element.net/reference/scale/core/property/", 
-            "@prefix": true
-        }, 
-        "processor": {
-            "@id": "https://live-element.net/reference/scale/core/computor/", 
             "@prefix": true
         }, 
         "reference": {
@@ -39,6 +19,22 @@
             "@id": "https://live-element.net/learn/", 
             "@prefix": true
         }, 
+
+        "subClassOf": "rdfs:subClassOf", 
+        "subPropertyOf": "rdfs:subPropertyOf", 
+        "label": "rdfs:label", 
+        "comment": "refs:comment", 
+        "documentation": "schema:documentation", 
+        "learnMore": "core:property/learnMore", 
+        "eventbusQueue": "core:property/eventbusQueue",
+        "partOfPackage": "core:property/partOfPackage",
+        "partOfComponent": "core:property/partOfComponent", 
+        "associatedProcessor": "core:property/associatedProcessor", 
+        "codeRepository": "schema:codeRepository", 
+        "deploymentPath": "core:property/deploymentPath", 
+        "version": "schema:version", 
+        "isActive": "core:property/isActive", 
+        
         "sh": {
             "@id": "https://www.w3.org/ns/shacl#", 
             "@prefix": true

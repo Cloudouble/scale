@@ -2,6 +2,8 @@ import platform, configuration
 import boto3, json
 
 def run_processor(module_address, processor_input, event=None, synchronous=None):
+    if event and type(event) is str:
+        event = {'type': event}
     result = boto3.client('lambda').invoke(
         FunctionName='{namespace}-core'.format(namespace=configuration['processorNamespace']), 
         InvocationType='RequestResponse' if synchronous else 'Event', 

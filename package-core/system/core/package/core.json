@@ -8,6 +8,7 @@
     "learnMore": "learn:scale/core", 
     "associatedProcessor": "computor:core", 
     "associatedProcessorConfiguration": "value/configuration/package/core", 
+    "eventbusQueue": "core:eventbus/system", 
     "isActive": true, 
     "version": 0
 }

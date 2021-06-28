@@ -1,26 +1,19 @@
 import liveelement
 
-def main(package, component, module, configuration, inputObject):
+def main(package, component, module, configuration, inputObject, contexts):
     operation = inputObject.get('operation', 'read')
-    if operation in ['create', 'update']:
-        code_repository = module.get('https://schema.org/codeRepository')
-        deployment_path = module.get('https://live-element.net/reference/scale/core/property/deploymentPath')
-        if code_repository and deployment_path:
-            code_repository_split = code_repository.split('/', 3)
-            partition = code_repository_split[2]
-            if len(code_repository_split) == 4:
-                liveelement.run_processor('core.storer.{}'.format(partition), {
-                    'operation': 'copy', 
-                    'path': code_repository_split[3], 
-                    'target': deployment_path
-                })
-    elif operation == 'delete':
-        deployment_path = module.get('https://live-element.net/reference/scale/core/property/deploymentPath')
-        if deployment_path:
-            deployment_path_split = deployment_path.split('/', 3)
-            if len(deployment_path_split) == 4:
-                partition = deployment_path_split[2]
-                liveelement.run_processor('core.storer.{}'.format(partition), {
-                    'operation': 'delete', 
-                    'path': deployment_path_split[3]
-                })
+    if operation in ['create', 'update'] and module.get('codeRepository') and module.get('deploymentPath'):
+        code_repository_split = module['codeRepository'].split('/', 3)
+        if len(code_repository_split) == 4:
+            liveelement.run_processor('core.storer.{}'.format(code_repository_split[2]), {
+                'operation': 'copy', 
+                'path': code_repository_split[3], 
+                'target': module['deploymentPath']
+            })
+    elif operation == 'delete' and module.get('deploymentPath'):
+        deployment_path_split = module['deploymentPath'].split('/', 3)
+        if len(deployment_path_split) == 4:
+            liveelement.run_processor('core.storer.{}'.format(deployment_path_split[2]), {
+                'operation': 'delete', 
+                'path': deployment_path_split[3]
+            })

@@ -1,0 +1,16 @@
+{
+    "@context": "context/default",
+    "@id": "core:computor/console",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core", 
+    "core:property/partOfComponent": "core:component/computor", 
+    "label": "console",
+    "comment": "Processes systems tasks for the console interface.",
+    "documentation": "reference:scale/core/computor/console", 
+    "learnMore": "learn:scale/core/computor/console", 
+	"version": 0, 
+	"isActive": true, 
+    "schema:codeRepository": "blob~:computor/console/", 
+    "schema:runtimePlatform": "python3.8", 
+	"core:property/inputStructure": "validator/input/componentProcessorInput", 
+}

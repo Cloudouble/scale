@@ -1,0 +1,11 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/property/eventbusQueue",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "core:property/eventbusQueue",
+	"sh:order": 25, 
+	"sh:minCount": 1,
+	"sh:maxCount": 1,
+	"sh:class": "class/Queue", 
+	"sh:nodeKind": "sh:IRI"
+}

@@ -1,0 +1,12 @@
+{
+    "@context": "context/default",
+    "@id": "core:property/eventbusQueue",
+    "@type": "rdf:Property",
+    "partOfPackage": "reference:scale/core"
+    "label": "eventbusQueue",
+    "comment": "The eventbus to send module events to if not other specified.", 
+    "documentation": "reference:scale/core/property/eventbusQueue", 
+    "learnMore": "learn:scale/core/property/eventbusQueue", 
+    "schema:domainIncludes": ["core:class/Unit"],
+    "schema:rangeIncludes": "core:class/Queue"
+}
