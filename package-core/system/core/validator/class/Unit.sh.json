@@ -9,6 +9,7 @@
 	"sh:ignoredProperties": ["rdfs:subClassOf", "rdfs:label", "rdfs:comment"], 
 	"sh:property": [
 		"core:validator/property/partOfPackage", 
+		"core:validator/property/eventbusQueue", 
 		"core:validator/property/associatedProcessor", 
 		"core:validator/property/associatedProcessorConfiguration", 
 		"core:validator/property/associatedProcessorDefaultInput", 

@@ -6,6 +6,11 @@
 	"sh:targetClass" : "core:class/Module",
 	"sh:message": "This is not a valid module.", 
 	"sh:property": [
-		"core:validator/property/partOfComponent"
+		"core:validator/property/partOfComponent", 
+		{
+			"@id": "core:validator/property/eventbusQueue", 
+			"sh:minCount": 1
+		}
+		
     ]
 }

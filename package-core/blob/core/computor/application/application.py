@@ -10,6 +10,7 @@ def main(package, component, module, configuration, inputObject, contexts):
                 'path': code_repository_split[3], 
                 'target': module['deploymentPath']
             })
+            liveelement.dispatch_event('.'.join([r['@id'].split('/').pop() for r in [package, component, module]]).lower(), 'deploy')
     elif operation == 'delete' and module.get('deploymentPath'):
         deployment_path_split = module['deploymentPath'].split('/', 3)
         if len(deployment_path_split) == 4:
@@ -17,3 +18,4 @@ def main(package, component, module, configuration, inputObject, contexts):
                 'operation': 'delete', 
                 'path': deployment_path_split[3]
             })
+            liveelement.dispatch_event('.'.join([r['@id'].split('/').pop() for r in [package, component, module]]).lower(), 'remove')
