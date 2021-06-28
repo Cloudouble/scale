@@ -1,0 +1,15 @@
+{
+    "@context": "context/core",
+    "@id": "core:storer/connection",
+    "@type": "core:class/Partition",
+    "partOfPackage": "core:package/core", 
+    "partOfComponent": "core:component/storer", 
+    "eventbusQueue": "core:eventbus/system", 
+    "label": "connection",
+    "comment": "The partition used for objects defining third-party connections to the system.", 
+    "documentation": "reference:scale/core/storer/connection", 
+    "learnMore": "learn:scale/core/storer/connection", 
+    "associatedProcessor": "core:computor/awsS3", 
+    "associatedProcessorConfiguration": "value/configuration/storer/connection", 
+    "isActive": true
+}

@@ -1,0 +1,15 @@
+{
+    "@context": "context/core",
+    "@id": "core:storer/scratchpad",
+    "@type": "core:class/Partition",
+    "partOfPackage": "core:package/core", 
+    "partOfComponent": "core:component/storer", 
+    "eventbusQueue": "core:eventbus/system", 
+    "label": "scratchpad",
+    "comment": "The partition used for intermediate objects written to and read only by the system.", 
+    "documentation": "reference:scale/core/storer/scratchpad", 
+    "learnMore": "learn:scale/core/storer/scratchpad", 
+    "associatedProcessor": "core:computor/awsS3", 
+    "associatedProcessorConfiguration": "value/configuration/storer/scratchpad", 
+    "isActive": true
+}

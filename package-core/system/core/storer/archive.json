@@ -1,15 +1,15 @@
 {
     "@context": "context/core",
-    "@id": "core:storer/system",
+    "@id": "core:storer/archive",
     "@type": "core:class/Partition",
-    "partOfPackage": "reference:scale/core"
+    "partOfPackage": "core:package/core", 
     "partOfComponent": "core:component/storer", 
     "eventbusQueue": "core:eventbus/system", 
-    "label": "system",
+    "label": "archive",
     "comment": "The partition used for storing the system definition files that describe how the system runs.", 
-    "documentation": "reference:scale/core/storer/system", 
-    "learnMore": "learn:scale/core/storer/system", 
+    "documentation": "reference:scale/core/storer/archive", 
+    "learnMore": "learn:scale/core/storer/archive", 
     "associatedProcessor": "core:computor/awsS3", 
-    "associatedProcessorConfiguration": "value/configuration/storer/scratchpad", 
+    "associatedProcessorConfiguration": "value/configuration/storer/archive", 
     "isActive": true
 }

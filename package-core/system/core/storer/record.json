@@ -1,0 +1,15 @@
+{
+    "@context": "context/core",
+    "@id": "core:storer/record",
+    "@type": "core:class/Partition",
+    "partOfPackage": "core:package/core", 
+    "partOfComponent": "core:component/storer", 
+    "eventbusQueue": "core:eventbus/system", 
+    "label": "record",
+    "comment": "A partition used for storing the actual structured data being managed by the system.", 
+    "documentation": "reference:scale/core/storer/record", 
+    "learnMore": "learn:scale/core/storer/record", 
+    "associatedProcessor": "core:computor/awsS3", 
+    "associatedProcessorConfiguration": "value/configuration/storer/record", 
+    "isActive": true
+}

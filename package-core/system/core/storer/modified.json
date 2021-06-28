@@ -1,0 +1,15 @@
+{
+    "@context": "context/core",
+    "@id": "core:storer/modified",
+    "@type": "core:class/Partition",
+    "partOfPackage": "core:package/core", 
+    "partOfComponent": "core:component/storer", 
+    "eventbusQueue": "core:eventbus/system", 
+    "label": "modified",
+    "comment": "The partition used for objects which record when other corresponding objects on other partitions were last modified.", 
+    "documentation": "reference:scale/core/storer/modified", 
+    "learnMore": "learn:scale/core/storer/modified", 
+    "associatedProcessor": "core:computor/awsS3", 
+    "associatedProcessorConfiguration": "value/configuration/storer/modified", 
+    "isActive": true
+}

@@ -1,0 +1,15 @@
+{
+    "@context": "context/core",
+    "@id": "core:storer/request",
+    "@type": "core:class/Partition",
+    "partOfPackage": "core:package/core", 
+    "partOfComponent": "core:component/storer", 
+    "eventbusQueue": "core:eventbus/system", 
+    "label": "request",
+    "comment": "The partition used for write request objects to.", 
+    "documentation": "reference:scale/core/storer/request", 
+    "learnMore": "learn:scale/core/storer/request", 
+    "associatedProcessor": "core:computor/awsS3", 
+    "associatedProcessorConfiguration": "value/configuration/storer/request", 
+    "isActive": true
+}
