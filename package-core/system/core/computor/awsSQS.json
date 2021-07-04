@@ -1,0 +1,17 @@
+{
+    "@context": "context/core",
+    "@id": "core:computor/awsSQS",
+    "@type": "core:class/Processor",
+    "partOfPackage": "reference:scale/core"
+    "label": "awsSQS",
+    "comment": "Used to manage a queue on AWS SQS.", 
+    "documentation": "reference:scale/core/computor/awsSQS", 
+    "learnMore": "learn:scale/core/computor/awsSQS", 
+	"version": 0, 
+	"isActive": true, 
+    "codeRepository": "//blob/core/computor/awsSQS", 
+    "runtimePlatform": "python3.8", 
+    "partOfComponent": "core:component/computor", 
+	"inputObjectShape": "validator/input/awsSQS", 
+	"configurationShape": "validator/configuration/awsSQS"
+}

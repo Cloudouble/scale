@@ -1,7 +1,7 @@
 import liveelement
 import json, boto3, base64
 
-def main(package, component, module, configuration, inputObject, contexts):
+def main(package, component, module, contexts, configuration, inputObject):
     operation, path, target, body, content_type = [inputObject.get(f) for f in {'operation': 'read', 'path': '', 'target': None, 'body': None, 'content_type': 'application/json'}.items()]
     s3_client = boto3.client('s3')
     if operation == 'copy' and path and target:

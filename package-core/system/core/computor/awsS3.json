@@ -9,9 +9,10 @@
     "learnMore": "learn:scale/core/computor/awsS3", 
 	"version": 0, 
 	"isActive": true, 
-    "schema:codeRepository": "//blob/core/computor/awss3/", 
+    "schema:codeRepository": "//blob/core/computor/awsS3/", 
     "schema:runtimePlatform": "python3.8", 
     "partOfComponent": "core:component/computor", 
-	"core:property/configurationShape": "validator/configuration/awsS3"
+	"inputObjectShape": "validator/input/awsS3"
+	"configurationShape": "validator/configuration/awsS3"
 }
 

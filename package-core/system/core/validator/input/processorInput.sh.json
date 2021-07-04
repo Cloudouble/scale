@@ -35,10 +35,20 @@
         	"sh:nodeKind": "sh:Literal"
         },
         {
+        	"sh:path": "contexts",
+        	"sh:name": "Contexts", 
+        	"sh:description": "The relevant contexts for the input objects of this processor, keyed by the URL address reference in their object.", 
+        	"sh:order": 3, 
+        	"sh:minCount": 0,
+        	"sh:maxCount": 1,
+        	"sh:class": "schema:StructuredValue", 
+        	"sh:nodeKind": "sh:Literal"
+        }, 
+        {
         	"sh:path": "configuration",
         	"sh:name": "Configuration Object", 
         	"sh:description": "The configuration object of the processor associated with the target module.", 
-        	"sh:order": 3, 
+        	"sh:order": 4, 
         	"sh:minCount": 0,
         	"sh:maxCount": 1,
         	"sh:class": "schema:StructuredValue", 
@@ -48,7 +58,7 @@
         	"sh:path": "inputObject",
         	"sh:name": "Input Object", 
         	"sh:description": "The input object for this execution of the processor.", 
-        	"sh:order": 4, 
+        	"sh:order": 5, 
         	"sh:minCount": 0,
         	"sh:maxCount": 1,
         	"sh:class": "schema:StructuredValue", 

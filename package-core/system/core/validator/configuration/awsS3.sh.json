@@ -1,0 +1,63 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/configuration/awsS3",
+	"@type": "sh:NodeShape", 
+	"sh:message": "Used to validate the configuration of an AWS S3 partition."
+	"sh:severity": "sh:Violation", 
+	"sh:closed" : false,
+	"sh:property": [
+        {
+        	"sh:path": "operation",
+        	"sh:name": "Operation", 
+        	"sh:description": "The storer operation to execute.", 
+        	"sh:order": 0, 
+        	"sh:minCount": 1,
+        	"sh:maxCount": 1,
+        	"sh:datatype": "xsd:string", 
+        	"sh:in": ["create", "read", "update", "delete", "list", "copy", "mount", "unmount"], 
+        	"sh:nodeKind": "sh:Literal"
+        },
+        {
+        	"sh:path": "path",
+        	"sh:name": "Path", 
+        	"sh:description": "The path on which to execute the operation.", 
+        	"sh:order": 1, 
+        	"sh:minCount": 1,
+        	"sh:maxCount": 1,
+        	"sh:datatype": "xsd:string", 
+        	"sh:nodeKind": "sh:Literal"
+        },
+        {
+        	"sh:path": "target",
+        	"sh:name": "Target", 
+        	"sh:description": "The path of the target of the operation, fully qualified including the partition.", 
+        	"sh:order": 2, 
+        	"sh:minCount": 0,
+        	"sh:maxCount": 1,
+        	"sh:datatype": "xsd:string", 
+        	"sh:pattern": "^//.+/.+$", 
+        	"sh:nodeKind": "sh:Literal"
+        },
+        {
+        	"sh:path": "body",
+        	"sh:name": "Body", 
+        	"sh:description": "The base64 encoded body to use for creating or updating the object at the specified path.", 
+        	"sh:order": 3, 
+        	"sh:minCount": 0,
+        	"sh:maxCount": 1,
+        	"sh:datatype": "xsd:string", 
+        	"sh:pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$", 
+        	"sh:nodeKind": "sh:Literal"
+        }, 
+        {
+        	"sh:path": "content_type",
+        	"sh:name": "ContentType", 
+        	"sh:description": "The Content-Type to use when creating or updating the object at the specified path.", 
+        	"sh:order": 4, 
+        	"sh:minCount": 0,
+        	"sh:maxCount": 1,
+        	"sh:datatype": "xsd:string", 
+        	"sh:nodeKind": "sh:Literal"
+        }
+    ]
+}

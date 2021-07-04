@@ -1,0 +1,13 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/property/argumentsShape",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "core:property/argumentsShape",
+	"sh:name": "Arguments Shape", 
+	"sh:description": "The validation shape required for a valid set of processor arguments.", 
+	"sh:order": 15, 
+	"sh:minCount": 1,
+	"sh:maxCount": 1,
+	"sh:datatype": "sh:NodeShape",
+	"sh:nodeKind": "sh:IRI"
+}

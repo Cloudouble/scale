@@ -34,6 +34,9 @@
         "deploymentPath": "core:property/deploymentPath", 
         "version": "schema:version", 
         "isActive": "core:property/isActive", 
+        "runtimePlatform": "schema:runtimePlatform", 
+        "inputObjectShape": "core:property/inputObjectShape", 
+        "configurationShape": "core:property/configurationShape", 
         
         "sh": {
             "@id": "https://www.w3.org/ns/shacl#", 

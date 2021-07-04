@@ -1,0 +1,12 @@
+{
+    "@context": "context/core",
+    "@id": "core:property/argumentsShape",
+    "@type": "rdf:Property",
+    "partOfPackage": "reference:scale/core"
+    "label": "argumentsShape",
+    "comment": "The validation shape required for a set of processor arguments.", 
+    "documentation": "reference:scale/core/property/argumentsShape", 
+    "learnMore": "learn:scale/core/property/argumentsShape", 
+    "schema:domainIncludes": ["core:class/Processor"],
+    "schema:rangeIncludes": "sh:NodeShape"
+}

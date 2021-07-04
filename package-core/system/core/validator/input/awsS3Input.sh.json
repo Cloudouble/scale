@@ -1,9 +1,0 @@
-{
-    "@context": "context/default",
-	"@id" : "core:validator/input/awsS3InputShape",
-	"@type": "sh:NodeShape", 
-	"sh:message": "Used to validate the input into the AWS S3 adaptor."
-	"sh:severity": "sh:Violation", 
-	"sh:closed" : true,
-	"sh:property": []
-}

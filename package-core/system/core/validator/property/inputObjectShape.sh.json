@@ -1,0 +1,13 @@
+{
+    "@context": "context/default",
+	"@id" : "core:validator/property/inputObjectShape",
+	"@type" : "sh:PropertyShape",
+	"sh:path": "core:property/inputObjectShape",
+	"sh:name": "Input Object Shape", 
+	"sh:description": "The validation shape required for a valid inputObject to a processor.", 
+	"sh:order": 15, 
+	"sh:minCount": 1,
+	"sh:maxCount": 1,
+	"sh:datatype": "sh:NodeShape",
+	"sh:nodeKind": "sh:IRI"
+}

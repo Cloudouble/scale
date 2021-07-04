@@ -1,0 +1,12 @@
+{
+    "@context": "context/default",
+    "@id": "core:property/inputObjectShape",
+    "@type": "rdf:Property",
+    "partOfPackage": "reference:scale/core"
+    "label": "inputObjectShape",
+    "comment": "The validation shape required for a valid inputObject to a processor.", 
+    "documentation": "reference:scale/core/property/inputObjectShape", 
+    "learnMore": "learn:scale/core/property/inputObjectShape", 
+    "schema:domainIncludes": ["core:class/Processor"],
+    "schema:rangeIncludes": "sh:NodeShape"
+}

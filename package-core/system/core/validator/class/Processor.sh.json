@@ -10,14 +10,15 @@
 		"core:validator/property/programmingLanguage", 
 		"core:validator/property/runtimePlatform", 
 		"core:validator/property/targetProduct", 
+		"core:validator/property/inputObjectShape", 
 		"core:validator/property/configurationShape", 
 		{
-			"@id": "core:validator/property/inputShape", 
-			"defaultValue": "value/input/processorInputShape"
+			"@id": "core:validator/property/argumentsShape", 
+			"defaultValue": "validator/input/processorArguments"
 		}, 
 		{
 			"@id": "core:validator/property/outputShape", 
-			"defaultValue": "value/output/processorOutputShape"
+			"defaultValue": "validator/output/processorOutput"
 		}
     ]
 }
