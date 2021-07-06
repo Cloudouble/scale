@@ -36,7 +36,7 @@ def main(package, component, module, contexts, configuration, inputObject):
                 'content_type': 'application/json'
             })
             queue_url = sqs_client.delete_queue(QueueUrl=queue_url)
-    elif records and type(records) is list:
+    elif configuration.get('QueueUrl') and records and type(records) is list:
         for message_record in records:
             try:
                 message = json.loads(message_record.get('body'))
@@ -44,7 +44,7 @@ def main(package, component, module, contexts, configuration, inputObject):
                 message = {}
             if message and message.get('module'):
                 liveelement.run_processor(message['module'], message.get('input', {}), message.get('event', None))
-            if message and message.get('type'):
+            elif message and message.get('type'):
                 listener_map = liveelement.run_processor('core.storer.system', component['core:property/listenerMap'])
                 if message['type'] in listener_map:
                     if not type(listener_map[message['type']]) is list:
@@ -54,4 +54,8 @@ def main(package, component, module, contexts, configuration, inputObject):
                             processor_input = {**event_type.get('input', {}), **message.get('input', {})}
                             processor_event = {**event_type.get('event', {}), **message.get('event', {})}
                             liveelement.run_processor(event_type['module'], processor_input, processor_event)
+            sqs_client.delete_message(
+                QueueUrl=configuration['QueueUrl'], 
+                ReceiptHandle=message_record['receiptHandle']
+            )
             
