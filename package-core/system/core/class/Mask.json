@@ -2,10 +2,10 @@
     "@context": "context/core",
     "@id": "core:class/Mask",
     "@type": "rdfs:Class",
-    "partOfPackage": "reference:scale/core"
-    "subClassOf": "core:class/Unit", 
-    "label": "Mask",
     "comment": "A structure for creating permission profiles.", 
     "documentation": "reference:scale/core/class/Mask", 
-    "learnMore": "learn:scale/core/class/Mask"
+    "label": "Mask",
+    "learnMore": "learn:scale/core/class/Mask", 
+    "partOfPackage": "reference:scale/core", 
+    "subClassOf": "core:class/Unit"
 }

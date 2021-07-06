@@ -2,10 +2,10 @@
     "@context": "context/core",
     "@id": "core:class/EventBusAdaptor",
     "@type": "rdfs:Class",
-    "partOfPackage": "reference:scale/core"
-    "subClassOf": "core:class/Adaptor", 
-    "label": "StorageAdaptor",
     "comment": "An adaptor which handles the task of reading and writing to a specific underlying platform.", 
     "documentation": "reference:scale/core/class/EventBusAdaptor", 
-    "learnMore": "learn:scale/core/class/EventBusAdaptor"
+    "label": "StorageAdaptor",
+    "learnMore": "learn:scale/core/class/EventBusAdaptor", 
+    "partOfPackage": "reference:scale/core", 
+    "subClassOf": "core:class/Adaptor"
 }

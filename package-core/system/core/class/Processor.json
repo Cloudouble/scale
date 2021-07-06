@@ -2,10 +2,10 @@
     "@context": "context/core",
     "@id": "core:class/Processor",
     "@type": "rdfs:Class",
-    "partOfPackage": "reference:scale/core"
-    "subClassOf": "core:class/Module", 
-    "label": "Processor",
     "comment": "A single executable chunk of code to perform dynamic system tasks.", 
     "documentation": "reference:scale/core/class/Processor", 
-    "learnMore": "learn:scale/core/class/Processor"
+    "label": "Processor",
+    "learnMore": "learn:scale/core/class/Processor", 
+    "partOfPackage": "reference:scale/core", 
+    "subClassOf": "core:class/Module"
 }

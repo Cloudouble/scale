@@ -2,10 +2,10 @@
     "@context": "context/core",
     "@id": "core:class/EventBusComponent",
     "@type": "rdfs:Class",
-    "partOfPackage": "reference:scale/core"
-    "subClassOf": "core:class/Component", 
-    "label": "EventBusComponent",
     "comment": "A which is responsible for managing the system events.", 
     "documentation": "reference:scale/core/class/EventBusComponent", 
-    "learnMore": "learn:scale/core/class/EventBusComponent"
+    "label": "EventBusComponent",
+    "learnMore": "learn:scale/core/class/EventBusComponent", 
+    "partOfPackage": "reference:scale/core", 
+    "subClassOf": "core:class/Component"
 }

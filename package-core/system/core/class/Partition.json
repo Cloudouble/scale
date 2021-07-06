@@ -2,10 +2,10 @@
     "@context": "context/core",
     "@id": "core:class/Partition",
     "@type": "rdfs:Class",
-    "partOfPackage": "reference:scale/core"
-    "subClassOf": "core:class/Module", 
-    "label": "Partition",
     "comment": "A single storage node.", 
     "documentation": "reference:scale/core/class/Partition", 
-    "learnMore": "learn:scale/core/class/Partition"
+    "label": "Partition",
+    "learnMore": "learn:scale/core/class/Partition", 
+    "partOfPackage": "reference:scale/core", 
+    "subClassOf": "core:class/Module"
 }

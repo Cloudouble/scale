@@ -1,16 +1,14 @@
 {
-    "@context": "context/default", 
+    "@context": "context/core", 
     "@id": "reference:scale/core", 
     "@type": "core:class/Package", 
-    "label": "core",
+    "associatedProcessor": "core:computor/core", 
+    "associatedProcessorConfiguration": "value/configuration/package/core", 
     "comment": "The package that contains all core system components and modules for a minimal standard installation.",
     "documentation": "reference:scale/core", 
-    "learnMore": "learn:scale/core", 
-    "associatedProcessor": "computor:core", 
-    "associatedProcessorConfiguration": "value/configuration/package/core", 
     "eventbusQueue": "core:eventbus/system", 
     "isActive": true, 
+    "label": "core",
+    "learnMore": "learn:scale/core", 
     "version": 0
 }
-
-

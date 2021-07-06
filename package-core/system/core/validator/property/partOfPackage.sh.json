@@ -10,4 +10,4 @@
 	"sh:maxCount": 1,
 	"sh:class": "class/Package", 
 	"sh:nodeKind": "sh:IRI"
-},
+}

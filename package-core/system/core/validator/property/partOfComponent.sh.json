@@ -10,4 +10,4 @@
 	"sh:maxCount": 1,
 	"sh:class": "class/Component", 
 	"sh:nodeKind": "sh:IRI"
-},
+}

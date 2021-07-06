@@ -2,10 +2,10 @@
     "@context": "context/core",
     "@id": "core:class/Package",
     "@type": "rdfs:Class",
-    "partOfPackage": "reference:scale/core"
-    "subClassOf": "core:class/Unit", 
-    "label": "Package", 
     "comment": "A set of components and modules from a single vendor which provides a defined set of features.", 
     "documentation": "reference:scale/core/class/Package", 
-    "learnMore": "learn:scale/core/class/Package"
+    "label": "Package", 
+    "learnMore": "learn:scale/core/class/Package", 
+    "partOfPackage": "reference:scale/core", 
+    "subClassOf": "core:class/Unit"
 }

@@ -2,10 +2,10 @@
     "@context": "context/core",
     "@id": "core:class/View",
     "@type": "rdfs:Class",
-    "partOfPackage": "reference:scale/core"
-    "subClassOf": "core:class/Module", 
-    "label": "View",
-    "comment": "A set of instructions for the compiler to use when creating output."
+    "comment": "A set of instructions for the compiler to use when creating output.", 
     "documentation": "reference:scale/core/class/View", 
-    "learnMore": "learn:scale/core/class/View"
+    "label": "View",
+    "learnMore": "learn:scale/core/class/View", 
+    "partOfPackage": "reference:scale/core", 
+    "subClassOf": "core:class/Module"
 }

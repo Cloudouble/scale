@@ -2,10 +2,10 @@
     "@context": "context/core",
     "@id": "core:class/Unit",
     "@type": "rdfs:Class",
-    "partOfPackage": "reference:scale/core"
-    "subClassOf": "schema:WebAPI", 
-    "label": "Unit",
     "comment": "A single moving part within a package.", 
     "documentation": "reference:scale/core/class/Unit", 
-    "learnMore": "learn:scale/core/class/Unit"
+    "label": "Unit",
+    "learnMore": "learn:scale/core/class/Unit", 
+    "partOfPackage": "reference:scale/core", 
+    "subClassOf": "schema:WebAPI"
 }

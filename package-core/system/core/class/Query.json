@@ -2,10 +2,10 @@
     "@context": "context/core",
     "@id": "core:class/Query",
     "@type": "rdfs:Class",
-    "partOfPackage": "reference:scale/core"
-    "subClassOf": "core:class/Module", 
-    "label": "Query",
     "comment": "A set of instructions for the indexer to use when creating result sets.", 
     "documentation": "reference:scale/core/class/Query", 
-    "learnMore": "learn:scale/core/class/Query"
+    "label": "Query",
+    "learnMore": "learn:scale/core/class/Query", 
+    "partOfPackage": "reference:scale/core", 
+    "subClassOf": "core:class/Module"
 }

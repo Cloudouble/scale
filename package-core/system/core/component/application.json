@@ -2,16 +2,16 @@
     "@context": "context/default",
     "@id": "core:component/application",
     "@type": "core:class/Component",
-    "partOfPackage": "reference:scale/core"
-    "label": "Application",
+	"associatedProcessor": "core:computor/application", 
     "comment": "Responsible for managing end user applications.",
     "documentation": "reference:scale/core/component/Application", 
-    "learnMore": "learn:scale/core/component/Application", 
-	"associatedProcessor": "system~:computor/application", 
-	"version": 1, 
-	"isActive": true, 
-    "core:property/homeDirectory": "system~:application", 
-    "core:property/expectedModuleType": [
+    "expectedModuleType": [
         "core:class/Application"
-    ]
+    ], 
+    "homeDirectory": "application", 
+	"isActive": true, 
+    "label": "Application",
+    "learnMore": "learn:scale/core/component/Application", 
+    "partOfPackage": "reference:scale/core"
+	"version": 1
 }

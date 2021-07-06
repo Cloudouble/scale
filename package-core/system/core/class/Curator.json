@@ -2,10 +2,10 @@
     "@context": "context/core",
     "@id": "core:class/Curator",
     "@type": "rdfs:Class",
-    "partOfPackage": "reference:scale/core"
-    "subClassOf": "core:class/Daemon", 
-    "label": "Curator",
     "comment": "A daemon which is tasked with keeping the system in good order.", 
     "documentation": "reference:scale/core/class/Curator", 
+    "label": "Curator",
     "learnMore": "learn:scale/core/class/Curator"
+    "partOfPackage": "reference:scale/core", 
+    "subClassOf": "core:class/Daemon"
 }

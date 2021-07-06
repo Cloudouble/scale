@@ -2,10 +2,10 @@
     "@context": "context/core",
     "@id": "core:class/Component",
     "@type": "rdfs:Class",
-    "partOfPackage": "reference:scale/core"
-    "subClassOf": "core:class/Unit", 
-    "label": "Component",
     "comment": "An sub-system which is responsible for a specified system task.", 
     "documentation": "reference:scale/core/class/Component", 
-    "learnMore": "learn:scale/core/class/Component"
+    "label": "Component",
+    "learnMore": "learn:scale/core/class/Component", 
+    "partOfPackage": "reference:scale/core", 
+    "subClassOf": "core:class/Unit"
 }

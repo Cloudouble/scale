@@ -2,10 +2,10 @@
     "@context": "context/core",
     "@id": "core:class/StorerComponent",
     "@type": "rdfs:Class",
-    "partOfPackage": "reference:scale/core"
-    "subClassOf": "core:class/Component", 
-    "label": "StorerComponent",
     "comment": "An sub-system which is responsible for reading writing data to the partitions.", 
     "documentation": "reference:scale/core/class/StorerComponent", 
-    "learnMore": "learn:scale/core/class/StorerComponent"
+    "label": "StorerComponent",
+    "learnMore": "learn:scale/core/class/StorerComponent", 
+    "partOfPackage": "reference:scale/core", 
+    "subClassOf": "core:class/Component"
 }

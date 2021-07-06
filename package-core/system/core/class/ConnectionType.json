@@ -2,10 +2,10 @@
     "@context": "context/core",
     "@id": "core:class/ConnectionType",
     "@type": "rdfs:Class",
-    "partOfPackage": "reference:scale/core"
-    "subClassOf": "core:class/Unit", 
-    "label": "ConnectionType",
     "comment": "A type of incoming connection.", 
     "documentation": "reference:scale/core/class/ConnectionType", 
-    "learnMore": "learn:scale/core/class/ConnectionType"
+    "label": "ConnectionType",
+    "learnMore": "learn:scale/core/class/ConnectionType", 
+    "partOfPackage": "reference:scale/core", 
+    "subClassOf": "core:class/Unit"
 }
