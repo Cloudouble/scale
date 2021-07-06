@@ -51,5 +51,7 @@ def main(package, component, module, contexts, configuration, inputObject):
                         listener_map[message['type']] = [listener_map[message['type']]]
                     for event_type in listener_map[message['type']]:
                         if event_type.get('module'):
-                            liveelement.run_processor(event_type['module'], event_type.get('input', {}), event_type.get('event', None))
+                            processor_input = {**event_type.get('input', {}), **message.get('input', {})}
+                            processor_event = {**event_type.get('event', {}), **message.get('event', {})}
+                            liveelement.run_processor(event_type['module'], processor_input, processor_event)
             
