@@ -42,6 +42,13 @@ def main(package, component, module, contexts, configuration, inputObject):
                 message = json.loads(message_record.get('body'))
             except:
                 message = {}
-            if message:
-                #do something with the message!
+            if message and message.get('module'):
+                liveelement.run_processor(message['module'], message.get('input', {}), message.get('event', None))
+            if message and message.get('type'):
+                listener_map = liveelement.run_processor('core.storer.system', component['core:property/listenerMap'])
+                if message['type'] in listener_map:
+                    if not type(listener_map[message['type']]) is list:
+                        listener_map[message['type']] = [listener_map[message['type']]]
+                    for event_type in listener_map[message['type']]:
+                        liveelement.run_processor(event_type['module'], event_type.get('input', {}), event_type.get('event', None))
             

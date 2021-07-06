@@ -17,5 +17,5 @@
     ],
     "core:property/eventStructure": "validator/input/eventbusEventStructure", 
     "core:property/listenerStructure": "validator/input/eventbusListenerStructure"
-    "core:property/listenerMap": "validator/input/eventbusListenerMap"
+    "core:property/listenerMap": "value/map/eventbusListener"
 }
