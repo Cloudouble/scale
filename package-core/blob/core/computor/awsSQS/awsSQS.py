@@ -2,6 +2,43 @@ import liveelement
 import json, boto3, base64
 
 def main(package, component, module, contexts, configuration, inputObject):
+    operation, message = [inputObject.get(f) for f in {'operation': 'receive', 'message': {}}.items()]
+    sqs_client = boto3.client('sqs')
+    if operation == 'send' and configuration.get('QueueUrl'):
+        sqs_client.send_message(
+            QueueUrl=configuration['QueueUrl'], 
+            MessageBody=json.dumps(message)
+        )
+    elif operation == 'mount' and configuration.get('QueueName'):
+        try:
+            queue_url = sqs_client.get_queue_url(QueueName=configuration['QueueName'])['QueueUrl']
+        except:
+            queue_url = sqs_client.create_queue(QueueName=configuration['QueueName'])['QueueUrl']
+        if queue_url and queue_url != configuration.get('QueueUrl'):
+            configuration['QueueUrl'] = queue_url
+            liveelement.run_processor('core.storer.system', {
+                'operation': 'update', 
+                'path': module['associatedProcessorConfiguration'], 
+                'body': configuration, 
+                'content_type': 'application/json'
+            })
+    elif operation == 'unmount': 
+        try:
+            queue_url = sqs_client.get_queue_url(QueueName=configuration['QueueName'])['QueueUrl']
+        except:
+            queue_url = sqs_client.create_queue(QueueName=configuration['QueueName'])['QueueUrl']
+        if queue_url:
+            del configuration['QueueUrl']
+            liveelement.run_processor('core.storer.system', {
+                'operation': 'update', 
+                'path': module['associatedProcessorConfiguration'], 
+                'body': configuration, 
+                'content_type': 'application/json'
+            })
+            queue_url = sqs_client.delete_queue(QueueUrl=queue_url)
+    else:
+        
+    
     
     operation, path, target, body, content_type = [inputObject.get(f) for f in {'operation': 'read', 'path': '', 'target': None, 'body': None, 'content_type': 'application/json'}.items()]
     s3_client = boto3.client('s3')
