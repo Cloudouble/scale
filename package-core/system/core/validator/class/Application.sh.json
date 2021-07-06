@@ -1,5 +1,5 @@
 {
-    "@context": "context/default",
+    "@context": "context/core",
 	"@id" : "core:validator/class/Application",
 	"@type": "sh:NodeShape", 
 	"rdfs:subClassOf" : "core:validator/class/Module",

@@ -1,5 +1,5 @@
 {
-    "@context": "context/default",
+    "@context": "context/core",
 	"@id" : "core:validator/class/Unit",
 	"@type" : "sh:NodeShape",
 	"sh:targetClass" : "core:class/Unit",

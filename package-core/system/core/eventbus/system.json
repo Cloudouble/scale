@@ -2,13 +2,13 @@
     "@context": "context/core",
     "@id": "core:eventbus/system",
     "@type": "core:class/Queue",
-    "associatedProcessor": "core:computor/queueAwsSQS", 
+    "associatedProcessor": "core:computor/awsSQS", 
     "associatedProcessorConfiguration": "value/configuration/eventbus/system", 
     "comment": "The queue used for notifications regarding changes to the system.", 
     "documentation": "reference:scale/core/eventbus/system", 
     "isActive": true, 
     "label": "system",
     "learnMore": "learn:scale/core/eventbus/system", 
-    "partOfPackage": "reference:scale/core"
+    "partOfPackage": "reference:scale/core", 
     "version": 0
 }
