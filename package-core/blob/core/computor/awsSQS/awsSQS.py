@@ -1,6 +1,23 @@
 import liveelement
 import json, boto3, base64
 
+def listener(event, context):
+    if 'Records' in event:
+        for event_record in event['Records']:
+            event_source_arn = event_record.get('eventSourceARN')
+            if event_source_arn:
+                queue_map = liveelement.platform.get('value/map/queueMap')
+                if event_source_arn in queue_map:
+                    queue_module_address = queue_map[event_source_arn]
+                    if queue_module_address:
+                        package_name, component_name, module_name = queue_module_address.split('.')
+                        module = liveelement.platform.get('{}/{}/{}.json'.format(package_name, component_name, module_name))
+                        component = liveelement.platform.get('{}/component/{}.json'.format(package_name, component_name))
+                        package = liveelement.platform.get('core/package/{}.json'.format(package_name))
+                        contexts = liveelement.platform.get('core/context/{}.json'.format(package['context']))
+                        configuration = liveelement.platform.get('{}.json'.format(module['associatedProcessorConfiguration']))
+                        main(package, component, module, contexts, configuration, event)
+
 def main(package, component, module, contexts, configuration, inputObject):
     operation, message, records = [inputObject.get(f) for f in {'operation': 'receive', 'message': {}, 'Records': []}.items()]
     sqs_client = boto3.client('sqs')
@@ -9,7 +26,7 @@ def main(package, component, module, contexts, configuration, inputObject):
             QueueUrl=configuration['QueueUrl'], 
             MessageBody=json.dumps(message)
         )
-    elif operation == 'mount' and configuration.get('QueueName'):
+    elif operation == 'create' and configuration.get('QueueName'):
         try:
             queue_url = sqs_client.get_queue_url(QueueName=configuration['QueueName'])['QueueUrl']
         except:
@@ -22,7 +39,7 @@ def main(package, component, module, contexts, configuration, inputObject):
                 'body': configuration, 
                 'content_type': 'application/json'
             })
-    elif operation == 'unmount': 
+    elif operation == 'delete': 
         try:
             queue_url = sqs_client.get_queue_url(QueueName=configuration['QueueName'])['QueueUrl']
         except:
@@ -45,8 +62,11 @@ def main(package, component, module, contexts, configuration, inputObject):
             if message and message.get('module'):
                 liveelement.run_processor(message['module'], message.get('input', {}), message.get('event', None))
             elif message and message.get('type'):
-                listener_map = liveelement.run_processor('core.storer.system', component['core:property/listenerMap'])
-                if message['type'] in listener_map:
+                try:
+                    listener_map = json.loads(liveelement.platform.get(component['core:property/listenerMap']))
+                except:
+                    listener_map = {}
+                if listener_map and message['type'] in listener_map:
                     if not type(listener_map[message['type']]) is list:
                         listener_map[message['type']] = [listener_map[message['type']]]
                     for event_type in listener_map[message['type']]:
