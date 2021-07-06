@@ -11,11 +11,11 @@ def listener(event, context):
                     queue_module_address = queue_map[event_source_arn]
                     if queue_module_address:
                         package_name, component_name, module_name = queue_module_address.split('.')
-                        module = liveelement.platform.get('{}/{}/{}.json'.format(package_name, component_name, module_name))
-                        component = liveelement.platform.get('{}/component/{}.json'.format(package_name, component_name))
-                        package = liveelement.platform.get('core/package/{}.json'.format(package_name))
-                        contexts = liveelement.platform.get('core/context/{}.json'.format(package['context']))
-                        configuration = liveelement.platform.get('{}.json'.format(module['associatedProcessorConfiguration']))
+                        module = liveelement.platform.get('{}/{}'.format(component_name, module_name), package_name)
+                        component = liveelement.platform.get('component/{}'.format(component_name), package_name)
+                        package = liveelement.platform.get('package/{}'.format(package_name), package_name)
+                        contexts = liveelement.platform.get('context/{}'.format(package['context']), package_name)
+                        configuration = liveelement.platform.get(module['associatedProcessorConfiguration'], package_name)
                         main(package, component, module, contexts, configuration, event)
 
 def main(package, component, module, contexts, configuration, inputObject):
