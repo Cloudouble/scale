@@ -1,5 +1,5 @@
 {
     "newRequest": [
-        "component/storer"
+        {"module": "core.component.storer"}
     ]
 }
