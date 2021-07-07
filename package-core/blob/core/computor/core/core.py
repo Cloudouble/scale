@@ -1,66 +1,46 @@
-import json, platform, configuration
+import liveelement, json
 
-def get_object_via_prefixed_address(address, module, package_name):
-    if ':' in address:
-        processor = None
-        if '@context' in module:
-            context = platform.get('{}/{}.json'.format(package_name, module['@context']))
-            if context and type(context) is dict:
-                processor_address_prefix, processor_address_main = module['associatedProcessor'].split(':', 1)
-                processor_address = ''
-                if processor_address_prefix in context:
-                    if type(context[processor_address_prefix]) is dict and '@id' in context[processor_address_prefix]:
-                        processor_address = '{}{}'.format(context[processor_address_prefix]['@id'], processor_address_main)
-                    elif type(context[processor_address_prefix]) is str:
-                        processor_address = '{}{}'.format(context[processor_address_prefix], processor_address_main)
-                else:
-                    processor_address = processor_address_main
-                if processor_address:
-                    processor = platform.get('{}.json'.format(processor_address))
-    else:
-        processor = platform.get('{}.json'.format(module['associatedProcessor']))
-    return processor
-    
 
-def main(module_address, processor_input, event={}, synchronous=None):
-    processor_result = None
+def main(module_address, _input, synchronous=None, event=None):
+    result = None
     package_name, component_name, module_name = (module_address.lower().split('.') + ['', '', ''])[:3]
     if package_name and component_name and module_name:
-        package = platform.get('core/package/{}.json'.format(package_name))
+        package = liveelement.get_object(package_name, 'system', 'package', 'core')
         if package and type(package) is dict:
-            component = platform.get('{}/component/{}.json'.format(package_name, component_name))
+            component = liveelement.get_object(component_name, 'system', 'component', package_name)
             if component and type(component) is dict:
-                module = platform.get('{}/{}/{}.json'.format(package_name, component_name, module_name))
+                module = liveelement.get_object(module_name, 'system', component_name, package_name)
                 if module and type(module) is dict:
                     if 'associatedProcessor' in module:
-                        processor = get_object_via_prefixed_address(module['associatedProcessor'], module, package_name)
+                        processor = liveelement.get_object(module['associatedProcessor'], 'system', 'computor', package_name)
                         if processor:
                             configuration = {}
                             if 'associatedProcessorConfiguration' in module:
-                                configuration = get_object_via_prefixed_address(module['associatedProcessorConfiguration'], module, package_name)
-                            processor_result = platform.invoke(
-                                '{}-{}'.format(package_name, processor['@id'].split('/')[-1]), 
+                                configuration = liveelement.get_object('configuration/{}'.format(module['associatedProcessorConfiguration']), 'system', 'value', package_name)
+                            context = liveelement.get_object('context.json', 'scratchpad')
+                            result = liveelement.invoke(
+                                '{}-{}'.format(package_name, processor['@id'].split('/')[-1]).lower(), 
                                 {
                                     'package': package, 
                                     'component': component, 
                                     'module': module, 
+                                    'context': context, 
                                     'configuration': configuration, 
-                                    'inputObject': processor_input
+                                    '_input': _input
                                 }, 
                                 synchronous)
                             if event:
-                                if not type(event) is list:
-                                    event = [event]
-                                for event_detail in event:
-                                    if event_detail and type(event_detail) is dict:
-                                        event_type = event_detail.pop('type', None)
-                                        if event_type:
-                                            queue = event_detail.pop('queue', module.get('eventbusQueue'))
-                                            if not queue:
-                                                queue = component.get('eventbusQueue')
-                                            if not queue:
-                                                queue = package.get('eventbusQueue')
-                                            if not queue:
-                                                queue = 'default'
-                                            platform.send(queue, module_address, event_type, event_detail)
-    return processor_result if synchronous else None
+                                if type(event) is str:
+                                    event_detail = result if type(result) is dict else {'result': result}
+                                    liveelement.dispatch_event(module_address, event, event_detail)
+                                elif type(event) is dict and 'type' in event:
+                                    event_type = event['type']
+                                    event_detail = result if type(result) is dict else {'result': result}
+                                    if 'detail' in event and type(event['detail']) is dict:
+                                        event_detail = {**event['detail'], **event_detail}
+                                    liveelement.dispatch_event(
+                                        event.get('source', module_address), 
+                                        event_type, event_detail, 
+                                        event.get('target_queue', 'system'), event.get('target_queue_package', 'core'))
+
+    return result if synchronous else None

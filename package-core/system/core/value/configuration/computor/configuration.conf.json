@@ -1,0 +1,37 @@
+{
+    "namespace": "liveelement", 
+    "working_partitions": {
+        "system": {
+            "driver": {
+                "efs": {
+                    "LocalMountPath": "/mnt/system"
+                }
+            }, 
+            "root": "/"
+        }, 
+        "scratchpad": {
+            "driver": {
+                "efs": {
+                    "LocalMountPath": "/mnt/scratchpad"
+                }
+            }, 
+            "root": "/"
+        }, 
+        "modified": {
+            "driver": {
+                "efs": {
+                    "LocalMountPath": "/mnt/modified"
+                }
+            }, 
+            "root": "/"
+        }, 
+        "archive": {
+            "driver": {
+                "s3": {
+                    "Bucket": "scale.live-element.net"
+                }
+            }, 
+            "root": "_/archive/"
+        }
+    }
+}

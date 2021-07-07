@@ -1,28 +1,15 @@
 import configuration, boto3, json
 
-def run_processor(module_address, processor_input, synchronous=None, event=None):
-    if event and type(event) is str:
-        event = {'type': event}
+def invoke(function_name, payload, synchronous=None):
     result = boto3.client('lambda').invoke(
-        FunctionName='{namespace}-core'.format(namespace=configuration['namespace']), 
+        FunctionName='{namespace}-{function_name}'.format(namespace=configuration['namespace'], function_name=function_name), 
         InvocationType='RequestResponse' if synchronous else 'Event', 
-        Payload=bytes(json.dumps({
-            'module': module_address, 
-            'input': processor_input, 
-            'synchronous': synchronous
-        }), 'utf-8')
+        Payload=bytes(json.dumps(payload), 'utf-8')
     )
-    if event:
-        if type(event) is str:
-            event_detail = result if type(result) is dict else {'result': result}
-            dispatch_event(module_address, event, event_detail)
-        elif type(event) is dict and 'type' in event:
-            event_type = event['type']
-            event_detail = result if type(result) is dict else {'result': result}
-            if 'detail' in event and type(event['detail']) is dict:
-                event_detail = {**event['detail'], **event_detail}
-            dispatch_event(event.get('source', module_address), event_type, event_detail, event.get('target_queue', 'system'), event.get('target_queue_package', 'core'))
     return json.loads(result['Payload'].read().decode('utf-8')) if synchronous else None
+
+def run_processor(module_address, _input, synchronous=None, event=None):
+    return invoke('core', {'module_address': module_address, '_input': _input, 'synchronous': synchronous, 'event': event}, synchronous)
 
 def dispatch_event(source_module, event_type, event_detail={}, target_queue='system', target_queue_package='core'):
     if source_module and type(source_module) is dict:
@@ -55,10 +42,11 @@ def dispatch_event(source_module, event_type, event_detail={}, target_queue='sys
                         )
 
 def get_object(path, partition='system', component=None, package='core'):
-    if partition and partition in configuration and type(configuration[partition]) is dict and 'driver' in configuration[partition]:
-        partition_driver = configuration[partition]['driver']
-        partition_configuration = configuration[partition].get('configuration', {})
-        partition_root = configuration[partition].get('root', '')
+    working_partitions = configuration.get('working_partitions', {})
+    if partition and partition in working_partitions and type(working_partitions[partition]) is dict and 'driver' in working_partitions[partition]:
+        partition_driver = working_partitions[partition]['driver']
+        partition_configuration = working_partitions[partition].get('configuration', {})
+        partition_root = working_partitions[partition].get('root', '')
         if partition_driver == 's3':
             partition_bucket = partition_configuration.get('Bucket') if type(partition_configuration) is dict else None
             if partition_bucket:
@@ -125,10 +113,11 @@ def get_object(path, partition='system', component=None, package='core'):
                     return object_data
 
 def set_object(path, data, content_type='application/json', partition='system', component=None, package='core'):
-    if partition and partition in configuration and type(configuration[partition]) is dict and 'driver' in configuration[partition]:
-        partition_driver = configuration[partition]['driver']
-        partition_configuration = configuration[partition].get('configuration', {})
-        partition_root = configuration[partition].get('root', '')
+    working_partitions = configuration.get('working_partitions', {})
+    if partition and partition in working_partitions and type(working_partitions[partition]) is dict and 'driver' in working_partitions[partition]:
+        partition_driver = working_partitions[partition]['driver']
+        partition_configuration = working_partitions[partition].get('configuration', {})
+        partition_root = working_partitions[partition].get('root', '')
         if partition_driver == 's3':
             partition_bucket = partition_configuration.get('Bucket') if type(partition_configuration) is dict else None
             if partition_bucket:
