@@ -1,13 +1,11 @@
-import json
+import liveelement, json
 
 import pyshacl
-
 from rdflib import Graph, plugin
 from rdflib.serializer import Serializer
 
+def main(package, component, module, contexts, configuration, inputObject):
 
-def main(event, context):
-    
     from os import listdir
     
     object_path = '../../../../system/core/application/console.json'
@@ -67,4 +65,18 @@ def main(event, context):
     
     return True
 
-main({}, {})
+
+
+# remove for Lambda, onle for local testing
+
+system_path = liveelement.configuration.configuration['working_partitions']['system']['driver']['efs']['LocalMountPath']
+
+print(system_path)
+
+'''with open(validator_path) as validator_file:
+    validator_text = validator_file.read()
+validator_object = json.loads(validator_text)
+validator_object['@context'] = context_object
+'''
+
+#main(package, component, module, contexts, configuration, inputObject)
