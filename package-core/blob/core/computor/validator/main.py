@@ -31,6 +31,10 @@ def main(event, context):
     with open(validator_path) as validator_file:
         validator_text = validator_file.read()
     validator_object = json.loads(validator_text)
+    validator_object['@context'] = context_object
+    
+    validator_ancestors = []
+    
     
         
     object_as_rdf_graph = Graph().parse(data=json.dumps(object_object), format='json-ld')
