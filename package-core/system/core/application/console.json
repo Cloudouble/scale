@@ -1,5 +1,4 @@
 {
-    "@context": "context/core",
     "@id": "core:application/console",
     "@type": "core:class/Application",
     "associatedProcessor": "core:computor/console", 

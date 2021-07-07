@@ -12,22 +12,31 @@ def main(event, context):
     
     object_path = '../../../../system/core/application/console.json'
     
-    print('starting...')
+    context_path = '../../../../system/core/value/context/core.json'
     
+    print(' ')
+
+    with open(context_path) as context_file:
+        context_text = context_file.read()
+    context_object = json.loads(context_text)
+
     with open(object_path) as object_file:
         object_text = object_file.read()
     object_object = json.loads(object_text)
         
-        
-        
-    g = Graph().parse(data=object_text, format='json-ld')
+    object_object['@context'] = context_object
     
-    print(g.serialize(format='json-ld', indent=4))
+    
+        
+        
+    object_as_rdf_graph = Graph().parse(data=json.dumps(object_object), format='json-ld')
+    
+    #print(object_as_rdf_graph.serialize(format='n3', indent=4).decode('utf-8'))
 
-    #object_as_rdf_graph
-    
     #r = pyshacl.validate(object_as_rdf_graph, shacl_graph=validator_as_shacl_graph)
     #conforms, results_graph, results_text = r    
+    
+    print(' ')
     
     return True
 
