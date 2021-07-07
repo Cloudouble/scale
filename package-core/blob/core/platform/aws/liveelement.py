@@ -1,6 +1,6 @@
 import configuration, boto3, json
 
-def run_processor(module_address, processor_input, event=None, synchronous=None):
+def run_processor(module_address, processor_input, synchronous=None, event=None):
     if event and type(event) is str:
         event = {'type': event}
     result = boto3.client('lambda').invoke(
@@ -9,13 +9,22 @@ def run_processor(module_address, processor_input, event=None, synchronous=None)
         Payload=bytes(json.dumps({
             'module': module_address, 
             'input': processor_input, 
-            'event': event, 
             'synchronous': synchronous
         }), 'utf-8')
     )
+    if event:
+        if type(event) is str:
+            event_detail = result if type(result) is dict else {'result': result}
+            dispatch_event(module_address, event, event_detail)
+        elif type(event) is dict and 'type' in event:
+            event_type = event['type']
+            event_detail = result if type(result) is dict else {'result': result}
+            if 'detail' in event and type(event['detail']) is dict:
+                event_detail = {**event['detail'], **event_detail}
+            dispatch_event(event.get('source', module_address), event_type, event_detail, event.get('target_queue', 'system'), event.get('target_queue_package', 'core'))
     return json.loads(result['Payload'].read().decode('utf-8')) if synchronous else None
 
-def dispatch_event(source_module, event_type, event_detail={}, target_queue=None, target_queue_package='core'):
+def dispatch_event(source_module, event_type, event_detail={}, target_queue='system', target_queue_package='core'):
     if source_module and type(source_module) is dict:
         source_module_name = str(source_module.get('@id', '')).split('/').pop().lower()
         source_component_name = str(source_module.get('partOfComponent', '')).split('/').pop().lower()
