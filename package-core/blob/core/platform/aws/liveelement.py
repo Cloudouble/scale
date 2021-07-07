@@ -172,7 +172,8 @@ def set_object(path, data, content_type='application/json', partition='system', 
                     boto3.client('s3').put_object(
                         Bucket=partition_bucket, 
                         Key='{}{}'.format(partition_root, path), 
-                        Body=bytes(data, 'utf-8')
+                        Body=bytes(data, 'utf-8'), 
+                        ContentType=content_type
                     )
         elif partition_driver == 'efs':
             partition_localmountpath = partition_configuration.get('LocalMountPath') if type(partition_configuration) is dict else None
