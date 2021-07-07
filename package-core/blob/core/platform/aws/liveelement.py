@@ -54,7 +54,7 @@ def dispatch_event(source_module, event_type, event_detail={}, target_queue='sys
                             MessageBody=json.dumps(event)
                         )
 
-def get_object(path, component=None, package='core'):
+def get_object(path, partition='system', component=None, package='core'):
     try:
         try:
             if component:
@@ -84,3 +84,44 @@ def get_object(path, component=None, package='core'):
         )['Body'].read().decode('utf-8'))
     except:
         return {}
+
+
+'''
+configuration => 
+{
+    "namespace": "liveelement", 
+    "system": {
+        "configuration": {
+            "bucket": "", 
+            "mount": ""
+        }, 
+        "driver": "s3/efs", 
+        "root": "_/system/"
+    }, 
+    "scratchpad": {
+        "configuration": {
+            "bucket": "", 
+            "mount": ""
+        }, 
+        "driver": "s3/efs", 
+        "root": "_/scratchpad/"
+    }, 
+    "modified": {
+        "configuration": {
+            "bucket": "", 
+            "mount": ""
+        }, 
+        "driver": "s3/efs", 
+        "root": "_/modified/"
+    }, 
+    "archive": {
+        "configuration": {
+            "bucket": "", 
+            "mount": ""
+        }, 
+        "driver": "s3/efs", 
+        "root": "_/archive/"
+    }
+}
+
+'''

@@ -50,16 +50,16 @@ _/scratchpad/asset/{hash}/view.json                             - list views dep
 
 
 
-LastModified Partition: object which record when other corresponding objects on other partitions were last modified, all values are a single timestamp
-{root}/lastmodified/{partition}/{path}
+Modified Partition: object which record when other corresponding objects on other partitions were last modified, all values are a single timestamp
+{root}/modified/{partition}/{path}
 
-_/lastmodified/core/*
-_/lastmodified/scratchpad/*
-_/lastmodified/blob/*
-_/lastmodified/record/*
-_/lastmodified/import/*
-_/lastmodified/connection/*
-_/lastmodified/output/*
+_/modified/core/*
+_/modified/scratchpad/*
+_/modified/blob/*
+_/modified/record/*
+_/modified/import/*
+_/modified/connection/*
+_/modified/output/*
 
 
 
