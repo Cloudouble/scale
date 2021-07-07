@@ -8,8 +8,8 @@ def run_processor(module_address, processor_input, event=None, synchronous=None)
         FunctionName='{namespace}-core'.format(namespace=configuration['processorNamespace']), 
         InvocationType='RequestResponse' if synchronous else 'Event', 
         Payload=bytes(json.dumps({
-            'module_address': module_address, 
-            'processor_input': processor_input, 
+            'module': module_address, 
+            'input': processor_input, 
             'event': event, 
             'synchronous': synchronous
         }), 'utf-8')

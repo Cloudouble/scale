@@ -2,21 +2,32 @@ import configuration
 import boto3, json
 
 
-def get(path, package_name='core'):
+def get(path, component=None, package='core'):
     try:
-        if '.' not in path:
-            if path.startswith('validator/'):
-                path = '{}.sh.json'.format(path)
-            elif path.startswith('value/configuration/'):
-                path = '{}.cf.json'.format(path)
-            elif path.startswith('value/map/'):
-                path = '{}.mp.json'.format(path)
-            elif path.startswith('value/reference/'):
-                path = '{}.rf.json'.format(path)
+        try:
+            if component:
+                component_object = json.loads(boto3.client('s3').get_object(
+                    Bucket=configuration['systemBucket'], 
+                    Key='{}/{}/component/{}.json'.format(configuration['systemRoot'], package.lower(), component.lower())
+                )['Body'].read().decode('utf-8'))
             else:
-                path = '{}.json'.format(path)
-        if package_name:
-            path = '{}/{}'.format(package_name, path)
+                component_object = {}
+        except:
+            component_object = {}
+        if '.' not in path:
+            filename_extension = component_object.get('defaultModuleFilenameExtension', 'json')
+            if type(filename_extension) is dict:
+                for subdir, ext in filename_extension.items():
+                    if path.startswith('{}/'.format(subdir)):
+                        filename_extension = ext
+                        break
+            path = '{}.{}'.format(path, filename_extension)
+        if component_object.get('homeDirectory'):
+            path = '{}/{}'.format(component_object['homeDirectory'], path)
+        elif component:
+            path = '{}/{}'.format(component.lower(), path)
+        if package:
+            path = '{}/{}'.format(package.lower(), path)
         return json.loads(boto3.client('s3').get_object(
             Bucket=configuration['systemBucket'], 
             Key='{}/{}'.format(configuration['systemRoot'], path)
