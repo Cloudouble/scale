@@ -1,19 +1,18 @@
 {
-    "@context": "context/default",
+    "@context": "context/core",
     "@id": "core:component/authenticator",
     "@type": "core:class/Component",
-    "partOfPackage": "reference:scale/core"
-    "label": "Authenticator",
+	"associatedProcessor": "core:computor/authenticator", 
     "comment": "Responsible for connection authentication and authorisation.",
     "documentation": "reference:scale/core/component/Authenticator", 
-    "learnMore": "learn:scale/core/component/Authenticator", 
-	"associatedProcessor": "core:computor/authenticator", 
-	"version": 1, 
-	"isActive": true, 
-    "core:property/homeDirectory": "authenticator", 
-    "core:property/expectedModuleType": [
+    "expectedModuleClass": [
         "core:class/Processor", 
         "core:class/AuthenticationGateway", 
         "core:class/Mask"
-    ]
+    ], 
+	"isActive": true, 
+    "label": "Authenticator",
+    "learnMore": "learn:scale/core/component/Authenticator", 
+    "partOfPackage": "reference:scale/core", 
+	"version": 0
 }

@@ -1,29 +1,14 @@
 {
-    "@context": "context/default",
+    "@context": "context/core",
     "@id": "core:component/platform",
     "@type": "core:class/Component",
-    "partOfPackage": "reference:scale/core"
-    "label": "Platform",
+	"associatedProcessor": "core:computor/platform", 
     "comment": "Responsible for delegating processors to match the target hosting infrastructure.",
     "documentation": "reference:scale/core/component/Platform", 
-    "learnMore": "learn:scale/core/component/Platform", 
-	"associatedProcessor": "processor:platform", 
-	"version": 1, 
+    "expectedModuleType": "core:class/Platform", 
 	"isActive": true, 
-    "core:property/homeDirectory": "platform", 
-    "core:property/expectedModuleType": [
-        "core:class/Platform"
-    ]
+    "label": "Platform",
+    "learnMore": "learn:scale/core/component/Platform", 
+    "partOfPackage": "reference:scale/core", 
+	"version": 0
 }
-
-
-* request hits Cloudfront
-* connect/httpsDefault/aws writes the standardised request to it's request partition and sends message to request SQS queue
-* eventbus/requestQueue/aws (via aws adaptor) is triggered by the incoming message and invokes eventbus/requestQueue with a standardised event object
-* requestQueue processor uses the eventbus listenerMap to find any target modules
-* each target module processor, requestQueue runs them with (package, component, module, configuration, input) where:
-    package is the target module's containing package object {packageName: {...package object...}}
-    component is the target module's containing component(s) object  {componentName: {...component object...}...}
-    module is the target module's module object  {moduleName: {...module object...}...}
-    configuration is the target module's configuration object {...configuration object...}
-    input is the event object  {...event object...}

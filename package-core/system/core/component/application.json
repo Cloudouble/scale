@@ -1,18 +1,15 @@
 {
-    "@context": "context/default",
+    "@context": "context/core",
     "@id": "core:component/application",
     "@type": "core:class/Component",
 	"associatedProcessor": "core.component.storer", 
 	"associatedProcessorInputTransform": "transform/component/application", 
     "comment": "Responsible for managing end user applications.",
     "documentation": "reference:scale/core/component/Application", 
-    "expectedModuleType": [
-        "core:class/Application"
-    ], 
-    "homeDirectory": "application", 
+    "expectedModuleClass": "core:class/Application", 
 	"isActive": true, 
     "label": "Application",
     "learnMore": "learn:scale/core/component/Application", 
     "partOfPackage": "reference:scale/core"
-	"version": 1
+	"version": 0
 }

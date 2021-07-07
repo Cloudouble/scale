@@ -2,23 +2,20 @@
     "@context": "context/core",
     "@id": "core:component/value",
     "@type": "core:class/Component",
-    "partOfPackage": "reference:scale/core"
-    "label": "Value",
-    "comment": "Responsible for managing stored system environment, configuration, maps and reference values.",
-    "documentation": "reference:scale/core/component/Value", 
-    "learnMore": "learn:scale/core/component/Value", 
 	"associatedProcessor": "core:computor/value", 
-	"version": 1, 
-	"isActive": true, 
-    "core:property/homeDirectory": "value", 
-    "core:property/expectedModuleType": [
-        "schema:StructuredValue", 
-    ], 
+    "comment": "Responsible for managing stored system environment, configuration, maps and reference values.",
     "defaultModuleFilenameExtension": {
-        "configuration": "conf.json"
-        "input": "in.json"
-        "output": "out.json"
-        "map": "map.json"
+        "configuration": "conf.json", 
+        "input": "in.json", 
+        "output": "out.json", 
+        "map": "map.json", 
         "reference": "ref.json"
-    }
+    }, 
+    "documentation": "reference:scale/core/component/Value", 
+    "expectedModuleType": "schema:StructuredValue", 
+	"isActive": true, 
+    "label": "Value",
+    "learnMore": "learn:scale/core/component/Value", 
+    "partOfPackage": "reference:scale/core", 
+	"version": 0
 }

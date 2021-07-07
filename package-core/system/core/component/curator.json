@@ -1,17 +1,14 @@
 {
-    "@context": "context/default",
+    "@context": "context/core",
     "@id": "core:component/curator",
     "@type": "core:class/Component",
-    "partOfPackage": "reference:scale/core"
-    "label": "Curator",
+	"associatedProcessor": "core:computor/curator", 
     "comment": "Responsible for keeping the system in good order.",
     "documentation": "reference:scale/core/component/Curator", 
-    "learnMore": "learn:scale/core/component/Curator", 
-	"associatedProcessor": "core:computor/curator", 
-	"version": 1, 
+    "expectedModuleClass": "core:class/Curator", 
 	"isActive": true, 
-    "core:property/homeDirectory": "curator", 
-    "core:property/expectedModuleType": [
-        "core:class/Curator"
-    ]
+    "label": "Curator",
+    "learnMore": "learn:scale/core/component/Curator", 
+    "partOfPackage": "reference:scale/core", 
+	"version": 0
 }

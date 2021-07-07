@@ -1,19 +1,14 @@
 {
-    "@context": "context/default",
+    "@context": "context/core",
     "@id": "core:component/connect",
     "@type": "core:class/Component",
-    "partOfPackage": "reference:scale/core"
-    "label": "Connect",
+	"associatedProcessor": "computor:connect", 
     "comment": "Responsible for managing and routing incoming connection requests in to valid request objects.",
     "documentation": "reference:scale/core/component/Connect", 
-    "learnMore": "learn:scale/core/component/Connect", 
-	"associatedProcessor": "computor:connect", 
-	"version": 1, 
+    "expectedModuleClass": "core:class/Connector", 
 	"isActive": true, 
-    "core:property/homeDirectory": "connect", 
-    "core:property/expectedModuleType": [
-        "core:class/Connector"
-    ]
+    "label": "Connect",
+    "learnMore": "learn:scale/core/component/Connect", 
+    "partOfPackage": "reference:scale/core", 
+	"version": 0
 }
-
-

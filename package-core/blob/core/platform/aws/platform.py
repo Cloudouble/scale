@@ -22,9 +22,7 @@ def get(path, component=None, package='core'):
                         filename_extension = ext
                         break
             path = '{}.{}'.format(path, filename_extension)
-        if component_object.get('homeDirectory'):
-            path = '{}/{}'.format(component_object['homeDirectory'], path)
-        elif component:
+        if component:
             path = '{}/{}'.format(component.lower(), path)
         if package:
             path = '{}/{}'.format(package.lower(), path)

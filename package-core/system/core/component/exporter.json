@@ -1,17 +1,14 @@
 {
-    "@context": "context/default",
+    "@context": "context/core",
     "@id": "core:component/exporter",
     "@type": "core:class/Component",
-    "partOfPackage": "reference:scale/core"
-    "label": "Exporter",
+	"associatedProcessor": "core:computor/exporter", 
     "comment": "Responsible for managing the bulk bulk collation and output of recordsfor transfer out of the system.",
     "documentation": "reference:scale/core/component/Exporter", 
-    "learnMore": "learn:scale/core/component/Exporter", 
-	"associatedProcessor": "core:computor/exporter", 
-	"version": 1, 
+    "expectedModuleClass": "core:class/ExportFormat", 
 	"isActive": true, 
-    "core:property/homeDirectory": "exporter", 
-    "core:property/expectedModuleType": [
-        "core:class/ExportFormat"
-    ]
+    "label": "Exporter",
+    "learnMore": "learn:scale/core/component/Exporter", 
+    "partOfPackage": "reference:scale/core", 
+	"version": 0
 }

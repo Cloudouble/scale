@@ -2,14 +2,13 @@
     "@context": "context/core",
     "@id": "core:component/transformer",
     "@type": "core:class/Component",
-    "partOfPackage": "reference:scale/core"
-    "label": "Transformer",
-    "comment": "Responsible for running data transformations.",
-    "documentation": "reference:scale/core/component/Transformer", 
-    "learnMore": "learn:scale/core/component/Transformer", 
 	"associatedProcessor": "core:computor/transformer", 
-	"version": 0, 
+    "comment": "Responsible for running data transformations.",
+    "defaultModuleFilenameExtension": "jsonata", 
+    "documentation": "reference:scale/core/component/Transformer", 
 	"isActive": true, 
-    "homeDirectory": "transformer", 
-    "defaultModuleFilenameExtension": "jsonata"
+    "partOfPackage": "reference:scale/core", 
+    "label": "Transformer",
+    "learnMore": "learn:scale/core/component/Transformer", 
+	"version": 0
 }

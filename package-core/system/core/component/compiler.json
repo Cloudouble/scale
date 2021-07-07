@@ -1,15 +1,14 @@
 {
-    "@context": "context/default",
+    "@context": "context/core",
     "@id": "core:component/compiler",
     "@type": "core:class/Component",
-    "partOfPackage": "reference:scale/core"
-    "label": "Compiler",
+	"associatedProcessor": "core:computor/compiler", 
     "comment": "Responsible for compiling views to the output partitions.",
     "documentation": "reference:scale/core/component/Compiler", 
-    "learnMore": "learn:scale/core/component/Compiler", 
-	"associatedProcessor": "core:computor/compiler", 
-	"version": 1, 
+    "expectedModuleType": "core:class/View", 
 	"isActive": true, 
-    "core:property/homeDirectory": "compiler", 
-    "core:property/expectedModuleType": ["core:class/View"]
+    "label": "Compiler",
+    "learnMore": "learn:scale/core/component/Compiler", 
+    "partOfPackage": "reference:scale/core", 
+	"version": 0
 }

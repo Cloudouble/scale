@@ -1,18 +1,15 @@
 {
-    "@context": "context/default",
+    "@context": "context/core",
     "@id": "core:component/validator",
     "@type": "core:class/Component",
-    "partOfPackage": "reference:scale/core"
-    "label": "Validator",
+	"associatedProcessor": "core:computor/validator", 
     "comment": "Responsible for ensuring the all data stored is valid according to its type.",
     "documentation": "reference:scale/core/component/Validator", 
-    "learnMore": "learn:scale/core/component/Validator", 
-	"associatedProcessor": "core:computor/validator", 
-	"version": 1, 
+    "defaultModuleFilenameExtension": "sh.json", 
+    "expectedModuleClass": "sh:Shape", 
 	"isActive": true, 
-    "core:property/homeDirectory": "validator", 
-    "core:property/expectedModuleType": [
-        "sh:Shape"
-    ], 
-    "defaultModuleFilenameExtension": "sh.json"
+    "label": "Validator",
+    "learnMore": "learn:scale/core/component/Validator", 
+    "partOfPackage": "reference:scale/core", 
+	"version": 0
 }

@@ -1,17 +1,14 @@
 {
-    "@context": "context/default",
+    "@context": "context/core",
     "@id": "core:component/importer",
     "@type": "core:class/Component",
-    "partOfPackage": "reference:scale/core"
-    "label": "Importer",
+	"associatedProcessor": "core:computor/importer", 
     "comment": "Responsible for managing the bulk import of new data records.",
     "documentation": "reference:scale/core/component/Importer", 
-    "learnMore": "learn:scale/core/component/Importer", 
-	"associatedProcessor": "core:computor/importer", 
-	"version": 1, 
+    "expectedModuleClass": "core:class/ImportFormat", 
 	"isActive": true, 
-    "core:property/homeDirectory": "importer", 
-    "core:property/expectedModuleType": [
-        "core:class/ImportFormat"
-    ]
+    "label": "Importer",
+    "learnMore": "learn:scale/core/component/Importer", 
+    "partOfPackage": "reference:scale/core", 
+	"version": 0 
 }

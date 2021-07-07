@@ -1,15 +1,14 @@
 {
-    "@context": "context/default",
+    "@context": "context/core",
     "@id": "core:component/indexer",
     "@type": "core:class/Component",
-    "partOfPackage": "reference:scale/core"
-    "label": "Indexer",
+	"associatedProcessor": "core:computor/indexer", 
     "comment": "Responsible for querying records to create result sets.",
     "documentation": "reference:scale/core/component/Indexer", 
-    "learnMore": "learn:scale/core/component/Indexer", 
-	"associatedProcessor": "core:computor/indexer", 
-	"version": 1, 
+    "expectedModuleType": "core:class/Query", 
 	"isActive": true, 
-    "core:property/homeDirectory": "indexer", 
-    "core:property/expectedModuleType": ["core:class/Query"]
+    "label": "Indexer",
+    "learnMore": "learn:scale/core/component/Indexer", 
+    "partOfPackage": "reference:scale/core", 
+	"version": 0
 }

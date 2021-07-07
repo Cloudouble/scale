@@ -1,15 +1,14 @@
 {
-    "@context": "context/default",
+    "@context": "context/core",
     "@id": "core:component/packager",
     "@type": "core:class/Component",
-    "partOfPackage": "reference:scale/core"
-    "label": "Packager",
+	"associatedProcessor": "core:computor/packager", 
     "comment": "Responsible for creating packages.",
     "documentation": "reference:scale/core/component/Packager", 
-    "learnMore": "learn:scale/core/component/Packager", 
-	"associatedProcessor": "core:computor/packager", 
-	"version": 1, 
+    "expectedModuleType": [], 
 	"isActive": true, 
-    "core:property/homeDirectory": "packager", 
-    "core:property/expectedModuleType": []
+    "label": "Packager",
+    "learnMore": "learn:scale/core/component/Packager", 
+    "partOfPackage": "reference:scale/core", 
+	"version": 0
 }

@@ -1,19 +1,18 @@
 {
-    "@context": "context/default",
+    "@context": "context/core",
     "@id": "core:component/storer",
     "@type": "core:class/StorerComponent",
-    "partOfPackage": "reference:scale/core"
-    "label": "Storer",
-    "comment": "Responsible for reading writing data to the partitions.",
-    "documentation": "reference:scale/core/component/Storer", 
-    "learnMore": "learn:scale/core/component/Storer", 
 	"associatedProcessor": "core:computor/storer", 
-	"version": 1, 
-	"isActive": true, 
-    "core:property/homeDirectory": "storer", 
-    "core:property/expectedModuleType": [
+    "comment": "Responsible for reading writing data to the partitions.",
+    "core:property/partitionMap": "value/storerPartitionMap", 
+    "documentation": "reference:scale/core/component/Storer", 
+    "expectedModuleType": [
         "core:class/Partition", 
         "core:class/StorageAdaptor"
     ], 
-    "core:property/partitionMap": "value/storerPartitionMap"
+	"isActive": true, 
+    "label": "Storer",
+    "learnMore": "learn:scale/core/component/Storer", 
+    "partOfPackage": "reference:scale/core", 
+	"version": 0
 }

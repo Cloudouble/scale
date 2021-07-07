@@ -1,15 +1,14 @@
 {
-    "@context": "context/default",
+    "@context": "context/core",
     "@id": "core:component/schema",
     "@type": "core:class/Component",
     "partOfPackage": "reference:scale/core"
     "label": "Schema",
+	"associatedProcessor": "core:computor/schema", 
     "comment": "Responsible for parsing schemas.",
     "documentation": "reference:scale/core/component/Schema", 
-    "learnMore": "learn:scale/core/component/Schema", 
-	"associatedProcessor": "core:computor/schema", 
-	"version": 1, 
+    "expectedModuleType": [], 
 	"isActive": true, 
-    "core:property/homeDirectory": "schema", 
-    "core:property/expectedModuleType": []
+    "learnMore": "learn:scale/core/component/Schema", 
+	"version": 0
 }

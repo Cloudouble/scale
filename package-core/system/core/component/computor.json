@@ -1,15 +1,14 @@
 {
-    "@context": "context/default",
+    "@context": "context/core",
     "@id": "core:component/computor",
     "@type": "core:class/Component",
-    "partOfPackage": "reference:scale/core"
-    "label": "Computor",
+	"associatedProcessor": "core:computor/computor", 
     "comment": "Responsible for running the processors.",
     "documentation": "reference:scale/core/component/Computor", 
-    "learnMore": "learn:scale/core/component/Computor", 
-	"associatedProcessor": "core:computor/computor", 
-	"version": 1, 
+    "expectedModuleClass": "core:class/Processor", 
 	"isActive": true, 
-    "core:property/homeDirectory": "computor", 
-    "core:property/expectedModuleType": ["core:class/Processor"]
+    "label": "Computor",
+    "learnMore": "learn:scale/core/component/Computor", 
+    "partOfPackage": "reference:scale/core", 
+	"version": 0
 }
