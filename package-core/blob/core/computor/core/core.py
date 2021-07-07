@@ -1,4 +1,4 @@
-import liveelement, json
+import liveelement, json, rdflib
 
 
 def main(module_address, _input, synchronous=None, event=None):
@@ -18,6 +18,10 @@ def main(module_address, _input, synchronous=None, event=None):
                             if 'associatedProcessorConfiguration' in module:
                                 configuration = liveelement.get_object('configuration/{}'.format(module['associatedProcessorConfiguration']), 'system', 'value', package_name)
                             context = liveelement.get_object('context.json', 'scratchpad')
+                            
+                            _input = _input if type(_input) is dict else {}
+                            
+                            
                             result = liveelement.invoke(
                                 '{}-{}'.format(package_name, processor['@id'].split('/')[-1]).lower(), 
                                 {
@@ -26,7 +30,7 @@ def main(module_address, _input, synchronous=None, event=None):
                                     'module': module, 
                                     'context': context, 
                                     'configuration': configuration, 
-                                    '_input': _input
+                                    '_input': _input if type(_input) is dict else {}
                                 }, 
                                 synchronous)
                             if event:
