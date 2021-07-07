@@ -90,81 +90,34 @@ def get_object(path, partition='system', component=None, package='core'):
                         return {}
                 else:
                     return object_data
-                
-                
-            
         elif partition_driver == 'efs':
             partition_localmountpath = partition_configuration.get('LocalMountPath') if type(partition_configuration) is dict else None
-            
-            
-    
-    try:
-        try:
-            if component:
-                component_object = json.loads(boto3.client('s3').get_object(
-                    Bucket=configuration['systemBucket'], 
-                    Key='{}/{}/component/{}.json'.format(configuration['systemRoot'], package.lower(), component.lower())
-                )['Body'].read().decode('utf-8'))
-            else:
-                component_object = {}
-        except:
-            component_object = {}
-        if '.' not in path:
-            filename_extension = component_object.get('defaultModuleFilenameExtension', 'json')
-            if type(filename_extension) is dict:
-                for subdir, ext in filename_extension.items():
-                    if path.startswith('{}/'.format(subdir)):
-                        filename_extension = ext
-                        break
-            path = '{}.{}'.format(path, filename_extension)
-        if component:
-            path = '{}/{}'.format(component.lower(), path)
-        if package:
-            path = '{}/{}'.format(package.lower(), path)
-        return json.loads(boto3.client('s3').get_object(
-            Bucket=configuration['systemBucket'], 
-            Key='{}/{}'.format(configuration['systemRoot'], path)
-        )['Body'].read().decode('utf-8'))
-    except:
-        return {}
-
-
-'''
-configuration => 
-{
-    "namespace": "liveelement", 
-    "system": {
-        "configuration": {
-            "Bucket": "", 
-            "LocalMountPath": ""
-        }, 
-        "driver": "s3/efs", 
-        "root": "_/system/"
-    }, 
-    "scratchpad": {
-        "configuration": {
-            "Bucket": "", 
-            "LocalMountPath": ""
-        }, 
-        "driver": "s3/efs", 
-        "root": "_/scratchpad/"
-    }, 
-    "modified": {
-        "configuration": {
-            "Bucket": "", 
-            "LocalMountPath": ""
-        }, 
-        "driver": "s3/efs", 
-        "root": "_/modified/"
-    }, 
-    "archive": {
-        "configuration": {
-            "Bucket": "", 
-            "LocalMountPath": ""
-        }, 
-        "driver": "s3/efs", 
-        "root": "_/archive/"
-    }
-}
-
-'''
+            if partition_localmountpath:
+                if component:
+                    try:
+                        component_path = '{}/{}{}/component/{}.json'.format(partition_localmountpath, partition_root, package.lower(), component.lower())
+                        component_object = json.loads(open(component_path, 'r').read().decode('utf-8'))
+                    except:
+                        component_object = {}
+                else:
+                    component_object = {}
+                if '.' not in path:
+                    filename_extension = component_object.get('defaultModuleFilenameExtension', 'json')
+                    if type(filename_extension) is dict:
+                        for subdir, ext in filename_extension.items():
+                            if path.startswith('{}/'.format(subdir)):
+                                filename_extension = ext
+                                break
+                    path = '{}.{}'.format(path, filename_extension)
+                if component:
+                    path = '{}/{}'.format(component.lower(), path)
+                if package:
+                    path = '{}/{}'.format(package.lower(), path)
+                object_data = open('{}/{}{}'.format(partition_localmountpath, partition_root, path), 'r').read().decode('utf-8')
+                if path.endswith('.json'):
+                    try:
+                        return json.loads(object_data)
+                    except:
+                        return {}
+                else:
+                    return object_data
