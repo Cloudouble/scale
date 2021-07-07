@@ -55,6 +55,49 @@ def dispatch_event(source_module, event_type, event_detail={}, target_queue='sys
                         )
 
 def get_object(path, partition='system', component=None, package='core'):
+    if partition and partition in configuration and type(configuration[partition]) is dict and 'driver' in configuration[partition]:
+        partition_driver = configuration[partition]['driver']
+        partition_configuration = configuration[partition].get('configuration', {})
+        partition_root = configuration[partition].get('root', '')
+        if partition_driver == 's3':
+            partition_bucket = partition_configuration.get('Bucket') if type(partition_configuration) is dict else None
+            if partition_bucket:
+                if component:
+                    try:
+                        component_key = '{}{}/component/{}.json'.format(partition_root, package.lower(), component.lower())
+                        component_object = json.loads(boto3.client('s3').get_object(Bucket=partition_bucket, Key=component_key)['Body'].read().decode('utf-8'))
+                    except:
+                        component_object = {}
+                else:
+                    component_object = {}
+                if '.' not in path:
+                    filename_extension = component_object.get('defaultModuleFilenameExtension', 'json')
+                    if type(filename_extension) is dict:
+                        for subdir, ext in filename_extension.items():
+                            if path.startswith('{}/'.format(subdir)):
+                                filename_extension = ext
+                                break
+                    path = '{}.{}'.format(path, filename_extension)
+                if component:
+                    path = '{}/{}'.format(component.lower(), path)
+                if package:
+                    path = '{}/{}'.format(package.lower(), path)
+                object_data = boto3.client('s3').get_object(Bucket=partition_bucket, Key='{}{}'.format(partition_root, path))['Body'].read().decode('utf-8')
+                if path.endswith('.json'):
+                    try:
+                        return json.loads(object_data)
+                    except:
+                        return {}
+                else:
+                    return object_data
+                
+                
+            
+        elif partition_driver == 'efs':
+            partition_localmountpath = partition_configuration.get('LocalMountPath') if type(partition_configuration) is dict else None
+            
+            
+    
     try:
         try:
             if component:
@@ -92,32 +135,32 @@ configuration =>
     "namespace": "liveelement", 
     "system": {
         "configuration": {
-            "bucket": "", 
-            "mount": ""
+            "Bucket": "", 
+            "LocalMountPath": ""
         }, 
         "driver": "s3/efs", 
         "root": "_/system/"
     }, 
     "scratchpad": {
         "configuration": {
-            "bucket": "", 
-            "mount": ""
+            "Bucket": "", 
+            "LocalMountPath": ""
         }, 
         "driver": "s3/efs", 
         "root": "_/scratchpad/"
     }, 
     "modified": {
         "configuration": {
-            "bucket": "", 
-            "mount": ""
+            "Bucket": "", 
+            "LocalMountPath": ""
         }, 
         "driver": "s3/efs", 
         "root": "_/modified/"
     }, 
     "archive": {
         "configuration": {
-            "bucket": "", 
-            "mount": ""
+            "Bucket": "", 
+            "LocalMountPath": ""
         }, 
         "driver": "s3/efs", 
         "root": "_/archive/"
