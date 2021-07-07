@@ -96,7 +96,8 @@ def get_object(path, partition='system', component=None, package='core'):
                 if component:
                     try:
                         component_path = '{}/{}{}/component/{}.json'.format(partition_localmountpath, partition_root, package.lower(), component.lower())
-                        component_object = json.loads(open(component_path, 'r').read().decode('utf-8'))
+                        with open(component_path, 'r') as component_file:
+                            component_object = json.loads(component_file.read().decode('utf-8'))
                     except:
                         component_object = {}
                 else:
@@ -113,7 +114,8 @@ def get_object(path, partition='system', component=None, package='core'):
                     path = '{}/{}'.format(component.lower(), path)
                 if package:
                     path = '{}/{}'.format(package.lower(), path)
-                object_data = open('{}/{}{}'.format(partition_localmountpath, partition_root, path), 'r').read().decode('utf-8')
+                with open('{}/{}{}'.format(partition_localmountpath, partition_root, path), 'r') as object_file:
+                    object_data = object_file.read().decode('utf-8')
                 if path.endswith('.json'):
                     try:
                         return json.loads(object_data)
@@ -121,3 +123,97 @@ def get_object(path, partition='system', component=None, package='core'):
                         return {}
                 else:
                     return object_data
+
+def set_object(path, data, content_type='application/json', partition='system', component=None, package='core'):
+    if partition and partition in configuration and type(configuration[partition]) is dict and 'driver' in configuration[partition]:
+        partition_driver = configuration[partition]['driver']
+        partition_configuration = configuration[partition].get('configuration', {})
+        partition_root = configuration[partition].get('root', '')
+        if partition_driver == 's3':
+            partition_bucket = partition_configuration.get('Bucket') if type(partition_configuration) is dict else None
+            if partition_bucket:
+                if component:
+                    try:
+                        component_key = '{}{}/component/{}.json'.format(partition_root, package.lower(), component.lower())
+                        component_object = json.loads(boto3.client('s3').get_object(Bucket=partition_bucket, Key=component_key)['Body'].read().decode('utf-8'))
+                    except:
+                        component_object = {}
+                else:
+                    component_object = {}
+                if '.' not in path:
+                    filename_extension = component_object.get('defaultModuleFilenameExtension', 'json')
+                    if type(filename_extension) is dict:
+                        for subdir, ext in filename_extension.items():
+                            if path.startswith('{}/'.format(subdir)):
+                                filename_extension = ext
+                                break
+                    path = '{}.{}'.format(path, filename_extension)
+                if component:
+                    path = '{}/{}'.format(component.lower(), path)
+                if package:
+                    path = '{}/{}'.format(package.lower(), path)
+                if path.endswith('.json') or content_type == 'application/json':
+                    if type(data) is str:
+                        try:
+                            data = json.loads(data)
+                        except:
+                            data = None
+                    if data:
+                        try:
+                            data = json.dumps(data, indent=4, sort_keys=True)
+                        except:
+                            data = None
+                else:
+                    try:
+                        data = str(data)
+                    except:
+                        data = None
+                if data:
+                    boto3.client('s3').put_object(
+                        Bucket=partition_bucket, 
+                        Key='{}{}'.format(partition_root, path), 
+                        Body=bytes(data, 'utf-8')
+                    )
+        elif partition_driver == 'efs':
+            partition_localmountpath = partition_configuration.get('LocalMountPath') if type(partition_configuration) is dict else None
+            if partition_localmountpath:
+                if component:
+                    try:
+                        component_path = '{}/{}{}/component/{}.json'.format(partition_localmountpath, partition_root, package.lower(), component.lower())
+                        with open(component_path, 'r') as component_file:
+                            component_object = json.loads(component_file.read().decode('utf-8'))
+                    except:
+                        component_object = {}
+                else:
+                    component_object = {}
+                if '.' not in path:
+                    filename_extension = component_object.get('defaultModuleFilenameExtension', 'json')
+                    if type(filename_extension) is dict:
+                        for subdir, ext in filename_extension.items():
+                            if path.startswith('{}/'.format(subdir)):
+                                filename_extension = ext
+                                break
+                    path = '{}.{}'.format(path, filename_extension)
+                if component:
+                    path = '{}/{}'.format(component.lower(), path)
+                if package:
+                    path = '{}/{}'.format(package.lower(), path)
+                if path.endswith('.json') or content_type == 'application/json':
+                    if type(data) is str:
+                        try:
+                            data = json.loads(data)
+                        except:
+                            data = None
+                    if data:
+                        try:
+                            data = json.dumps(data, indent=4, sort_keys=True)
+                        except:
+                            data = None
+                else:
+                    try:
+                        data = str(data)
+                    except:
+                        data = None
+                if data:
+                    with open('{}/{}{}'.format(partition_localmountpath, partition_root, path), 'w') as object_file:
+                        object_file.write(data)
