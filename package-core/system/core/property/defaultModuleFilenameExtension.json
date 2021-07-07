@@ -1,0 +1,12 @@
+{
+    "@context": "context/default",
+    "@id": "core:property/defaultModuleFilenameExtension",
+    "@type": "rdf:Property",
+    "partOfPackage": "reference:scale/core", 
+    "label": "defaultModuleFilenameExtension",
+    "comment": "The filename extension of the modules in this component when left out of the path.", 
+    "documentation": "reference:scale/core/property/defaultModuleFilenameExtension", 
+    "learnMore": "learn:scale/core/property/defaultModuleFilenameExtension", 
+    "schema:domainIncludes": ["core:class/Component"],
+    "schema:rangeIncludes": "schema:Text"
+}

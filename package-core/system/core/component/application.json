@@ -2,7 +2,8 @@
     "@context": "context/default",
     "@id": "core:component/application",
     "@type": "core:class/Component",
-	"associatedProcessor": "core:computor/application", 
+	"associatedProcessor": "core.component.storer", 
+	"associatedProcessorInputTransform": "transform/component/application", 
     "comment": "Responsible for managing end user applications.",
     "documentation": "reference:scale/core/component/Application", 
     "expectedModuleType": [

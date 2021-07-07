@@ -13,5 +13,6 @@
     "core:property/homeDirectory": "validator", 
     "core:property/expectedModuleType": [
         "sh:Shape"
-    ]
+    ], 
+    "defaultModuleFilenameExtension": "sh.json"
 }

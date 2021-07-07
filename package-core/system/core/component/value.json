@@ -1,5 +1,5 @@
 {
-    "@context": "context/default",
+    "@context": "context/core",
     "@id": "core:component/value",
     "@type": "core:class/Component",
     "partOfPackage": "reference:scale/core"
@@ -13,5 +13,12 @@
     "core:property/homeDirectory": "value", 
     "core:property/expectedModuleType": [
         "schema:StructuredValue", 
-    ]
+    ], 
+    "defaultModuleFilenameExtension": {
+        "configuration": "conf.json"
+        "input": "in.json"
+        "output": "out.json"
+        "map": "map.json"
+        "reference": "ref.json"
+    }
 }

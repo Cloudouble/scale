@@ -6,6 +6,7 @@
 	"sh:targetClass" : "core:class/Component",
 	"sh:message": "This is not a valid component."
 	"sh:property": [
+		"core:validator/property/defaultModuleFilenameExtension", 
 		"core:validator/property/expectedModuleClass", 
 		"core:validator/property/homeDirectory"
     ]
