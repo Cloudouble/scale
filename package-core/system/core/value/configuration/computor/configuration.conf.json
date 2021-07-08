@@ -1,12 +1,39 @@
 {
-    "namespace": "liveelement", 
-    "boot": {
-        "driver": {
-            "efs": {
-                "LocalMountPath": "../../../../system"
+    "computor": {
+        "system": {
+            "driver": "aws_lambda", 
+            "configuration": {
+                "namespace": "liveelement", 
+                "default_parameters": {
+                    "invoke_function": {}
+                }
             }
-        }, 
-        "partition": "system", 
-        "root": "/"
+        }
+    }, 
+    "storer": {
+        "system": {
+            "driver": "aws_efs", 
+            "configuration": {
+                "LocalMountPath": "../../../../system", 
+                "root": "/", 
+                "default_parameters": {
+                    "read": {}, 
+                    "write": {}, 
+                    "delete": {}, 
+                    "ls": {}
+                }
+            }
+        }
+    }, 
+    "eventbus": {
+        "system": {
+            "driver": "aws_sqs", 
+            "configuration": {
+                "QueueUrl": "", 
+                "default_parameters": {
+                    "send_message": {}
+                }
+            }
+        }
     }
 }

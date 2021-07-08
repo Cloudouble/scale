@@ -2,7 +2,7 @@ import boto3, json
 
 
 def invoke_function(function_name, payload, synchronous=None, configuration={}):
-    result = boto3.client('lambda').invoke(
+    result = boto3.client('lambda').invoke(**configuration.get('default_parameters', {}).get('invoke_function', {}), 
         FunctionName='{namespace}-{function_name}'.format(namespace=configuration['namespace'], function_name=function_name), 
         InvocationType='RequestResponse' if synchronous else 'Event', 
         Payload=bytes(json.dumps(payload), 'utf-8')

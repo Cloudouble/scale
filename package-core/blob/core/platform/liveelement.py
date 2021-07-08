@@ -89,69 +89,6 @@ def get_object(path, component=None, package='core', use_partition='system'):
             else:
                 return object_data
 
-'''    
-        elif partition_driver == 'efs':
-            partition_localmountpath = partition_configuration.get('LocalMountPath') if type(partition_configuration) is dict else None
-            if partition_localmountpath:
-                if component:
-                    try:
-                        component_path = '{}/{}{}/component/{}.json'.format(partition_localmountpath, partition_root, package.lower(), component.lower())
-                        with open(component_path, 'r') as component_file:
-                            component_object = json.loads(component_file.read().decode('utf-8'))
-                    except:
-                        component_object = {}
-                else:
-                    component_object = {}
-                if '.' not in path:
-                    filename_extension = component_object.get('defaultModuleFilenameExtension', 'json')
-                    if type(filename_extension) is dict:
-                        for subdir, ext in filename_extension.items():
-                            if path.startswith('{}/'.format(subdir)):
-                                filename_extension = ext
-                                break
-                    path = '{}.{}'.format(path, filename_extension)
-                if component:
-                    path = '{}/{}'.format(component.lower(), path)
-                if package:
-                    path = '{}/{}'.format(package.lower(), path)
-                with open('{}/{}{}'.format(partition_localmountpath, partition_root, path), 'r') as object_file:
-                    object_data = object_file.read().decode('utf-8')
-                if path.endswith('.json'):
-                    try:
-                        return json.loads(object_data)
-                    except:
-                        return {}
-                else:
-                    return object_data
-'''
-
-{
-    "computor": {
-        "system": {
-            "driver": "aws_lambda", 
-            "configuration": {
-                "namespace": "liveelement"
-            }
-        }
-    }, 
-    "storer": {
-        "system": {
-            "driver": "aws_efs", 
-            "configuration": {
-                "LocalMountPath": "../../../../system", 
-                "root": "/"
-            }
-        }
-    }, 
-    "eventbus": {
-        "system": {
-            "driver": "aws_sqs", 
-            "configuration": {
-                "QueueUrl"
-            }
-        }
-    }
-}
 
 def set_object(path, data, encoding=None, content_type='application/json', component=None, package='core', use_partition='system'):
     if path and data:
@@ -222,53 +159,6 @@ def set_object(path, data, encoding=None, content_type='application/json', compo
                         path = '{}/{}'.format(package.lower(), path)
                     driver.write(path, data_object, partition.get('configuration', {}))    
 
-
-
-'''
-        elif partition_driver == 'efs':
-            partition_localmountpath = partition_configuration.get('LocalMountPath') if type(partition_configuration) is dict else None
-            if partition_localmountpath:
-                if component:
-                    try:
-                        component_path = '{}/{}{}/component/{}.json'.format(partition_localmountpath, partition_root, package.lower(), component.lower())
-                        with open(component_path, 'r') as component_file:
-                            component_object = json.loads(component_file.read().decode('utf-8'))
-                    except:
-                        component_object = {}
-                else:
-                    component_object = {}
-                if '.' not in path:
-                    filename_extension = component_object.get('defaultModuleFilenameExtension', 'json')
-                    if type(filename_extension) is dict:
-                        for subdir, ext in filename_extension.items():
-                            if path.startswith('{}/'.format(subdir)):
-                                filename_extension = ext
-                                break
-                    path = '{}.{}'.format(path, filename_extension)
-                if component:
-                    path = '{}/{}'.format(component.lower(), path)
-                if package:
-                    path = '{}/{}'.format(package.lower(), path)
-                if path.endswith('.json') or content_type == 'application/json':
-                    if type(data) is str:
-                        try:
-                            data = json.loads(data)
-                        except:
-                            data = None
-                    if data:
-                        try:
-                            data = json.dumps(data, indent=4, sort_keys=True)
-                        except:
-                            data = None
-                else:
-                    try:
-                        data = str(data)
-                    except:
-                        data = None
-                if data:
-                    with open('{}/{}{}'.format(partition_localmountpath, partition_root, path), 'w') as object_file:
-                        object_file.write(data)
-'''
 
 def remove_object(path, component=None, package='core', use_partition='system'):
     partition = configuration['storer'].get(use_partition)
