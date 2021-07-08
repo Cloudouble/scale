@@ -23,57 +23,50 @@ from configuration import configuration as configuration
         "system": {
             "driver": "aws_sqs", 
             "configuration": {
-                
+                "QueueUrl"
             }
         }
     }
 }
 
 
-def invoke(function_name, payload, synchronous=None, target_service='system', target_service_package='core'):
+def invoke_function(function_name, payload, synchronous=None, target_service='system'):
     service = configuration['computor'].get(target_service)
     if service and service.get('driver'):
-        driver_module = importlib.import_module('./drivers/{}'.format(service['driver']))
-        return driver_module.invoke(function_name, payload, synchronous, service.get('configuration', {}))
+        try:
+            driver = importlib.import_module('./drivers/{}'.format(service['driver']))
+        except:
+            driver = None
+        if driver:
+            return driver.invoke_function(function_name, payload, synchronous, service.get('configuration', {}))
+
 
 def run_processor(module_address, _input, synchronous=None, event=None):
-    return invoke('core', {'module_address': module_address, '_input': _input, 'synchronous': synchronous, 'event': event}, synchronous)
+    return invoke_function('core', {'module_address': module_address, '_input': _input, 'synchronous': synchronous, 'event': event}, synchronous)
 
-def dispatch_event(source_module, event_type, event_detail={}, target_queue='system', target_queue_package='core'):
-    driver = configuration['drivers']['eventbus']
-    driver_name = list(driver.keys())[0]
-    driver_configuration = driver[driver_name]
-    driver_module = importlib.import_module('./drivers/{}'.format(driver_name))
-    
-    
-    if source_module and type(source_module) is dict:
-        source_module_name = str(source_module.get('@id', '')).split('/').pop().lower()
-        source_component_name = str(source_module.get('partOfComponent', '')).split('/').pop().lower()
-        source_package_name = str(source_module.get('partOfPackage', '')).split('/').pop().lower()
-        source_module_address = '.'.join([source_package_name, source_component_name, source_module_name])
-    if source_module and type(source_module) is str:
-        source_package_name, source_component_name, source_module_name = (source_module.lower().split('.') + ['', '', ''])[:3]
-        source_module_address = source_module
-        source_module = get_object('{}/{}/{}.json'.format(source_package_name, source_component_name, source_module_name))
-    if source_package_name and source_component_name and source_module_name and event_type and type(event_type) is str:
-        target_queue = target_queue if target_queue else source_module.get('eventbusQueue')
-        if target_queue:
-            target_queue_package = target_queue_package if target_queue_package else 'core'
-            target_queue_module = get_object('{}/eventbus/{}'.format(target_queue_package, target_queue))
-            if target_queue_module and 'associatedProcessorConfiguration' in target_queue_module:
-                target_queue_configuration = get_object(target_queue_module['associatedProcessorConfiguration'])
-                if target_queue_configuration and 'QueueUrl' in target_queue_configuration:
-                    if len(source_module_address.split('.')) == 3:
-                        sqs = boto3.client('sqs')
-                        event = {
-                            'source': source_module_address, 
-                            'type': event_type, 
-                            'detail': event_detail if type(event_detail) is dict else {}
-                        }
-                        sqs.send_message(
-                            QueueUrl=target_queue_configuration['QueueUrl'], 
-                            MessageBody=json.dumps(event)
-                        )
+
+def dispatch_event(source_module, event_type, event_detail={}, target_queue='system'):
+    queue = configuration['eventbus'].get(target_queue)
+    if queue and queue.get('driver'):
+        try:
+            driver = importlib.import_module('./drivers/{}'.format(queue['driver']))
+        except:
+            driver = None
+        if driver:
+            if source_module and type(source_module) is dict:
+                source_module_name = str(source_module.get('@id', '')).split('/').pop().lower()
+                source_component_name = str(source_module.get('partOfComponent', '')).split('/').pop().lower()
+                source_package_name = str(source_module.get('partOfPackage', '')).split('/').pop().lower()
+                source_module_address = '.'.join([source_package_name, source_component_name, source_module_name])
+            if source_module and type(source_module) is str:
+                source_module_address = source_module
+            event = {
+                'source': source_module_address, 
+                'type': event_type, 
+                'detail': event_detail if type(event_detail) is dict else {}
+            }
+            driver.send_message(event, queue.get('configuration', {}))
+            
 
 def get_object(path, partition='system', component=None, package='core'):
     working_partitions = configuration.get('working_partitions', {})
