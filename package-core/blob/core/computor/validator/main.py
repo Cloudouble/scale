@@ -67,11 +67,27 @@ def main(package, component, module, contexts, configuration, inputObject):
 
 
 
-# remove for Lambda, onle for local testing
+# remove for Lambda, only for local testing
 
 system_path = liveelement.configuration.configuration['working_partitions']['system']['driver']['efs']['LocalMountPath']
 
-print(system_path)
+with open('{}/core/package/core.json'.format(system_path)) as package_file:
+    package = json.loads(package_file.read())
+
+with open('{}/core/component/validator.json'.format(system_path)) as component_file:
+    component = json.loads(component_file.read())
+
+with open('{}/core/value/context/core.json'.format(system_path)) as context_file:
+    context = json.loads(context_file.read())
+
+module = {}
+
+configuration = {}
+
+with open('{}/core/application/console.json'.format(system_path)) as input_file:
+    input_object = json.loads(input_file.read())
+
+print(json.dumps(input_object, indent=4, sort_keys=True))
 
 '''with open(validator_path) as validator_file:
     validator_text = validator_file.read()
@@ -79,4 +95,5 @@ validator_object = json.loads(validator_text)
 validator_object['@context'] = context_object
 '''
 
-#main(package, component, module, contexts, configuration, inputObject)
+#main(package, component, module, context, configuration, inputObject)
+

@@ -1,4 +1,5 @@
 {
+    "@context": "value/context/core.json", 
     "@id": "core:application/console",
     "@type": "core:class/Application",
     "associatedProcessor": "core:computor/console", 

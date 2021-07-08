@@ -1,5 +1,5 @@
 {
-    "@context": "context/core",
+    "@context": "value/context/core.json", 
     "@id": "core:component/validator",
     "@type": "core:class/Component",
 	"associatedProcessor": "core:computor/validator", 

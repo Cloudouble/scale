@@ -1,5 +1,4 @@
 {
-    "@context": "context/core",
     "@id": "core:authenticator/userConnectionType",
     "@type": "core:class/ConnectionType",
     "partOfPackage": "reference:scale/core"
