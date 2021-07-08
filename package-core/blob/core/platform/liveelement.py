@@ -1,17 +1,51 @@
-import configuration, boto3, json
+import json, importlib
+from configuration import configuration as configuration
 
-def invoke(function_name, payload, synchronous=None):
-    result = boto3.client('lambda').invoke(
-        FunctionName='{namespace}-{function_name}'.format(namespace=configuration['namespace'], function_name=function_name), 
-        InvocationType='RequestResponse' if synchronous else 'Event', 
-        Payload=bytes(json.dumps(payload), 'utf-8')
-    )
-    return json.loads(result['Payload'].read().decode('utf-8')) if synchronous else None
+{
+    "computor": {
+        "system": {
+            "driver": "aws_lambda", 
+            "configuration": {
+                "namespace": "liveelement"
+            }
+        }
+    }, 
+    "storer": {
+        "system": {
+            "driver": "aws_efs", 
+            "configuration": {
+                "LocalMountPath": "../../../../system", 
+            }, 
+            "root": "/"
+        }
+    }, 
+    "eventbus": {
+        "system": {
+            "driver": "aws_sqs", 
+            "configuration": {
+                
+            }
+        }
+    }
+}
+
+
+def invoke(function_name, payload, synchronous=None, target_service='system', target_service_package='core'):
+    service = configuration['computor'].get(target_service)
+    if service and service.get('driver'):
+        driver_module = importlib.import_module('./drivers/{}'.format(service['driver']))
+        return driver_module.invoke(function_name, payload, synchronous, service.get('configuration', {}))
 
 def run_processor(module_address, _input, synchronous=None, event=None):
     return invoke('core', {'module_address': module_address, '_input': _input, 'synchronous': synchronous, 'event': event}, synchronous)
 
 def dispatch_event(source_module, event_type, event_detail={}, target_queue='system', target_queue_package='core'):
+    driver = configuration['drivers']['eventbus']
+    driver_name = list(driver.keys())[0]
+    driver_configuration = driver[driver_name]
+    driver_module = importlib.import_module('./drivers/{}'.format(driver_name))
+    
+    
     if source_module and type(source_module) is dict:
         source_module_name = str(source_module.get('@id', '')).split('/').pop().lower()
         source_component_name = str(source_module.get('partOfComponent', '')).split('/').pop().lower()
