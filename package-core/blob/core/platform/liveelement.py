@@ -17,7 +17,7 @@ def run_processor(module_address, _input, synchronous=None, event=None):
     return invoke_function('core', {'module_address': module_address, '_input': _input, 'synchronous': synchronous, 'event': event}, synchronous)
 
 
-def dispatch_event(source_module, event_type, event_detail={}, use_queue='system'):
+def send_message(message, use_queue='system'):
     queue = configuration['eventbus'].get(use_queue)
     if queue and queue.get('driver'):
         try:
@@ -25,19 +25,34 @@ def dispatch_event(source_module, event_type, event_detail={}, use_queue='system
         except:
             driver = None
         if driver:
-            if source_module and type(source_module) is dict:
-                source_module_name = str(source_module.get('@id', '')).split('/').pop().lower()
-                source_component_name = str(source_module.get('partOfComponent', '')).split('/').pop().lower()
-                source_package_name = str(source_module.get('partOfPackage', '')).split('/').pop().lower()
-                source_module_address = '.'.join([source_package_name, source_component_name, source_module_name])
-            if source_module and type(source_module) is str:
-                source_module_address = source_module
-            event = {
-                'source': source_module_address, 
-                'type': event_type, 
-                'detail': event_detail if type(event_detail) is dict else {}
-            }
-            driver.send_message(event, queue.get('configuration', {}))
+            driver.send_message(message, queue.get('configuration', {}))
+
+
+def remove_message(message, use_queue='system'):
+    queue = configuration['eventbus'].get(use_queue)
+    if queue and queue.get('driver'):
+        try:
+            driver = importlib.import_module('./drivers/{}'.format(queue['driver']))
+        except:
+            driver = None
+        if driver:
+            driver.delete_message(message, queue.get('configuration', {}))
+
+
+def dispatch_event(source_module, event_type, event_detail={}, use_queue='system'):
+    if source_module and type(source_module) is dict:
+        source_module_name = str(source_module.get('@id', '')).split('/').pop().lower()
+        source_component_name = str(source_module.get('partOfComponent', '')).split('/').pop().lower()
+        source_package_name = str(source_module.get('partOfPackage', '')).split('/').pop().lower()
+        source_module_address = '.'.join([source_package_name, source_component_name, source_module_name])
+    if source_module and type(source_module) is str:
+        source_module_address = source_module
+    event = {
+        'source': source_module_address, 
+        'type': event_type, 
+        'detail': event_detail if type(event_detail) is dict else {}
+    }
+    send_message(event, use_queue)
 
 
 def get_object(path, component=None, package='core', use_partition='system'):
