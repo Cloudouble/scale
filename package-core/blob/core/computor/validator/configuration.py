@@ -2,40 +2,29 @@ import json
 
 configuration = json.loads('''
 {
-    "namespace": "liveelement", 
-    "working_partitions": {
-        "system": {
+    "boot": {
+        "computor": {
+            "driver: {
+                "aws_lambda": {
+                    "namespace": "liveelement"
+                }
+            }
+        }, 
+        "storer": {
             "driver": {
-                "efs": {
+                "aws_efs": {
                     "LocalMountPath": "../../../../system"
                 }
             }, 
+            "partition": "system", 
             "root": "/"
         }, 
-        "scratchpad": {
-            "driver": {
-                "efs": {
-                    "LocalMountPath": "../../../../scratchpad"
+        "eventbus": {
+            "driver: {
+                "aws_sqs": {
                 }
-            }, 
-            "root": "/"
+            }
         }, 
-        "modified": {
-            "driver": {
-                "efs": {
-                    "LocalMountPath": "../../../../modified"
-                }
-            }, 
-            "root": "/"
-        }, 
-        "archive": {
-            "driver": {
-                "s3": {
-                    "Bucket": "scale.live-element.net"
-                }
-            }, 
-            "root": "_/archive/"
-        }
     }
 }
 ''')
