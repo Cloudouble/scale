@@ -2,6 +2,26 @@ import json, importlib, base64
 from configuration import configuration as configuration
 
 
+def deploy_function(function_name, options, to_service='system'):
+    service = configuration['computor'].get(to_service)
+    if service and service.get('driver'):
+        try:
+            driver = importlib.import_module('./drivers/{}'.format(service['driver']))
+        except:
+            driver = None
+        if driver:
+            return driver.deploy_function(function_name, configuration, service.get('configuration', {}))
+
+def remove_function(function_name, from_service='system'):
+    service = configuration['computor'].get(from_service)
+    if service and service.get('driver'):
+        try:
+            driver = importlib.import_module('./drivers/{}'.format(service['driver']))
+        except:
+            driver = None
+        if driver:
+            return driver.remove_function(function_name, service.get('configuration', {}))
+
 def invoke_function(function_name, payload, synchronous=None, use_service='system'):
     service = configuration['computor'].get(use_service)
     if service and service.get('driver'):
@@ -11,7 +31,6 @@ def invoke_function(function_name, payload, synchronous=None, use_service='syste
             driver = None
         if driver:
             return driver.invoke_function(function_name, payload, synchronous, service.get('configuration', {}))
-
 
 def run_processor(module_address, _input, synchronous=None, event=None):
     return invoke_function('core', {'module_address': module_address, '_input': _input, 'synchronous': synchronous, 'event': event}, synchronous)
