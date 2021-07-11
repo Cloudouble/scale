@@ -1,49 +1,45 @@
 import boto3, json, base64
 
-###
+
 def mount_partition(partition_name, options={}, configuration={}):
-    if partition_name and (options or configuration):
+    if partition_name and configuration and configuration.get('Bucket'):
         s3_client = boto3.client('s3')
-        full_bucket_name = '{namespace}-{bucket_name}'.format(namespace=configuration['namespace'], bucket_name=bucket_name)
         try:
-            get_queue_result = sqs_client.get_queue_url(QueueName=full_queue_name)
+            head_bucket_result = s3_client.head_bucket(Bucket=configuration['Bucket'])
         except:
-            get_queue_result = None
-        if get_queue_result and get_queue_result.get('QueueUrl'):
+            head_bucket_result = None
+        if head_bucket_result:
             try:
                 if options:
-                    sqs_client.set_queue_attributes(QueueUrl=get_queue_result['QueueUrl'], **options)
+                    for method, method_params in option.items():
+                        getattr(s3_client, method)(**method_params, Bucket=configuration['Bucket'])
                 return True
             except:
                 return False
         else:
             try:
-                sqs_client.create_queue(**configuration.get('default_parameters', {}).get('deploy_queue', {}), 
-                    QueueName=full_queue_name, **options)
+                s3_client.create_bucket(**configuration.get('default_parameters', {}).get('mount_partition', {}), 
+                    **options, Bucket=configuration['Bucket'])
                 return True
             except:
                 return False
     else:
         return None
 
-def remove_queue(queue_name, configuration={}):
-    if queue_name:
-        sqs_client = boto3.client('sqs')
-        full_queue_name = '{namespace}-{queue_name}'.format(namespace=configuration['namespace'], queue_name=queue_name)
+
+def unmount_partition(partition_name, configuration={}):
+    if partition_name:
+        s3_client = boto3.client('s3')
         try:
-            get_queue_result = sqs_client.get_queue_url(QueueName=full_queue_name)
+            head_bucket_result = s3_client.head_bucket(Bucket=configuration['Bucket'])
         except:
-            get_queue_result = None
-        if get_queue_result and get_queue_result.get('QueueUrl'):
-            try:
-                sqs_client.delete_queue(**configuration.get('default_parameters', {}).get('deploy_queue', {}), 
-                    QueueUrl=get_queue_result['QueueUrl'])
-            except:
-                return False
+            head_bucket_result = None
+        if head_bucket_result:
+            return False
+        else:
+            return True
     else:
         return None
-###
-
 
 
 def read(path, configuration):

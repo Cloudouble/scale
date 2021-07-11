@@ -2,8 +2,8 @@ import json, importlib, base64
 from configuration import configuration as configuration
 
 
-def deploy_function(function_name, options, to_service='system'):
-    service = configuration['computor'].get(to_service)
+def deploy_function(function_name, options, to_service='system', non_system_function_configuration={}):
+    service = configuration['computor'][to_service] if configuration.get('computor', {}).get(to_service) else non_system_function_configuration
     if service and service.get('driver'):
         try:
             driver = importlib.import_module('./drivers/{}'.format(service['driver']))
@@ -12,8 +12,8 @@ def deploy_function(function_name, options, to_service='system'):
         if driver:
             return driver.deploy_function(function_name, configuration, service.get('configuration', {}))
 
-def remove_function(function_name, from_service='system'):
-    service = configuration['computor'].get(from_service)
+def remove_function(function_name, from_service='system', non_system_function_configuration={}):
+    service = configuration['computor'][from_service] if configuration.get('computor', {}).get(from_service) else non_system_function_configuration
     if service and service.get('driver'):
         try:
             driver = importlib.import_module('./drivers/{}'.format(service['driver']))
@@ -22,8 +22,8 @@ def remove_function(function_name, from_service='system'):
         if driver:
             return driver.remove_function(function_name, service.get('configuration', {}))
 
-def invoke_function(function_name, payload, synchronous=None, use_service='system'):
-    service = configuration['computor'].get(use_service)
+def invoke_function(function_name, payload, synchronous=None, use_service='system', non_system_function_configuration={}):
+    service = configuration['computor'][use_service] if configuration.get('computor', {}).get(use_service) else non_system_function_configuration
     if service and service.get('driver'):
         try:
             driver = importlib.import_module('./drivers/{}'.format(service['driver']))
@@ -32,8 +32,9 @@ def invoke_function(function_name, payload, synchronous=None, use_service='syste
         if driver:
             return driver.invoke_function(function_name, payload, synchronous, service.get('configuration', {}))
 
-def run_processor(module_address, _input, synchronous=None, event=None):
-    return invoke_function('core', {'module_address': module_address, '_input': _input, 'synchronous': synchronous, 'event': event}, synchronous)
+def run_processor(module_address, _input, synchronous=None, event=None, non_system_function_configuration={}):
+    return invoke_function('core', {'module_address': module_address, '_input': _input, 'synchronous': synchronous, 'event': event}, 
+        synchronous, non_system_function_configuration)
 
 
 def deploy_queue(queue_name, options, non_system_queue_configuration={}):
@@ -112,8 +113,8 @@ def unmount_partition(partition_name, non_system_partition_configuration={}):
         if driver:
             driver.unmount_partition(partition_name, partition.get('configuration', {}))
 
-def get_object(path, component=None, package='core', use_partition='system'):
-    partition = configuration['storer'].get(use_partition)
+def get_object(path, component=None, package='core', use_partition='system', non_system_partition_configuration={}):
+    partition = configuration['storer'][use_partition] if configuration.get('storer', {}).get(use_partition) else non_system_partition_configuration
     if partition and partition.get('driver'):
         try:
             driver = importlib.import_module('./drivers/{}'.format(partition['driver']))
@@ -162,7 +163,7 @@ def get_object(path, component=None, package='core', use_partition='system'):
                 return object_data
 
 
-def set_object(path, data, encoding=None, content_type='application/json', component=None, package='core', use_partition='system'):
+def set_object(path, data, encoding=None, content_type='application/json', component=None, package='core', use_partition='system', non_system_partition_configuration={}):
     if path and data:
         data_object = {}
         if type(data) is str:
@@ -190,7 +191,7 @@ def set_object(path, data, encoding=None, content_type='application/json', compo
         if data_object and content_type:
             data_object['ContentType'] = content_type
         if data_object:
-            partition = configuration['storer'].get(use_partition)
+            partition = configuration['storer'][use_partition] if configuration.get('storer', {}).get(use_partition) else non_system_partition_configuration
             if partition and partition.get('driver'):
                 try:
                     driver = importlib.import_module('./drivers/{}'.format(partition['driver']))
@@ -232,8 +233,8 @@ def set_object(path, data, encoding=None, content_type='application/json', compo
                     driver.write(path, data_object, partition.get('configuration', {}))    
 
 
-def remove_object(path, component=None, package='core', use_partition='system'):
-    partition = configuration['storer'].get(use_partition)
+def remove_object(path, component=None, package='core', use_partition='system', non_system_partition_configuration={}):
+    partition = configuration['storer'][use_partition] if configuration.get('storer', {}).get(use_partition) else non_system_partition_configuration
     if partition and partition.get('driver'):
         try:
             driver = importlib.import_module('./drivers/{}'.format(partition['driver']))
@@ -275,8 +276,8 @@ def remove_object(path, component=None, package='core', use_partition='system'):
             driver.delete(path, partition.get('configuration'))
 
 
-def list_objects(path, component=None, package='core', use_partition='system'):
-    partition = configuration['storer'].get(use_partition)
+def list_objects(path, component=None, package='core', use_partition='system', non_system_partition_configuration={}):
+    partition = configuration['storer'][use_partition] if configuration.get('storer', {}).get(use_partition) else non_system_partition_configuration
     if partition and partition.get('driver'):
         try:
             driver = importlib.import_module('./drivers/{}'.format(partition['driver']))
