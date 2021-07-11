@@ -57,6 +57,23 @@ def remove_queue(queue_name, non_system_queue_configuration={}):
         if driver:
             driver.remove_queue(queue_name, queue.get('configuration', {}))
 
+def read_queue(from_queue, queue_dump={}, non_system_queue_configuration={}):
+    queue = configuration['eventbus'][from_queue] if configuration.get('eventbus', {}).get(from_queue) else non_system_queue_configuration
+    if queue_dump and queue and queue.get('driver'):
+        try:
+            driver = importlib.import_module('./drivers/{}'.format(queue['driver']))
+        except:
+            driver = None
+        if driver:
+            try:
+                return driver.read_queue(from_queue, queue_dump, queue.get('configuration', {}))
+            except:
+                return []
+        else:
+            return []
+    else:
+        return []
+
 def send_message(message, use_queue='system', non_system_queue_configuration={}):
     queue = configuration['eventbus'][use_queue] if configuration.get('eventbus', {}).get(use_queue) else non_system_queue_configuration
     if queue and queue.get('driver'):
@@ -92,6 +109,18 @@ def dispatch_event(source_module, event_type, event_detail={}, use_queue='system
     }
     send_message(event, use_queue, non_system_queue_configuration)
 
+def process_events(from_queue, event_dump={}, non_system_queue_configuration={}):
+    events = [m for m in read_queue(from_queue, event_dump, non_system_queue_configuration) 
+        if m and type(m) is dict and m.get('source') and m.get('type') and m.get('detail')]
+    if events:
+        listeners = get_object('map/eventbus/{}'.format(from_queue), 'value')
+        if listeners:
+            for event in events:
+                if listeners.get(event['type']):
+                    listener = listeners[event['type']]
+                    if listener.get('module'):
+                        run_processor(listener['module'], {**listener.get('input', {}), **event['detail'], 'source': event['source']})
+                        
 
 def mount_partition(partition_name, options, non_system_partition_configuration={}):
     partition = configuration['storer'][partition_name] if configuration.get('storer', {}).get(partition_name) else non_system_partition_configuration

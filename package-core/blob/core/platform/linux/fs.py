@@ -1,6 +1,28 @@
 import json, base64, os, mimetypes
 
 
+def mount_partition(partition_name, options={}, configuration={}):
+    if partition_name:
+        try:
+            dir_exists = True # see if MountPath/root directory exists
+        except:
+            dir_exists = False
+        if dir_exists:
+            return True
+        else:
+            # create MountPath/root directory
+            return True
+    else:
+        return None
+
+
+def unmount_partition(partition_name, configuration={}):
+    if partition_name:
+        return True
+    else:
+        return None
+
+
 def read(path, configuration):
     if path and configuration.get('MountPath'):
         path = '{}/{}{}'.format(configuration['MountPath'], configuration.get('root', ''), path)

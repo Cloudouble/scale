@@ -1,6 +1,56 @@
 import boto3, json
 
 
+{
+  "Records": [
+    {
+      "messageId": "19dd0b57-b21e-4ac1-bd88-01bbb068cb78",
+      "receiptHandle": "MessageReceiptHandle",
+      "body": "Hello from SQS!",
+      "attributes": {
+        "ApproximateReceiveCount": "1",
+        "SentTimestamp": "1523232000000",
+        "SenderId": "123456789012",
+        "ApproximateFirstReceiveTimestamp": "1523232000001"
+      },
+      "messageAttributes": {},
+      "md5OfBody": "{{{md5_of_body}}}",
+      "eventSource": "aws:sqs",
+      "eventSourceARN": "arn:aws:sqs:ap-southeast-2:123456789012:MyQueue",
+      "awsRegion": "ap-southeast-2"
+    }
+  ]
+}
+
+
+def read_queue(queue_name, queue_dump={}, configuration={}):
+    raw_messages = []
+    if queue_name and not queue_dump:
+        sqs_client = boto3.client('sqs')
+        full_queue_name = '{namespace}-{queue_name}'.format(namespace=configuration['namespace'], queue_name=queue_name)
+        try:
+            get_queue_result = sqs_client.get_queue_url(QueueName=full_queue_name)
+        except:
+            get_queue_result = None
+        if get_queue_result and get_queue_result.get('QueueUrl'):
+            try:
+                raw_messages = sqs_client.receive_message(**configuration.get('default_parameters', {}).get('read_queue', {}), 
+                    QueueUrl=get_queue_result['QueueUrl'], **options)['Messages']
+            except:
+                raw_messages = []
+    elif queue_dump:
+        raw_messages = queue_dump.get('Records')
+    if raw_messages:
+        messages = []
+        for raw_message in raw_messages:
+            try:
+                
+            except:
+                pass
+
+    
+
+
 def deploy_queue(queue_name, options={}, configuration={}):
     if queue_name and (options or configuration):
         sqs_client = boto3.client('sqs')
