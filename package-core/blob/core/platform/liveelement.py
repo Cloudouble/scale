@@ -36,6 +36,26 @@ def run_processor(module_address, _input, synchronous=None, event=None):
     return invoke_function('core', {'module_address': module_address, '_input': _input, 'synchronous': synchronous, 'event': event}, synchronous)
 
 
+def deploy_queue(queue_name, options):
+    queue = configuration['eventbus'].get(queue_name)
+    if queue and queue.get('driver'):
+        try:
+            driver = importlib.import_module('./drivers/{}'.format(queue['driver']))
+        except:
+            driver = None
+        if driver:
+            driver.deploy_queue(queue_name, options, queue.get('configuration', {}))
+
+def remove_queue(queue_name):
+    queue = configuration['eventbus'].get(queue_name)
+    if queue and queue.get('driver'):
+        try:
+            driver = importlib.import_module('./drivers/{}'.format(queue['driver']))
+        except:
+            driver = None
+        if driver:
+            driver.remove_queue(queue_name, queue.get('configuration', {}))
+
 def send_message(message, use_queue='system'):
     queue = configuration['eventbus'].get(use_queue)
     if queue and queue.get('driver'):
