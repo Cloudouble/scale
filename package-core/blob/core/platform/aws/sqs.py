@@ -36,7 +36,8 @@ def remove_queue(queue_name, configuration={}):
             get_queue_result = None
         if get_queue_result and get_queue_result.get('QueueUrl'):
             try:
-                sqs_client.delete_queue(QueueUrl=get_queue_result['QueueUrl'])
+                sqs_client.delete_queue(**configuration.get('default_parameters', {}).get('deploy_queue', {}), 
+                    QueueUrl=get_queue_result['QueueUrl'])
             except:
                 return False
     else:

@@ -36,40 +36,28 @@ def run_processor(module_address, _input, synchronous=None, event=None):
     return invoke_function('core', {'module_address': module_address, '_input': _input, 'synchronous': synchronous, 'event': event}, synchronous)
 
 
-def deploy_queue(queue_name, options):
-    queue = configuration['eventbus'].get(queue_name)
-    if (queue and queue.get('driver')) or (not queue and options.get('driver')):
-        if not queue:
-            queue = {'driver': options['driver']}
-            del options['driver']
-            queue_configuration = options
-        else:
-            queue_configuration = queue.get('configuration')
+def deploy_queue(queue_name, options, non_system_queue_configuration={}):
+    queue = configuration['eventbus'][queue_name] if configuration.get('eventbus', {}).get(queue_name) else non_system_queue_configuration
+    if queue and queue.get('driver'):
         try:
             driver = importlib.import_module('./drivers/{}'.format(queue['driver']))
         except:
             driver = None
         if driver:
-            driver.deploy_queue(queue_name, options, queue_configuration)
+            driver.deploy_queue(queue_name, options, queue.get('configuration', {}))
 
-def remove_queue(queue_name, options={}):
-    queue = configuration['eventbus'].get(queue_name)
-    if (queue and queue.get('driver')) or (not queue and options.get('driver')):
-        if not queue:
-            queue = {'driver': options['driver']}
-            del options['driver']
-            queue_configuration = options
-        else:
-            queue_configuration = queue.get('configuration')
+def remove_queue(queue_name, non_system_queue_configuration={}):
+    queue = configuration['eventbus'][queue_name] if configuration.get('eventbus', {}).get(queue_name) else non_system_queue_configuration
+    if queue and queue.get('driver'):
         try:
             driver = importlib.import_module('./drivers/{}'.format(queue['driver']))
         except:
             driver = None
         if driver:
-            driver.remove_queue(queue_name, queue_configuration)
+            driver.remove_queue(queue_name, queue.get('configuration', {}))
 
-def send_message(message, use_queue='system'):
-    queue = configuration['eventbus'].get(use_queue)
+def send_message(message, use_queue='system', non_system_queue_configuration={}):
+    queue = configuration['eventbus'][use_queue] if configuration.get('eventbus', {}).get(use_queue) else non_system_queue_configuration
     if queue and queue.get('driver'):
         try:
             driver = importlib.import_module('./drivers/{}'.format(queue['driver']))
@@ -78,8 +66,8 @@ def send_message(message, use_queue='system'):
         if driver:
             driver.send_message(message, queue.get('configuration', {}))
 
-def remove_message(message, use_queue='system'):
-    queue = configuration['eventbus'].get(use_queue)
+def remove_message(message, use_queue='system', non_system_queue_configuration={}):
+    queue = configuration['eventbus'][use_queue] if configuration.get('eventbus', {}).get(use_queue) else non_system_queue_configuration
     if queue and queue.get('driver'):
         try:
             driver = importlib.import_module('./drivers/{}'.format(queue['driver']))
@@ -88,7 +76,7 @@ def remove_message(message, use_queue='system'):
         if driver:
             driver.delete_message(message, queue.get('configuration', {}))
 
-def dispatch_event(source_module, event_type, event_detail={}, use_queue='system'):
+def dispatch_event(source_module, event_type, event_detail={}, use_queue='system', non_system_queue_configuration={}):
     if source_module and type(source_module) is dict:
         source_module_name = str(source_module.get('@id', '')).split('/').pop().lower()
         source_component_name = str(source_module.get('partOfComponent', '')).split('/').pop().lower()
@@ -101,7 +89,7 @@ def dispatch_event(source_module, event_type, event_detail={}, use_queue='system
         'type': event_type, 
         'detail': event_detail if type(event_detail) is dict else {}
     }
-    send_message(event, use_queue)
+    send_message(event, use_queue, non_system_queue_configuration)
 
 
 def mount_partition(queue_name, options):
