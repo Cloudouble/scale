@@ -1,5 +1,50 @@
 import boto3, json, base64
 
+###
+def mount_partition(partition_name, options={}, configuration={}):
+    if partition_name and (options or configuration):
+        s3_client = boto3.client('s3')
+        full_bucket_name = '{namespace}-{bucket_name}'.format(namespace=configuration['namespace'], bucket_name=bucket_name)
+        try:
+            get_queue_result = sqs_client.get_queue_url(QueueName=full_queue_name)
+        except:
+            get_queue_result = None
+        if get_queue_result and get_queue_result.get('QueueUrl'):
+            try:
+                if options:
+                    sqs_client.set_queue_attributes(QueueUrl=get_queue_result['QueueUrl'], **options)
+                return True
+            except:
+                return False
+        else:
+            try:
+                sqs_client.create_queue(**configuration.get('default_parameters', {}).get('deploy_queue', {}), 
+                    QueueName=full_queue_name, **options)
+                return True
+            except:
+                return False
+    else:
+        return None
+
+def remove_queue(queue_name, configuration={}):
+    if queue_name:
+        sqs_client = boto3.client('sqs')
+        full_queue_name = '{namespace}-{queue_name}'.format(namespace=configuration['namespace'], queue_name=queue_name)
+        try:
+            get_queue_result = sqs_client.get_queue_url(QueueName=full_queue_name)
+        except:
+            get_queue_result = None
+        if get_queue_result and get_queue_result.get('QueueUrl'):
+            try:
+                sqs_client.delete_queue(**configuration.get('default_parameters', {}).get('deploy_queue', {}), 
+                    QueueUrl=get_queue_result['QueueUrl'])
+            except:
+                return False
+    else:
+        return None
+###
+
+
 
 def read(path, configuration):
     if path and configuration.get('Bucket'):

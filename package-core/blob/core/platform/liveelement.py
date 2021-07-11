@@ -92,25 +92,25 @@ def dispatch_event(source_module, event_type, event_detail={}, use_queue='system
     send_message(event, use_queue, non_system_queue_configuration)
 
 
-def mount_partition(queue_name, options):
-    queue = configuration['eventbus'].get(queue_name)
-    if queue and queue.get('driver'):
+def mount_partition(partition_name, options, non_system_partition_configuration={}):
+    partition = configuration['storer'][partition_name] if configuration.get('storer', {}).get(partition_name) else non_system_partition_configuration
+    if partition and partition.get('driver'):
         try:
-            driver = importlib.import_module('./drivers/{}'.format(queue['driver']))
+            driver = importlib.import_module('./drivers/{}'.format(partition['driver']))
         except:
             driver = None
         if driver:
-            driver.deploy_queue(queue_name, options, queue.get('configuration', {}))
+            driver.mount_partition(partition_name, options, partition.get('configuration', {}))
 
-def unmount_partition(queue_name):
-    queue = configuration['eventbus'].get(queue_name)
-    if queue and queue.get('driver'):
+def unmount_partition(partition_name, non_system_partition_configuration={}):
+    partition = configuration['storer'][partition_name] if configuration.get('storer', {}).get(partition_name) else non_system_partition_configuration
+    if partition and partition.get('driver'):
         try:
-            driver = importlib.import_module('./drivers/{}'.format(queue['driver']))
+            driver = importlib.import_module('./drivers/{}'.format(partition['driver']))
         except:
             driver = None
         if driver:
-            driver.remove_queue(queue_name, queue.get('configuration', {}))
+            driver.unmount_partition(partition_name, partition.get('configuration', {}))
 
 def get_object(path, component=None, package='core', use_partition='system'):
     partition = configuration['storer'].get(use_partition)
