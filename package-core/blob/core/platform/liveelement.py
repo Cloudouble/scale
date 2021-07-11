@@ -74,7 +74,7 @@ def read_queue(from_queue, queue_dump={}, non_system_queue_configuration={}):
     else:
         return []
 
-def send_message(message, use_queue='system', non_system_queue_configuration={}):
+def send_message(message, options={}, use_queue='system', non_system_queue_configuration={}):
     queue = configuration['eventbus'][use_queue] if configuration.get('eventbus', {}).get(use_queue) else non_system_queue_configuration
     if queue and queue.get('driver'):
         try:
@@ -82,7 +82,12 @@ def send_message(message, use_queue='system', non_system_queue_configuration={})
         except:
             driver = None
         if driver:
-            driver.send_message(message, queue.get('configuration', {}))
+            if type(message) is not str or options.get('ContentType') == 'application/json':
+                message = base64.b64encode(bytes(json.dumps(message), 'utf-8')).decode('utf-8')
+                options['ContentType'] = 'application/json'
+            else:
+                message = base64.b64encode(bytes(str(message), 'utf-8')).decode('utf-8')
+            driver.send_message(message, options, queue.get('configuration', {}))
 
 def remove_message(message, use_queue='system', non_system_queue_configuration={}):
     queue = configuration['eventbus'][use_queue] if configuration.get('eventbus', {}).get(use_queue) else non_system_queue_configuration
@@ -107,7 +112,7 @@ def dispatch_event(source_module, event_type, event_detail={}, use_queue='system
         'type': event_type, 
         'detail': event_detail if type(event_detail) is dict else {}
     }
-    send_message(event, use_queue, non_system_queue_configuration)
+    send_message(event, {'ContentType': 'application/json'}, use_queue, non_system_queue_configuration)
 
 def process_events(from_queue, event_dump={}, non_system_queue_configuration={}):
     events = [m for m in read_queue(from_queue, event_dump, non_system_queue_configuration) 

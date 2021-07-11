@@ -1,30 +1,9 @@
 import boto3, json
 
 
-{
-  "Records": [
-    {
-      "messageId": "19dd0b57-b21e-4ac1-bd88-01bbb068cb78",
-      "receiptHandle": "MessageReceiptHandle",
-      "body": "Hello from SQS!",
-      "attributes": {
-        "ApproximateReceiveCount": "1",
-        "SentTimestamp": "1523232000000",
-        "SenderId": "123456789012",
-        "ApproximateFirstReceiveTimestamp": "1523232000001"
-      },
-      "messageAttributes": {},
-      "md5OfBody": "{{{md5_of_body}}}",
-      "eventSource": "aws:sqs",
-      "eventSourceARN": "arn:aws:sqs:ap-southeast-2:123456789012:MyQueue",
-      "awsRegion": "ap-southeast-2"
-    }
-  ]
-}
-
-
 def read_queue(queue_name, queue_dump={}, configuration={}):
     raw_messages = []
+    messages = []
     if queue_name and not queue_dump:
         sqs_client = boto3.client('sqs')
         full_queue_name = '{namespace}-{queue_name}'.format(namespace=configuration['namespace'], queue_name=queue_name)
@@ -41,14 +20,16 @@ def read_queue(queue_name, queue_dump={}, configuration={}):
     elif queue_dump:
         raw_messages = queue_dump.get('Records')
     if raw_messages:
-        messages = []
         for raw_message in raw_messages:
             try:
-                
+                if raw_message.get('MessageAttributes', {}).get('ContentType', {}).get('StringValue', 'application/json') == 'application/json': 
+                    messages.append(json.loads(base64.decode(raw_message.get('Body')).decode('utf-8')))
+                else:
+                    messages.append(base64.decode(raw_message.get('Body')))
             except:
                 pass
-
-    
+            delete_message(raw_message.get('ReceiptHandle'))
+    return messages
 
 
 def deploy_queue(queue_name, options={}, configuration={}):
@@ -93,12 +74,12 @@ def remove_queue(queue_name, configuration={}):
     else:
         return None
 
-def send_message(message, configuration={}):
+def send_message(message, options={}, configuration={}):
     if configuration and configuration.get('QueueUrl'):
         sqs = boto3.client('sqs')
         message = message if type(message) is str else json.dumps(message)
         sqs.send_message(**configuration.get('default_parameters', {}).get('send_message', {}), 
-            QueueUrl=configuration['QueueUrl'], MessageBody=message)
+            QueueUrl=configuration['QueueUrl'], MessageBody=message, MessageAttributes={k: {'StringValue': str(v)} for k, v in options.items()})
 
 def delete_message(message, configuration={}):
     if configuration and configuration.get('QueueUrl'):
