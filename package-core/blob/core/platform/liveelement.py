@@ -82,7 +82,9 @@ def send_message(message, options={}, use_queue='system', non_system_queue_confi
         except:
             driver = None
         if driver:
-            if type(message) is not str or options.get('ContentType') == 'application/json':
+            if type(message) is bytes:
+                message = base64.b64encode(message).decode('utf-8')
+            elif type(message) is not str or options.get('ContentType') == 'application/json':
                 message = base64.b64encode(bytes(json.dumps(message), 'utf-8')).decode('utf-8')
                 options['ContentType'] = 'application/json'
             else:
