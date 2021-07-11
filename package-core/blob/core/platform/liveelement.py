@@ -38,23 +38,35 @@ def run_processor(module_address, _input, synchronous=None, event=None):
 
 def deploy_queue(queue_name, options):
     queue = configuration['eventbus'].get(queue_name)
-    if queue and queue.get('driver'):
+    if (queue and queue.get('driver')) or (not queue and options.get('driver')):
+        if not queue:
+            queue = {'driver': options['driver']}
+            del options['driver']
+            queue_configuration = options
+        else:
+            queue_configuration = queue.get('configuration')
         try:
             driver = importlib.import_module('./drivers/{}'.format(queue['driver']))
         except:
             driver = None
         if driver:
-            driver.deploy_queue(queue_name, options, queue.get('configuration', {}))
+            driver.deploy_queue(queue_name, options, queue_configuration)
 
-def remove_queue(queue_name):
+def remove_queue(queue_name, options={}):
     queue = configuration['eventbus'].get(queue_name)
-    if queue and queue.get('driver'):
+    if (queue and queue.get('driver')) or (not queue and options.get('driver')):
+        if not queue:
+            queue = {'driver': options['driver']}
+            del options['driver']
+            queue_configuration = options
+        else:
+            queue_configuration = queue.get('configuration')
         try:
             driver = importlib.import_module('./drivers/{}'.format(queue['driver']))
         except:
             driver = None
         if driver:
-            driver.remove_queue(queue_name, queue.get('configuration', {}))
+            driver.remove_queue(queue_name, queue_configuration)
 
 def send_message(message, use_queue='system'):
     queue = configuration['eventbus'].get(use_queue)
@@ -66,7 +78,6 @@ def send_message(message, use_queue='system'):
         if driver:
             driver.send_message(message, queue.get('configuration', {}))
 
-
 def remove_message(message, use_queue='system'):
     queue = configuration['eventbus'].get(use_queue)
     if queue and queue.get('driver'):
@@ -76,7 +87,6 @@ def remove_message(message, use_queue='system'):
             driver = None
         if driver:
             driver.delete_message(message, queue.get('configuration', {}))
-
 
 def dispatch_event(source_module, event_type, event_detail={}, use_queue='system'):
     if source_module and type(source_module) is dict:
@@ -93,6 +103,26 @@ def dispatch_event(source_module, event_type, event_detail={}, use_queue='system
     }
     send_message(event, use_queue)
 
+
+def mount_partition(queue_name, options):
+    queue = configuration['eventbus'].get(queue_name)
+    if queue and queue.get('driver'):
+        try:
+            driver = importlib.import_module('./drivers/{}'.format(queue['driver']))
+        except:
+            driver = None
+        if driver:
+            driver.deploy_queue(queue_name, options, queue.get('configuration', {}))
+
+def unmount_partition(queue_name):
+    queue = configuration['eventbus'].get(queue_name)
+    if queue and queue.get('driver'):
+        try:
+            driver = importlib.import_module('./drivers/{}'.format(queue['driver']))
+        except:
+            driver = None
+        if driver:
+            driver.remove_queue(queue_name, queue.get('configuration', {}))
 
 def get_object(path, component=None, package='core', use_partition='system'):
     partition = configuration['storer'].get(use_partition)
