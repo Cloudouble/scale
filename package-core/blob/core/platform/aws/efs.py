@@ -1,4 +1,48 @@
-import json, base64, os, mimetypes
+import json, base64, os, mimetypes, boto3
+
+def mount_partition(partition_name, options={}, configuration={}):
+    if partition_name and configuration and configuration.get('FileSystemId'):
+        efs_client = boto3.client('efs')
+        try:
+            describe_result = efs_client.describe_file_systems(FileSystemId=configuration['FileSystemId'])
+        except:
+            describe_result = None
+        if describe_result:
+            try:
+                if options:
+                    for method, method_params in option.items():
+                        getattr(s3_client, method)(**method_params, Bucket=configuration['Bucket'])
+                return True
+            except:
+                return False
+        else:
+            try:
+                file_system_id = efs_client.create_file_system(**configuration.get('default_parameters', {}).get('mount_partition', {}), 
+                    **options, CreationToken=configuration['FileSystemId'])['FileSystemId']
+                ### mount to given functions
+                ### save file_system_id as FileSystemId to partition configuration
+                return True
+            except:
+                return False
+    else:
+        return None
+
+
+def unmount_partition(partition_name, configuration={}):
+    if partition_name:
+        efs_client = boto3.client('efs')
+        try:
+            describe_result = efs_client.describe_file_systems(FileSystemId=configuration['FileSystemId'])
+        except:
+            describe_result = None
+        if describe_result:
+            ### unmount from given functions
+            ### remove file_system_id as FileSystemId from partition configuration
+            return False
+        else:
+            return True
+    else:
+        return None
 
 
 def read(path, configuration):
