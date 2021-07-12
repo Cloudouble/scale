@@ -1,13 +1,14 @@
 import json, base64, os, mimetypes, boto3
 
 def mount_partition(partition_name, options={}, configuration={}):
-    if partition_name and configuration and configuration.get('FileSystemId'):
+    if partition_name and configuration:
         efs_client = boto3.client('efs')
+        full_partition_name = '{namespace}-{partition_name}'.format(namespace=configuration['namespace'], partition_name=partition_name)
         try:
-            describe_result = efs_client.describe_file_systems(FileSystemId=configuration['FileSystemId'])
+            describe_result = [f.get('Name') for f in efs_client.describe_file_systems()['FileSystems']]
         except:
-            describe_result = None
-        if describe_result:
+            describe_result = []
+        if full_partition_name in describe_result:
             try:
                 if options:
                     for method, method_params in option.items():
@@ -17,10 +18,8 @@ def mount_partition(partition_name, options={}, configuration={}):
                 return False
         else:
             try:
-                file_system_id = efs_client.create_file_system(**configuration.get('default_parameters', {}).get('mount_partition', {}), 
-                    **options, CreationToken=configuration['FileSystemId'])['FileSystemId']
-                ### mount to given functions
-                ### save file_system_id as FileSystemId to partition configuration
+                efs_client.create_file_system(**configuration.get('default_parameters', {}).get('mount_partition', {}), 
+                    **options, CreationToken=configuration['FileSystemId'], Tags=[{'Key': 'Name', 'Value': full_partition_name}])['FileSystemId']
                 return True
             except:
                 return False
@@ -29,15 +28,14 @@ def mount_partition(partition_name, options={}, configuration={}):
 
 
 def unmount_partition(partition_name, configuration={}):
-    if partition_name:
+    if partition_name and configuration:
         efs_client = boto3.client('efs')
+        full_partition_name = '{namespace}-{partition_name}'.format(namespace=configuration['namespace'], partition_name=partition_name)
         try:
-            describe_result = efs_client.describe_file_systems(FileSystemId=configuration['FileSystemId'])
+            describe_result = [f.get('Name') for f in efs_client.describe_file_systems()['FileSystems']]
         except:
-            describe_result = None
-        if describe_result:
-            ### unmount from given functions
-            ### remove file_system_id as FileSystemId from partition configuration
+            describe_result = []
+        if full_partition_name in describe_result:
             return False
         else:
             return True
@@ -111,3 +109,26 @@ def ls(path, configuration):
     else:
         return []
 
+
+def connect_function(partition_name, configuration={}, function_name='', function_service={}):
+    return None
+
+
+def disconnect_function(partition_name, configuration={}, function_name='', function_service={}):
+    return None
+
+
+def describe_native(partition_name, configuration={}):
+    if partition_name and configuration:
+        efs_client = boto3.client('efs')
+        full_partition_name = '{namespace}-{partition_name}'.format(namespace=configuration['namespace'], partition_name=partition_name)
+        try:
+            describe_result = {f.get('Name'): f for f in efs_client.describe_file_systems()['FileSystems'] if f.get('Name')}
+        except:
+            describe_result = {}
+        if full_partition_name in describe_result:
+            return describe_result[full_partition_name]
+        else:
+            return {}
+    else:
+        return {}

@@ -57,7 +57,14 @@ def connect_function(function_name, configuration={}, target_name='', target={})
         lambda_client = boto3.client('lambda')
         lambda_client.create_event_source_mapping(**configuration.get('default_parameters', {}).get('connect_function', {}),
             EventSourceArn=target['native']['QueueArn'], FunctionName = full_function_name, Enabled=True)
-        
+    elif target and target.get('native', {}) and target['native'].get('FileSystemArn'):
+        efs_object = {'Arn': target['native']['FileSystemArn'], 'LocalMountPath': configuration['LocalMountPath']}
+        existing_efs = describe_native(function_name, configuration).get('FileSystemConfigs', [])
+        if efs_object not in existing_efs:
+            existing_efs.append(efs_object)
+        lambda_client.update_function_configuration(**configuration.get('default_parameters', {}).get('connect_function', {}),
+            FileSystemConfigs=existing_efs)
+
 
 def disconnect_function(function_name, configuration={}, target_name='', target={}):
     full_function_name = '{namespace}-{function_name}'.format(namespace=configuration['namespace'], function_name=function_name)
@@ -66,6 +73,13 @@ def disconnect_function(function_name, configuration={}, target_name='', target=
         mapping_uuids = [m['UUID'] for m in lambda_client.list_event_source_mappings(EventSourceArn=target['native']['QueueArn'], FunctionName=full_function_name)['EventSourceMappings']]
         for mapping_uuid in mapping_uuids:
             lambda_client.delete_event_source_mapping(UUID=mapping_uuid)
+    elif target and target.get('native', {}) and target['native'].get('FileSystemArn'):
+        efs_object = {'Arn': target['native']['FileSystemArn'], 'LocalMountPath': configuration['LocalMountPath']}
+        existing_efs = describe_native(function_name, configuration).get('FileSystemConfigs', [])
+        if efs_object in existing_efs:
+            existing_efs.remove(efs_object)
+        lambda_client.update_function_configuration(**configuration.get('default_parameters', {}).get('connect_function', {}),
+            FileSystemConfigs=existing_efs)
         
 
 def describe_native(function_name, configuration={}):

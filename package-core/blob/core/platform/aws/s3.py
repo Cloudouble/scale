@@ -98,3 +98,12 @@ def ls(path, configuration):
     else:
         return []
 
+def describe_native(path, configuration={}):
+    if path and configuration.get('Bucket'):
+        try:
+            return boto3.client('s3').head_object(**configuration.get('default_parameters', {}).get('describe_native', {}), 
+                Bucket=configuration['Bucket'], Key='{}{}'.format(configuration.get('root', ''), path))
+        except:
+            return {}
+    else:
+        return {}
