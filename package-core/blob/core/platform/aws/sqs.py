@@ -87,5 +87,26 @@ def delete_message(message, configuration={}):
         sqs.delete_message(**configuration.get('default_parameters', {}).get('delete_message', {}), 
             QueueUrl=configuration['QueueUrl'], ReceiptHandle=message)
 
+def connect_function(function_name, configuration={}, function_service={}):
+    return None
 
+def disconnect_function(function_name, configuration={}, function_service={}):
+    return None
+
+def describe_native(queue_name, configuration={}):
+    if queue_name:
+        sqs_client = boto3.client('sqs')
+        full_queue_name = '{namespace}-{queue_name}'.format(namespace=configuration['namespace'], queue_name=queue_name)
+        try:
+            get_queue_result = sqs_client.get_queue_url(QueueName=full_queue_name)
+        except:
+            get_queue_result = None
+        if get_queue_result and get_queue_result.get('QueueUrl'):
+            try:
+                return sqs_client.get_queue_attributes(QueueUrl=get_queue_result['QueueUrl'], AttributeNames='All')['Attributes']
+            except:
+                return {}
+    else:
+        return {}
+    
 

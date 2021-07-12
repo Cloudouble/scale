@@ -14,7 +14,7 @@ def deploy_schedule(schedule_name, options={}, configuration={}):
     else:
         return None
 
-def enable_schedule(schedule_name, configuration={}):
+def start_schedule(schedule_name, configuration={}):
     if schedule_name:
         events_client = boto3.client('events')
         full_schedule_name = '{namespace}-{schedule_name}'.format(namespace=configuration['namespace'], schedule_name=schedule_name)
@@ -30,7 +30,7 @@ def enable_schedule(schedule_name, configuration={}):
     else:
         return None
 
-def disable_schedule(schedule_name, configuration={}):
+def stop_schedule(schedule_name, configuration={}):
     if schedule_name:
         events_client = boto3.client('events')
         full_schedule_name = '{namespace}-{schedule_name}'.format(namespace=configuration['namespace'], schedule_name=schedule_name)
@@ -68,3 +68,18 @@ def remove_schedule(schedule_name, configuration={}):
     else:
         return None
 
+def describe_native(schedule_name, configuration={}):
+    if schedule_name:
+        events_client = boto3.client('events')
+        full_schedule_name = '{namespace}-{schedule_name}'.format(namespace=configuration['namespace'], schedule_name=schedule_name)
+        eventbus_name = configuration.get('default_parameters', {}).get('remove_schedule', {}).get('EventBusName')
+        try:
+            describe_rule_params = {'Name': full_schedule_name}
+            if eventbus_name:
+                describe_rule_params['EventBusName'] = eventbus_name
+            return events_client.describe_rule(**describe_rule_params)
+        except:
+            return {}
+    else:
+        return {}
+    

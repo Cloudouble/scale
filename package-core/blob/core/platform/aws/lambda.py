@@ -49,3 +49,31 @@ def invoke_function(function_name, payload, synchronous=None, configuration={}):
         Payload=bytes(json.dumps(payload), 'utf-8')
     )
     return json.loads(result['Payload'].read().decode('utf-8')) if synchronous else None
+
+
+def connect_function(function_name, configuration={}, target={}):
+    full_function_name = '{namespace}-{function_name}'.format(namespace=configuration['namespace'], function_name=function_name)
+    if target and target.get('native', {}) and target['native'].get('QueueArn'):
+        lambda_client = boto3.client('lambda')
+        lambda_client.create_event_source_mapping(**configuration.get('default_parameters', {}).get('connect_function', {}),
+            EventSourceArn=target['native']['QueueArn'], FunctionName = full_function_name, Enabled=True)
+        
+
+def disconnect_function(function_name, configuration={}, target={}):
+    full_function_name = '{namespace}-{function_name}'.format(namespace=configuration['namespace'], function_name=function_name)
+    if target and target.get('native', {}) and target['native'].get('QueueArn'):
+        lambda_client = boto3.client('lambda')
+        mapping_uuids = [m['UUID'] for m in lambda_client.list_event_source_mappings(EventSourceArn=target['native']['QueueArn'], FunctionName=full_function_name)['EventSourceMappings']]
+        for mapping_uuid in mapping_uuids:
+            lambda_client.delete_event_source_mapping(UUID=mapping_uuid)
+        
+def describe_native(function_name, configuration={}):
+    if function_name:
+        lambda_client = boto3.client('lambda')
+        full_function_name = '{namespace}-{function_name}'.format(namespace=configuration['namespace'], function_name=function_name)
+        try:
+            return lambda_client.get_function(FunctionName=full_function_name)
+        except:
+            return {}
+    else:
+        return {}

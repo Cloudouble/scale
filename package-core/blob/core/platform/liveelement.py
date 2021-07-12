@@ -32,25 +32,27 @@ def invoke_function(function_name, payload, synchronous=None, use_service='syste
         if driver:
             return driver.invoke_function(function_name, payload, synchronous, service.get('configuration', {}))
 
-def start_listener(function_name, source, function_service='system', non_system_function_configuration={}):
+def connect_function(function_name, function_service='system', non_system_function_configuration={}, 
+        target_component='eventbus', target_module='system', non_system_target_configuration={}):
     service = configuration['computor'][function_service] if configuration.get('computor', {}).get(function_service) else non_system_function_configuration
+    target = configuration[target_component][target_module] if configuration.get(target_component, {}).get(target_module) else non_system_target_configuration
     if service and service.get('driver'):
         try:
             driver = importlib.import_module('./drivers/{}'.format(service['driver']))
         except:
             driver = None
         if driver:
-            return driver.start_listener(function_name, source, service.get('configuration', {}))
-
-def stop_listener(function_name, source, function_service='system', non_system_function_configuration={}):
-    service = configuration['computor'][function_service] if configuration.get('computor', {}).get(function_service) else non_system_function_configuration
-    if service and service.get('driver'):
-        try:
-            driver = importlib.import_module('./drivers/{}'.format(service['driver']))
-        except:
-            driver = None
-        if driver:
-            return driver.stop_listener(function_name, source, service.get('configuration', {}))
+            service['native'] = driver.describe_native(function_name, service.get('configuration', {}))
+            target_connection_result = None
+            if target and target.get('driver'):
+                try:
+                    target_driver = importlib.import_module('./drivers/{}'.format(target['driver']))
+                except:
+                    target_driver = None
+                if target_driver:
+                    target['native'] = target_driver.describe_native(target_module, target.get('configuration', {}))
+                    target_connection_result = target_driver.connect_function(function_name, target.get('configuration', {}), service) 
+            return (driver.connect_function(function_name, service.get('configuration', {}), target), target_connection_result)
 
 def run_processor(module_address, _input, synchronous=None, event=None, non_system_function_configuration={}):
     return invoke_function('core', {'module_address': module_address, '_input': _input, 'synchronous': synchronous, 'event': event}, 
@@ -66,6 +68,26 @@ def deploy_schedule(schedule_name, options, non_system_schedule_configuration={}
             driver = None
         if driver:
             driver.deploy_schedule(schedule_name, options, schedule.get('configuration', {}))
+
+def start_schedule(schedule_name, options, non_system_schedule_configuration={}):
+    schedule = configuration['scheduler'][schedule_name] if configuration.get('scheduler', {}).get(schedule_name) else non_system_schedule_configuration
+    if schedule and schedule.get('driver'):
+        try:
+            driver = importlib.import_module('./drivers/{}'.format(schedule['driver']))
+        except:
+            driver = None
+        if driver:
+            driver.start_schedule(schedule_name, options, schedule.get('configuration', {}))
+
+def stop_schedule(schedule_name, options, non_system_schedule_configuration={}):
+    schedule = configuration['scheduler'][schedule_name] if configuration.get('scheduler', {}).get(schedule_name) else non_system_schedule_configuration
+    if schedule and schedule.get('driver'):
+        try:
+            driver = importlib.import_module('./drivers/{}'.format(schedule['driver']))
+        except:
+            driver = None
+        if driver:
+            driver.stop_schedule(schedule_name, options, schedule.get('configuration', {}))
 
 def remove_schedule(schedule_name, options, non_system_schedule_configuration={}):
     schedule = configuration['scheduler'][schedule_name] if configuration.get('scheduler', {}).get(schedule_name) else non_system_schedule_configuration
