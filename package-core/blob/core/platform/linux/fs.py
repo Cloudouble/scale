@@ -89,3 +89,12 @@ def ls(path, configuration):
     else:
         return []
 
+def connect_function(partition_name, configuration={}, function_name='', function_service={}):
+    return None
+
+
+def disconnect_function(partition_name, configuration={}, function_name='', function_service={}):
+    return None
+
+def describe_native(partition_name, configuration={}):
+    return {}

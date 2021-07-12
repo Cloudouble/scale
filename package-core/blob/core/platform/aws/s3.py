@@ -98,11 +98,20 @@ def ls(path, configuration):
     else:
         return []
 
+
+def connect_function(partition_name, configuration={}, function_name='', function_service={}):
+    return None
+
+
+def disconnect_function(partition_name, configuration={}, function_name='', function_service={}):
+    return None
+
+
 def describe_native(path, configuration={}):
     if path and configuration.get('Bucket'):
         try:
-            return boto3.client('s3').head_object(**configuration.get('default_parameters', {}).get('describe_native', {}), 
-                Bucket=configuration['Bucket'], Key='{}{}'.format(configuration.get('root', ''), path))
+            return {**boto3.client('s3').head_object(**configuration.get('default_parameters', {}).get('describe_native', {}), 
+                Bucket=configuration['Bucket'], Key='{}{}'.format(configuration.get('root', ''), path)), Bucket: configuration['Bucket']}
         except:
             return {}
     else:
