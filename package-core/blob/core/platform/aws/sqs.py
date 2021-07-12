@@ -1,4 +1,4 @@
-import boto3, json
+import boto3, json, zipfile
 
 
 def read_queue(queue_name, queue_dump={}, configuration={}):
@@ -50,7 +50,7 @@ def deploy_queue(queue_name, options={}, configuration={}):
         else:
             try:
                 sqs_client.create_queue(**configuration.get('default_parameters', {}).get('deploy_queue', {}), 
-                    QueueName=full_queue_name, **options)
+                    QueueName=full_queue_name, **options)['QueueUrl']
                 return True
             except:
                 return False
