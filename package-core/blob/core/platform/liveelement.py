@@ -32,6 +32,26 @@ def invoke_function(function_name, payload, synchronous=None, use_service='syste
         if driver:
             return driver.invoke_function(function_name, payload, synchronous, service.get('configuration', {}))
 
+def start_listener(function_name, source, function_service='system', non_system_function_configuration={}):
+    service = configuration['computor'][function_service] if configuration.get('computor', {}).get(function_service) else non_system_function_configuration
+    if service and service.get('driver'):
+        try:
+            driver = importlib.import_module('./drivers/{}'.format(service['driver']))
+        except:
+            driver = None
+        if driver:
+            return driver.start_listener(function_name, source, service.get('configuration', {}))
+
+def stop_listener(function_name, source, function_service='system', non_system_function_configuration={}):
+    service = configuration['computor'][function_service] if configuration.get('computor', {}).get(function_service) else non_system_function_configuration
+    if service and service.get('driver'):
+        try:
+            driver = importlib.import_module('./drivers/{}'.format(service['driver']))
+        except:
+            driver = None
+        if driver:
+            return driver.stop_listener(function_name, source, service.get('configuration', {}))
+
 def run_processor(module_address, _input, synchronous=None, event=None, non_system_function_configuration={}):
     return invoke_function('core', {'module_address': module_address, '_input': _input, 'synchronous': synchronous, 'event': event}, 
         synchronous, non_system_function_configuration)
