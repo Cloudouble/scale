@@ -87,10 +87,10 @@ def delete_message(message, configuration={}):
         sqs.delete_message(**configuration.get('default_parameters', {}).get('delete_message', {}), 
             QueueUrl=configuration['QueueUrl'], ReceiptHandle=message)
 
-def connect_function(function_name, configuration={}, function_service={}):
+def connect_function(queue_name, configuration={}, function_name='', function_service={}):
     return None
 
-def disconnect_function(function_name, configuration={}, function_service={}):
+def disconnect_function(queue_name, configuration={}, function_name='', function_service={}):
     return None
 
 def describe_native(queue_name, configuration={}):

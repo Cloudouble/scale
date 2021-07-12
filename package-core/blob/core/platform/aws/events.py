@@ -68,6 +68,46 @@ def remove_schedule(schedule_name, configuration={}):
     else:
         return None
 
+def connect_function(schedule_name, configuration={}, function_name='', function_service={}):
+    if schedule_name and function_service.get('configuration', {}) and function_service.get('native', {}).get('Configuration', {}).get('FunctionArn'):
+        events_client = boto3.client('events')
+        full_schedule_name = '{namespace}-{schedule_name}'.format(namespace=configuration['namespace'], schedule_name=schedule_name)
+        full_function_name = '{namespace}-{function_name}'.format(namespace=function_service['configuration'].get('namespace', ''), function_name=function_name)
+        eventbus_name = configuration.get('default_parameters', {}).get('remove_schedule', {}).get('EventBusName')
+        try:
+            put_targets_params = {
+                'Rule': full_schedule_name, 
+                'Targets': [{'Id': full_function_name, 'Arn': function_service['native']['Configuration']['FunctionArn']}]
+            }
+            if eventbus_name:
+                put_targets_params['EventBusName'] = eventbus_name
+            events_client.put_targets(**put_targets_params)
+            return True
+        except:
+            return False
+    else:
+        return None
+
+def disconnect_function(schedule_name, configuration={}, function_name='', function_service={}):
+    if schedule_name and function_service.get('configuration', {}) and function_service.get('native', {}).get('Configuration', {}).get('FunctionArn'):
+        events_client = boto3.client('events')
+        full_schedule_name = '{namespace}-{schedule_name}'.format(namespace=configuration['namespace'], schedule_name=schedule_name)
+        full_function_name = '{namespace}-{function_name}'.format(namespace=function_service['configuration'].get('namespace', ''), function_name=function_name)
+        eventbus_name = configuration.get('default_parameters', {}).get('remove_schedule', {}).get('EventBusName')
+        try:
+            remove_targets_params = {
+                'Rule': full_schedule_name, 
+                'Ids': [full_function_name]
+            }
+            if eventbus_name:
+                remove_targets_params['EventBusName'] = eventbus_name
+            events_client.remove_targets(**remove_targets_params)
+            return True
+        except:
+            return False
+    else:
+        return None
+
 def describe_native(schedule_name, configuration={}):
     if schedule_name:
         events_client = boto3.client('events')

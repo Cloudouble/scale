@@ -51,7 +51,7 @@ def invoke_function(function_name, payload, synchronous=None, configuration={}):
     return json.loads(result['Payload'].read().decode('utf-8')) if synchronous else None
 
 
-def connect_function(function_name, configuration={}, target={}):
+def connect_function(function_name, configuration={}, target_name='', target={}):
     full_function_name = '{namespace}-{function_name}'.format(namespace=configuration['namespace'], function_name=function_name)
     if target and target.get('native', {}) and target['native'].get('QueueArn'):
         lambda_client = boto3.client('lambda')
@@ -59,7 +59,7 @@ def connect_function(function_name, configuration={}, target={}):
             EventSourceArn=target['native']['QueueArn'], FunctionName = full_function_name, Enabled=True)
         
 
-def disconnect_function(function_name, configuration={}, target={}):
+def disconnect_function(function_name, configuration={}, target_name='', target={}):
     full_function_name = '{namespace}-{function_name}'.format(namespace=configuration['namespace'], function_name=function_name)
     if target and target.get('native', {}) and target['native'].get('QueueArn'):
         lambda_client = boto3.client('lambda')
