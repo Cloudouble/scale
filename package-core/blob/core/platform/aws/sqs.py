@@ -57,6 +57,7 @@ def deploy_queue(queue_name, options={}, configuration={}):
     else:
         return None
 
+
 def remove_queue(queue_name, configuration={}):
     if queue_name:
         sqs_client = boto3.client('sqs')
@@ -74,6 +75,7 @@ def remove_queue(queue_name, configuration={}):
     else:
         return None
 
+
 def send_message(message, options={}, configuration={}):
     if configuration and configuration.get('QueueUrl'):
         sqs = boto3.client('sqs')
@@ -81,17 +83,21 @@ def send_message(message, options={}, configuration={}):
         sqs.send_message(**configuration.get('default_parameters', {}).get('send_message', {}), 
             QueueUrl=configuration['QueueUrl'], MessageBody=message, MessageAttributes={k: {'StringValue': str(v)} for k, v in options.items()})
 
+
 def delete_message(message, configuration={}):
     if configuration and configuration.get('QueueUrl'):
         sqs = boto3.client('sqs')
         sqs.delete_message(**configuration.get('default_parameters', {}).get('delete_message', {}), 
             QueueUrl=configuration['QueueUrl'], ReceiptHandle=message)
 
+
 def connect_function(queue_name, configuration={}, function_name='', function_service={}):
     return None
 
+
 def disconnect_function(queue_name, configuration={}, function_name='', function_service={}):
     return None
+
 
 def describe_native(queue_name, configuration={}):
     if queue_name:
@@ -108,5 +114,6 @@ def describe_native(queue_name, configuration={}):
                 return {}
     else:
         return {}
-    
+
+
 

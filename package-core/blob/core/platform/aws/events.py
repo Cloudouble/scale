@@ -14,6 +14,7 @@ def deploy_schedule(schedule_name, options={}, configuration={}):
     else:
         return None
 
+
 def start_schedule(schedule_name, configuration={}):
     if schedule_name:
         events_client = boto3.client('events')
@@ -30,6 +31,7 @@ def start_schedule(schedule_name, configuration={}):
     else:
         return None
 
+
 def stop_schedule(schedule_name, configuration={}):
     if schedule_name:
         events_client = boto3.client('events')
@@ -45,6 +47,7 @@ def stop_schedule(schedule_name, configuration={}):
             return False
     else:
         return None
+
 
 def remove_schedule(schedule_name, configuration={}):
     if schedule_name:
@@ -68,6 +71,7 @@ def remove_schedule(schedule_name, configuration={}):
     else:
         return None
 
+
 def connect_function(schedule_name, configuration={}, function_name='', function_service={}):
     if schedule_name and function_service.get('configuration', {}) and function_service.get('native', {}).get('Configuration', {}).get('FunctionArn'):
         events_client = boto3.client('events')
@@ -88,6 +92,7 @@ def connect_function(schedule_name, configuration={}, function_name='', function
     else:
         return None
 
+
 def disconnect_function(schedule_name, configuration={}, function_name='', function_service={}):
     if schedule_name and function_service.get('configuration', {}) and function_service.get('native', {}).get('Configuration', {}).get('FunctionArn'):
         events_client = boto3.client('events')
@@ -107,6 +112,7 @@ def disconnect_function(schedule_name, configuration={}, function_name='', funct
             return False
     else:
         return None
+
 
 def describe_native(schedule_name, configuration={}):
     if schedule_name:

@@ -261,7 +261,6 @@ def get_object(path, component=None, package='core', use_partition='system', non
             else:
                 return object_data
 
-
 def set_object(path, data, encoding=None, content_type='application/json', component=None, package='core', use_partition='system', non_system_partition_configuration={}):
     if path and data:
         data_object = {}
@@ -331,7 +330,6 @@ def set_object(path, data, encoding=None, content_type='application/json', compo
                         path = '{}/{}'.format(package.lower(), path)
                     driver.write(path, data_object, partition.get('configuration', {}))    
 
-
 def remove_object(path, component=None, package='core', use_partition='system', non_system_partition_configuration={}):
     partition = configuration['storer'][use_partition] if configuration.get('storer', {}).get(use_partition) else non_system_partition_configuration
     if partition and partition.get('driver'):
@@ -373,7 +371,6 @@ def remove_object(path, component=None, package='core', use_partition='system', 
             if package:
                 path = '{}/{}'.format(package.lower(), path)
             driver.delete(path, partition.get('configuration'))
-
 
 def list_objects(path, component=None, package='core', use_partition='system', non_system_partition_configuration={}):
     partition = configuration['storer'][use_partition] if configuration.get('storer', {}).get(use_partition) else non_system_partition_configuration

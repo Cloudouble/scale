@@ -67,6 +67,7 @@ def disconnect_function(function_name, configuration={}, target_name='', target=
         for mapping_uuid in mapping_uuids:
             lambda_client.delete_event_source_mapping(UUID=mapping_uuid)
         
+
 def describe_native(function_name, configuration={}):
     if function_name:
         lambda_client = boto3.client('lambda')
