@@ -1,4 +1,4 @@
-import boto3, json, zipfile
+import boto3, json
 
 
 def read_queue(queue_name, queue_dump={}, configuration={}):
