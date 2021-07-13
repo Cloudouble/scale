@@ -1,17 +1,13 @@
 import json, base64, os, mimetypes
-
+from pathlib import Path
 
 def mount_partition(partition_name, options={}, configuration={}):
     if partition_name:
         try:
-            dir_exists = True # see if MountPath/root directory exists
+            Path('{}/{}'.format(configuration['MountPath'], configuration.get('root', ''))).mkdir(parents=True, exist_ok=True)
+            return True
         except:
-            dir_exists = False
-        if dir_exists:
-            return True
-        else:
-            # create MountPath/root directory
-            return True
+            return False
     else:
         return None
 
